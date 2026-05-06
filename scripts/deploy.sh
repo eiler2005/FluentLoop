@@ -26,7 +26,15 @@ if [[ ! -f "$LOCAL_ENV" ]]; then
   exit 1
 fi
 
-ssh_cmd=(ssh -o BatchMode=yes -o ConnectTimeout=10 -p "$VPS_PORT" "${VPS_USER}@${VPS_HOST}")
+ssh_cmd=(
+  ssh
+  -o BatchMode=yes
+  -o ConnectTimeout=10
+  -o ServerAliveInterval=15
+  -o ServerAliveCountMax=4
+  -p "$VPS_PORT"
+  "${VPS_USER}@${VPS_HOST}"
+)
 
 echo "==> Ensuring remote directory exists: ${REMOTE_DIR}"
 "${ssh_cmd[@]}" "
@@ -53,19 +61,19 @@ rsync -az --delete \
   --exclude='.ruff_cache/' \
   --exclude='*.session' \
   --exclude='*.session-journal' \
-  -e "ssh -o BatchMode=yes -p ${VPS_PORT}" \
+  -e "ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p ${VPS_PORT}" \
   "${REPO_ROOT}/" \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/"
 
 echo "==> Rsync .env (mode 600)"
 rsync -az \
-  -e "ssh -o BatchMode=yes -p ${VPS_PORT}" \
+  -e "ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p ${VPS_PORT}" \
   "${LOCAL_ENV}" \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/.env"
 "${ssh_cmd[@]}" "chmod 600 ${REMOTE_DIR}/.env"
 
 echo "==> Build + (re)start container"
-"${ssh_cmd[@]}" "cd ${REMOTE_DIR} && docker compose up -d --build"
+"${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 600 docker compose up -d --build"
 
 echo "==> Tail logs (15s)"
 "${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 15 docker compose logs --tail=50 --follow || true"
