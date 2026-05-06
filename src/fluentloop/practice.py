@@ -98,6 +98,22 @@ def start_or_resume_session(
     return current
 
 
+def get_in_progress_session(
+    session: Session,
+    user: User,
+    *,
+    target_date: date | None = None,
+) -> PracticeSession | None:
+    local_date = target_date or datetime.now(UTC).date()
+    return session.scalar(
+        select(PracticeSession).where(
+            PracticeSession.user_id == user.id,
+            PracticeSession.target_date_local == local_date,
+            PracticeSession.status == "in_progress",
+        )
+    )
+
+
 def next_exercise(
     session: Session, practice_session: PracticeSession
 ) -> tuple[int, dict] | None:

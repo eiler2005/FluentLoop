@@ -20,7 +20,12 @@ from fluentloop.grammar import seed_concepts
 from fluentloop.learning import create_learning_item, favorite_items
 from fluentloop.materials import approve_all, extract_candidates, store_material
 from fluentloop.mistakes import active_patterns
-from fluentloop.practice import next_exercise, record_attempt, start_or_resume_session
+from fluentloop.practice import (
+    get_in_progress_session,
+    next_exercise,
+    record_attempt,
+    start_or_resume_session,
+)
 from fluentloop.stats import collect_stats, render_stats
 from fluentloop.users import ensure_user, format_settings, update_setting
 
@@ -157,7 +162,9 @@ def handle_answer(
     provider: AIProvider,
     answer: str,
 ) -> BotReply:
-    practice_session = start_or_resume_session(session, user)
+    practice_session = get_in_progress_session(session, user)
+    if practice_session is None:
+        return BotReply("No active exercise. Send /today.")
     current = next_exercise(session, practice_session)
     if current is None:
         return BotReply("No active exercise. Send /today.")

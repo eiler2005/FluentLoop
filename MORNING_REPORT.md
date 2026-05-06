@@ -66,6 +66,9 @@
   practical text-command paths.
 - APScheduler jobs were wired into the running bot for daily reminders,
   overnight pre-generation, and SQLite backups.
+- Practice answer handling was tightened: `/today` starts/resumes a session,
+  while unrelated free text gets a "send /today" prompt instead of creating a
+  hidden session.
 
 ## Recommended morning order of business
 

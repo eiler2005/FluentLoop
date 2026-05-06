@@ -92,3 +92,5 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   resume behavior, summaries, and SQLite backup helper.
 - Added APScheduler registration for daily reminders, overnight pre-generation,
   and daily SQLite backups.
+- Tightened answer handling so random free text no longer silently starts a
+  practice session; answers require an active `/today`/`/review` session.

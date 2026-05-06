@@ -2,6 +2,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+from sqlalchemy import select
+
+from fluentloop.ai.provider import StubProvider
+from fluentloop.bot.handlers import handle_answer
+from fluentloop.db.models import PracticeSession
 from fluentloop.exercises import EXERCISE_TYPES, render_for_item
 from fluentloop.learning import create_learning_item
 from fluentloop.practice import next_exercise, record_attempt, start_or_resume_session
@@ -49,3 +54,10 @@ def test_exercise_registry_and_session_resume(db_session, settings) -> None:
     second = next_exercise(db_session, resumed)
     assert second is not None
     assert second[0] == 1
+
+
+def test_answer_without_session_does_not_create_practice(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    reply = handle_answer(db_session, user, StubProvider(), "anything")
+    assert "No active exercise" in reply.text
+    assert db_session.scalar(select(PracticeSession)) is None
