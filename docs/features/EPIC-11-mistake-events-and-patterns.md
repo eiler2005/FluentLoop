@@ -96,3 +96,8 @@ not yet driving exercise generation.
   rendering.
 - Added `/mistakes focus <id>` and `/mistakes ignore <id>` so the user can
   promote or archive detected recurring patterns from Telegram.
+- EPIC-10 feedback now calls ingestion automatically when it creates a
+  `MistakeEvent`; the feedback text points to `/mistakes focus <id>` /
+  `/mistakes ignore <id>` when a recurring low-confidence pattern appears.
+- Audit coverage verifies an archived pattern is not re-created by future
+  matching events.

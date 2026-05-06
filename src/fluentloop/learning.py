@@ -129,7 +129,9 @@ def list_items(
     )
 
 
-def favorite_items(session: Session, user_id: int) -> list[LearningItem]:
+def favorite_items(
+    session: Session, user_id: int, *, limit: int = 20
+) -> list[LearningItem]:
     return list(
         session.scalars(
             select(LearningItem)
@@ -139,6 +141,7 @@ def favorite_items(session: Session, user_id: int) -> list[LearningItem]:
                 LearningItem.is_favorite.is_(True),
             )
             .order_by(LearningItem.created_at)
+            .limit(limit)
         )
     )
 

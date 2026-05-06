@@ -61,4 +61,7 @@ listing.
 
 - Added favorite toggling, `/favorites` listing, and selector tiebreaker data.
 - Added `/favorite <item_id>` for Telegram-side favorite toggling.
-- Inline star buttons are pending richer Telegram callback wiring.
+- `/favorites` now caps the Telegram listing at 20 active favorites, and audit
+  coverage verifies archiving preserves the favorite flag.
+- Inline star buttons are pending richer Telegram callback wiring; `/favorite`
+  is the deployed MVP fallback.

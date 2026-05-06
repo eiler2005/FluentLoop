@@ -81,3 +81,7 @@ foundation.
 
 - Added seeded grammar concepts, bidirectional parent links, parent/child walk
   helpers, and `/rules` rendering.
+- Added `unlink_parent` with bidirectional cleanup.
+- High-confidence mistake patterns linked to a grammar concept now add a parent
+  concept refresher in generated practice when a parent exists.
+- `/rules` now includes active linked learning-item and pattern counts.

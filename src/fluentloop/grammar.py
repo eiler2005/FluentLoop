@@ -57,6 +57,15 @@ def link_parent(
     session.flush()
 
 
+def unlink_parent(
+    session: Session, child: GrammarConcept, parent: GrammarConcept
+) -> None:
+    child.parent_ids = sorted(set(child.parent_ids or []) - {parent.id})
+    parent.child_ids = sorted(set(parent.child_ids or []) - {child.id})
+    session.add_all([child, parent])
+    session.flush()
+
+
 def parents_of(
     session: Session, concept_id: int, *, depth: int = 1
 ) -> list[GrammarConcept]:

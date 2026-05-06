@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
 from fluentloop.ai.schemas import AnswerFeedback
-from fluentloop.db.models import MistakeEvent, User
+from fluentloop.db.models import MistakeEvent, MistakePattern, User
+from fluentloop.mistakes import ingest_mistake_event
 from fluentloop.srs import record_result
 
 
@@ -50,27 +51,28 @@ def apply_feedback(
     *,
     disputed: bool = False,
     hard_override: bool = False,
-) -> None:
+) -> MistakePattern | None:
     result = srs_result_from_feedback(feedback, hard_override=hard_override)
     for item_id in exercise.get("target_learning_item_ids", []):
         record_result(session, item_id, result)
     if disputed:
-        return
+        return None
     should_log = result == "Again" or feedback.should_create_mistake_event
     if should_log:
-        session.add(
-            MistakeEvent(
-                user_id=user.id,
-                wrong_answer=answer,
-                corrected_answer=feedback.corrected_answer,
-                explanation=feedback.explanation,
-                mistake_type=feedback.detected_mistake_type or "general",
-                linked_learning_item_id=(
-                    exercise.get("target_learning_item_ids") or [None]
-                )[0],
-            )
+        event = MistakeEvent(
+            user_id=user.id,
+            wrong_answer=answer,
+            corrected_answer=feedback.corrected_answer,
+            explanation=feedback.explanation,
+            mistake_type=feedback.detected_mistake_type or "general",
+            linked_learning_item_id=(
+                exercise.get("target_learning_item_ids") or [None]
+            )[0],
         )
+        session.add(event)
         session.flush()
+        return ingest_mistake_event(session, event)
+    return None
 
 
 def write_dispute(

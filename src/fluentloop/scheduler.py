@@ -15,6 +15,7 @@ from fluentloop.config import Settings
 from fluentloop.db.models import PracticeSession, User
 from fluentloop.db.session import session_scope
 from fluentloop.practice import backup_sqlite, cache_session
+from fluentloop.stats import weekly_summary
 
 LOG = logging.getLogger(__name__)
 
@@ -76,6 +77,37 @@ async def send_reminders(client: Any, session_factory: sessionmaker) -> int:
     return sent
 
 
+def split_telegram_message(text: str, *, limit: int = 4096) -> list[str]:
+    if len(text) <= limit:
+        return [text]
+    parts: list[str] = []
+    current: list[str] = []
+    current_len = 0
+    for line in text.splitlines():
+        line_len = len(line) + 1
+        if current and current_len + line_len > limit:
+            parts.append("\n".join(current))
+            current = []
+            current_len = 0
+        current.append(line)
+        current_len += line_len
+    if current:
+        parts.append("\n".join(current))
+    return parts
+
+
+async def send_weekly_summaries(client: Any, session_factory: sessionmaker) -> int:
+    sent = 0
+    with session_scope(session_factory) as session:
+        users = session.scalars(select(User)).all()
+        for user in users:
+            for part in split_telegram_message(weekly_summary(session, user)):
+                await client.send_message(user.telegram_user_id, part)
+                sent += 1
+    LOG.info("Sent %s weekly summary message(s)", sent)
+    return sent
+
+
 def build_scheduler(
     settings: Settings,
     session_factory: sessionmaker,
@@ -114,5 +146,15 @@ def build_scheduler(
             id="daily_reminder",
             replace_existing=True,
             misfire_grace_time=1800,
+        )
+        scheduler.add_job(
+            lambda: asyncio.create_task(send_weekly_summaries(client, session_factory)),
+            "cron",
+            day_of_week="sun",
+            hour=18,
+            minute=0,
+            id="weekly_summary",
+            replace_existing=True,
+            misfire_grace_time=3600,
         )
     return scheduler

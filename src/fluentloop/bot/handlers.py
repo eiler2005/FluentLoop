@@ -273,7 +273,7 @@ def handle_answer(
         return BotReply("No active exercise. Send /today.")
     index, exercise = current
     feedback = check_answer(provider, exercise, answer)
-    apply_feedback(session, user, exercise, answer, feedback)
+    pattern = apply_feedback(session, user, exercise, answer, feedback)
     attempt = record_attempt(
         session, practice_session, index, exercise, answer, feedback.model_dump()
     )
@@ -288,6 +288,11 @@ def handle_answer(
         message += f"\nRule: {feedback.related_rule}"
     if feedback.should_create_mistake_event:
         message += "\nI'll add this as a weak point unless you dispute it."
+    if pattern is not None and pattern.confidence == "low":
+        message += (
+            f"\nRecurring pattern #{pattern.id} detected. "
+            f"Use /mistakes focus {pattern.id} or /mistakes ignore {pattern.id}."
+        )
     message += f"\nDisagree? Send /dispute {attempt.id} <reason>."
     if follow_up is not None:
         next_index, next_item = follow_up
@@ -415,17 +420,37 @@ def handle_item_status(
 
 
 def handle_rules(session: Session) -> BotReply:
-    from sqlalchemy import select
+    from sqlalchemy import func, select
 
-    from fluentloop.db.models import GrammarConcept
+    from fluentloop.db.models import GrammarConcept, LearningItem, MistakePattern
 
     seed_concepts(session)
     concepts = session.scalars(
         select(GrammarConcept).order_by(GrammarConcept.title)
     ).all()
-    return BotReply(
-        "Grammar rules\n" + "\n".join(f"- {concept.title}" for concept in concepts)
-    )
+    lines = ["Grammar rules"]
+    for concept in concepts:
+        pattern_count = session.scalar(
+            select(func.count())
+            .select_from(MistakePattern)
+            .where(
+                MistakePattern.linked_grammar_concept_id == concept.id,
+                MistakePattern.status == "active",
+            )
+        )
+        item_count = session.scalar(
+            select(func.count())
+            .select_from(LearningItem)
+            .where(
+                LearningItem.linked_grammar_concept_id == concept.id,
+                LearningItem.status == "active",
+            )
+        )
+        suffix = ""
+        if pattern_count or item_count:
+            suffix = f" ({item_count or 0} items, {pattern_count or 0} patterns)"
+        lines.append(f"- {concept.title}{suffix}")
+    return BotReply("Grammar rules\n" + "\n".join(lines[1:]))
 
 
 def command_catalog() -> list[str]:

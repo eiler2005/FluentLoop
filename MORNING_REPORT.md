@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 21:31 UTC` (`00:31 Moscow`)
-- Total wall time so far: `01h 46m`
+- Last updated: `2026-05-06 22:08 UTC` (`01:08 Moscow`)
+- Total wall time so far: `02h 23m`
 
 ## Epics done
 
@@ -19,11 +19,11 @@
 | 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | no repeats + high-confidence mistakes |
 | 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | Start button + completion audit |
 | 09 | EPIC-09-exercise-types | this commit | ✅ | skipped | 6-type registry |
-| 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | ✅ pending | attempt feedback + dispute command |
-| 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | skipped | threshold + promotion |
-| 12 | EPIC-12-grammar-rules-graph | this commit | ✅ | skipped | seeded graph |
-| 13 | EPIC-13-stats-and-weekly-summary | this commit | ✅ | skipped | stats text |
-| 14 | EPIC-14-favorites | this commit | ✅ | skipped | toggle/list support |
+| 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | ✅ 22:04 UTC | attempt feedback + dispute command |
+| 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | skipped | auto ingestion + archive audit |
+| 12 | EPIC-12-grammar-rules-graph | this commit | ✅ | skipped | unlink + parent refresher audit |
+| 13 | EPIC-13-stats-and-weekly-summary | this commit | ✅ | skipped | weekly job + split audit |
+| 14 | EPIC-14-favorites | this commit | ✅ | skipped | 20-item cap + preserve flag |
 
 ## Epics stuck
 
@@ -78,7 +78,7 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`29 passed`).
+  (`32 passed`).
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
@@ -92,6 +92,9 @@
   completion coverage, high-confidence mistake refreshers, richer feedback
   messages, and `/dispute <attempt_id> <reason>` with JSONL logging and
   mistake-event removal.
+- EPIC-11-14 strict-audit fixes added automatic mistake-pattern ingestion,
+  archived-pattern no-recreate coverage, grammar unlink/rule counts, weekly
+  summary scheduling/splitting, and `/favorites` 20-item cap coverage.
 
 ## Recommended morning order of business
 

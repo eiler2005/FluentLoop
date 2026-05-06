@@ -77,5 +77,5 @@ recommended next-week focus areas.
 
 - Added `/stats` aggregation and weekly summary text generation from existing
   tables.
-- Telegram 4096-character splitting is not yet needed by the compact summary
-  and should be added if real summaries grow.
+- Added APScheduler weekly summary delivery and Telegram message splitting at
+  section boundaries for summaries that exceed 4096 characters.

@@ -17,6 +17,7 @@ from fluentloop.db.models import (
     utc_now,
 )
 from fluentloop.exercises import EXERCISE_TYPES, Exercise, render_for_item
+from fluentloop.grammar import parents_of
 from fluentloop.learning import active_items
 from fluentloop.srs import get_due_items
 
@@ -105,18 +106,28 @@ def _high_confidence_pattern_exercises(session: Session, user: User) -> list[Exe
     )
     for pattern in patterns:
         target_ids: list[int] = []
+        prompt = (
+            f"Fix this recurring {pattern.mistake_type} issue:\n"
+            f'"{(pattern.wrong_examples or ["Review this pattern."])[-1]}"'
+        )
+        expected = (pattern.correct_examples or ["Use the corrected pattern."])[-1]
         if pattern.linked_learning_item_id is not None:
             item = session.get(LearningItem, pattern.linked_learning_item_id)
             if item is not None and item.status == "active":
                 target_ids.append(item.id)
+        if pattern.linked_grammar_concept_id is not None:
+            parents = parents_of(session, pattern.linked_grammar_concept_id, depth=1)
+            if parents:
+                prompt = (
+                    f"Review the parent grammar concept: {parents[0].title}.\n"
+                    f"Now fix:\n"
+                    f'"{(pattern.wrong_examples or ["Review this pattern."])[-1]}"'
+                )
         exercises.append(
             Exercise(
                 "error_correction",
-                (
-                    f"Fix this recurring {pattern.mistake_type} issue:\n"
-                    f'"{(pattern.wrong_examples or ["Review this pattern."])[-1]}"'
-                ),
-                (pattern.correct_examples or ["Use the corrected pattern."])[-1],
+                prompt,
+                expected,
                 "Use the recurring mistake pattern as your clue.",
                 pattern.description,
                 target_ids,
