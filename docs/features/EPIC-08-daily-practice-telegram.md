@@ -94,3 +94,5 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   and daily SQLite backups.
 - Tightened answer handling so random free text no longer silently starts a
   practice session; answers require an active `/today`/`/review` session.
+- Completion feedback now includes a persisted attempt summary with correct,
+  partial, incorrect, and answered counts.

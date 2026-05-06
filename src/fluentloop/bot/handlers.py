@@ -31,6 +31,7 @@ from fluentloop.practice import (
     next_exercise,
     record_attempt,
     start_or_resume_session,
+    summarize_session,
 )
 from fluentloop.stats import collect_stats, render_stats
 from fluentloop.users import ensure_user, format_settings, update_setting
@@ -200,7 +201,7 @@ def handle_answer(
         next_index, next_item = follow_up
         message += f"\n\nExercise {next_index + 1}/7\n{next_item['prompt']}"
     else:
-        message += "\n\nSession complete."
+        message += "\n\n" + summarize_session(session, practice_session)
     return BotReply(message)
 
 

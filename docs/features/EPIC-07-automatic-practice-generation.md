@@ -94,3 +94,8 @@ instantly.
   is intentionally compact to keep the max-epics run green.
 - Added APScheduler overnight pre-generation job registration using
   `PRE_GEN_HOUR` / `PRE_GEN_MINUTE`.
+- Hardened the composer so the same approved `LearningItem` is not repeated in
+  one 7-exercise session; seed business/IT prompts fill any remaining slots
+  until enough approved items exist.
+- High-confidence mistake patterns now contribute error-correction refreshers
+  without overriding due-item priority.

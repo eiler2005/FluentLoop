@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 21:06 UTC` (`00:06 Moscow`)
-- Total wall time so far: `01h 21m`
+- Last updated: `2026-05-06 21:11 UTC` (`00:11 Moscow`)
+- Total wall time so far: `01h 26m`
 
 ## Epics done
 
@@ -16,8 +16,8 @@
 | 04 | EPIC-04-ai-extraction-and-approval | this commit | ✅ | skipped | stub AI provider |
 | 05 | EPIC-05-learning-items | this commit | ✅ | ✅ 21:06 UTC | CRUD + review state + item status commands |
 | 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | SRS helper tests |
-| 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | cached deterministic composer |
-| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | private-chat fallback; channel id not discovered |
+| 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | composer no longer repeats one item |
+| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | private-chat fallback; completion summary |
 | 09 | EPIC-09-exercise-types | this commit | ✅ | skipped | 6-type registry |
 | 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | skipped | stub checking + disputes |
 | 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | skipped | threshold + promotion |
@@ -78,7 +78,10 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`20 passed`).
+  (`22 passed`).
+- EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
+  seed business/IT prompts instead of repeating the same approved item, and
+  completion messages include persisted attempt counts.
 
 ## Recommended morning order of business
 

@@ -8,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.db.models import (
+    LearningItem,
+    MistakePattern,
     PracticeAttempt,
     PracticeSession,
     PracticeSessionCached,
@@ -17,6 +19,110 @@ from fluentloop.db.models import (
 from fluentloop.exercises import EXERCISE_TYPES, Exercise, render_for_item
 from fluentloop.learning import active_items
 from fluentloop.srs import get_due_items
+
+
+def _seed_exercises() -> list[Exercise]:
+    return [
+        Exercise(
+            "follow_up",
+            (
+                "Reply in 2-3 sentences: what delivery risk should we discuss "
+                "first?"
+            ),
+            "We should discuss the highest-impact delivery risk first.",
+            "Use concise stakeholder language.",
+            "Seed exercise until enough approved learning items exist.",
+            [],
+        ),
+        Exercise(
+            "grammar_rewrite",
+            (
+                "Rewrite this more diplomatically:\n"
+                '"We must change the architecture immediately."'
+            ),
+            "We might need to reconsider the architecture soon.",
+            "Use hedging language.",
+            "Business English often softens direct recommendations.",
+            [],
+        ),
+        Exercise(
+            "error_correction",
+            'Find and fix the issue:\n"We need align priorities before sprint."',
+            "We need to align on priorities before the sprint.",
+            "Check verb pattern, preposition, and article.",
+            "Use align on + topic; use the sprint for a specific sprint.",
+            [],
+        ),
+        Exercise(
+            "translate",
+            '"Можем ли мы согласовать риски до планирования?"',
+            "Can we align on the risks before planning?",
+            "Keep it natural for a meeting.",
+            "Seed business/IT translation prompt.",
+            [],
+        ),
+        Exercise(
+            "cloze",
+            "We need to ____ on the priorities before the sprint starts.",
+            "align",
+            "One word.",
+            "Seed collocation prompt.",
+            [],
+        ),
+        Exercise(
+            "guess",
+            '"To politely challenge an idea in a meeting."',
+            "push back on",
+            "Three-word phrasal expression.",
+            "Seed expression prompt.",
+            [],
+        ),
+        Exercise(
+            "follow_up",
+            (
+                "Write a short status update about a delayed delivery. Mention "
+                "risk, next step, and owner."
+            ),
+            "There is a delivery risk; the next step is to align on scope.",
+            "Use calm, specific language.",
+            "Seed production prompt.",
+            [],
+        ),
+    ]
+
+
+def _high_confidence_pattern_exercises(session: Session, user: User) -> list[Exercise]:
+    exercises: list[Exercise] = []
+    patterns = session.scalars(
+        select(MistakePattern)
+        .where(
+            MistakePattern.user_id == user.id,
+            MistakePattern.status == "active",
+            MistakePattern.confidence == "high",
+        )
+        .order_by(MistakePattern.event_count.desc())
+        .limit(3)
+    )
+    for pattern in patterns:
+        target_ids: list[int] = []
+        if pattern.linked_learning_item_id is not None:
+            item = session.get(LearningItem, pattern.linked_learning_item_id)
+            if item is not None and item.status == "active":
+                target_ids.append(item.id)
+        exercises.append(
+            Exercise(
+                "error_correction",
+                (
+                    f"Fix this recurring {pattern.mistake_type} issue:\n"
+                    f'"{(pattern.wrong_examples or ["Review this pattern."])[-1]}"'
+                ),
+                (pattern.correct_examples or ["Use the corrected pattern."])[-1],
+                "Use the recurring mistake pattern as your clue.",
+                pattern.description,
+                target_ids,
+            )
+        )
+    return exercises
 
 
 def compose_session(
@@ -32,19 +138,26 @@ def compose_session(
     type_cycle = list(EXERCISE_TYPES)
     for index, item in enumerate(selected[:7]):
         exercises.append(render_for_item(item, type_cycle[index % len(type_cycle)]))
-    if not exercises:
-        exercises.append(
-            Exercise(
-                "follow_up",
-                "Reply in 2-3 sentences: what delivery risk should we discuss first?",
-                "We should discuss the highest-impact delivery risk first.",
-                "Use concise stakeholder language.",
-                "Seed exercise until learning items exist.",
-                [],
-            )
+    seen_item_ids = {
+        item_id
+        for exercise in exercises
+        for item_id in exercise.target_learning_item_ids
+    }
+    for exercise in _high_confidence_pattern_exercises(session, user):
+        already_selected = any(
+            item_id in seen_item_ids
+            for item_id in exercise.target_learning_item_ids
         )
+        if not already_selected:
+            exercises.append(exercise)
+            seen_item_ids.update(exercise.target_learning_item_ids)
+        if len(exercises) >= 7:
+            break
+    seed_pool = _seed_exercises()
+    seed_index = 0
     while len(exercises) < 7:
-        exercises.append(exercises[len(exercises) % len(exercises)])
+        exercises.append(seed_pool[seed_index % len(seed_pool)])
+        seed_index += 1
     return [exercise.as_dict() for exercise in exercises[:7]]
 
 
@@ -156,6 +269,27 @@ def record_attempt(
     session.add(attempt)
     session.flush()
     return attempt
+
+
+def summarize_session(session: Session, practice_session: PracticeSession) -> str:
+    attempts = list(
+        session.scalars(
+            select(PracticeAttempt)
+            .where(PracticeAttempt.practice_session_id == practice_session.id)
+            .order_by(PracticeAttempt.exercise_index)
+        )
+    )
+    counts = {"correct": 0, "partial": 0, "incorrect": 0}
+    for attempt in attempts:
+        if attempt.status in counts:
+            counts[attempt.status] += 1
+    return (
+        "Session complete.\n"
+        f"Correct: {counts['correct']}\n"
+        f"Partial: {counts['partial']}\n"
+        f"Incorrect: {counts['incorrect']}\n"
+        f"Answered: {len(attempts)}/7"
+    )
 
 
 def backup_sqlite(db_path: Path, backup_dir: Path, *, retention_days: int = 14) -> Path:
