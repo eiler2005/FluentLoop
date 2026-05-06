@@ -11,6 +11,8 @@ HELP = """Commands
 /approve <material_id> - approve all pending candidates for a material
 /upload - upload lesson material
 /mistakes - show mistake patterns
+/mistakes focus <pattern_id> - promote a recurring mistake
+/mistakes ignore <pattern_id> - archive a recurring mistake
 /rules - show grammar concepts
 /stats - show progress
 /favorites - show favorite items
@@ -46,6 +48,7 @@ def mistake_patterns(patterns: list[MistakePattern]) -> str:
     lines = ["Mistake patterns"]
     for pattern in patterns:
         lines.append(
-            f"- {pattern.description} ({pattern.confidence}, {pattern.event_count})"
+            f"- #{pattern.id} {pattern.description} "
+            f"({pattern.confidence}, {pattern.event_count})"
         )
     return "\n".join(lines)

@@ -71,6 +71,8 @@
   hidden session.
 - Invalid `/add` payloads and oversized uploads now return friendly errors
   instead of crashing handler execution.
+- `/mistakes` now shows pattern ids and supports `/mistakes focus <id>` /
+  `/mistakes ignore <id>` for promotion/archive.
 
 ## Recommended morning order of business
 

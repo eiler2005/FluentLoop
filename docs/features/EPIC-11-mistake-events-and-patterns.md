@@ -94,3 +94,5 @@ not yet driving exercise generation.
 - Implemented mistake-event ingestion, the ≥3 similar events / 14-day pattern
   threshold, low-confidence creation, promotion, archive, and `/mistakes`
   rendering.
+- Added `/mistakes focus <id>` and `/mistakes ignore <id>` so the user can
+  promote or archive detected recurring patterns from Telegram.

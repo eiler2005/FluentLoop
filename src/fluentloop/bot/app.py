@@ -12,6 +12,7 @@ from fluentloop.bot.handlers import (
     handle_approve_all,
     handle_favorites,
     handle_help,
+    handle_mistake_action,
     handle_mistakes,
     handle_rules,
     handle_setting_update,
@@ -95,7 +96,19 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif command == "/stats":
                 reply = handle_stats(session, user)
             elif command == "/mistakes":
-                reply = handle_mistakes(session, user)
+                if len(parts) >= 3 and parts[1] in {"focus", "ignore"}:
+                    try:
+                        pattern_id = int(parts[2])
+                    except ValueError:
+                        reply = BotReply(
+                            "Use /mistakes focus <id> or /mistakes ignore <id>."
+                        )
+                    else:
+                        reply = handle_mistake_action(
+                            session, user, parts[1], pattern_id
+                        )
+                else:
+                    reply = handle_mistakes(session, user)
             elif command == "/favorites":
                 reply = handle_favorites(session, user)
             elif command == "/rules":

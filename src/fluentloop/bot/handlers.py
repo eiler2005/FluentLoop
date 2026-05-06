@@ -19,7 +19,7 @@ from fluentloop.feedback import apply_feedback, check_answer
 from fluentloop.grammar import seed_concepts
 from fluentloop.learning import create_learning_item, favorite_items
 from fluentloop.materials import approve_all, extract_candidates, store_material
-from fluentloop.mistakes import active_patterns
+from fluentloop.mistakes import active_patterns, archive_pattern, promote_pattern
 from fluentloop.practice import (
     get_in_progress_session,
     next_exercise,
@@ -200,6 +200,23 @@ def handle_stats(session: Session, user: User) -> BotReply:
 
 def handle_mistakes(session: Session, user: User) -> BotReply:
     return BotReply(mistake_patterns(active_patterns(session, user.id)))
+
+
+def handle_mistake_action(
+    session: Session, user: User, action: str, pattern_id: int
+) -> BotReply:
+    from fluentloop.db.models import MistakePattern
+
+    pattern = session.get(MistakePattern, pattern_id)
+    if pattern is None or pattern.user_id != user.id:
+        return BotReply("Mistake pattern not found.")
+    if action == "focus":
+        promote_pattern(session, pattern)
+        return BotReply(f"Promoted pattern #{pattern.id}: {pattern.description}")
+    if action == "ignore":
+        archive_pattern(session, pattern)
+        return BotReply(f"Archived pattern #{pattern.id}: {pattern.description}")
+    return BotReply("Use /mistakes focus <id> or /mistakes ignore <id>.")
 
 
 def handle_favorites(session: Session, user: User) -> BotReply:
