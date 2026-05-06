@@ -2,7 +2,7 @@
 
 **Status:** Planned
 **PRD references:** §21 (commands), §22 (user scenarios — base layer)
-**Depends on:** ADR-0002 (Telegram library choice)
+**Depends on:** ADR-0002 (Telegram library choice — **Accepted: Telethon bot mode**)
 **Blocks:** every other epic
 
 ## Goal
@@ -15,18 +15,30 @@ the next epics without restructuring.
 
 ## In scope
 
-- Choose Telegram library per ADR-0002, add to dependencies.
-- Project skeleton: `src/fluentloop/`, `tests/`, `Dockerfile`,
-  `docker-compose.yml`, `pyproject.toml` or `requirements.txt`.
-- Logging configured from `LOG_LEVEL` env var, JSON-friendly format.
+- Add dependencies per ADR-0002 / ADR-0003 / docs/architecture.md:
+  `telethon==1.36.0`, `apscheduler==3.10.4`, `python-dotenv==1.0.1`,
+  `pytz==2024.1`, `sqlalchemy>=2.0`, `alembic>=1.13`, `openai>=1.40.0`,
+  `pydantic>=2.7`.
+- Project skeleton: `src/fluentloop/{__init__.py,__main__.py,bot/,
+  ai/,db/,prompts/,seeds/}`, `tests/`, `Dockerfile`, `docker-compose.yml`,
+  `pyproject.toml`, Alembic config in `alembic.ini` + `migrations/`.
+- Logging configured from `LOG_LEVEL` env var; mask token-shaped strings
+  in the formatter.
+- Telethon client wired in bot mode: `TelegramClient(SESSION_PATH,
+  TELEGRAM_API_ID, TELEGRAM_API_HASH).start(bot_token=TELEGRAM_BOT_TOKEN)`.
+  Session file path: `data/sessions/fluentloop-bot.session`.
 - `/start` — greeting message, mention next steps.
 - `/help` — list of commands (initially just `/start` and `/help`).
-- Long-polling against Telegram Bot API (no webhook).
-- Single-user gate: if `TELEGRAM_ALLOWED_USER_ID` is set and the message
-  comes from a different user, reply with a polite "this is a personal bot"
-  and ignore.
-- Basic CI-able commands: `ruff check`, `pytest -q` (even with one trivial
-  test), `python -m fluentloop --help`.
+- Long-polling via Telethon (`client.run_until_disconnected()`).
+- Single-user gate: if `TELEGRAM_ALLOWED_USER_ID` is set and the
+  message comes from a different user, reply with a polite "this is a
+  personal bot" and ignore.
+- Tiny FSM helper at `src/fluentloop/bot/state.py` — per
+  `(chat_id, user_id)` state dict persisted in SQLite. ~50–100 LoC,
+  enough for upload→extract→approve in EPIC-03/04 and `/settings` in
+  EPIC-02.
+- Basic CI-able commands: `ruff check`, `pytest -q` (with one smoke
+  test asserting the app constructs), `python -m fluentloop --help`.
 
 ## Out of scope
 
@@ -37,22 +49,26 @@ the next epics without restructuring.
 
 ## Acceptance criteria
 
-- `docker compose up --build` brings the bot up; logs show "polling started".
-- Sending `/start` to the bot from the allowed Telegram account returns the
-  greeting.
+- `docker compose up --build` brings the bot up; logs show "Telethon
+  bot connected as @<bot-username>".
+- Sending `/start` to the bot from the allowed Telegram account returns
+  the greeting.
 - Sending `/start` from a non-allowed account returns the personal-bot
   message (when `TELEGRAM_ALLOWED_USER_ID` is set).
 - `/help` lists `/start` and `/help`.
+- The session file persists across container restarts (mounted via
+  `./data:/app/data`).
 - `ruff check src tests` passes.
-- `pytest -q` passes (one smoke test asserting the app constructs).
+- `pytest -q` passes (one smoke test asserting the app constructs and
+  the FSM helper round-trips a state dict).
 
 ## Open questions
 
-- ADR-0002 not yet decided (`aiogram` vs `python-telegram-bot`).
-- Container image: `python:3.11-slim` (matches `openclaw_firststeps`) vs
-  `python:3.12-slim`. Default to 3.11 unless a dependency requires newer.
-- Project layout: src-layout (`src/fluentloop/__init__.py`) vs flat. Default
-  src-layout.
+- Container image: `python:3.11-slim` (matches `openclaw_firststeps`) is
+  default unless a dependency requires newer.
+- Where exactly to put Alembic — top-level `migrations/` (matches most
+  tutorials) vs `src/fluentloop/db/migrations/`. Default: top-level for
+  Alembic CLI ergonomics.
 
 ## Verification plan
 

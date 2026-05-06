@@ -101,7 +101,9 @@
     ],
     "deny": [
       "Read(./.env)",
-      "Read(./.env.*)",
+      "Read(./.env.local)",
+      "Read(./.env.production)",
+      "Read(./.env.development)",
       "Read(./secrets/**)",
       "Read(./**/secrets/**)",
       "Read(./data/**)",
@@ -112,7 +114,9 @@
       "Read(~/.kube/**)",
       "Read(~/.config/gh/hosts.yml)",
       "Edit(./.env)",
-      "Edit(./.env.*)",
+      "Edit(./.env.local)",
+      "Edit(./.env.production)",
+      "Edit(./.env.development)",
       "Edit(./.git/**)"
     ],
     "additionalDirectories": []
