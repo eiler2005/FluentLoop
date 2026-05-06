@@ -5,8 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt requirements-dev.txt ./
-RUN pip install --no-cache-dir -r requirements-dev.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY pyproject.toml ./
 COPY src ./src
@@ -18,4 +18,3 @@ RUN pip install --no-cache-dir -e .
 VOLUME ["/app/data"]
 
 CMD ["python", "-m", "fluentloop"]
-
