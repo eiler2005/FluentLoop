@@ -94,5 +94,10 @@ bot can silently train mistake patterns from its own miscalls.
 
 - Added stub AI checking, feedback-to-SRS mapping, mistake-event creation, and
   JSONL dispute logging.
-- Inline dispute buttons are not fully wired in Telegram yet; the underlying
-  service path is present and tested.
+- Feedback messages now include attempt ids, related rules when available, and
+  a `/dispute <attempt_id> <reason>` fallback.
+- `/dispute` writes the JSONL audit row, marks the attempt as disputed, and
+  removes the latest matching mistake event so disputed answers do not train
+  mistake patterns.
+- Inline `[Got it]` / `[I disagree]` buttons remain a callback UX polish item;
+  the command fallback is deployed and tested for the Telegram MVP.

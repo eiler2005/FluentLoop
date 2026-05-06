@@ -12,6 +12,7 @@ from fluentloop.bot.handlers import (
     handle_approve_all,
     handle_candidate_action,
     handle_candidates,
+    handle_dispute,
     handle_favorite_toggle,
     handle_favorites,
     handle_help,
@@ -126,6 +127,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         )
             elif command == "/stats":
                 reply = handle_stats(session, user)
+            elif command == "/dispute":
+                if len(parts) < 3:
+                    reply = BotReply("Use /dispute <attempt_id> <reason>.")
+                else:
+                    try:
+                        attempt_id = int(parts[1])
+                    except ValueError:
+                        reply = BotReply("Use /dispute <attempt_id> <reason>.")
+                    else:
+                        reply = handle_dispute(session, user, attempt_id, parts[2])
             elif command == "/mistakes":
                 if len(parts) >= 3 and parts[1] in {"focus", "ignore"}:
                     try:
@@ -169,6 +180,24 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_rules(session)
             else:
                 reply = handle_help()
+            await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
+
+    @client.on(events.CallbackQuery(data=b"start_today"))
+    async def on_start_today(event) -> None:  # type: ignore[no-untyped-def]
+        sender = await event.get_sender()
+        telegram_user_id = int(sender.id)
+        with session_scope(session_factory) as session:
+            if (
+                settings.telegram_allowed_user_id is not None
+                and settings.telegram_allowed_user_id != telegram_user_id
+            ):
+                await event.answer("This is a personal FluentLoop bot.")
+                return
+            user = ensure_user(session, telegram_user_id, settings)
+            reply = handle_today(
+                session, user, channel_id=settings.telegram_channel_id
+            )
+            await event.answer("Starting practice")
             await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
 
     @client.on(events.NewMessage)

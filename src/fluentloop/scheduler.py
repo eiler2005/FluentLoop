@@ -50,6 +50,8 @@ def run_pre_generation(settings: Settings, session_factory: sessionmaker) -> int
 
 
 async def send_reminders(client: Any, session_factory: sessionmaker) -> int:
+    from telethon import Button
+
     sent = 0
     with session_scope(session_factory) as session:
         users = session.scalars(select(User)).all()
@@ -67,6 +69,7 @@ async def send_reminders(client: Any, session_factory: sessionmaker) -> int:
             await client.send_message(
                 user.telegram_user_id,
                 "Ready for today's English practice? Send /today.",
+                buttons=[[Button.inline("Start", b"start_today")]],
             )
             sent += 1
     LOG.info("Sent %s reminder(s)", sent)
@@ -113,4 +116,3 @@ def build_scheduler(
             misfire_grace_time=1800,
         )
     return scheduler
-

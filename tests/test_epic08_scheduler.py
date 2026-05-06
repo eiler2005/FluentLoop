@@ -3,8 +3,15 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from fluentloop.db.session import make_engine, make_session_factory
-from fluentloop.scheduler import build_scheduler, run_backup, run_pre_generation
+from fluentloop.scheduler import (
+    build_scheduler,
+    run_backup,
+    run_pre_generation,
+    send_reminders,
+)
 from fluentloop.users import ensure_user
 
 
@@ -33,3 +40,25 @@ def test_backup_and_pre_generation_jobs(tmp_path, settings) -> None:
     )
     assert target == expected
     assert target.exists()
+
+
+class FakeClient:
+    def __init__(self) -> None:
+        self.messages: list[tuple[int, str, dict]] = []
+
+    async def send_message(self, chat_id: int, text: str, **kwargs) -> None:
+        self.messages.append((chat_id, text, kwargs))
+
+
+@pytest.mark.asyncio
+async def test_reminder_sends_start_button(settings) -> None:
+    engine = make_engine("sqlite:///:memory:")
+    factory = make_session_factory(engine)
+    with factory() as session:
+        ensure_user(session, 123456789, settings)
+        session.commit()
+    client = FakeClient()
+    assert await send_reminders(client, factory) == 1
+    assert client.messages
+    assert "Ready for today's English practice" in client.messages[0][1]
+    assert client.messages[0][2]["buttons"]

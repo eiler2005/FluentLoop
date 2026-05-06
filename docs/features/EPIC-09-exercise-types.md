@@ -74,3 +74,5 @@ composing a session; EPIC-10 checks answers.
 
 - Added all six exercise types as a registry with renderers, answer semantics,
   pretty names, and target item-kind hints.
+- Audit coverage exercises the registry in practice sessions and checks that
+  rendered exercise dictionaries carry the fields EPIC-10 consumes.

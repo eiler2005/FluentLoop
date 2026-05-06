@@ -5,8 +5,13 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 
 from fluentloop.ai.provider import StubProvider
-from fluentloop.bot.handlers import handle_answer
-from fluentloop.db.models import PracticeSession
+from fluentloop.bot.handlers import handle_answer, handle_dispute
+from fluentloop.db.models import (
+    MistakeEvent,
+    MistakePattern,
+    PracticeAttempt,
+    PracticeSession,
+)
 from fluentloop.exercises import EXERCISE_TYPES, render_for_item
 from fluentloop.learning import create_learning_item
 from fluentloop.practice import (
@@ -29,6 +34,9 @@ def test_srs_intervals_and_due_order(db_session, settings) -> None:
     state = record_result(db_session, item.id, "Again", now=now)
     assert state.due_at == now
     assert get_due_items(db_session, user.id, now=now)[0].id == item.id
+    for _ in range(3):
+        state = record_result(db_session, item.id, "Good", now=now)
+    assert state.due_at - now >= timedelta(days=7)
 
 
 def test_exercise_registry_and_session_resume(db_session, settings) -> None:
@@ -101,6 +109,73 @@ def test_session_summary_counts_attempt_statuses(db_session, settings) -> None:
     summary = summarize_session(db_session, practice)
     assert "Correct: 1" in summary
     assert "Answered: 1/7" in summary
+
+
+def test_session_completion_marks_completed_after_all_attempts(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    practice = start_or_resume_session(db_session, user)
+    for _ in range(7):
+        current = next_exercise(db_session, practice)
+        assert current is not None
+        index, exercise = current
+        record_attempt(
+            db_session,
+            practice,
+            index,
+            exercise,
+            "answer",
+            {"status": "correct"},
+        )
+    assert next_exercise(db_session, practice) is None
+    assert practice.status == "completed"
+    assert practice.completed_at is not None
+
+
+def test_high_confidence_mistake_pattern_adds_refresher(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    db_session.add(
+        MistakePattern(
+            user_id=user.id,
+            description="Recurring article issue",
+            mistake_type="articles",
+            confidence="high",
+            status="active",
+            wrong_examples=["We start before sprint."],
+            correct_examples=["We start before the sprint."],
+            event_count=3,
+        )
+    )
+    db_session.flush()
+    exercises = compose_session(db_session, user)
+    assert any("recurring articles" in exercise["prompt"] for exercise in exercises)
+
+
+def test_feedback_dispute_logs_and_removes_mistake_event(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    start_or_resume_session(db_session, user)
+    handle_answer(db_session, user, StubProvider(tmp_path / "usage.jsonl"), "wrong")
+    attempt = db_session.scalar(select(PracticeAttempt))
+    assert attempt is not None
+    assert db_session.scalar(select(MistakeEvent)) is not None
+
+    reply = handle_dispute(
+        db_session,
+        user,
+        attempt.id,
+        "mine was equally valid",
+        base_dir=tmp_path / "disputes",
+    )
+    assert "Dispute logged" in reply.text
+    assert db_session.scalar(select(MistakeEvent)) is None
+    assert attempt.status == "disputed"
+    assert list((tmp_path / "disputes").glob("*.jsonl"))
 
 
 def test_answer_without_session_does_not_create_practice(db_session, settings) -> None:

@@ -96,3 +96,7 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   practice session; answers require an active `/today`/`/review` session.
 - Completion feedback now includes a persisted attempt summary with correct,
   partial, incorrect, and answered counts.
+- Reminder messages now include a Telegram `Start` inline button wired to the
+  same `/today` session-start path.
+- Audit coverage verifies all seven attempts complete a session and set
+  `completed_at`.

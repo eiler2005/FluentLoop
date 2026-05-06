@@ -99,3 +99,5 @@ instantly.
   until enough approved items exist.
 - High-confidence mistake patterns now contribute error-correction refreshers
   without overriding due-item priority.
+- Audit coverage verifies high-confidence mistake refreshers and sparse-library
+  seed fillers using the demo dataset shape.

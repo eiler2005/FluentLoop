@@ -72,3 +72,5 @@ the bookkeeping.
 
 - Implemented the simple Again/Hard/Good/Easy interval algorithm and due-item
   query with weak/favorite ordering signals.
+- Audit coverage now verifies three consecutive `Good` reviews reach the
+  7-day interval floor and `Again` resets the item to immediate review.

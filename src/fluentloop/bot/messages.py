@@ -13,6 +13,7 @@ HELP = """Commands
 /candidate add <candidate_id> - add one candidate
 /candidate skip <candidate_id> - skip one candidate
 /upload - upload lesson material
+/dispute <attempt_id> <reason> - dispute feedback
 /mistakes - show mistake patterns
 /mistakes focus <pattern_id> - promote a recurring mistake
 /mistakes ignore <pattern_id> - archive a recurring mistake

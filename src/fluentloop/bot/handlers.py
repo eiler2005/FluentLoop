@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
@@ -15,7 +17,7 @@ from fluentloop.bot.state import StateStore
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.exercises import EXERCISE_TYPES
-from fluentloop.feedback import apply_feedback, check_answer
+from fluentloop.feedback import apply_feedback, check_answer, write_dispute
 from fluentloop.grammar import seed_concepts
 from fluentloop.learning import (
     create_learning_item,
@@ -272,21 +274,66 @@ def handle_answer(
     index, exercise = current
     feedback = check_answer(provider, exercise, answer)
     apply_feedback(session, user, exercise, answer, feedback)
-    record_attempt(
+    attempt = record_attempt(
         session, practice_session, index, exercise, answer, feedback.model_dump()
     )
     follow_up = next_exercise(session, practice_session)
     message = (
+        f"Attempt #{attempt.id}\n"
         f"{feedback.status.title()}.\n"
         f"Better: {feedback.natural_answer or feedback.corrected_answer}\n"
         f"Why: {feedback.explanation}"
     )
+    if feedback.related_rule:
+        message += f"\nRule: {feedback.related_rule}"
+    if feedback.should_create_mistake_event:
+        message += "\nI'll add this as a weak point unless you dispute it."
+    message += f"\nDisagree? Send /dispute {attempt.id} <reason>."
     if follow_up is not None:
         next_index, next_item = follow_up
         message += f"\n\nExercise {next_index + 1}/7\n{next_item['prompt']}"
     else:
         message += "\n\n" + summarize_session(session, practice_session)
     return BotReply(message)
+
+
+def handle_dispute(
+    session: Session,
+    user: User,
+    attempt_id: int,
+    reason: str,
+    *,
+    base_dir: Path = Path("data/feedback_disputes"),
+) -> BotReply:
+    from fluentloop.db.models import MistakeEvent, PracticeAttempt, PracticeSession
+
+    attempt = session.get(PracticeAttempt, attempt_id)
+    if attempt is None:
+        return BotReply("Attempt not found.")
+    practice_session = session.get(PracticeSession, attempt.practice_session_id)
+    if practice_session is None or practice_session.user_id != user.id:
+        return BotReply("Attempt not found.")
+    write_dispute(
+        base_dir,
+        prompt=attempt.prompt,
+        answer=attempt.user_answer,
+        verdict=attempt.feedback,
+        reason=reason,
+    )
+    mistake = session.scalar(
+        select(MistakeEvent)
+        .where(
+            MistakeEvent.user_id == user.id,
+            MistakeEvent.wrong_answer == attempt.user_answer,
+        )
+        .order_by(MistakeEvent.created_at.desc())
+    )
+    if mistake is not None:
+        session.delete(mistake)
+    attempt.status = "disputed"
+    session.add(attempt)
+    session.flush()
+    return BotReply(f"Dispute logged for attempt #{attempt.id}.")
 
 
 def handle_stats(session: Session, user: User) -> BotReply:
@@ -391,6 +438,7 @@ def command_catalog() -> list[str]:
         "/candidates",
         "/candidate",
         "/upload",
+        "/dispute",
         "/mistakes",
         "/rules",
         "/stats",

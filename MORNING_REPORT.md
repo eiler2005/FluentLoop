@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 21:23 UTC` (`00:23 Moscow`)
-- Total wall time so far: `01h 38m`
+- Last updated: `2026-05-06 21:31 UTC` (`00:31 Moscow`)
+- Total wall time so far: `01h 46m`
 
 ## Epics done
 
@@ -15,11 +15,11 @@
 | 03 | EPIC-03-material-upload | this commit | ✅ | skipped | upload service + safe free-text fallback |
 | 04 | EPIC-04-ai-extraction-and-approval | this commit | ✅ | skipped | approve-all + one-by-one candidate review |
 | 05 | EPIC-05-learning-items | this commit | ✅ | ✅ 21:06 UTC | CRUD + duplicate/status command audit |
-| 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | SRS helper tests |
-| 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | composer no longer repeats one item |
-| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | private-chat fallback; completion summary |
+| 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | 7-day Good interval audit |
+| 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | no repeats + high-confidence mistakes |
+| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | Start button + completion audit |
 | 09 | EPIC-09-exercise-types | this commit | ✅ | skipped | 6-type registry |
-| 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | skipped | stub checking + disputes |
+| 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | ✅ pending | attempt feedback + dispute command |
 | 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | skipped | threshold + promotion |
 | 12 | EPIC-12-grammar-rules-graph | this commit | ✅ | skipped | seeded graph |
 | 13 | EPIC-13-stats-and-weekly-summary | this commit | ✅ | skipped | stats text |
@@ -78,7 +78,7 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`25 passed`).
+  (`29 passed`).
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
@@ -88,6 +88,10 @@
 - EPIC-01-05 strict-audit fixes added coverage for container/gate invariants,
   setting timestamps, one-by-one candidate actions, malformed extraction
   fallback, duplicate `/add` UX, and free-text upload guidance.
+- EPIC-06-10 strict-audit fixes added Start-button reminders, 7-answer
+  completion coverage, high-confidence mistake refreshers, richer feedback
+  messages, and `/dispute <attempt_id> <reason>` with JSONL logging and
+  mistake-event removal.
 
 ## Recommended morning order of business
 
