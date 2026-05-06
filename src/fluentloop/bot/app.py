@@ -13,6 +13,8 @@ from fluentloop.bot.handlers import (
     handle_favorite_toggle,
     handle_favorites,
     handle_help,
+    handle_item_status,
+    handle_items,
     handle_mistake_action,
     handle_mistakes,
     handle_rules,
@@ -31,6 +33,9 @@ from fluentloop.scheduler import build_scheduler
 from fluentloop.users import ensure_user
 
 LOG = logging.getLogger(__name__)
+ITEM_STATUS_USAGE = (
+    "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
+)
 
 
 async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
@@ -122,6 +127,19 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         reply = BotReply("Use /favorite <item_id>.")
                     else:
                         reply = handle_favorite_toggle(session, user, item_id)
+            elif command == "/items":
+                status = parts[1] if len(parts) >= 2 else "active"
+                reply = handle_items(session, user, status)
+            elif command == "/item":
+                if len(parts) < 3:
+                    reply = BotReply(ITEM_STATUS_USAGE)
+                else:
+                    try:
+                        item_id = int(parts[2])
+                    except ValueError:
+                        reply = BotReply(ITEM_STATUS_USAGE)
+                    else:
+                        reply = handle_item_status(session, user, item_id, parts[1])
             elif command == "/rules":
                 reply = handle_rules(session)
             else:

@@ -6,6 +6,8 @@ from fluentloop.bot.handlers import (
     handle_add_text,
     handle_favorite_toggle,
     handle_favorites,
+    handle_item_status,
+    handle_items,
     parse_add_payload,
 )
 from fluentloop.learning import create_learning_item, favorite_items, toggle_favorite
@@ -76,3 +78,20 @@ def test_favorite_toggle_command_flow(db_session, settings) -> None:
     reply = handle_favorite_toggle(db_session, user, item.id)
     assert "favorite" in reply.text
     assert "#1" in handle_favorites(db_session, user).text
+
+
+def test_item_list_and_status_command_flow(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(db_session, user, type_="expression", text="align on")
+    active_reply = handle_items(db_session, user)
+    assert "#1 [expression] align on" in active_reply.text
+
+    archive_reply = handle_item_status(db_session, user, item.id, "archive")
+    assert "archived" in archive_reply.text
+    assert "No active learning items" in handle_items(db_session, user).text
+    assert "#1 [expression] align on" in handle_items(
+        db_session, user, "archived"
+    ).text
+
+    restore_reply = handle_item_status(db_session, user, item.id, "restore")
+    assert "active" in restore_reply.text

@@ -81,3 +81,5 @@ points for `is_favorite`, `status`, and tagging.
   the existing row; explicit merge/keep-separate remains a UX expansion.
 - Invalid `/add` payloads now return friendly Telegram errors.
 - Add confirmations now include item ids so later commands can target items.
+- Added `/items [active|archived|suspended]` and `/item archive|suspend|restore
+  <item_id>` so the MVP can manage learning-item lifecycle from Telegram.

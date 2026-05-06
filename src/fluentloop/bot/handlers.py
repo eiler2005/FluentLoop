@@ -17,7 +17,13 @@ from fluentloop.db.models import User
 from fluentloop.exercises import EXERCISE_TYPES
 from fluentloop.feedback import apply_feedback, check_answer
 from fluentloop.grammar import seed_concepts
-from fluentloop.learning import create_learning_item, favorite_items, toggle_favorite
+from fluentloop.learning import (
+    create_learning_item,
+    favorite_items,
+    list_items,
+    set_item_status,
+    toggle_favorite,
+)
 from fluentloop.materials import approve_all, extract_candidates, store_material
 from fluentloop.mistakes import active_patterns, archive_pattern, promote_pattern
 from fluentloop.practice import (
@@ -28,6 +34,10 @@ from fluentloop.practice import (
 )
 from fluentloop.stats import collect_stats, render_stats
 from fluentloop.users import ensure_user, format_settings, update_setting
+
+ITEM_STATUS_USAGE = (
+    "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
+)
 
 
 @dataclass(frozen=True)
@@ -239,6 +249,39 @@ def handle_favorite_toggle(session: Session, user: User, item_id: int) -> BotRep
     return BotReply(f"Marked #{item.id} as {marker}: {item.text}")
 
 
+def handle_items(session: Session, user: User, status: str = "active") -> BotReply:
+    try:
+        items = list_items(session, user.id, status=status, limit=20)
+    except ValueError as exc:
+        return BotReply(f"Could not list items: {exc}")
+    if not items:
+        return BotReply(f"No {status} learning items.")
+    lines = [f"Learning items ({status})"]
+    for item in items:
+        favorite = " *" if item.is_favorite else ""
+        lines.append(f"- #{item.id} [{item.type}] {item.text}{favorite}")
+    return BotReply("\n".join(lines))
+
+
+def handle_item_status(
+    session: Session, user: User, item_id: int, action: str
+) -> BotReply:
+    from fluentloop.db.models import LearningItem
+
+    item = session.get(LearningItem, item_id)
+    if item is None or item.user_id != user.id:
+        return BotReply("Learning item not found.")
+    target = {
+        "archive": "archived",
+        "suspend": "suspended",
+        "restore": "active",
+    }.get(action)
+    if target is None:
+        return BotReply(ITEM_STATUS_USAGE)
+    set_item_status(session, item, target)
+    return BotReply(f"Marked #{item.id} as {target}: {item.text}")
+
+
 def handle_rules(session: Session) -> BotReply:
     from sqlalchemy import select
 
@@ -266,6 +309,8 @@ def command_catalog() -> list[str]:
         "/stats",
         "/favorites",
         "/favorite",
+        "/items",
+        "/item",
         "/settings",
         "/help",
     ]

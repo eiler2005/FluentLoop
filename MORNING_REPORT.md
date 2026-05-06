@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Ended: `2026-05-06 20:29 UTC` (`23:29 Moscow`)
-- Total wall time: `00h 44m`
+- Last updated: `2026-05-06 21:06 UTC` (`00:06 Moscow`)
+- Total wall time so far: `01h 21m`
 
 ## Epics done
 
@@ -14,7 +14,7 @@
 | 02 | EPIC-02-user-profile-settings | this commit | ✅ | skipped | local/service tests |
 | 03 | EPIC-03-material-upload | this commit | ✅ | skipped | upload service + handler path |
 | 04 | EPIC-04-ai-extraction-and-approval | this commit | ✅ | skipped | stub AI provider |
-| 05 | EPIC-05-learning-items | this commit | ✅ | skipped | CRUD + review state |
+| 05 | EPIC-05-learning-items | this commit | ✅ | ✅ 21:06 UTC | CRUD + review state + item status commands |
 | 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | SRS helper tests |
 | 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | cached deterministic composer |
 | 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | private-chat fallback; channel id not discovered |
@@ -29,7 +29,6 @@
 
 | # | Epic | Question | Reverted? |
 |---|---|---|---|
-| — | Channel discovery | [Q1](NIGHT_QUESTIONS.md#1-channel-discovery-did-not-expose-fluentloop-english) | no |
 | — | Channel discovery | [Q1](NIGHT_QUESTIONS.md#1-channel-discovery-did-not-expose-fluentloop-english) | no |
 
 ## Epics not attempted
@@ -50,6 +49,7 @@
 | Time (UTC) | Commit | Smoke test | Notes |
 |---|---|---|---|
 | 20:28 | `this commit` | ✅ Bot API outbound smoke message delivered | deployed to `/opt/fluentloop-bot` |
+| 21:02 | `5fa79b5` | ✅ Bot API outbound smoke message delivered | redeployed healthy container after deploy keepalive hardening |
 
 ## Surprises / anomalies
 
@@ -75,6 +75,10 @@
   `/mistakes ignore <id>` for promotion/archive.
 - `/favorite <item_id>` now toggles favorites from Telegram; add/list output
   includes item ids.
+- `/items [active|archived|suspended]` lists learning items, and `/item
+  archive|suspend|restore <item_id>` manages lifecycle from Telegram.
+- Current green gate: `ruff check src tests scripts` and `pytest -q`
+  (`20 passed`).
 
 ## Recommended morning order of business
 

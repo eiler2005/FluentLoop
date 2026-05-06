@@ -110,6 +110,25 @@ def active_items(session: Session, user_id: int) -> list[LearningItem]:
     )
 
 
+def list_items(
+    session: Session,
+    user_id: int,
+    *,
+    status: str = "active",
+    limit: int = 20,
+) -> list[LearningItem]:
+    if status not in ITEM_STATUSES:
+        raise ValueError(f"Unsupported status: {status}")
+    return list(
+        session.scalars(
+            select(LearningItem)
+            .where(LearningItem.user_id == user_id, LearningItem.status == status)
+            .order_by(LearningItem.created_at.desc())
+            .limit(limit)
+        )
+    )
+
+
 def favorite_items(session: Session, user_id: int) -> list[LearningItem]:
     return list(
         session.scalars(

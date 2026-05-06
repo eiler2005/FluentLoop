@@ -16,6 +16,7 @@ Exit codes:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -51,6 +52,13 @@ def call_bot(token: str, method: str, payload: dict) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--text",
+        default="FluentLoop deploy smoke: Bot API outbound check passed.",
+        help="message text to send to TELEGRAM_ALLOWED_USER_ID",
+    )
+    args = parser.parse_args()
     load_env()
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     chat_id_raw = os.environ.get("TELEGRAM_ALLOWED_USER_ID", "")
@@ -81,7 +89,7 @@ def main() -> int:
             "sendMessage",
             {
                 "chat_id": chat_id,
-                "text": "FluentLoop deploy smoke: Bot API outbound check passed.",
+                "text": args.text,
             },
         )
     except RuntimeError as exc:
