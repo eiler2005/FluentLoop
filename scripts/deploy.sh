@@ -30,8 +30,8 @@ ssh_cmd=(
   ssh
   -o BatchMode=yes
   -o ConnectTimeout=10
-  -o ServerAliveInterval=15
-  -o ServerAliveCountMax=4
+  -o ServerAliveInterval=30
+  -o ServerAliveCountMax=20
   -p "$VPS_PORT"
   "${VPS_USER}@${VPS_HOST}"
 )
@@ -61,13 +61,13 @@ rsync -az --delete \
   --exclude='.ruff_cache/' \
   --exclude='*.session' \
   --exclude='*.session-journal' \
-  -e "ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p ${VPS_PORT}" \
+  -e "ssh -o BatchMode=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -p ${VPS_PORT}" \
   "${REPO_ROOT}/" \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/"
 
 echo "==> Rsync .env (mode 600)"
 rsync -az \
-  -e "ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p ${VPS_PORT}" \
+  -e "ssh -o BatchMode=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -p ${VPS_PORT}" \
   "${LOCAL_ENV}" \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/.env"
 "${ssh_cmd[@]}" "chmod 600 ${REMOTE_DIR}/.env"

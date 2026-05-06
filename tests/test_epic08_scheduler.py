@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fluentloop.db.session import make_engine, make_session_factory
@@ -28,6 +28,8 @@ def test_backup_and_pre_generation_jobs(tmp_path, settings) -> None:
         session.commit()
     assert run_pre_generation(local_settings, factory) == 1
     target = run_backup(local_settings)
-    expected = Path(tmp_path / "backups" / f"db-{date.today()}.sqlite")
+    expected = Path(
+        tmp_path / "backups" / f"db-{datetime.now(UTC).date()}.sqlite"
+    )
     assert target == expected
     assert target.exists()
