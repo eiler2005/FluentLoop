@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Post-deploy smoke test: send /start to the bot via the Bot API and
-verify a reply within 10 seconds.
+"""Post-deploy smoke test for Telegram reachability.
 
-Uses the raw Bot HTTP API (not Telethon) so it's a separate code path
-from the bot itself — a true black-box smoke test.
+The Bot HTTP API cannot impersonate the user, so it cannot truly send
+``/start`` *to* a Telethon bot and wait for the bot to process it. This smoke
+test verifies the deploy-facing Telegram path that is available without a user
+session: token auth via ``getMe`` plus outbound delivery to the allowed chat.
+
+Container health and Telethon long-polling are checked by deploy/VPS logs.
 
 Exit codes:
-    0 — bot replied within timeout
-    1 — bot did not reply within timeout
+    0 — Bot API auth and outbound delivery succeeded
+    1 — Bot API returned ok=false
     2 — required env vars missing
     3 — HTTP error
 """
@@ -16,7 +19,6 @@ from __future__ import annotations
 import json
 import os
 import sys
-import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -64,45 +66,34 @@ def main() -> int:
         print("FAIL: TELEGRAM_ALLOWED_USER_ID must be an integer", file=sys.stderr)
         return 2
 
-    # Mark the cutoff so we ignore older updates.
     try:
-        baseline = call_bot(token, "getUpdates", {"limit": 1, "offset": -1})
+        me = call_bot(token, "getMe", {})
     except RuntimeError as exc:
-        print(f"FAIL: getUpdates baseline error: {exc}", file=sys.stderr)
+        print(f"FAIL: getMe error: {exc}", file=sys.stderr)
         return 3
-    last_id = 0
-    for upd in baseline.get("result", []):
-        last_id = max(last_id, upd.get("update_id", 0))
+    if not me.get("ok"):
+        print(f"FAIL: getMe returned ok=false: {me}", file=sys.stderr)
+        return 1
 
     try:
-        call_bot(token, "sendMessage", {"chat_id": chat_id, "text": "/start"})
+        sent = call_bot(
+            token,
+            "sendMessage",
+            {
+                "chat_id": chat_id,
+                "text": "FluentLoop deploy smoke: Bot API outbound check passed.",
+            },
+        )
     except RuntimeError as exc:
         print(f"FAIL: sendMessage error: {exc}", file=sys.stderr)
         return 3
-
-    deadline = time.time() + 15.0
-    while time.time() < deadline:
-        try:
-            polls = call_bot(
-                token,
-                "getUpdates",
-                {"offset": last_id + 1, "timeout": 3, "limit": 10},
-            )
-        except RuntimeError as exc:
-            print(f"FAIL: getUpdates poll error: {exc}", file=sys.stderr)
-            return 3
-        for upd in polls.get("result", []):
-            last_id = max(last_id, upd.get("update_id", 0))
-            msg = upd.get("message") or upd.get("edited_message") or {}
-            from_bot = msg.get("from", {}).get("is_bot", False)
-            if from_bot and msg.get("chat", {}).get("id") == chat_id:
-                text = msg.get("text", "")[:80]
-                print(f"OK: bot replied: {text!r}")
-                return 0
-        time.sleep(0.5)
-
-    print("FAIL: bot did not reply within 15 seconds", file=sys.stderr)
-    return 1
+    if not sent.get("ok"):
+        print(f"FAIL: sendMessage returned ok=false: {sent}", file=sys.stderr)
+        return 1
+    username = me.get("result", {}).get("username", "<unknown>")
+    message_id = sent.get("result", {}).get("message_id", "?")
+    print(f"OK: @{username} reachable; outbound message_id={message_id}")
+    return 0
 
 
 if __name__ == "__main__":

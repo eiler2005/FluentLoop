@@ -29,7 +29,14 @@ fi
 ssh_cmd=(ssh -o BatchMode=yes -o ConnectTimeout=10 -p "$VPS_PORT" "${VPS_USER}@${VPS_HOST}")
 
 echo "==> Ensuring remote directory exists: ${REMOTE_DIR}"
-"${ssh_cmd[@]}" "mkdir -p ${REMOTE_DIR}/data ${REMOTE_DIR}/data/sessions ${REMOTE_DIR}/data/backups"
+"${ssh_cmd[@]}" "
+  if mkdir -p ${REMOTE_DIR}/data ${REMOTE_DIR}/data/sessions ${REMOTE_DIR}/data/backups 2>/dev/null; then
+    true
+  else
+    sudo mkdir -p ${REMOTE_DIR}/data ${REMOTE_DIR}/data/sessions ${REMOTE_DIR}/data/backups
+    sudo chown -R ${VPS_USER}:${VPS_USER} ${REMOTE_DIR}
+  fi
+"
 
 echo "==> Rsync code to ${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/"
 rsync -az --delete \
@@ -51,10 +58,11 @@ rsync -az --delete \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/"
 
 echo "==> Rsync .env (mode 600)"
-rsync -az --chmod=F600 \
+rsync -az \
   -e "ssh -o BatchMode=yes -p ${VPS_PORT}" \
   "${LOCAL_ENV}" \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/.env"
+"${ssh_cmd[@]}" "chmod 600 ${REMOTE_DIR}/.env"
 
 echo "==> Build + (re)start container"
 "${ssh_cmd[@]}" "cd ${REMOTE_DIR} && docker compose up -d --build"

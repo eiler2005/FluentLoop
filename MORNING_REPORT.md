@@ -3,21 +3,21 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Ended: `2026-05-06 19:58 UTC` (`22:58 Moscow`)
-- Total wall time: `00h 13m`
+- Ended: `2026-05-06 20:29 UTC` (`23:29 Moscow`)
+- Total wall time: `00h 44m`
 
 ## Epics done
 
 | # | Epic | Commit | Tests | Deployed? | Notes |
 |---|---|---|---|---|---|
-| 01 | EPIC-01-bot-foundation | this commit | ✅ | skipped | Docker daemon unavailable locally |
+| 01 | EPIC-01-bot-foundation | this commit | ✅ | ✅ 20:28 UTC | Docker build on VPS |
 | 02 | EPIC-02-user-profile-settings | this commit | ✅ | skipped | local/service tests |
 | 03 | EPIC-03-material-upload | this commit | ✅ | skipped | upload service + handler path |
 | 04 | EPIC-04-ai-extraction-and-approval | this commit | ✅ | skipped | stub AI provider |
 | 05 | EPIC-05-learning-items | this commit | ✅ | skipped | CRUD + review state |
 | 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | SRS helper tests |
 | 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | cached deterministic composer |
-| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | skipped | channel id not discovered |
+| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | private-chat fallback; channel id not discovered |
 | 09 | EPIC-09-exercise-types | this commit | ✅ | skipped | 6-type registry |
 | 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | skipped | stub checking + disputes |
 | 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | skipped | threshold + promotion |
@@ -30,8 +30,7 @@
 | # | Epic | Question | Reverted? |
 |---|---|---|---|
 | — | Channel discovery | [Q1](NIGHT_QUESTIONS.md#1-channel-discovery-did-not-expose-fluentloop-english) | no |
-| — | Local Docker build | [Q2](NIGHT_QUESTIONS.md#2-docker-daemon-unavailable-locally) | no |
-| — | VPS deploy | [Q3](NIGHT_QUESTIONS.md#3-vps-ssh-became-unreachable-after-initial-success) | no |
+| — | Channel discovery | [Q1](NIGHT_QUESTIONS.md#1-channel-discovery-did-not-expose-fluentloop-english) | no |
 
 ## Epics not attempted
 
@@ -50,20 +49,23 @@
 
 | Time (UTC) | Commit | Smoke test | Notes |
 |---|---|---|---|
-| — | — | skipped | VPS SSH timed out during banner exchange |
+| 20:28 | `this commit` | ✅ Bot API outbound smoke message delivered | deployed to `/opt/fluentloop-bot` |
 
 ## Surprises / anomalies
 
 - Local system Python is 3.7 and has SSL certificate issues; verification used
   `uv --python 3.11`, which created `.venv/` and passed lint/tests.
-- Docker files were added, but local Docker daemon was unavailable, so
-  `docker compose build` could not be verified locally.
+- Local Docker daemon was unavailable, but VPS Docker build succeeded and the
+  container reached healthy status.
 - Bot-mode Telethon handshake passed for the configured bot; Bot API and
   Telethon could not discover the private channel id from available updates.
+- `/opt/fluentloop-bot` initially required root-owned directory setup; deploy
+  script now uses sudo only to create/chown that service directory.
 
 ## Recommended morning order of business
 
-1. Start Docker Desktop locally or retry on VPS, then run `docker compose build`.
-2. Add `TELEGRAM_CHANNEL_ID` to `.env` or create a fresh channel event visible
+1. Add `TELEGRAM_CHANNEL_ID` to `.env` or create a fresh channel event visible
    to the bot, then rerun `python scripts/discover_channel.py`.
-3. Retry `bash scripts/check_vps.sh`; if green, deploy with `bash scripts/deploy.sh`.
+2. Send `/start` manually to the bot in Telegram and check the live UX.
+3. Continue hardening inline callback flows for `/settings`, `/add`, approval,
+   favorites, and disputes.

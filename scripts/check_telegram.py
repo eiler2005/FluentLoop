@@ -40,7 +40,8 @@ async def run() -> int:
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     if not api_id_raw or not api_hash or not bot_token:
         print(
-            "FAIL: TELEGRAM_API_ID / TELEGRAM_API_HASH / TELEGRAM_BOT_TOKEN must be set",
+            "FAIL: TELEGRAM_API_ID / TELEGRAM_API_HASH / "
+            "TELEGRAM_BOT_TOKEN must be set",
             file=sys.stderr,
         )
         return 2

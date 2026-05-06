@@ -25,6 +25,10 @@ reachable.
 **Why I'd prefer to ask:** Docker Desktop may simply need to be started on the
 Mac before local container verification.
 
+**Resolved during night:** VPS Docker build succeeded via `scripts/deploy.sh`.
+Local Docker Desktop may still be stopped, but deployment no longer depends on
+local Docker.
+
 ## 3. VPS SSH became unreachable after initial success
 
 **Epic:** deployment after Telegram-visible epics  
@@ -37,3 +41,6 @@ retry `scripts/check_vps.sh` before the next deployment attempt.
 network filtering, or transient host issues; forced retries risk wasting the
 night without changing code.
 
+**Resolved during night:** VPS SSH recovered. Deployment now succeeds to
+`/opt/fluentloop-bot` after `scripts/deploy.sh` creates/chowns the service
+directory with sudo when needed.
