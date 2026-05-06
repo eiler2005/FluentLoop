@@ -1,0 +1,60 @@
+# FluentLoop — runtime environment.
+# This file is gitignored. Never commit.
+# After overnight implementation, rotate TELEGRAM_BOT_TOKEN via @BotFather.
+
+# ---------------------------------------------------------------------------
+# Telegram (Telethon in bot mode — see docs/adr/0002-telegram-library-choice.md)
+# ---------------------------------------------------------------------------
+# Bot @fluentloop_ai_bot. Paste the token from @BotFather here.
+# (The original token was leaked in chat — REVOKE it via @BotFather first
+#  and use the new one.)
+TELEGRAM_BOT_TOKEN=<FILL_ME_FROM_BOTFATHER_AFTER_REVOKE>
+
+# REQUIRED — copy from:
+#   /Users/DenisErmilov/aiprojects/openclaw_firststeps/secrets/telethon-digest/telethon.env
+# (lines TELEGRAM_API_ID=... and TELEGRAM_API_HASH=...)
+# These are app-scoped credentials; one pair supports multiple bots.
+TELEGRAM_API_ID=<FILL_ME_FROM_OPENCLAW_TELETHON_ENV>
+TELEGRAM_API_HASH=<FILL_ME_FROM_OPENCLAW_TELETHON_ENV>
+
+# REQUIRED — your numeric Telegram user ID. Get from @userinfobot in Telegram.
+TELEGRAM_ALLOWED_USER_ID=<FILL_ME_FROM_USERINFOBOT>
+
+# ---------------------------------------------------------------------------
+# AI provider — see docs/adr/0003-ai-model-tiering-and-cost.md
+# ---------------------------------------------------------------------------
+AI_PROVIDER=openai
+
+# REQUIRED — copy from:
+#   /Users/DenisErmilov/aiprojects/openclaw_firststeps/secrets/signals-bridge/signals.env
+# (line OPENAI_API_KEY=...)
+OPENAI_API_KEY=<FILL_ME_FROM_OPENCLAW_SIGNALS_ENV>
+
+OPENAI_MODEL_LIGHT=gpt-4o-mini
+OPENAI_MODEL_HEAVY=gpt-4o
+
+# ---------------------------------------------------------------------------
+# Storage
+# ---------------------------------------------------------------------------
+DB_URL=sqlite:////app/data/fluentloop.sqlite
+
+# ---------------------------------------------------------------------------
+# Scheduling & locale
+# ---------------------------------------------------------------------------
+TIMEZONE=Europe/Moscow
+REMINDER_TIME_DEFAULT=20:00
+PRACTICE_DURATION_MINUTES=15
+
+# Overnight pre-generation of the next day's session (ADR-0004).
+PRE_GEN_HOUR=3
+PRE_GEN_MINUTE=0
+
+# Daily SQLite backup (per EPIC-08).
+BACKUP_HOUR=4
+BACKUP_MINUTE=0
+BACKUP_RETENTION_DAYS=14
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+LOG_LEVEL=INFO

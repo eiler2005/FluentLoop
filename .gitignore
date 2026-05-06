@@ -12,6 +12,12 @@ state/
 reports/
 feedback_disputes/
 
+# --- Night-run artefacts ---
+# scripts/env_template.txt is committed as a TEMPLATE only. If you ever
+# fill it with real values locally, rename or move it; never commit values.
+# NIGHT_QUESTIONS.md and MORNING_REPORT.md are committed (handoff artefacts).
+# usage_log.jsonl lives under data/ (already ignored above).
+
 # --- Databases ---
 *.sqlite
 *.sqlite3
