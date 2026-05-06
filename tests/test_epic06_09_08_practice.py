@@ -107,4 +107,5 @@ def test_answer_without_session_does_not_create_practice(db_session, settings) -
     user = ensure_user(db_session, 123456789, settings)
     reply = handle_answer(db_session, user, StubProvider(), "anything")
     assert "No active exercise" in reply.text
+    assert "/upload" in reply.text
     assert db_session.scalar(select(PracticeSession)) is None

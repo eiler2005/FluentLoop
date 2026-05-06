@@ -16,10 +16,19 @@ from fluentloop.users import ensure_user, format_settings, update_setting
 
 def test_settings_update_and_validation(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
+    before = user.updated_at
+    update_setting(db_session, user, "level", "C1")
+    update_setting(db_session, user, "focus_areas", "business, architecture")
     update_setting(db_session, user, "reminder_time", "20:30")
     update_setting(db_session, user, "timezone", "Europe/Berlin")
+    update_setting(db_session, user, "explanation_language", "en")
+    update_setting(db_session, user, "practice_duration_minutes", "25")
+    assert user.updated_at > before
+    assert "C1" in format_settings(user)
+    assert "architecture" in format_settings(user)
     assert "20:30" in format_settings(user)
     assert "Europe/Berlin" in format_settings(user)
+    assert "25 min" in format_settings(user)
     with pytest.raises(ValueError):
         update_setting(db_session, user, "timezone", "Mars/Base")
 
@@ -64,6 +73,14 @@ def test_add_text_payload_creates_item(db_session, settings) -> None:
     )
     assert "Added #" in reply.text
     assert "expression: align on" in reply.text
+    duplicate = handle_add_text(
+        db_session,
+        user,
+        "expression | align on | согласовать | planning",
+    )
+    assert "Duplicate item" in duplicate.text
+    assert "Merge" in duplicate.text
+    assert "Keep separate" in duplicate.text
 
 
 def test_add_text_returns_friendly_error(db_session, settings) -> None:

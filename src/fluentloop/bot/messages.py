@@ -9,6 +9,9 @@ HELP = """Commands
 /add - add a learning item
 /add expression | push back on | мягко возражать | meetings,stakeholders
 /approve <material_id> - approve all pending candidates for a material
+/candidates <material_id> - review extracted candidates
+/candidate add <candidate_id> - add one candidate
+/candidate skip <candidate_id> - skip one candidate
 /upload - upload lesson material
 /mistakes - show mistake patterns
 /mistakes focus <pattern_id> - promote a recurring mistake

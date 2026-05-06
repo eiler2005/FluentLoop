@@ -3,18 +3,18 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 21:16 UTC` (`00:16 Moscow`)
-- Total wall time so far: `01h 31m`
+- Last updated: `2026-05-06 21:23 UTC` (`00:23 Moscow`)
+- Total wall time so far: `01h 38m`
 
 ## Epics done
 
 | # | Epic | Commit | Tests | Deployed? | Notes |
 |---|---|---|---|---|---|
-| 01 | EPIC-01-bot-foundation | this commit | ✅ | ✅ 20:28 UTC | Docker build on VPS |
-| 02 | EPIC-02-user-profile-settings | this commit | ✅ | skipped | local/service tests |
-| 03 | EPIC-03-material-upload | this commit | ✅ | skipped | upload service + handler path |
-| 04 | EPIC-04-ai-extraction-and-approval | this commit | ✅ | skipped | stub AI provider |
-| 05 | EPIC-05-learning-items | this commit | ✅ | ✅ 21:06 UTC | CRUD + review state + item status commands |
+| 01 | EPIC-01-bot-foundation | this commit | ✅ | ✅ 20:28 UTC | Docker/VPS health + gate audit |
+| 02 | EPIC-02-user-profile-settings | this commit | ✅ | skipped | all settings + updated_at audit |
+| 03 | EPIC-03-material-upload | this commit | ✅ | skipped | upload service + safe free-text fallback |
+| 04 | EPIC-04-ai-extraction-and-approval | this commit | ✅ | skipped | approve-all + one-by-one candidate review |
+| 05 | EPIC-05-learning-items | this commit | ✅ | ✅ 21:06 UTC | CRUD + duplicate/status command audit |
 | 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | SRS helper tests |
 | 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | composer no longer repeats one item |
 | 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | private-chat fallback; completion summary |
@@ -78,13 +78,16 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`23 passed`).
+  (`25 passed`).
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
 - Added an idempotent demo-data seeding script for audit/smoke coverage:
   learning items, lesson material, extracted candidates, high-confidence
   mistake pattern, cached session, and completed session.
+- EPIC-01-05 strict-audit fixes added coverage for container/gate invariants,
+  setting timestamps, one-by-one candidate actions, malformed extraction
+  fallback, duplicate `/add` UX, and free-text upload guidance.
 
 ## Recommended morning order of business
 

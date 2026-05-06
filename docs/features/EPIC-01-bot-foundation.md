@@ -85,3 +85,5 @@ the next epics without restructuring.
   `/start`, `/help`, single-user gate, logging, SQLite-backed FSM, and tests.
 - Docker daemon was not reachable locally, so the green gate ran through
   `uv --python 3.11`; Docker files are ready for VPS/Docker verification.
+- Audit coverage now asserts the single-user gate, Docker data mount, and
+  container command; VPS deploy verifies Telethon connection and health.

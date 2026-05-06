@@ -68,3 +68,5 @@ via `/settings`.
   service functions used by the bot handlers.
 - Added `/settings set <field> <value>` for practical Telegram-side edits;
   richer inline keyboard editing remains a later UX polish.
+- Audit coverage now exercises all editable fields and verifies `updated_at`
+  changes on update.

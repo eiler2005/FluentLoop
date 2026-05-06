@@ -10,6 +10,8 @@ from fluentloop.bot.handlers import (
     handle_add_text,
     handle_answer,
     handle_approve_all,
+    handle_candidate_action,
+    handle_candidates,
     handle_favorite_toggle,
     handle_favorites,
     handle_help,
@@ -36,6 +38,7 @@ LOG = logging.getLogger(__name__)
 ITEM_STATUS_USAGE = (
     "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
 )
+CANDIDATE_USAGE = "Use /candidate add <id> or /candidate skip <id>."
 
 
 async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
@@ -99,6 +102,28 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         reply = BotReply("Use /approve <material_id>.")
                     else:
                         reply = handle_approve_all(session, user, material_id)
+            elif command == "/candidates":
+                if len(parts) < 2:
+                    reply = BotReply("Use /candidates <material_id>.")
+                else:
+                    try:
+                        material_id = int(parts[1])
+                    except ValueError:
+                        reply = BotReply("Use /candidates <material_id>.")
+                    else:
+                        reply = handle_candidates(session, user, material_id)
+            elif command == "/candidate":
+                if len(parts) < 3:
+                    reply = BotReply(CANDIDATE_USAGE)
+                else:
+                    try:
+                        candidate_id = int(parts[2])
+                    except ValueError:
+                        reply = BotReply(CANDIDATE_USAGE)
+                    else:
+                        reply = handle_candidate_action(
+                            session, user, parts[1], candidate_id
+                        )
             elif command == "/stats":
                 reply = handle_stats(session, user)
             elif command == "/mistakes":

@@ -84,3 +84,7 @@ This is the canonical "approval required" gate from PRD §5.5 and §13.
   the Telegram chat flow.
 - Real OpenAI provider code is present but unexercised tonight because
   `AI_PROVIDER=stub` keeps spend at zero.
+- Added `/candidates <material_id>` plus `/candidate add <id>` and
+  `/candidate skip <id>` for one-by-one candidate review in Telegram.
+- Malformed extraction/provider failures now return a friendly "try again or
+  rephrase" response instead of crashing handler execution.

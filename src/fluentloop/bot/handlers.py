@@ -24,7 +24,13 @@ from fluentloop.learning import (
     set_item_status,
     toggle_favorite,
 )
-from fluentloop.materials import approve_all, extract_candidates, store_material
+from fluentloop.materials import (
+    approve_all,
+    approve_candidate,
+    extract_candidates,
+    skip_candidate,
+    store_material,
+)
 from fluentloop.mistakes import active_patterns, archive_pattern, promote_pattern
 from fluentloop.practice import (
     get_in_progress_session,
@@ -91,6 +97,23 @@ def handle_add(
     meaning: str = "",
     tags: list[str] | None = None,
 ) -> BotReply:
+    from sqlalchemy import select
+
+    from fluentloop.db.models import LearningItem
+
+    existing = session.scalar(
+        select(LearningItem).where(
+            LearningItem.user_id == user.id,
+            LearningItem.type == type_,
+            LearningItem.text == text.strip(),
+        )
+    )
+    if existing is not None:
+        return BotReply(
+            f"Duplicate item #{existing.id} already exists: {existing.text}.\n"
+            "Merge: keep using the existing item.\n"
+            "Keep separate: add a clarifying suffix or tag, then send /add again."
+        )
     try:
         item = create_learning_item(
             session,
@@ -142,7 +165,10 @@ def handle_upload(
         material = store_material(session, user, raw_text, type_=type_)
     except ValueError as exc:
         return BotReply(f"Could not store material: {exc}")
-    candidates = extract_candidates(session, material, provider)
+    try:
+        candidates = extract_candidates(session, material, provider)
+    except ValueError as exc:
+        return BotReply(f"Could not extract material: {exc}")
     return BotReply(candidate_summary(candidates))
 
 
@@ -154,6 +180,61 @@ def handle_approve_all(session: Session, user: User, material_id: int) -> BotRep
         return BotReply("Material not found.")
     count = approve_all(session, user, source)
     return BotReply(f"Added {count} learning items.")
+
+
+def handle_candidates(session: Session, user: User, material_id: int) -> BotReply:
+    from sqlalchemy import select
+
+    from fluentloop.db.models import ExtractedCandidate, SourceMaterial
+
+    source = session.get(SourceMaterial, material_id)
+    if source is None or source.user_id != user.id:
+        return BotReply("Material not found.")
+    candidates = session.scalars(
+        select(ExtractedCandidate)
+        .where(ExtractedCandidate.source_material_id == source.id)
+        .order_by(ExtractedCandidate.id)
+    ).all()
+    if not candidates:
+        return BotReply("No candidates for this material.")
+    lines = [f"Candidates for material #{source.id}"]
+    for candidate in candidates:
+        lines.append(
+            f"- #{candidate.id} [{candidate.status}] "
+            f"{candidate.type}: {candidate.text}"
+        )
+    lines.append("Use /candidate add <id> or /candidate skip <id>.")
+    return BotReply("\n".join(lines))
+
+
+def handle_candidate_action(
+    session: Session, user: User, action: str, candidate_id: int
+) -> BotReply:
+    from fluentloop.db.models import ExtractedCandidate
+
+    candidate = session.get(ExtractedCandidate, candidate_id)
+    if candidate is None:
+        return BotReply("Candidate not found.")
+    try:
+        if action == "add":
+            changed = approve_candidate(session, user, candidate)
+            text = (
+                f"Added candidate #{candidate.id}."
+                if changed
+                else "Candidate already handled."
+            )
+            return BotReply(text)
+        if action == "skip":
+            changed = skip_candidate(session, user, candidate)
+            text = (
+                f"Skipped candidate #{candidate.id}."
+                if changed
+                else "Candidate already handled."
+            )
+            return BotReply(text)
+    except ValueError:
+        return BotReply("Candidate not found.")
+    return BotReply("Use /candidate add <id> or /candidate skip <id>.")
 
 
 def handle_today(
@@ -181,7 +262,10 @@ def handle_answer(
 ) -> BotReply:
     practice_session = get_in_progress_session(session, user)
     if practice_session is None:
-        return BotReply("No active exercise. Send /today.")
+        return BotReply(
+            "No active exercise. Send /today, or send /upload and paste this "
+            "text as lesson material."
+        )
     current = next_exercise(session, practice_session)
     if current is None:
         return BotReply("No active exercise. Send /today.")
@@ -304,6 +388,8 @@ def command_catalog() -> list[str]:
         "/review",
         "/add",
         "/approve",
+        "/candidates",
+        "/candidate",
         "/upload",
         "/mistakes",
         "/rules",

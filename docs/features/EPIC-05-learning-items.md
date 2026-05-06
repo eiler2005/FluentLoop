@@ -77,8 +77,9 @@ points for `is_favorite`, `status`, and tagging.
 - Added `LearningItem` CRUD helpers, duplicate protection, status changes,
   favorite flag support, and automatic `ReviewState` creation.
 - Added `/add type | text | meaning | tags` plus a one-step FSM prompt for
-  manual item creation. Duplicate UI is still conservative: service returns
-  the existing row; explicit merge/keep-separate remains a UX expansion.
+  manual item creation.
+- Duplicate `/add` attempts now warn about the existing row and present the
+  practical merge/keep-separate options for the Telegram MVP.
 - Invalid `/add` payloads now return friendly Telegram errors.
 - Add confirmations now include item ids so later commands can target items.
 - Added `/items [active|archived|suspended]` and `/item archive|suspend|restore

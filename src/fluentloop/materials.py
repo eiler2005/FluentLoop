@@ -30,10 +30,15 @@ def extract_candidates(
     material: SourceMaterial,
     provider: AIProvider,
 ) -> list[ExtractedCandidate]:
-    result = provider.heavy_call(
-        "epic_04_extract",
-        {"raw_text": material.raw_text, "type": material.type},
-    )
+    try:
+        result = provider.heavy_call(
+            "epic_04_extract",
+            {"raw_text": material.raw_text, "type": material.type},
+        )
+    except Exception as exc:
+        raise ValueError("couldn't extract candidates; try again or rephrase") from exc
+    if not hasattr(result, "candidates"):
+        raise ValueError("couldn't extract candidates; try again or rephrase")
     stored: list[ExtractedCandidate] = []
     for item in result.candidates:
         existing = session.scalar(
@@ -75,6 +80,33 @@ def approve_all(session: Session, user: User, material: SourceMaterial) -> int:
         promote_candidate(session, user, candidate)
         count += 1
     return count
+
+
+def approve_candidate(
+    session: Session, user: User, candidate: ExtractedCandidate
+) -> int:
+    if candidate.status != "pending":
+        return 0
+    source = session.get(SourceMaterial, candidate.source_material_id)
+    if source is None or source.user_id != user.id:
+        raise ValueError("Candidate not found")
+    promote_candidate(session, user, candidate)
+    return 1
+
+
+def skip_candidate(
+    session: Session, user: User, candidate: ExtractedCandidate
+) -> int:
+    source = session.get(SourceMaterial, candidate.source_material_id)
+    if source is None or source.user_id != user.id:
+        raise ValueError("Candidate not found")
+    if candidate.status != "pending":
+        return 0
+    candidate.status = "skipped"
+    candidate.terminal_at = utc_now()
+    session.add(candidate)
+    session.flush()
+    return 1
 
 
 def skip_all(session: Session, material: SourceMaterial) -> int:
