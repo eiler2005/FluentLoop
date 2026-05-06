@@ -1,0 +1,97 @@
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+from sqlalchemy.orm import Session
+
+from fluentloop.ai.provider import AIProvider
+from fluentloop.ai.schemas import AnswerFeedback
+from fluentloop.db.models import MistakeEvent, User
+from fluentloop.srs import record_result
+
+
+def check_answer(provider: AIProvider, exercise: dict, answer: str) -> AnswerFeedback:
+    task_type = exercise.get("exercise_type")
+    payload = {
+        "exercise_type": task_type,
+        "prompt": exercise.get("prompt", ""),
+        "expected_answer": exercise.get("expected_answer", ""),
+        "answer": answer,
+    }
+    if task_type in {"grammar_rewrite", "follow_up", "error_correction"}:
+        result = provider.heavy_call("epic_10_check_answer", payload)
+    else:
+        result = provider.light_call("epic_10_check_answer", payload)
+    if not isinstance(result, AnswerFeedback):
+        raise TypeError("AI provider returned the wrong feedback schema")
+    return result
+
+
+def srs_result_from_feedback(
+    feedback: AnswerFeedback, *, hard_override: bool = False
+) -> str:
+    if hard_override and feedback.status == "correct":
+        return "Hard"
+    if feedback.status == "correct":
+        return "Good"
+    if feedback.status == "partial":
+        return "Hard"
+    return "Again"
+
+
+def apply_feedback(
+    session: Session,
+    user: User,
+    exercise: dict,
+    answer: str,
+    feedback: AnswerFeedback,
+    *,
+    disputed: bool = False,
+    hard_override: bool = False,
+) -> None:
+    result = srs_result_from_feedback(feedback, hard_override=hard_override)
+    for item_id in exercise.get("target_learning_item_ids", []):
+        record_result(session, item_id, result)
+    if disputed:
+        return
+    should_log = result == "Again" or feedback.should_create_mistake_event
+    if should_log:
+        session.add(
+            MistakeEvent(
+                user_id=user.id,
+                wrong_answer=answer,
+                corrected_answer=feedback.corrected_answer,
+                explanation=feedback.explanation,
+                mistake_type=feedback.detected_mistake_type or "general",
+                linked_learning_item_id=(
+                    exercise.get("target_learning_item_ids") or [None]
+                )[0],
+            )
+        )
+        session.flush()
+
+
+def write_dispute(
+    base_dir: Path,
+    *,
+    prompt: str,
+    answer: str,
+    verdict: dict,
+    reason: str,
+    note: str = "",
+) -> Path:
+    base_dir.mkdir(parents=True, exist_ok=True)
+    path = base_dir / f"{datetime.now(UTC).date().isoformat()}.jsonl"
+    row = {
+        "ts": datetime.now(UTC).isoformat(),
+        "prompt": prompt,
+        "answer": answer,
+        "verdict": verdict,
+        "reason": reason,
+        "note": note,
+    }
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return path

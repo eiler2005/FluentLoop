@@ -1,6 +1,6 @@
 # EPIC-05 — Learning items
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §10 (item types), §24 (data entities), §21 (`/add`)
 **Depends on:** EPIC-02
 **Blocks:** EPIC-04 (writes here), EPIC-06, EPIC-07, EPIC-09, EPIC-14
@@ -71,3 +71,10 @@ points for `is_favorite`, `status`, and tagging.
 3. Archive a row programmatically; confirm it disappears from any future
    EPIC-07 candidate set.
 4. Try to add a duplicate; confirm the merge/keep-separate dialog.
+
+## Notes from implementation
+
+- Added `LearningItem` CRUD helpers, duplicate protection, status changes,
+  favorite flag support, and automatic `ReviewState` creation.
+- Duplicate UI is currently conservative: service returns the existing row;
+  an explicit merge/keep-separate chat dialog remains a UX expansion.

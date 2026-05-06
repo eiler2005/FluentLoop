@@ -1,6 +1,6 @@
 # EPIC-06 — Spaced repetition
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §12, §24 (`ReviewState`)
 **Depends on:** EPIC-05
 **Blocks:** EPIC-07
@@ -67,3 +67,8 @@ the bookkeeping.
    `due_at` is now ~4 days out.
 4. Mark one `Again`; assert `due_at` is ~now.
 5. `get_due_items` orders correctly.
+
+## Notes from implementation
+
+- Implemented the simple Again/Hard/Good/Easy interval algorithm and due-item
+  query with weak/favorite ordering signals.

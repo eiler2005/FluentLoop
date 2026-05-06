@@ -1,6 +1,6 @@
 # EPIC-11 — Mistake events and mistake patterns
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §17, §22.3, §24 (`MistakeEvent`, `MistakePattern`)
 **Depends on:** EPIC-10 (writes `MistakeEvent`s)
 **Blocks:** EPIC-07 (consumes high-confidence patterns), EPIC-12
@@ -88,3 +88,9 @@ not yet driving exercise generation.
 5. Add a fourth matching `MistakeEvent`; verify the pattern's
    `wrong_examples` grows by 1, no new pattern row created.
 6. `/mistakes` lists the pattern with count and confidence.
+
+## Notes from implementation
+
+- Implemented mistake-event ingestion, the ≥3 similar events / 14-day pattern
+  threshold, low-confidence creation, promotion, archive, and `/mistakes`
+  rendering.

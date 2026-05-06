@@ -1,6 +1,6 @@
 # EPIC-04 — AI extraction and candidate approval
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §9, §22.1, §25.1 (AI extraction)
 **Depends on:** EPIC-03, ADR-0003 (model tiering)
 **Blocks:** EPIC-07 (which expects approved learning items as input)
@@ -75,3 +75,10 @@ This is the canonical "approval required" gate from PRD §5.5 and §13.
 4. Re-run extraction on the same material → verify idempotency (no dupes).
 5. Upload random Lorem Ipsum → verify graceful "nothing meaningful found"
    reply.
+
+## Notes from implementation
+
+- Implemented AI provider abstraction, stub extraction fixtures, candidate
+  persistence, idempotency, and approve-all promotion into learning items.
+- Real OpenAI provider code is present but unexercised tonight because
+  `AI_PROVIDER=stub` keeps spend at zero.

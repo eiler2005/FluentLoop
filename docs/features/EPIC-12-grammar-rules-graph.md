@@ -1,6 +1,6 @@
 # EPIC-12 — Grammar rules graph
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §11, §18, §22.4
 **Depends on:** EPIC-05, EPIC-11
 **Blocks:** EPIC-07 (uses parent-concept walks)
@@ -76,3 +76,8 @@ foundation.
 3. Run pre-gen 20 times; assert ~3 sessions include a "modal verbs for
    recommendations" or "modal verbs" exercise.
 4. `/rules` lists concepts; the hedging one is highlighted as weak.
+
+## Notes from implementation
+
+- Added seeded grammar concepts, bidirectional parent links, parent/child walk
+  helpers, and `/rules` rendering.

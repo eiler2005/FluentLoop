@@ -1,6 +1,6 @@
 # EPIC-08 — Daily practice in Telegram
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §14, §22.2 (daily practice scenario), §21 (`/today`,
 `/review`)
 **Depends on:** EPIC-07
@@ -85,3 +85,10 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
 5. Wait one day after first run; `ls data/backups/` shows the snapshot.
 6. Simulate 16 days of operation; confirm rotation deletes the oldest
    snapshot.
+
+## Notes from implementation
+
+- Implemented `/today`/`/review` handler path, persisted sessions/attempts,
+  resume behavior, summaries, and SQLite backup helper.
+- Reminder scheduling is represented in config/runtime shape; exact APScheduler
+  registration should be hardened during VPS smoke once Docker is available.

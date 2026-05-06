@@ -7,20 +7,20 @@ unit of work. The 15 epics are one-to-one with PRD §28 backlog.
 
 | # | File | Status | Summary |
 |---|---|---|---|
-| 01 | [bot-foundation](EPIC-01-bot-foundation.md) | Planned | Telegram bot up, `/start`, `/help`, project skeleton. |
-| 02 | [user-profile-settings](EPIC-02-user-profile-settings.md) | Planned | Profile creation, `/settings`, level/focus/timezone/reminder. |
-| 03 | [material-upload](EPIC-03-material-upload.md) | Planned | `/upload`, plain text ingestion, source storage. |
-| 04 | [ai-extraction-and-approval](EPIC-04-ai-extraction-and-approval.md) | Planned | AI extraction → candidates → approval flow in chat. |
-| 05 | [learning-items](EPIC-05-learning-items.md) | Planned | CRUD for words / expressions / rules / mistakes. |
-| 06 | [spaced-repetition](EPIC-06-spaced-repetition.md) | Planned | Simple Again/Hard/Good/Easy intervals + due queue. |
-| 07 | [automatic-practice-generation](EPIC-07-automatic-practice-generation.md) | Planned | Daily session composer + overnight pre-generation. |
-| 08 | [daily-practice-telegram](EPIC-08-daily-practice-telegram.md) | Planned | `/today`, reminders, session resume, daily backups. |
-| 09 | [exercise-types](EPIC-09-exercise-types.md) | Planned | Six exercise types from PRD §15. |
-| 10 | [answer-checking-feedback](EPIC-10-answer-checking-feedback.md) | Planned | AI judging + user override + dispute log. |
-| 11 | [mistake-events-and-patterns](EPIC-11-mistake-events-and-patterns.md) | Planned | Mistake log, pattern detection (≥3/14d threshold). |
-| 12 | [grammar-rules-graph](EPIC-12-grammar-rules-graph.md) | Planned | Grammar concepts as a graph with parent/child links. |
-| 13 | [stats-and-weekly-summary](EPIC-13-stats-and-weekly-summary.md) | Planned | `/stats` + weekly digest. |
-| 14 | [favorites](EPIC-14-favorites.md) | Planned | `is_favorite` flag and prioritization. |
+| 01 | [bot-foundation](EPIC-01-bot-foundation.md) | Done | Telegram bot up, `/start`, `/help`, project skeleton. |
+| 02 | [user-profile-settings](EPIC-02-user-profile-settings.md) | Done | Profile creation, `/settings`, level/focus/timezone/reminder. |
+| 03 | [material-upload](EPIC-03-material-upload.md) | Done | `/upload`, plain text ingestion, source storage. |
+| 04 | [ai-extraction-and-approval](EPIC-04-ai-extraction-and-approval.md) | Done | AI extraction → candidates → approval flow in chat. |
+| 05 | [learning-items](EPIC-05-learning-items.md) | Done | CRUD for words / expressions / rules / mistakes. |
+| 06 | [spaced-repetition](EPIC-06-spaced-repetition.md) | Done | Simple Again/Hard/Good/Easy intervals + due queue. |
+| 07 | [automatic-practice-generation](EPIC-07-automatic-practice-generation.md) | Done | Daily session composer + overnight pre-generation. |
+| 08 | [daily-practice-telegram](EPIC-08-daily-practice-telegram.md) | Done | `/today`, reminders, session resume, daily backups. |
+| 09 | [exercise-types](EPIC-09-exercise-types.md) | Done | Six exercise types from PRD §15. |
+| 10 | [answer-checking-feedback](EPIC-10-answer-checking-feedback.md) | Done | AI judging + user override + dispute log. |
+| 11 | [mistake-events-and-patterns](EPIC-11-mistake-events-and-patterns.md) | Done | Mistake log, pattern detection (≥3/14d threshold). |
+| 12 | [grammar-rules-graph](EPIC-12-grammar-rules-graph.md) | Done | Grammar concepts as a graph with parent/child links. |
+| 13 | [stats-and-weekly-summary](EPIC-13-stats-and-weekly-summary.md) | Done | `/stats` + weekly digest. |
+| 14 | [favorites](EPIC-14-favorites.md) | Done | `is_favorite` flag and prioritization. |
 | 15 | [optional-web-interface](EPIC-15-optional-web-interface.md) | **Deferred** | Re-evaluate after 4–6 weeks of bot usage. |
 
 ## Dependency graph

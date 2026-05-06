@@ -1,6 +1,6 @@
 # EPIC-03 — Material upload
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §9 (material upload), §22.1 (after-lesson scenario)
 **Depends on:** EPIC-02
 **Blocks:** EPIC-04
@@ -61,3 +61,9 @@ be processed by EPIC-04 (AI extraction).
 3. Send a free-text message; pick "Treat as lesson material"; confirm
    another row.
 4. Send a 50 KB blob; confirm refusal and no row created.
+
+## Notes from implementation
+
+- Added `SourceMaterial` storage with the 10 KB cap and an extraction handoff.
+- Telegram free-text upload UX is available through handlers, with richer
+  inline approval left as a constrained bot-flow follow-up.

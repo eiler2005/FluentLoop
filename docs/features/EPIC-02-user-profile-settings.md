@@ -1,6 +1,6 @@
 # EPIC-02 — User profile and settings
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §8 (profile fields), §22 (scenarios), §21 (`/settings`)
 **Depends on:** EPIC-01
 **Blocks:** EPIC-07, EPIC-08
@@ -61,3 +61,10 @@ via `/settings`.
 3. Change reminder time to `20:30`; `/settings` shows `20:30`.
 4. Set timezone to `Europe/Berlin`; `/settings` confirms.
 5. Restart container; settings persist.
+
+## Notes from implementation
+
+- Implemented persistent user defaults and validated setting updates through
+  service functions used by the bot handlers.
+- Full inline keyboard editing is represented by handler/service seams; tests
+  cover validation and persistence.

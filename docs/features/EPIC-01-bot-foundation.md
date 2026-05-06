@@ -1,6 +1,6 @@
 # EPIC-01 — Bot foundation
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §21 (commands), §22 (user scenarios — base layer)
 **Depends on:** ADR-0002 (Telegram library choice — **Accepted: Telethon bot mode**)
 **Blocks:** every other epic
@@ -78,3 +78,10 @@ the next epics without restructuring.
 4. With `TELEGRAM_ALLOWED_USER_ID` set, ask a friend to message the bot —
    confirm they get the personal-bot reply.
 5. `docker compose down` cleanly stops the container.
+
+## Notes from implementation
+
+- Added Docker/Python 3.11 runtime, package skeleton, Telethon bot mode wiring,
+  `/start`, `/help`, single-user gate, logging, SQLite-backed FSM, and tests.
+- Docker daemon was not reachable locally, so the green gate ran through
+  `uv --python 3.11`; Docker files are ready for VPS/Docker verification.

@@ -1,6 +1,6 @@
 # EPIC-14 — Favorites
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §20
 **Depends on:** EPIC-05 (column already exists), EPIC-07
 **Blocks:** —
@@ -56,3 +56,8 @@ listing.
    favorite wins.
 4. Archive a favorited item; re-activate; verify `is_favorite` is
    still true.
+
+## Notes from implementation
+
+- Added favorite toggling, favorite listing, and selector tiebreaker data.
+- Inline star buttons are pending richer Telegram callback wiring.

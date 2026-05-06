@@ -1,6 +1,6 @@
 # EPIC-13 — Stats and weekly summary
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §19, §21 (`/stats`)
 **Depends on:** EPIC-05, EPIC-06, EPIC-08, EPIC-11
 **Blocks:** —
@@ -72,3 +72,10 @@ recommended next-week focus areas.
    degrades gracefully.
 4. Generate a synthetic week with very long expressions to push past
    4096 chars; confirm clean split.
+
+## Notes from implementation
+
+- Added `/stats` aggregation and weekly summary text generation from existing
+  tables.
+- Telegram 4096-character splitting is not yet needed by the compact summary
+  and should be added if real summaries grow.

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fluentloop"
+version = "0.1.0"
+description = "Personal Telegram bot for B2+/C1 English practice"
+requires-python = ">=3.11"
+dependencies = [
+  "telethon==1.36.0",
+  "apscheduler==3.10.4",
+  "python-dotenv==1.0.1",
+  "pytz==2024.1",
+  "sqlalchemy>=2.0",
+  "alembic>=1.13",
+  "openai>=1.40.0",
+  "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.5",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008"]
+

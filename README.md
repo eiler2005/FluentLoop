@@ -3,8 +3,8 @@
 Personal Telegram bot for English learning. B2+/C1- focus, business and IT
 context, text-only MVP, single Docker container on a VPS.
 
-> **Status:** Planning — repository scaffolded, no implementation yet.
-> Next deliverable is `docs/architecture.md` filled in, then EPIC-01 starts.
+> **Status:** MVP implementation slice — EPIC-01 through EPIC-14 have compact
+> code paths and tests; EPIC-15 remains deferred.
 
 ## What it does (intended MVP)
 

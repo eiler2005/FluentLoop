@@ -1,6 +1,6 @@
 # EPIC-09 — Exercise types
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §15.1–15.6, §27 (example UX)
 **Depends on:** EPIC-05
 **Blocks:** EPIC-07 (consumes the type registry), EPIC-10
@@ -69,3 +69,8 @@ composing a session; EPIC-10 checks answers.
    `render` and `parse_answer` callable attributes.
 3. Re-run PRD §27 example through the pipeline — expected feedback
    matches the PRD example shape.
+
+## Notes from implementation
+
+- Added all six exercise types as a registry with renderers, answer semantics,
+  pretty names, and target item-kind hints.

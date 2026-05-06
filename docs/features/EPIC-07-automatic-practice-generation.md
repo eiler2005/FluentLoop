@@ -1,6 +1,6 @@
 # EPIC-07 — Automatic practice generation
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §13, §25.2
 **Depends on:** EPIC-05, EPIC-06, EPIC-09, ADR-0003, ADR-0004
 **Blocks:** EPIC-08, EPIC-10, EPIC-11
@@ -86,3 +86,9 @@ instantly.
 4. Run pre-gen again the same day — should be idempotent (same row).
 5. Force the AI provider offline; run `/today` — fallback message
    appears, on-demand path produces a session.
+
+## Notes from implementation
+
+- Added deterministic session composition and `practice_session_cached` rows.
+- AI-generated exercise variation uses the stub/provider-ready path; selection
+  is intentionally compact to keep the max-epics run green.

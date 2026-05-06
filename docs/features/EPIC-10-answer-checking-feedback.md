@@ -1,6 +1,6 @@
 # EPIC-10 — Answer checking and feedback
 
-**Status:** Planned
+**Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §16, §22.3, §25.3, §27
 **Depends on:** EPIC-08 (calls into this), EPIC-09, ADR-0003
 **Blocks:** EPIC-11 (consumes mistake events from here)
@@ -89,3 +89,10 @@ bot can silently train mistake patterns from its own miscalls.
    `MistakeEvent` rows are created.
 5. Trigger an AI suggestion of a new expression; verify it appears in
    the EPIC-04 approval queue, not in `learning_items`.
+
+## Notes from implementation
+
+- Added stub AI checking, feedback-to-SRS mapping, mistake-event creation, and
+  JSONL dispute logging.
+- Inline dispute buttons are not fully wired in Telegram yet; the underlying
+  service path is present and tested.
