@@ -10,6 +10,7 @@ from fluentloop.bot.handlers import (
     handle_add_text,
     handle_answer,
     handle_approve_all,
+    handle_favorite_toggle,
     handle_favorites,
     handle_help,
     handle_mistake_action,
@@ -111,6 +112,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = handle_mistakes(session, user)
             elif command == "/favorites":
                 reply = handle_favorites(session, user)
+            elif command == "/favorite":
+                if len(parts) < 2:
+                    reply = BotReply("Use /favorite <item_id>.")
+                else:
+                    try:
+                        item_id = int(parts[1])
+                    except ValueError:
+                        reply = BotReply("Use /favorite <item_id>.")
+                    else:
+                        reply = handle_favorite_toggle(session, user, item_id)
             elif command == "/rules":
                 reply = handle_rules(session)
             else:

@@ -80,3 +80,4 @@ points for `is_favorite`, `status`, and tagging.
   manual item creation. Duplicate UI is still conservative: service returns
   the existing row; explicit merge/keep-separate remains a UX expansion.
 - Invalid `/add` payloads now return friendly Telegram errors.
+- Add confirmations now include item ids so later commands can target items.

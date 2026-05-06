@@ -17,7 +17,7 @@ from fluentloop.db.models import User
 from fluentloop.exercises import EXERCISE_TYPES
 from fluentloop.feedback import apply_feedback, check_answer
 from fluentloop.grammar import seed_concepts
-from fluentloop.learning import create_learning_item, favorite_items
+from fluentloop.learning import create_learning_item, favorite_items, toggle_favorite
 from fluentloop.materials import approve_all, extract_candidates, store_material
 from fluentloop.mistakes import active_patterns, archive_pattern, promote_pattern
 from fluentloop.practice import (
@@ -91,7 +91,7 @@ def handle_add(
         )
     except ValueError as exc:
         return BotReply(f"Could not add item: {exc}")
-    return BotReply(f"Added {item.type}: {item.text}")
+    return BotReply(f"Added #{item.id} {item.type}: {item.text}")
 
 
 def parse_add_payload(raw: str) -> tuple[str, str, str, list[str]]:
@@ -223,7 +223,20 @@ def handle_favorites(session: Session, user: User) -> BotReply:
     items = favorite_items(session, user.id)
     if not items:
         return BotReply("No favorites yet.")
-    return BotReply("Favorites\n" + "\n".join(f"- {item.text}" for item in items))
+    return BotReply(
+        "Favorites\n" + "\n".join(f"- #{item.id} {item.text}" for item in items)
+    )
+
+
+def handle_favorite_toggle(session: Session, user: User, item_id: int) -> BotReply:
+    from fluentloop.db.models import LearningItem
+
+    item = session.get(LearningItem, item_id)
+    if item is None or item.user_id != user.id:
+        return BotReply("Learning item not found.")
+    toggle_favorite(session, item)
+    marker = "favorite" if item.is_favorite else "not favorite"
+    return BotReply(f"Marked #{item.id} as {marker}: {item.text}")
 
 
 def handle_rules(session: Session) -> BotReply:
@@ -252,6 +265,7 @@ def command_catalog() -> list[str]:
         "/rules",
         "/stats",
         "/favorites",
+        "/favorite",
         "/settings",
         "/help",
     ]

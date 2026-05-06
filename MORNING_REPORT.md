@@ -73,6 +73,8 @@
   instead of crashing handler execution.
 - `/mistakes` now shows pattern ids and supports `/mistakes focus <id>` /
   `/mistakes ignore <id>` for promotion/archive.
+- `/favorite <item_id>` now toggles favorites from Telegram; add/list output
+  includes item ids.
 
 ## Recommended morning order of business
 

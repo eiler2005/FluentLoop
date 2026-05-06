@@ -16,6 +16,7 @@ HELP = """Commands
 /rules - show grammar concepts
 /stats - show progress
 /favorites - show favorite items
+/favorite <item_id> - toggle favorite on an item
 /settings - change settings
 /settings set reminder_time 20:30
 /help - show help"""

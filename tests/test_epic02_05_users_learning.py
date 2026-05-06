@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from fluentloop.bot.handlers import handle_add_text, parse_add_payload
+from fluentloop.bot.handlers import (
+    handle_add_text,
+    handle_favorite_toggle,
+    handle_favorites,
+    parse_add_payload,
+)
 from fluentloop.learning import create_learning_item, favorite_items, toggle_favorite
 from fluentloop.users import ensure_user, format_settings, update_setting
 
@@ -55,10 +60,19 @@ def test_add_text_payload_creates_item(db_session, settings) -> None:
         user,
         "expression | align on | согласовать | planning",
     )
-    assert "Added expression: align on" in reply.text
+    assert "Added #" in reply.text
+    assert "expression: align on" in reply.text
 
 
 def test_add_text_returns_friendly_error(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     reply = handle_add_text(db_session, user, "unknown | something")
     assert "Could not add item" in reply.text
+
+
+def test_favorite_toggle_command_flow(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(db_session, user, type_="expression", text="align on")
+    reply = handle_favorite_toggle(db_session, user, item.id)
+    assert "favorite" in reply.text
+    assert "#1" in handle_favorites(db_session, user).text
