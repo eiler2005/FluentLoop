@@ -1,0 +1,54 @@
+# --- Secrets & local config ---
+.env
+.env.*
+!.env.example
+secrets/
+*.session
+*.session-journal
+
+# --- Local user data (lesson notes, progress, AI outputs) ---
+data/
+state/
+reports/
+feedback_disputes/
+
+# --- Databases ---
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.tox/
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Build artefacts ---
+build/
+dist/
+*.egg
+
+# --- Docker volumes mounted locally ---
+.docker-data/
+
+# --- Claude Code: keep settings.json, ignore local overrides ---
+.claude/settings.local.json
+.claude/cache/

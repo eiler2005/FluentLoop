@@ -1,0 +1,1594 @@
+# PRD v0.2 — English Learning Companion Telegram Bot
+
+## 0. Purpose of this document
+
+This document describes the product requirements for a personal English-learning Telegram bot.
+
+The document is intended to be used by an LLM/Codex as a product specification. It describes what the product must do, why it exists, what is included in MVP, what is excluded, and what acceptance criteria should be satisfied.
+
+Architecture, deployment, Docker, VPS setup, database choice, framework choice, and infrastructure details should be described in a separate architecture document.
+
+---
+
+## 1. Product name
+
+**English Learning Companion**
+
+A personal Telegram bot that helps a B2+/C1- English learner consolidate school materials through short daily practice, active vocabulary usage, grammar/rules drills, immediate feedback, and mistake-based training.
+
+---
+
+## 2. Context
+
+The user attends an English school approximately 4 days per week. Lessons are mostly conversational and include business English, IT English, vocabulary, expressions, grammar rules, exercises, homework, and teacher feedback.
+
+The user already has enough learning input. The main problem is not lack of materials, but lack of systematic consolidation between lessons.
+
+The bot should help the user:
+
+- repeat new words and expressions;
+- activate phrases in business/IT contexts;
+- practice grammar rules through short drills;
+- receive immediate correction and explanation;
+- convert recurring mistakes into separate training items;
+- maintain regularity through daily Telegram reminders;
+- track progress and weak points over time.
+
+The bot is not intended to replace the English school. It should support the school process by converting lesson materials into structured personal practice.
+
+---
+
+## 3. Target user
+
+The MVP can be designed for one primary user.
+
+```text
+Level: B2+/C1-
+Main focus: business English, IT English, conversational English
+Schedule: English school 4 days per week
+Main goal: activate and retain lesson material
+Preferred channel: Telegram
+Preferred practice duration: approximately 15 minutes per day
+MVP format: text-first
+```
+
+Multi-user SaaS behavior is not required for MVP.
+
+---
+
+## 4. Product concept
+
+The core product loop:
+
+```text
+User uploads lesson material
+→ Bot extracts words, expressions, grammar rules, and mistakes
+→ User approves what should be added to learning storage
+→ Bot stores approved learning items
+→ Bot automatically generates daily practice based on progress, level, weak points, and due reviews
+→ User answers text exercises in Telegram
+→ Bot checks answers and explains mistakes
+→ Mistakes update progress and may become mistake patterns
+→ Mistake patterns are used in future practice
+```
+
+Important distinction:
+
+```text
+Adding new learning items from uploaded materials requires user confirmation.
+Generating exercises from already approved items, progress data, user level, weak points, and mistake history does not require confirmation.
+```
+
+---
+
+## 5. Product principles
+
+### 5.1. Learn from the user's own materials
+
+The bot should prioritize materials from the user's real English-learning process:
+
+- lesson notes;
+- word lists;
+- expressions/chunks;
+- homework;
+- teacher corrections;
+- grammar topics from school;
+- business/IT texts;
+- user mistakes.
+
+The MVP should not focus on importing generic content from the internet.
+
+### 5.2. Active production over passive recognition
+
+At B2+/C1-, simple flashcards are not enough. The bot should train active usage:
+
+- recall;
+- translation into English;
+- phrase production;
+- cloze exercises;
+- rewriting;
+- grammar correction;
+- business-style phrasing;
+- follow-up questions;
+- use of expressions in realistic IT/business situations.
+
+### 5.3. Mistakes become training
+
+A mistake should not end with a correction only. The bot should:
+
+1. correct the answer;
+2. explain the reason;
+3. classify the mistake type;
+4. connect the mistake to a grammar rule, expression, or concept;
+5. update progress;
+6. generate future practice based on this weak point.
+
+### 5.4. Business/IT context by default
+
+Examples and tasks should be relevant to the user's professional context:
+
+- meetings;
+- stakeholder communication;
+- product discussions;
+- architecture discussions;
+- sprint planning;
+- deadlines;
+- delivery risks;
+- incidents;
+- prioritization;
+- trade-offs;
+- risk mitigation;
+- status updates;
+- feedback;
+- negotiations.
+
+### 5.5. Automatic exercise generation is allowed
+
+The bot may automatically generate exercises without asking the user for confirmation before every exercise.
+
+Automatic exercise generation should be based on:
+
+- approved learning items;
+- user level;
+- business/IT focus;
+- due review schedule;
+- weak items;
+- mistake patterns;
+- favorite items;
+- recent lesson materials;
+- previous answer quality.
+
+The bot should not automatically add arbitrary new words, expressions, or grammar concepts from uploaded materials without user approval.
+
+---
+
+## 6. MVP scope
+
+MVP is a text-first Telegram bot.
+
+### P0 — required for MVP
+
+```text
+1. Telegram bot basics.
+2. Single-user profile.
+3. Settings: level, focus areas, reminder time, practice duration.
+4. Upload text lesson materials.
+5. AI extraction of words, expressions, grammar rules, and mistake patterns.
+6. User approval flow for adding extracted learning items.
+7. Manual adding of words, expressions, rules, and mistakes.
+8. Learning items storage.
+9. Spaced repetition state for items.
+10. Automatic daily practice generation from approved data.
+11. Daily practice session in Telegram.
+12. Exercise types:
+    - guess word/expression;
+    - translate phrase;
+    - cloze;
+    - grammar rewrite;
+    - error correction;
+    - follow-up question.
+13. Immediate answer checking and feedback.
+14. Mistake pattern tracking.
+15. Grammar/rules as connected concepts.
+16. Basic progress stats.
+17. Favorites / important items.
+```
+
+### P0.5 — optional MVP extension
+
+```text
+1. Lightweight web interface for managing learning content.
+2. View/edit/delete learning items.
+3. Approve extracted items in a web UI.
+4. View due items and weak items.
+5. View basic stats.
+6. Manually add words, expressions, grammar rules, and mistake patterns.
+```
+
+The web interface is allowed in MVP if it helps development and content management. It is not required for the first usable Telegram-only version.
+
+Telegram remains the primary interface for daily practice.
+
+### P1 — after MVP
+
+```text
+1. PDF import.
+2. Image/screenshot import.
+3. Telegram Mini App or richer web dashboard.
+4. Export to CSV/Anki.
+5. More advanced FSRS implementation.
+6. Lesson recap templates.
+7. Text role-play scenarios.
+8. More advanced weekly report.
+```
+
+### P2 — future
+
+```text
+1. Voice messages.
+2. Speech-to-text.
+3. Pronunciation feedback.
+4. Real-time voice dialogue.
+5. Full AI tutor with voice.
+6. Multi-user mode.
+7. Teacher/admin mode.
+8. LMS or school integrations.
+```
+
+---
+
+## 7. Non-goals for MVP
+
+The MVP should not include:
+
+```text
+1. Voice practice.
+2. Pronunciation scoring.
+3. Real-time voice dialogue.
+4. Full AI tutor with voice.
+5. Generic internet import as the main content source.
+6. Full English course from A1 to C1.
+7. Multi-user SaaS features.
+8. Complex admin panel.
+9. School LMS integration.
+10. Automatic activation of arbitrary newly extracted learning items without user approval.
+```
+
+Note: automatic exercise generation is not a non-goal. It is explicitly allowed when exercises are generated from approved learning items, user progress, user level, and weak points.
+
+---
+
+## 8. User profile
+
+The bot should store user settings.
+
+### Profile fields
+
+```text
+id
+telegram_user_id
+level: default B2+/C1-
+focus_areas: business, IT, conversational English, grammar, vocabulary
+explanation_language: Russian / English / mixed
+practice_duration_minutes: default 15
+reminder_time
+timezone
+school_days
+created_at
+updated_at
+```
+
+### Acceptance criteria
+
+```text
+Given the user starts the bot for the first time
+When the user sends /start
+Then the bot creates a profile and offers basic settings
+
+Given the user already has a profile
+When the user sends /settings
+Then the bot shows current settings and allows changing them
+```
+
+---
+
+## 9. Material upload
+
+The user should be able to send learning materials as text.
+
+### Supported MVP formats
+
+```text
+1. Plain text message.
+2. Word list.
+3. Expression list.
+4. Lesson notes.
+5. Homework text.
+6. Exercise text.
+7. Teacher feedback copied as text.
+```
+
+PDF, image, screenshot, and audio upload are not required for MVP.
+
+### Example flow
+
+```text
+User:
+Today we covered:
+- push back on
+- align on priorities
+- get buy-in
+- trade-off
+Grammar: hedging recommendations
+Mistake: I used "must" too directly in business context
+
+Bot:
+I found:
+
+Expressions:
+1. push back on
+2. align on priorities
+3. get buy-in
+4. trade-off
+
+Grammar rules:
+1. Hedging recommendations
+
+Mistake patterns:
+1. Too direct recommendations with "must"
+
+Add these to learning?
+[Add all] [Review one by one] [Skip]
+```
+
+### Acceptance criteria
+
+```text
+Given the user sends lesson material
+When the bot processes it
+Then the bot returns extracted words, expressions, grammar rules, and possible mistake patterns
+
+Given extracted items are shown
+When the user clicks Add all
+Then all extracted items become active learning items
+
+Given the user clicks Review one by one
+Then each extracted item can be added, edited, or skipped
+```
+
+---
+
+## 10. Learning items
+
+The system should support four main learning item types.
+
+```text
+1. Word
+2. Expression
+3. Grammar Rule
+4. Mistake Pattern
+```
+
+### 10.1. Word
+
+Example:
+
+```text
+Text: mitigate
+Meaning: смягчать, снижать риск
+Context: We need to mitigate the risk before the release.
+Tags: business, risk, IT
+Level: B2/C1
+```
+
+### 10.2. Expression
+
+Example:
+
+```text
+Text: push back on something
+Meaning: мягко возражать, не соглашаться
+Context: I’d like to push back on this proposal a bit.
+Tags: meetings, stakeholder communication
+Level: B2/C1
+```
+
+### 10.3. Grammar Rule
+
+Example:
+
+```text
+Title: Hedging recommendations
+Explanation:
+In business communication, direct recommendations can sound too strong.
+Use softer forms such as:
+- might need to
+- could consider
+- I’d suggest
+- it might be worth
+
+Too direct: We must change the architecture.
+Better: We might need to reconsider the architecture.
+```
+
+### 10.4. Mistake Pattern
+
+Example:
+
+```text
+Title: Too direct recommendations
+User mistake: We must change the architecture immediately.
+Correction: We might need to reconsider the architecture soon.
+Linked rule: Hedging recommendations
+Training types: rewrite, translate phrase, choose better option, follow-up question
+```
+
+---
+
+## 11. Grammar rules as a graph of concepts
+
+Grammar/rules should be stored as connected concepts rather than a flat list.
+
+Example:
+
+```text
+articles
+→ abstract nouns
+→ business collocations with zero article
+```
+
+Another example:
+
+```text
+modal verbs
+→ recommendations
+→ hedging in stakeholder communication
+```
+
+Another example:
+
+```text
+conditionals
+→ discussing risks
+→ discussing trade-offs with stakeholders
+```
+
+### Why this matters
+
+If the user makes mistakes in a narrow topic, the bot can connect that mistake to broader parent concepts and occasionally review the foundation.
+
+Example:
+
+```text
+Mistake:
+We need to get approval from managements.
+
+Linked concepts:
+nouns
+→ countable / uncountable nouns
+→ collective nouns
+→ business nouns
+```
+
+### Acceptance criteria
+
+```text
+Given a grammar rule exists
+When it is stored
+Then it can have parent concepts and child concepts
+
+Given the user repeatedly fails a child concept
+When the bot generates practice
+Then it may include a short exercise from the parent concept
+```
+
+---
+
+## 12. Spaced repetition
+
+The bot should plan reviews for words, expressions, grammar rules, and mistake patterns.
+
+### Reviewable item types
+
+```text
+1. Words
+2. Expressions
+3. Grammar rules
+4. Mistake patterns
+```
+
+### Review result options
+
+```text
+Again
+Hard
+Good
+Easy
+```
+
+For MVP, the implementation may use a simple interval-based algorithm. It should be possible to replace or upgrade it later with a more advanced FSRS-like algorithm.
+
+### Example MVP intervals
+
+```text
+Again: same day / very soon
+Hard: next day
+Good: in 3 days
+Easy: in 7 days
+```
+
+Intervals should grow over time when the user performs well.
+
+### Acceptance criteria
+
+```text
+Given a learning item is added
+When it becomes active
+Then it receives a review state and next_review_at
+
+Given the user answers correctly
+When the result is Good or Easy
+Then next_review_at is moved further into the future
+
+Given the user answers incorrectly
+When the result is Again or Hard
+Then next_review_at is scheduled sooner and priority increases
+```
+
+---
+
+## 13. Automatic practice generation
+
+The bot should generate practice sessions automatically.
+
+The user should not need to confirm every generated exercise.
+
+### Input signals for generation
+
+```text
+1. User level.
+2. Focus areas.
+3. Due review items.
+4. Weak items.
+5. Favorite items.
+6. Recent lesson materials.
+7. Recent mistakes.
+8. Active mistake patterns.
+9. Active grammar rules.
+10. Previous answer quality.
+```
+
+### Item priority rules
+
+When generating daily practice, the bot should prioritize:
+
+```text
+1. Due or overdue items.
+2. Weak expressions and words.
+3. Active mistake patterns.
+4. Grammar rules connected to recent mistakes.
+5. Recently added lesson items.
+6. Favorite items.
+7. Business/IT relevance.
+```
+
+### Exercise mix
+
+A typical daily session should include a mix of:
+
+```text
+1. Word/expression review.
+2. Translation into English.
+3. Cloze exercise.
+4. Grammar rewrite.
+5. Error correction.
+6. Business/IT follow-up question.
+7. Mistake-based exercise.
+```
+
+### Safety rule
+
+The bot may generate exercises freely from approved data, but it should not silently create new active learning items from hallucinated or unapproved content.
+
+If the AI discovers a potentially useful new phrase during feedback, it can suggest it as a candidate:
+
+```text
+Suggested new expression:
+"gently push back on"
+
+Add to learning?
+[Add] [Skip]
+```
+
+### Acceptance criteria
+
+```text
+Given the user has approved learning items and progress history
+When /today is triggered
+Then the bot automatically creates a practice session without asking for exercise-level confirmation
+
+Given the user has weak items
+When practice is generated
+Then weak items receive higher priority
+
+Given the user has recurring mistakes
+When practice is generated
+Then at least one mistake-based exercise should be included when appropriate
+
+Given the AI suggests a new learning item not already approved
+When it wants to add it to long-term storage
+Then the user must be asked for approval
+```
+
+---
+
+## 14. Daily practice
+
+The daily session should take approximately 15 minutes.
+
+### Example daily session
+
+```text
+Today’s English practice — 15 min
+
+Exercise 1/7
+Guess the expression:
+"to disagree with an idea in a polite but clear way"
+
+Exercise 2/7
+Translate into English:
+"Нам нужно согласовать приоритеты до начала спринта."
+
+Exercise 3/7
+Fill in the gap:
+We need to ___ the risk before the release.
+
+Exercise 4/7
+Rewrite this sentence in a more diplomatic business style:
+"We must change the architecture immediately."
+
+Exercise 5/7
+Correct the sentence:
+"We need approval from managements."
+
+Exercise 6/7
+Business follow-up:
+You are in a meeting with a product manager.
+Explain why the current approach is risky.
+Use: trade-off, mitigate, align on.
+```
+
+### Acceptance criteria
+
+```text
+Given there are due items
+When the reminder time comes
+Then the bot sends a daily practice invitation
+
+Given the user starts the session
+When exercises are due
+Then the bot sends exercises one by one
+
+Given the user completes the session
+When all exercises are finished
+Then the bot shows a short summary and updates progress
+```
+
+---
+
+## 15. Exercise types
+
+### 15.1. Guess word/expression
+
+```text
+Bot:
+Guess the expression:
+"to politely disagree with a proposal or idea"
+
+User:
+push back on
+
+Bot:
+Correct.
+Example:
+I’d like to push back on this proposal a bit.
+```
+
+### 15.2. Translate phrase
+
+```text
+Bot:
+Translate into English:
+"Нам нужно согласовать приоритеты до демо."
+
+User:
+We need to align priorities before the demo.
+
+Bot:
+Good, but more natural:
+We need to align on priorities before the demo.
+
+Explanation:
+"Align on something" is a common business collocation.
+```
+
+### 15.3. Cloze exercise
+
+```text
+Bot:
+Fill in the gap:
+We need to ___ the risk before the release.
+
+User:
+mitigate
+
+Bot:
+Correct.
+```
+
+### 15.4. Grammar rewrite
+
+```text
+Bot:
+Rewrite this sentence in a more diplomatic business style:
+"We must change the architecture immediately."
+
+User:
+I think we might need to reconsider the architecture soon.
+
+Bot:
+Great.
+You softened the recommendation using "might need to".
+```
+
+### 15.5. Error correction
+
+```text
+Bot:
+Correct the sentence:
+"We need to get approval from managements."
+
+User:
+We need to get approval from management.
+
+Bot:
+Correct.
+Explanation:
+"Management" is usually used as an uncountable collective noun in this context.
+```
+
+### 15.6. Follow-up question
+
+```text
+Bot:
+You are discussing a delayed feature with a product manager.
+Explain the trade-off between speed and quality.
+Use at least two expressions:
+- push back on
+- align on
+- mitigate
+
+User:
+I’d push back on releasing it this week because we haven’t mitigated the main risks yet. We should align on the priorities first.
+
+Bot:
+Good answer.
+
+More natural:
+I’d gently push back on releasing it this week because we haven’t mitigated the main risks yet. We should align on priorities first.
+```
+
+---
+
+## 16. Immediate feedback
+
+After each answer, the bot should give feedback.
+
+### Feedback should include
+
+```text
+1. Status: correct / partially correct / incorrect.
+2. Corrected version.
+3. More natural version, if needed.
+4. Short explanation.
+5. Related expression or grammar rule.
+6. Detected mistake type, if any.
+7. Suggestion to add a new item, if useful.
+```
+
+### Example
+
+```text
+User:
+We must change the architecture immediately.
+
+Bot:
+Grammatically correct, but too direct for a business meeting.
+
+Better:
+We might need to reconsider the architecture soon.
+
+Why:
+"Must" can sound too strong. In stakeholder communication, it is often better to hedge recommendations with:
+- might need to
+- could consider
+- I’d suggest
+
+Linked rule:
+Hedging recommendations
+
+I’ll add this as a weak point for future practice.
+```
+
+---
+
+## 17. Mistake-based training
+
+The bot should track mistakes and generate practice based on them.
+
+### Mistake event
+
+Every time the user makes a meaningful error, the bot may store a mistake event.
+
+A mistake event can include:
+
+```text
+wrong_answer
+corrected_answer
+explanation
+mistake_type
+linked_learning_item_id
+linked_grammar_concept_id
+created_at
+```
+
+### Mistake pattern
+
+If similar mistakes repeat, the bot should create or update a mistake pattern.
+
+Example:
+
+```text
+Title: Too direct recommendations in business context
+
+Detected examples:
+- We must change the architecture immediately.
+- You must fix it today.
+
+Better alternatives:
+- We might need to reconsider the architecture.
+- It might be worth fixing this today.
+- I’d suggest we look into this today.
+
+Linked rule:
+Hedging recommendations
+
+Training types:
+- rewrite;
+- choose better option;
+- translate phrase;
+- follow-up question.
+```
+
+### Confirmation behavior
+
+For MVP, the bot may automatically log mistake events.
+
+The bot may automatically create or update a mistake pattern when:
+
+```text
+1. Similar mistakes occur repeatedly.
+2. The confidence is high.
+3. The pattern is linked to a known grammar rule or expression.
+```
+
+If confidence is low, the bot should ask the user before adding a new active mistake pattern.
+
+### Acceptance criteria
+
+```text
+Given the user makes a mistake
+When the bot detects it
+Then the bot stores a mistake event and gives feedback
+
+Given similar mistakes repeat
+When the bot identifies a recurring pattern
+Then it creates or updates a mistake pattern
+
+Given a mistake pattern is active
+When daily practice is generated
+Then the bot can include exercises targeting that mistake pattern
+```
+
+---
+
+## 18. Rules practice
+
+The bot should train precise rules relevant to B2+/C1- business and IT English.
+
+### Priority rule examples
+
+```text
+1. Articles in abstract business language.
+2. Zero article in business collocations.
+3. Hedging in stakeholder communication.
+4. Conditionals for discussing risks.
+5. Reported speech in meetings.
+6. Modal verbs for recommendations.
+7. Phrasal verbs in business context.
+8. Countable / uncountable business nouns.
+9. More diplomatic phrasing.
+10. Natural collocations in IT discussions.
+```
+
+### Example rule
+
+```text
+Rule:
+Hedging in stakeholder communication
+
+Short explanation:
+In business English, direct statements can sound too strong.
+Use softer structures when giving recommendations.
+
+Patterns:
+- We must... → We might need to...
+- You should... → It might be worth...
+- This is wrong... → One concern is...
+
+Exercise:
+Rewrite:
+"You should change the deadline."
+```
+
+---
+
+## 19. Progress memory
+
+The bot should track progress over time.
+
+### Metrics
+
+```text
+1. Total words added.
+2. Total expressions added.
+3. Active words.
+4. Active expressions.
+5. Grammar rules in progress.
+6. Active mistake patterns.
+7. Completed sessions.
+8. Skipped sessions.
+9. Weak items.
+10. Due items.
+11. Favorite items.
+12. Last practiced date.
+```
+
+### Weekly report
+
+The bot should send a weekly report.
+
+Example:
+
+```text
+Weekly English Summary
+
+This week:
+- New expressions: 18
+- Practiced items: 64
+- Weak expressions: 5
+- Grammar focus: hedging, articles, conditionals
+- Recurring mistake: too direct recommendations
+
+Recommended focus next week:
+1. Hedging in meetings
+2. Articles with abstract business nouns
+3. Expressions for pushing back politely
+```
+
+---
+
+## 20. Favorites / important items
+
+The user should be able to mark items as important.
+
+Examples:
+
+```text
+- get buy-in
+- align on priorities
+- push back on
+- single source of truth
+- trade-off
+- mitigate risk
+- follow up with
+- keep stakeholders in the loop
+```
+
+### Acceptance criteria
+
+```text
+Given a learning item exists
+When the user marks it as Favorite
+Then the item receives an is_favorite flag
+
+Given an item is favorite
+When practice is generated
+Then the item may receive higher priority
+```
+
+---
+
+## 21. Telegram commands
+
+### Required commands
+
+```text
+/start
+Create or load user profile.
+
+/today
+Start today’s practice session.
+
+/review
+Review due items.
+
+/add
+Manually add a word, expression, grammar rule, or mistake.
+
+/upload
+Upload lesson material for extraction.
+
+/mistakes
+Show active mistake patterns.
+
+/rules
+Show grammar rules and weak rules.
+
+/stats
+Show progress.
+
+/settings
+Change settings.
+
+/help
+Show help.
+```
+
+---
+
+## 22. Main user scenarios
+
+### 22.1. After lesson
+
+```text
+1. User sends /upload.
+2. Bot asks for lesson materials.
+3. User sends text.
+4. Bot extracts words, expressions, grammar rules, and possible mistake patterns.
+5. User approves items.
+6. Bot stores approved items.
+7. Bot schedules them for future practice.
+```
+
+### 22.2. Daily practice
+
+```text
+1. At reminder time, the bot sends a practice invitation.
+2. User starts the session.
+3. Bot automatically generates exercises from approved data and progress history.
+4. Bot sends exercises one by one.
+5. User answers in text.
+6. Bot checks answers.
+7. Bot explains mistakes.
+8. Bot updates review states and progress.
+9. Bot shows a session summary.
+```
+
+### 22.3. Mistake becomes training
+
+```text
+1. User makes a mistake.
+2. Bot corrects the answer.
+3. Bot explains the rule.
+4. Bot logs a mistake event.
+5. Similar mistakes repeat.
+6. Bot creates or updates a mistake pattern.
+7. Future sessions include exercises for this mistake pattern.
+```
+
+### 22.4. Grammar concept practice
+
+```text
+1. Bot sees repeated mistakes with hedging.
+2. Bot selects the rule: Hedging recommendations.
+3. Bot gives a short explanation.
+4. Bot generates rewrite exercises.
+5. User answers.
+6. Bot updates rule review state.
+```
+
+### 22.5. Web interface usage, optional MVP extension
+
+```text
+1. User opens web interface.
+2. User sees learning items, due items, weak items, and stats.
+3. User edits or deletes items.
+4. User approves extracted items more comfortably than in Telegram chat.
+5. User returns to Telegram for daily practice.
+```
+
+---
+
+## 23. Lightweight web interface — optional MVP extension
+
+A lightweight web interface may be included in MVP if it improves usability.
+
+The web interface is not a replacement for Telegram practice. Its purpose is content management and visibility.
+
+### Web UI MVP features
+
+```text
+1. List learning items.
+2. Filter by type: word, expression, grammar rule, mistake pattern.
+3. Filter by tag, status, due, weak, favorite.
+4. View item details.
+5. Edit item.
+6. Delete or archive item.
+7. Mark item as favorite.
+8. Approve extracted candidate items.
+9. View basic stats.
+10. Manually create items.
+```
+
+### Web UI non-goals for MVP
+
+```text
+1. Complex design system.
+2. Multi-user admin panel.
+3. Teacher mode.
+4. Complex analytics.
+5. Real-time chat in web UI.
+```
+
+### Acceptance criteria
+
+```text
+Given the web UI is enabled
+When the user opens it
+Then the user can view existing learning items
+
+Given the user edits an item in web UI
+When the change is saved
+Then Telegram practice uses the updated item data
+
+Given extracted candidate items exist
+When the user opens the approval page
+Then the user can approve, edit, or skip them
+```
+
+---
+
+## 24. High-level data entities
+
+This is not a final database schema. It describes product-level entities.
+
+### User
+
+```text
+id
+telegram_user_id
+level
+focus_areas
+timezone
+reminder_time
+practice_duration_minutes
+created_at
+updated_at
+```
+
+### SourceMaterial
+
+```text
+id
+user_id
+type
+raw_text
+summary
+created_at
+```
+
+### ExtractedCandidate
+
+```text
+id
+source_material_id
+type: word | expression | grammar_rule | mistake_pattern
+text
+meaning
+explanation
+examples
+tags
+confidence
+status: pending | approved | skipped | edited
+created_at
+updated_at
+```
+
+### LearningItem
+
+```text
+id
+user_id
+type: word | expression | grammar_rule | mistake_pattern
+text
+meaning_ru
+explanation
+examples
+tags
+level
+source_material_id
+is_favorite
+status: active | archived | suspended
+created_at
+updated_at
+```
+
+### GrammarConcept
+
+```text
+id
+title
+description
+parent_ids
+child_ids
+examples
+created_at
+updated_at
+```
+
+### MistakeEvent
+
+```text
+id
+user_id
+wrong_answer
+corrected_answer
+explanation
+mistake_type
+linked_learning_item_id
+linked_grammar_concept_id
+created_at
+```
+
+### MistakePattern
+
+```text
+id
+user_id
+title
+description
+wrong_examples
+correct_examples
+linked_grammar_concept_id
+linked_learning_item_ids
+status
+created_at
+updated_at
+```
+
+### ReviewState
+
+```text
+id
+learning_item_id
+due_at
+last_reviewed_at
+review_count
+success_count
+fail_count
+difficulty
+stability
+last_result: again | hard | good | easy
+created_at
+updated_at
+```
+
+### PracticeSession
+
+```text
+id
+user_id
+type: daily | review | grammar | mistake_based
+started_at
+completed_at
+status
+summary
+created_at
+updated_at
+```
+
+### PracticeAttempt
+
+```text
+id
+practice_session_id
+learning_item_id
+exercise_type
+prompt
+user_answer
+correct_answer
+feedback
+score
+created_at
+```
+
+---
+
+## 25. AI requirements
+
+The bot may use AI for extraction, exercise generation, and answer checking.
+
+### 25.1. AI extraction from materials
+
+Input:
+
+```text
+raw lesson material
+user level
+focus areas
+```
+
+Expected output:
+
+```json
+{
+  "summary": "",
+  "words": [],
+  "expressions": [],
+  "grammar_rules": [],
+  "mistake_patterns": [],
+  "suggested_tags": []
+}
+```
+
+The extracted items should become candidates. They should not become active learning items until approved by the user.
+
+### 25.2. AI exercise generation
+
+Input:
+
+```text
+learning item
+item type
+user level
+focus areas
+progress state
+weakness state
+exercise type
+business/IT context
+```
+
+Expected output:
+
+```json
+{
+  "exercise_type": "",
+  "prompt": "",
+  "expected_answer": "",
+  "hint": "",
+  "explanation": "",
+  "target_learning_item_ids": []
+}
+```
+
+Exercise generation can be automatic and does not require user confirmation.
+
+### 25.3. AI answer checking
+
+Input:
+
+```text
+exercise prompt
+expected answer or target item
+user answer
+user level
+business/IT context
+```
+
+Expected output:
+
+```json
+{
+  "status": "correct | partially_correct | incorrect",
+  "corrected_answer": "",
+  "natural_answer": "",
+  "explanation_ru": "",
+  "related_rule": "",
+  "detected_mistake_type": "",
+  "should_create_mistake_event": true,
+  "should_create_or_update_mistake_pattern": false
+}
+```
+
+---
+
+## 26. MVP success criteria
+
+MVP is successful if:
+
+```text
+1. User can upload text materials after a lesson.
+2. Bot extracts useful words, expressions, rules, and mistakes.
+3. User can approve extracted learning items.
+4. Bot stores approved items.
+5. Bot automatically generates daily practice based on progress, level, and weak points.
+6. User can complete daily practice in Telegram.
+7. Bot checks answers and explains mistakes.
+8. Mistakes are logged.
+9. Recurring mistakes become mistake patterns.
+10. Mistake patterns appear in future exercises.
+11. Words and expressions are reviewed according to schedule.
+12. User can view basic progress.
+13. Optional: user can manage items through a lightweight web interface.
+```
+
+---
+
+## 27. Example ideal MVP UX
+
+### Example 1 — expression review
+
+```text
+Bot:
+Today’s English practice — 15 min
+
+Exercise 1/7
+Guess the expression:
+"to politely disagree with an idea or proposal"
+
+User:
+push back
+
+Bot:
+Almost.
+Better:
+push back on something
+
+Example:
+I’d like to push back on this proposal a bit.
+
+Result: Good
+Next review: in 3 days
+```
+
+### Example 2 — translation and natural collocation
+
+```text
+Bot:
+Exercise 2/7
+Translate into English:
+"Нам нужно согласовать приоритеты до начала спринта."
+
+User:
+We need to align priorities before sprint starts.
+
+Bot:
+Good meaning, but more natural:
+We need to align on priorities before the sprint starts.
+
+Notes:
+1. "align on priorities" is the natural collocation.
+2. Use "the sprint" if you mean a specific sprint.
+
+Weak points updated:
+- align on something
+- articles with specific project events
+```
+
+### Example 3 — hedging
+
+```text
+Bot:
+Exercise 3/7
+Rewrite this sentence in a more diplomatic business style:
+"We must change the architecture immediately."
+
+User:
+We might need to reconsider the architecture soon.
+
+Bot:
+Great.
+
+Why it works:
+"might need to" softens the recommendation.
+This is useful in stakeholder communication.
+
+Linked rule:
+Hedging recommendations
+```
+
+---
+
+## 28. Product backlog
+
+```text
+EPIC 1: Telegram Bot Foundation
+EPIC 2: User Profile and Settings
+EPIC 3: Material Upload
+EPIC 4: AI Extraction and Candidate Approval
+EPIC 5: Learning Items
+EPIC 6: Spaced Repetition
+EPIC 7: Automatic Practice Generation
+EPIC 8: Daily Practice in Telegram
+EPIC 9: Exercise Types
+EPIC 10: Answer Checking and Feedback
+EPIC 11: Mistake Events and Mistake Patterns
+EPIC 12: Grammar Rules Graph
+EPIC 13: Stats and Weekly Summary
+EPIC 14: Favorites
+EPIC 15: Optional Lightweight Web Interface
+```
+
+---
+
+## 29. What should be moved to a separate architecture document
+
+Do not decide these details in the PRD. They belong to the architecture document:
+
+```text
+1. Docker container on VPS.
+2. Backend framework.
+3. Telegram Bot API library.
+4. Database choice.
+5. Background scheduler.
+6. AI provider and model choice.
+7. Prompt structure.
+8. Secrets management.
+9. Backups.
+10. Logging.
+11. Deployment process.
+12. Monitoring.
+13. Web UI framework.
+14. Authentication for web UI.
+```
+
+The expected MVP architecture direction can be summarized separately as:
+
+```text
+One small personal app deployed as one Docker container on the user's VPS.
+Telegram is the main interface.
+A lightweight web interface may be added later or as an optional MVP extension.
+```
+
+---
+
+## 30. Short instruction for Codex / implementation LLM
+
+```text
+Build a personal text-first Telegram bot for English learning.
+
+The bot helps a B2+/C1- user practice business and IT English using the user's own lesson materials.
+
+Do not implement voice features in MVP.
+
+Core MVP flow:
+1. User uploads lesson notes or word/expression lists.
+2. Bot extracts words, expressions, grammar rules, and mistake patterns.
+3. Extracted items are shown as candidates.
+4. User approves what should become active learning items.
+5. Bot stores approved items.
+6. Bot schedules items for spaced repetition.
+7. Bot automatically generates a daily 15-minute practice session based on user level, progress, weak points, due items, favorite items, and mistake patterns.
+8. Exercise generation from approved data does not require confirmation.
+9. Adding new active learning items from uploaded materials requires confirmation.
+10. Practice includes guess word/expression, translate phrase, cloze, grammar rewrite, error correction, and business/IT follow-up questions.
+11. Bot checks answers, gives corrections, explains mistakes, and updates review state.
+12. Mistakes are logged as mistake events.
+13. Recurring mistakes become mistake patterns and appear in future practice.
+14. Grammar rules can be connected as a graph of concepts.
+15. Bot tracks progress, weak items, favorites, due reviews, and basic stats.
+16. Optional MVP extension: lightweight web interface for managing items, approving candidates, and viewing stats.
+
+Focus all examples on business English, IT English, meetings, stakeholder communication, architecture discussions, product discussions, risks, trade-offs, prioritization, and delivery.
+```

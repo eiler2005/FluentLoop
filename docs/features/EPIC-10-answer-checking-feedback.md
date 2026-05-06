@@ -1,0 +1,91 @@
+# EPIC-10 — Answer checking and feedback
+
+**Status:** Planned
+**PRD references:** §16, §22.3, §25.3, §27
+**Depends on:** EPIC-08 (calls into this), EPIC-09, ADR-0003
+**Blocks:** EPIC-11 (consumes mistake events from here)
+
+## Goal
+
+When the user answers an exercise, the bot judges the answer, returns
+structured feedback, updates the spaced-repetition state (EPIC-06), and
+optionally logs a mistake event (EPIC-11). The user must be able to
+override the AI verdict and dispute bad feedback — without that loop, the
+bot can silently train mistake patterns from its own miscalls.
+
+## In scope
+
+- AI checking call per PRD §25.3 schema: `status` (correct / partial /
+  incorrect), `corrected_answer`, `natural_answer`, `explanation`,
+  `related_rule`, `detected_mistake_type`, `should_create_mistake_event`,
+  `should_create_or_update_mistake_pattern`.
+- Light tier (per ADR-0003) for cloze / exact-match types; heavy tier
+  for grammar rewrite / follow-up / "more natural" suggestions.
+- Format the feedback in chat as in PRD §16: status, corrected,
+  natural, explanation, related rule, "I'll add this as a weak point"
+  hint when applicable.
+- **User override** of the AI verdict: every feedback message has inline
+  buttons `[Got it]` and `[I disagree]`. `[I disagree]` opens a small
+  flow: pick a reason (`AI was wrong`, `Stylistic, not an error`,
+  `Mine was equally valid`, `Other`) and optionally type a note.
+- **Dispute log:** every `[I disagree]` writes to
+  `feedback_disputes/YYYY-MM-DD.jsonl` with the original prompt, the
+  user's answer, the AI verdict, and the user's reason. This file is
+  gitignored per `data/` policy.
+- **Difficulty override:** the user may also tap `[Hard]` on a verdict
+  the AI marked `correct` to indicate the answer cost effort. EPIC-06
+  uses this to advance the schedule less aggressively.
+- Trigger EPIC-06 `record_result(item_id, "Again"|"Hard"|"Good"|"Easy")`
+  with the final (post-override) result.
+- When `should_create_mistake_event=true`, write a `MistakeEvent` for
+  EPIC-11 to consume.
+- When the AI suggests a *new* candidate item ("gently push back on"),
+  surface it as a candidate via the EPIC-04 approval flow — never
+  auto-add.
+
+## Out of scope
+
+- Re-judging old answers after the AI is upgraded — defer.
+- Showing the dispute log inside Telegram — log lives on disk for now.
+- Per-user tunable strictness — defer.
+
+## Acceptance criteria
+
+- After every answer, the user sees a feedback message within ~3
+  seconds (light tier) / ~6 seconds (heavy tier).
+- The five-field structure from PRD §16 is present whenever applicable.
+- `[Got it]` accepts the AI verdict; `[I disagree]` opens the reason
+  picker and writes to the dispute log.
+- `[Hard]` on a "correct" verdict downgrades to `Hard` for SRS purposes.
+- A `MistakeEvent` is created exactly when the (post-override) result
+  is `Again` or the AI's `should_create_mistake_event=true` AND the
+  user did not dispute.
+- Disputed answers do **not** trigger a `MistakeEvent` (avoid training
+  on AI miscalls).
+- Suggested-new-candidate flow goes through EPIC-04 — no silent auto-
+  adds.
+
+## Open questions
+
+- Where to render the dispute reason picker — inline keyboard in the
+  same message, or a follow-up message? Default: inline keyboard, edit
+  the original message after pick.
+- Should `[Hard]` also be available on `partial` / `incorrect` verdicts?
+  Default: no; those are already non-Good. Only on `correct`.
+- Time-bounded override: if the user moves on to the next exercise, can
+  they still override the previous? Default: no — override window is
+  the active feedback message only. Simpler.
+
+## Verification plan
+
+1. Answer "We must change the architecture immediately." to a hedging
+   prompt; AI should suggest the more diplomatic rewrite.
+2. Tap `[I disagree]` → "Stylistic, not an error" → confirm the
+   `feedback_disputes/<today>.jsonl` row appears and SRS records
+   `Good` (not `Again`).
+3. Answer correctly to a cloze; tap `[Hard]`; confirm SRS records
+   `Hard`, not `Good`.
+4. Answer correctly to several exercises and verify no
+   `MistakeEvent` rows are created.
+5. Trigger an AI suggestion of a new expression; verify it appears in
+   the EPIC-04 approval queue, not in `learning_items`.
