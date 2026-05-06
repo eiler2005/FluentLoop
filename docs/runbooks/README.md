@@ -1,9 +1,13 @@
 # Runbooks
 
-Operational procedures for running FluentLoop on a VPS. Empty until
-deployment lands.
+Operational procedures for running FluentLoop on a VPS.
 
-Planned entries (post-MVP foundation):
+Available:
+
+- [`demo-data.md`](demo-data.md) — idempotent demo dataset for audit and smoke
+  testing.
+
+Planned entries:
 
 - `deploy.md` — first-time deploy of the container to a fresh VPS.
 - `restart.md` — restart the bot, view logs, common failure modes.

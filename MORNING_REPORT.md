@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 21:11 UTC` (`00:11 Moscow`)
-- Total wall time so far: `01h 26m`
+- Last updated: `2026-05-06 21:16 UTC` (`00:16 Moscow`)
+- Total wall time so far: `01h 31m`
 
 ## Epics done
 
@@ -78,10 +78,13 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`22 passed`).
+  (`23 passed`).
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
+- Added an idempotent demo-data seeding script for audit/smoke coverage:
+  learning items, lesson material, extracted candidates, high-confidence
+  mistake pattern, cached session, and completed session.
 
 ## Recommended morning order of business
 
