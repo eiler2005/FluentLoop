@@ -296,6 +296,51 @@ what to do first.
 
 ---
 
+## 9.5 AI provider — STUB MODE for tonight
+
+**Important:** Tonight `AI_PROVIDER=stub` and `OPENAI_API_KEY=STUB_OVERNIGHT_BUILD`.
+The real provider choice (OpenAI direct vs OmniRoute on the user's VPS) is
+deferred until after the night-run. ADR-0003 stays Accepted; this is a
+temporary overnight-build mode.
+
+**What this means for you:**
+
+- Implement `src/fluentloop/ai/provider.py` with a clean abstraction:
+  `light_call(task, payload) -> Validated`, `heavy_call(...)`. Tier choice
+  per *task type*, not per call site.
+- Implement **two** concrete providers:
+  1. `StubProvider` — returns hand-crafted JSON matching each task's
+     output schema. Use static fixtures keyed by task type
+     (`epic_04_extract`, `epic_07_generate_exercise`,
+     `epic_10_check_answer`, etc.). Vary outputs slightly across calls
+     so deterministic tests work but the bot looks alive in smoke tests.
+  2. `OpenAIProvider` — full implementation using `openai>=1.40.0`,
+     structured outputs, the model names from env, retry policy.
+     **Coded but not exercised tonight.** Tomorrow the user flips
+     `AI_PROVIDER=openai` and (if real key set) it goes live.
+- Provider dispatch in `src/fluentloop/ai/factory.py`:
+  ```python
+  def make_provider() -> AIProvider:
+      kind = os.environ.get("AI_PROVIDER", "stub").lower()
+      if kind == "stub":
+          return StubProvider()
+      if kind == "openai":
+          return OpenAIProvider(...)
+      raise ValueError(f"unknown AI_PROVIDER: {kind}")
+  ```
+- The $10 cap (§8) is **vestigial tonight** — stub makes no real calls.
+  Still keep `usage_log.jsonl` plumbing in place; just write
+  `{"provider":"stub","cost_usd":0.0,...}` rows. Real billing will
+  start when the user flips the provider.
+- `check_openai.py` recognizes the stub mode and exits 0 without a real
+  call.
+- AI epics (EPIC-04, 07, 10) get fully implemented — code, schemas,
+  prompt templates — but tested against the stub fixtures.
+
+This means EPIC-04 / 07 / 10 ship tonight with deterministic test
+coverage and a usable-looking bot. Real LLM judgment calls land
+tomorrow.
+
 ## 10. Defaults for unspecified decisions
 
 Use these without asking. Save your "asks" budget for true ambiguity.
@@ -340,8 +385,8 @@ Pre-loaded into `.env` already (verify with `python scripts/check_env.py`):
 - `TELEGRAM_BOT_TOKEN` — bot @fluentloop_ai_bot.
 - `TELEGRAM_API_ID` + `TELEGRAM_API_HASH` — Telethon needs these even
   in bot mode (it speaks MTProto).
-- `TELEGRAM_ALLOWED_USER_ID` — the only user the bot will respond to.
-- `OPENAI_API_KEY` — for the bot's gpt-4o-mini / gpt-4o calls.
+- `TELEGRAM_ALLOWED_USER_ID` = `<telegram-allowed-user-id>`.
+- `AI_PROVIDER=stub` and `OPENAI_API_KEY=STUB_OVERNIGHT_BUILD` (see §9.5).
 
 VPS facts:
 

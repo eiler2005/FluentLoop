@@ -32,9 +32,17 @@ def main() -> int:
 
     api_key = os.environ.get("OPENAI_API_KEY", "")
     model = os.environ.get("OPENAI_MODEL_LIGHT", "gpt-4o-mini")
+    provider = os.environ.get("AI_PROVIDER", "openai").lower()
     if not api_key:
         print("FAIL: OPENAI_API_KEY must be set", file=sys.stderr)
         return 2
+
+    # Overnight stub mode: skip the real call. Bot will use a stub provider.
+    if provider == "stub" or api_key == "STUB_OVERNIGHT_BUILD":
+        print(
+            "OK: stub mode (AI_PROVIDER=stub or sentinel key) — no real call made"
+        )
+        return 0
 
     try:
         from openai import OpenAI  # type: ignore[import-not-found]

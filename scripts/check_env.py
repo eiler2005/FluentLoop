@@ -34,6 +34,14 @@ REQUIRED = (
 
 PLACEHOLDER_MARKERS = ("<", "TODO", "FILL_ME", "REPLACE_ME")
 
+# Sentinel values that are intentionally non-real (overnight build mode).
+# Recognized as "set" so check_env passes; downstream scripts dispatch
+# stubs when they see these.
+SENTINELS = {
+    "OPENAI_API_KEY": ("STUB_OVERNIGHT_BUILD",),
+    "AI_PROVIDER": ("stub",),
+}
+
 
 def parse_env(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
@@ -63,8 +71,11 @@ def main() -> int:
     placeholder: list[str] = []
     for key in REQUIRED:
         val = values.get(key, "")
+        sentinel_ok = val in SENTINELS.get(key, ())
         if not val:
             missing.append(key)
+        elif sentinel_ok:
+            continue
         elif any(marker in val for marker in PLACEHOLDER_MARKERS):
             placeholder.append(key)
 
