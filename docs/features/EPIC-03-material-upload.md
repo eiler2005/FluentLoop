@@ -65,5 +65,5 @@ be processed by EPIC-04 (AI extraction).
 ## Notes from implementation
 
 - Added `SourceMaterial` storage with the 10 KB cap and an extraction handoff.
-- Telegram free-text upload UX is available through handlers, with richer
-  inline approval left as a constrained bot-flow follow-up.
+- Added `/upload` FSM behavior: the next free-text message is stored and
+  passed to extraction.

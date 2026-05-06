@@ -86,6 +86,31 @@ def handle_add(
     return BotReply(f"Added {item.type}: {item.text}")
 
 
+def parse_add_payload(raw: str) -> tuple[str, str, str, list[str]]:
+    parts = [part.strip() for part in raw.split("|")]
+    if len(parts) < 2:
+        raise ValueError("Use: type | text | meaning | tag1,tag2")
+    type_ = parts[0]
+    text = parts[1]
+    meaning = parts[2] if len(parts) >= 3 else ""
+    tags = (
+        [tag.strip() for tag in parts[3].split(",") if tag.strip()]
+        if len(parts) >= 4
+        else []
+    )
+    return type_, text, meaning, tags
+
+
+def handle_add_text(session: Session, user: User, raw: str) -> BotReply:
+    try:
+        type_, text, meaning, tags = parse_add_payload(raw)
+    except ValueError as exc:
+        return BotReply(str(exc))
+    return handle_add(
+        session, user, type_=type_, text=text, meaning=meaning, tags=tags
+    )
+
+
 def handle_upload(
     session: Session,
     user: User,
@@ -100,8 +125,6 @@ def handle_upload(
 
 
 def handle_approve_all(session: Session, user: User, material_id: int) -> BotReply:
-    material = store_material  # keeps import visible to ruff as flow docs evolve
-    del material
     from fluentloop.db.models import SourceMaterial
 
     source = session.get(SourceMaterial, material_id)
@@ -193,10 +216,12 @@ def command_catalog() -> list[str]:
         "/today",
         "/review",
         "/add",
+        "/approve",
         "/upload",
         "/mistakes",
         "/rules",
         "/stats",
+        "/favorites",
         "/settings",
         "/help",
     ]

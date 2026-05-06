@@ -80,5 +80,7 @@ This is the canonical "approval required" gate from PRD §5.5 and §13.
 
 - Implemented AI provider abstraction, stub extraction fixtures, candidate
   persistence, idempotency, and approve-all promotion into learning items.
+- Added `/approve <material_id>` to promote pending extracted candidates from
+  the Telegram chat flow.
 - Real OpenAI provider code is present but unexercised tonight because
   `AI_PROVIDER=stub` keeps spend at zero.

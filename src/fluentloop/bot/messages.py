@@ -7,11 +7,15 @@ HELP = """Commands
 /today - start today's practice
 /review - review due items
 /add - add a learning item
+/add expression | push back on | мягко возражать | meetings,stakeholders
+/approve <material_id> - approve all pending candidates for a material
 /upload - upload lesson material
 /mistakes - show mistake patterns
 /rules - show grammar concepts
 /stats - show progress
+/favorites - show favorite items
 /settings - change settings
+/settings set reminder_time 20:30
 /help - show help"""
 
 
@@ -29,8 +33,10 @@ def candidate_summary(candidates: list[ExtractedCandidate]) -> str:
     for candidate in candidates:
         counts[candidate.type] = counts.get(candidate.type, 0) + 1
     parts = ", ".join(f"{value} {key}" for key, value in sorted(counts.items()))
+    material_id = candidates[0].source_material_id if candidates else "?"
     return (
-        f"Found {parts or '0 candidates'}. Use approval buttons in the full bot flow."
+        f"Found {parts or '0 candidates'}.\n"
+        f"Send /approve {material_id} to add all pending candidates."
     )
 
 

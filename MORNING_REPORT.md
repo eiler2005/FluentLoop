@@ -61,6 +61,9 @@
   Telethon could not discover the private channel id from available updates.
 - `/opt/fluentloop-bot` initially required root-owned directory setup; deploy
   script now uses sudo only to create/chown that service directory.
+- Telegram command coverage was widened after the first deploy: `/add`,
+  `/upload`, `/approve`, `/favorites`, and `/settings set ...` now have
+  practical text-command paths.
 
 ## Recommended morning order of business
 

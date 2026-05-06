@@ -59,5 +59,5 @@ listing.
 
 ## Notes from implementation
 
-- Added favorite toggling, favorite listing, and selector tiebreaker data.
+- Added favorite toggling, `/favorites` listing, and selector tiebreaker data.
 - Inline star buttons are pending richer Telegram callback wiring.

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from sqlalchemy import select
+
 from fluentloop.ai.provider import StubProvider
-from fluentloop.db.models import MistakeEvent
+from fluentloop.bot.handlers import handle_approve_all, handle_upload
+from fluentloop.db.models import LearningItem, MistakeEvent
 from fluentloop.feedback import apply_feedback, check_answer
 from fluentloop.materials import approve_all, extract_candidates, store_material
 from fluentloop.mistakes import ingest_mistake_event, promote_pattern
@@ -25,6 +28,20 @@ def test_upload_extract_approve_and_feedback(tmp_path, db_session, settings) -> 
     assert feedback.status in {"partial", "correct"}
     apply_feedback(db_session, user, exercise, "push back", feedback)
     assert (tmp_path / "usage.jsonl").exists()
+
+
+def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    provider = StubProvider(tmp_path / "usage.jsonl")
+    reply = handle_upload(db_session, user, provider, "push back on and align on")
+    assert "Send /approve" in reply.text
+    material_id = int(reply.text.split("/approve ", 1)[1].split()[0])
+    approved = handle_approve_all(db_session, user, material_id)
+    assert "Added" in approved.text
+    item = db_session.scalar(
+        select(LearningItem).where(LearningItem.user_id == user.id)
+    )
+    assert item is not None
 
 
 def test_mistake_pattern_threshold(db_session, settings) -> None:

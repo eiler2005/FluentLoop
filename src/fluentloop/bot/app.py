@@ -6,15 +6,22 @@ from sqlalchemy.orm import sessionmaker
 
 from fluentloop.ai.factory import make_provider
 from fluentloop.bot.handlers import (
+    BotReply,
+    handle_add_text,
     handle_answer,
+    handle_approve_all,
+    handle_favorites,
     handle_help,
     handle_mistakes,
     handle_rules,
+    handle_setting_update,
     handle_settings,
     handle_start,
     handle_stats,
     handle_today,
+    handle_upload,
 )
+from fluentloop.bot.state import StateStore
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.db.session import session_scope
@@ -33,11 +40,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
         settings.telegram_api_hash,
     )
 
-    @client.on(
-        events.NewMessage(
-            pattern=r"^/(start|help|today|review|settings|stats|mistakes|rules)$"
-        )
-    )
+    @client.on(events.NewMessage(pattern=r"^/"))
     async def on_command(event) -> None:  # type: ignore[no-untyped-def]
         sender = await event.get_sender()
         telegram_user_id = int(sender.id)
@@ -49,23 +52,55 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 await event.reply("This is a personal FluentLoop bot.")
                 return
             user = ensure_user(session, telegram_user_id, settings)
-            text = event.raw_text.split()[0]
-            if text == "/start":
+            parts = event.raw_text.split(maxsplit=2)
+            command = parts[0]
+            if command == "/start":
                 reply = handle_start(session, settings, telegram_user_id)
-            elif text == "/help":
+            elif command == "/help":
                 reply = handle_help()
-            elif text in {"/today", "/review"}:
+            elif command in {"/today", "/review"}:
                 reply = handle_today(
                     session, user, channel_id=settings.telegram_channel_id
                 )
-            elif text == "/settings":
-                reply = handle_settings(session, user)
-            elif text == "/stats":
+            elif command == "/settings":
+                if len(parts) == 3 and parts[1] == "set":
+                    field, _, value = parts[2].partition(" ")
+                    reply = handle_setting_update(session, user, field, value)
+                else:
+                    reply = handle_settings(session, user)
+            elif command == "/add":
+                payload = event.raw_text.removeprefix("/add").strip()
+                if payload:
+                    reply = handle_add_text(session, user, payload)
+                else:
+                    StateStore(session).set(event.chat_id, telegram_user_id, "add", {})
+                    reply = BotReply(
+                        "Send one line:\n"
+                        "expression | push back on | мягко возражать | meetings"
+                    )
+            elif command == "/upload":
+                StateStore(session).set(event.chat_id, telegram_user_id, "upload", {})
+                reply = BotReply("Paste the lesson material in the next message.")
+            elif command == "/approve":
+                if len(parts) < 2:
+                    reply = BotReply("Use /approve <material_id>.")
+                else:
+                    try:
+                        material_id = int(parts[1])
+                    except ValueError:
+                        reply = BotReply("Use /approve <material_id>.")
+                    else:
+                        reply = handle_approve_all(session, user, material_id)
+            elif command == "/stats":
                 reply = handle_stats(session, user)
-            elif text == "/mistakes":
+            elif command == "/mistakes":
                 reply = handle_mistakes(session, user)
-            else:
+            elif command == "/favorites":
+                reply = handle_favorites(session, user)
+            elif command == "/rules":
                 reply = handle_rules(session)
+            else:
+                reply = handle_help()
             await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
 
     @client.on(events.NewMessage)
@@ -75,8 +110,23 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
         sender = await event.get_sender()
         telegram_user_id = int(sender.id)
         with session_scope(session_factory) as session:
+            if (
+                settings.telegram_allowed_user_id is not None
+                and settings.telegram_allowed_user_id != telegram_user_id
+            ):
+                await event.reply("This is a personal FluentLoop bot.")
+                return
             user: User = ensure_user(session, telegram_user_id, settings)
-            reply = handle_answer(session, user, provider, event.raw_text)
+            state_store = StateStore(session)
+            state = state_store.get(event.chat_id, telegram_user_id)
+            if state is not None and state.name == "upload":
+                reply = handle_upload(session, user, provider, event.raw_text)
+                state_store.clear(event.chat_id, telegram_user_id)
+            elif state is not None and state.name == "add":
+                reply = handle_add_text(session, user, event.raw_text)
+                state_store.clear(event.chat_id, telegram_user_id)
+            else:
+                reply = handle_answer(session, user, provider, event.raw_text)
             await event.reply(reply.text)
 
     await client.start(bot_token=settings.telegram_bot_token)

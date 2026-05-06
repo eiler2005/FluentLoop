@@ -66,5 +66,5 @@ via `/settings`.
 
 - Implemented persistent user defaults and validated setting updates through
   service functions used by the bot handlers.
-- Full inline keyboard editing is represented by handler/service seams; tests
-  cover validation and persistence.
+- Added `/settings set <field> <value>` for practical Telegram-side edits;
+  richer inline keyboard editing remains a later UX polish.

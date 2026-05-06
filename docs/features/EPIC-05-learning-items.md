@@ -76,5 +76,6 @@ points for `is_favorite`, `status`, and tagging.
 
 - Added `LearningItem` CRUD helpers, duplicate protection, status changes,
   favorite flag support, and automatic `ReviewState` creation.
-- Duplicate UI is currently conservative: service returns the existing row;
-  an explicit merge/keep-separate chat dialog remains a UX expansion.
+- Added `/add type | text | meaning | tags` plus a one-step FSM prompt for
+  manual item creation. Duplicate UI is still conservative: service returns
+  the existing row; explicit merge/keep-separate remains a UX expansion.
