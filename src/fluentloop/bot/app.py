@@ -25,6 +25,7 @@ from fluentloop.bot.state import StateStore
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.db.session import session_scope
+from fluentloop.scheduler import build_scheduler
 from fluentloop.users import ensure_user
 
 LOG = logging.getLogger(__name__)
@@ -132,4 +133,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
     await client.start(bot_token=settings.telegram_bot_token)
     me = await client.get_me()
     LOG.info("Telethon bot connected as @%s", getattr(me, "username", "<unknown>"))
-    await client.run_until_disconnected()
+    scheduler = build_scheduler(settings, session_factory, client=client)
+    scheduler.start()
+    try:
+        await client.run_until_disconnected()
+    finally:
+        scheduler.shutdown(wait=False)

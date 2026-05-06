@@ -64,6 +64,8 @@
 - Telegram command coverage was widened after the first deploy: `/add`,
   `/upload`, `/approve`, `/favorites`, and `/settings set ...` now have
   practical text-command paths.
+- APScheduler jobs were wired into the running bot for daily reminders,
+  overnight pre-generation, and SQLite backups.
 
 ## Recommended morning order of business
 

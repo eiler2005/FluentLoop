@@ -92,3 +92,5 @@ instantly.
 - Added deterministic session composition and `practice_session_cached` rows.
 - AI-generated exercise variation uses the stub/provider-ready path; selection
   is intentionally compact to keep the max-epics run green.
+- Added APScheduler overnight pre-generation job registration using
+  `PRE_GEN_HOUR` / `PRE_GEN_MINUTE`.

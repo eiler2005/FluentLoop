@@ -90,5 +90,5 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
 
 - Implemented `/today`/`/review` handler path, persisted sessions/attempts,
   resume behavior, summaries, and SQLite backup helper.
-- Reminder scheduling is represented in config/runtime shape; exact APScheduler
-  registration should be hardened during VPS smoke once Docker is available.
+- Added APScheduler registration for daily reminders, overnight pre-generation,
+  and daily SQLite backups.
