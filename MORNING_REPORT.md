@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 22:08 UTC` (`01:08 Moscow`)
-- Total wall time so far: `02h 23m`
+- Last updated: `2026-05-06 22:11 UTC` (`01:11 Moscow`)
+- Total wall time so far: `02h 26m`
 
 ## Epics done
 
@@ -20,10 +20,10 @@
 | 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | Start button + completion audit |
 | 09 | EPIC-09-exercise-types | this commit | ✅ | skipped | 6-type registry |
 | 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | ✅ 22:04 UTC | attempt feedback + dispute command |
-| 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | skipped | auto ingestion + archive audit |
-| 12 | EPIC-12-grammar-rules-graph | this commit | ✅ | skipped | unlink + parent refresher audit |
-| 13 | EPIC-13-stats-and-weekly-summary | this commit | ✅ | skipped | weekly job + split audit |
-| 14 | EPIC-14-favorites | this commit | ✅ | skipped | 20-item cap + preserve flag |
+| 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | ✅ 22:10 UTC | auto ingestion + archive audit |
+| 12 | EPIC-12-grammar-rules-graph | this commit | ✅ | ✅ 22:10 UTC | unlink + parent refresher audit |
+| 13 | EPIC-13-stats-and-weekly-summary | this commit | ✅ | ✅ 22:10 UTC | weekly job + split audit |
+| 14 | EPIC-14-favorites | this commit | ✅ | ✅ 22:10 UTC | 20-item cap + preserve flag |
 
 ## Epics stuck
 
@@ -50,6 +50,12 @@
 |---|---|---|---|
 | 20:28 | `this commit` | ✅ Bot API outbound smoke message delivered | deployed to `/opt/fluentloop-bot` |
 | 21:02 | `5fa79b5` | ✅ Bot API outbound smoke message delivered | redeployed healthy container after deploy keepalive hardening |
+| 21:08 | `5b7254a` | ✅ Bot API outbound smoke message delivered | EPIC-05 item lifecycle commands |
+| 21:13 | `fbe0fda` | ✅ Bot API outbound smoke message delivered | EPIC-07/08 practice completion hardening |
+| 21:18 | `8691cda` | ✅ Bot API outbound smoke + VPS seed | demo audit seed deployed |
+| 21:28 | `e4981c9` | ✅ Bot API outbound smoke + VPS seed | EPIC-01-05 strict audit fixes |
+| 22:04 | `4d562fd` | ✅ Bot API outbound smoke + VPS seed | EPIC-06-10 strict audit fixes |
+| 22:10 | `113ba96` | ✅ Bot API outbound smoke + VPS seed | EPIC-11-14 strict audit fixes |
 
 ## Surprises / anomalies
 
