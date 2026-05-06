@@ -1,4 +1,7 @@
 # --- Secrets & local config ---
+# Convention: confidential data lives in secrets/ (gitignored entirely).
+# `secrets/fluentloop.env` is the ready-to-copy source for the local .env.
+# Never commit anything inside secrets/. See AGENTS.md "Secrets & privacy".
 .env
 .env.*
 !.env.example

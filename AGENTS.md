@@ -50,6 +50,12 @@ destructive action is high.
 - Real `TELEGRAM_BOT_TOKEN`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` never appear
   in git, in commit messages, in logs, or in agent outputs.
 - Only `.env.example` is committed. Real `.env` is gitignored.
+- **`secrets/` catalog** (gitignored entirely via `.gitignore:5`) — canonical
+  location for confidential data: `secrets/fluentloop.env` is the
+  ready-to-copy version of `.env` (preloaded with real values where
+  available, placeholders for the rest). Same pattern as
+  `aiprojects/openclaw_firststeps/secrets/` per service. Never commit
+  anything from `secrets/`. Set mode 600 on all files inside.
 - User lesson notes, mistakes, and answers are sensitive — they may contain
   names of colleagues, clients, projects. Treat the contents of `data/` as
   private. See [`SECURITY.md`](SECURITY.md) for the third-party data flow
