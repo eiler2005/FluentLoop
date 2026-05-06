@@ -80,14 +80,17 @@ def handle_add(
     meaning: str = "",
     tags: list[str] | None = None,
 ) -> BotReply:
-    item = create_learning_item(
-        session,
-        user,
-        type_=type_,
-        text=text,
-        meaning=meaning,
-        tags=tags or [],
-    )
+    try:
+        item = create_learning_item(
+            session,
+            user,
+            type_=type_,
+            text=text,
+            meaning=meaning,
+            tags=tags or [],
+        )
+    except ValueError as exc:
+        return BotReply(f"Could not add item: {exc}")
     return BotReply(f"Added {item.type}: {item.text}")
 
 
@@ -124,7 +127,10 @@ def handle_upload(
     *,
     type_: str = "other",
 ) -> BotReply:
-    material = store_material(session, user, raw_text, type_=type_)
+    try:
+        material = store_material(session, user, raw_text, type_=type_)
+    except ValueError as exc:
+        return BotReply(f"Could not store material: {exc}")
     candidates = extract_candidates(session, material, provider)
     return BotReply(candidate_summary(candidates))
 

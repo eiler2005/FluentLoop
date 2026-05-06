@@ -69,6 +69,8 @@
 - Practice answer handling was tightened: `/today` starts/resumes a session,
   while unrelated free text gets a "send /today" prompt instead of creating a
   hidden session.
+- Invalid `/add` payloads and oversized uploads now return friendly errors
+  instead of crashing handler execution.
 
 ## Recommended morning order of business
 

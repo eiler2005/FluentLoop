@@ -56,3 +56,9 @@ def test_add_text_payload_creates_item(db_session, settings) -> None:
         "expression | align on | согласовать | planning",
     )
     assert "Added expression: align on" in reply.text
+
+
+def test_add_text_returns_friendly_error(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    reply = handle_add_text(db_session, user, "unknown | something")
+    assert "Could not add item" in reply.text

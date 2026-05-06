@@ -67,3 +67,5 @@ be processed by EPIC-04 (AI extraction).
 - Added `SourceMaterial` storage with the 10 KB cap and an extraction handoff.
 - Added `/upload` FSM behavior: the next free-text message is stored and
   passed to extraction.
+- Oversized upload errors are returned as friendly Telegram replies rather
+  than bubbling exceptions.

@@ -44,6 +44,15 @@ def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) 
     assert item is not None
 
 
+def test_upload_handler_returns_friendly_size_error(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    provider = StubProvider(tmp_path / "usage.jsonl")
+    reply = handle_upload(db_session, user, provider, "x" * 10_001)
+    assert "Could not store material" in reply.text
+
+
 def test_mistake_pattern_threshold(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     pattern = None

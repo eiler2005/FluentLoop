@@ -79,3 +79,4 @@ points for `is_favorite`, `status`, and tagging.
 - Added `/add type | text | meaning | tags` plus a one-step FSM prompt for
   manual item creation. Duplicate UI is still conservative: service returns
   the existing row; explicit merge/keep-separate remains a UX expansion.
+- Invalid `/add` payloads now return friendly Telegram errors.
