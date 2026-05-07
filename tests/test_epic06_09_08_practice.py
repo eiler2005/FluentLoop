@@ -81,6 +81,7 @@ def test_exercise_registry_and_session_resume(db_session, settings) -> None:
     assert len(EXERCISE_TYPES) == 6
     rendered = render_for_item(item, "cloze")
     assert "____" in rendered.prompt
+    assert "(мягко возражать)" in rendered.prompt
     practice = start_or_resume_session(db_session, user)
     first = next_exercise(db_session, practice)
     assert first is not None

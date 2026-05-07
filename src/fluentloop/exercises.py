@@ -6,6 +6,11 @@ from typing import Protocol
 from fluentloop.db.models import LearningItem
 
 
+def _meaning_hint(item: LearningItem) -> str:
+    meaning = (item.meaning or item.explanation or "").strip()
+    return f"\n({meaning})" if meaning else ""
+
+
 @dataclass(frozen=True)
 class Exercise:
     exercise_type: str
@@ -87,7 +92,7 @@ class ClozeExercise:
             )
         return Exercise(
             self.key,
-            prompt,
+            prompt + _meaning_hint(item),
             item.text,
             "One gap, one answer.",
             item.explanation,

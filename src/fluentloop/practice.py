@@ -64,7 +64,8 @@ def _seed_exercises() -> list[Exercise]:
         ),
         Exercise(
             "cloze",
-            "We need to ____ on the priorities before the sprint starts.",
+            "We need to ____ on the priorities before the sprint starts.\n"
+            "(согласовать)",
             "align",
             "One word.",
             "Seed collocation prompt.",

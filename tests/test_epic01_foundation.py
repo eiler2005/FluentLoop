@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from fluentloop.bot.app import _effective_user_id, _is_forum_chat
 from fluentloop.bot.handlers import (
     command_catalog,
     exercise_type_count,
@@ -55,6 +56,8 @@ def test_forum_workspace_destinations(settings) -> None:
     assert help_target.message_thread_id == 10
     practice = workspace_destination(forum_settings, "practice_flow")
     assert practice.message_thread_id == 11
+    assert _is_forum_chat("-100999", forum_settings)
+    assert _effective_user_id(999, "-100999", forum_settings) == 123456789
 
 
 def test_single_user_gate_and_container_mount_are_configured(settings) -> None:

@@ -59,6 +59,28 @@ CANDIDATE_USAGE = "Use /candidate add <id> or /candidate skip <id>."
 CHANNEL_DISCOVERY_PATH = Path("data/channel_discovery.json")
 
 
+def _is_forum_chat(chat_id: int | str | None, settings: Settings) -> bool:
+    return (
+        chat_id is not None
+        and settings.telegram_forum_group_id is not None
+        and str(chat_id) == str(settings.telegram_forum_group_id)
+    )
+
+
+def _effective_user_id(
+    telegram_user_id: int, chat_id: int | str | None, settings: Settings
+) -> int:
+    if _is_forum_chat(chat_id, settings) and settings.telegram_allowed_user_id:
+        return settings.telegram_allowed_user_id
+    return telegram_user_id
+
+
+async def _reject_or_ignore(event, settings: Settings) -> None:  # type: ignore[no-untyped-def]
+    if _is_forum_chat(event.chat_id, settings):
+        return
+    await event.reply("This is a personal FluentLoop bot.")
+
+
 def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
     if not reply.buttons:
         return None
@@ -150,13 +172,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
         if await maybe_record_channel(event, settings):
             return
         sender = await event.get_sender()
-        telegram_user_id = int(sender.id)
+        sender_id = int(sender.id)
+        telegram_user_id = _effective_user_id(sender_id, event.chat_id, settings)
         with session_scope(session_factory) as session:
             if (
                 settings.telegram_allowed_user_id is not None
                 and settings.telegram_allowed_user_id != telegram_user_id
             ):
-                await event.reply("This is a personal FluentLoop bot.")
+                await _reject_or_ignore(event, settings)
                 return
             user = ensure_user(session, telegram_user_id, settings)
             parts = event.raw_text.split(maxsplit=2)
@@ -346,7 +369,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
     @client.on(events.CallbackQuery)
     async def on_callback(event) -> None:  # type: ignore[no-untyped-def]
         sender = await event.get_sender()
-        telegram_user_id = int(sender.id)
+        sender_id = int(sender.id)
+        telegram_user_id = _effective_user_id(sender_id, event.chat_id, settings)
         raw_data = bytes(event.data or b"").decode("utf-8", errors="replace")
         with session_scope(session_factory) as session:
             if (
@@ -538,13 +562,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
         if await maybe_record_channel(event, settings):
             return
         sender = await event.get_sender()
-        telegram_user_id = int(sender.id)
+        if getattr(sender, "bot", False):
+            return
+        sender_id = int(sender.id)
+        telegram_user_id = _effective_user_id(sender_id, event.chat_id, settings)
         with session_scope(session_factory) as session:
             if (
                 settings.telegram_allowed_user_id is not None
                 and settings.telegram_allowed_user_id != telegram_user_id
             ):
-                await event.reply("This is a personal FluentLoop bot.")
+                await _reject_or_ignore(event, settings)
                 return
             user: User = ensure_user(session, telegram_user_id, settings)
             state_store = StateStore(session)
