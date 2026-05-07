@@ -16,6 +16,8 @@ from fluentloop.bot.handlers import (
     handle_skip_all,
     handle_upload,
     handle_upload_prompt,
+    handle_upload_start,
+    handle_upload_type_choice,
 )
 from fluentloop.db.models import ExtractedCandidate, LearningItem, MistakeEvent
 from fluentloop.feedback import apply_feedback, check_answer
@@ -46,6 +48,8 @@ def test_upload_extract_approve_and_feedback(tmp_path, db_session, settings) -> 
     assert feedback.status in {"partial", "correct"}
     apply_feedback(db_session, user, exercise, "push back", feedback)
     assert (tmp_path / "usage.jsonl").exists()
+    typed = store_material(db_session, user, "notes", type_="lesson_notes")
+    assert typed.type == "lesson_notes"
 
 
 def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) -> None:
@@ -137,6 +141,19 @@ def test_free_text_upload_prompt_buttons() -> None:
     assert reply.buttons is not None
     data = {button.data for row in reply.buttons for button in row}
     assert data == {"upload:confirm:pending", "upload:cancel:pending"}
+
+
+def test_upload_type_picker_buttons() -> None:
+    reply = handle_upload_start()
+    assert reply.buttons is not None
+    data = {button.data for row in reply.buttons for button in row}
+    assert "upload_type:lesson_notes" in data
+    assert "upload_type:teacher_feedback" in data
+    assert "upload_type:other" in data
+    chosen = handle_upload_type_choice("homework")
+    assert "Paste homework material" in chosen.text
+    rejected = handle_upload_type_choice("pdf")
+    assert "Unsupported material type" in rejected.text
 
 
 def test_upload_handler_returns_friendly_size_error(

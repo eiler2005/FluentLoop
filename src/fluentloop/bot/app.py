@@ -35,6 +35,8 @@ from fluentloop.bot.handlers import (
     handle_today,
     handle_upload,
     handle_upload_prompt,
+    handle_upload_start,
+    handle_upload_type_choice,
 )
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
@@ -142,8 +144,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         "expression | push back on | мягко возражать | meetings"
                     )
             elif command == "/upload":
-                StateStore(session).set(event.chat_id, telegram_user_id, "upload", {})
-                reply = BotReply("Paste the lesson material in the next message.")
+                upload_type = parts[1] if len(parts) >= 2 else "other"
+                StateStore(session).set(
+                    event.chat_id,
+                    telegram_user_id,
+                    "upload",
+                    {"type": upload_type},
+                )
+                reply = (
+                    handle_upload_start()
+                    if len(parts) < 2
+                    else handle_upload_type_choice(upload_type)
+                )
             elif command == "/approve":
                 if len(parts) < 2:
                     reply = BotReply("Use /approve <material_id>.")
@@ -292,6 +304,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 StateStore(session).clear(event.chat_id, telegram_user_id)
                 reply = BotReply("Cancelled.")
                 await event.answer("Cancelled")
+            elif raw_data.startswith("upload_type:"):
+                upload_type = raw_data.removeprefix("upload_type:")
+                StateStore(session).set(
+                    event.chat_id,
+                    telegram_user_id,
+                    "upload",
+                    {"type": upload_type},
+                )
+                reply = handle_upload_type_choice(upload_type)
+                await event.answer("Upload type")
             elif len(parts) == 3 and parts[0] == "candidates":
                 try:
                     material_id = int(parts[2])
@@ -408,7 +430,13 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             state_store = StateStore(session)
             state = state_store.get(event.chat_id, telegram_user_id)
             if state is not None and state.name == "upload":
-                reply = handle_upload(session, user, provider, event.raw_text)
+                reply = handle_upload(
+                    session,
+                    user,
+                    provider,
+                    event.raw_text,
+                    type_=str(state.payload.get("type", "other")),
+                )
                 state_store.clear(event.chat_id, telegram_user_id)
             elif state is not None and state.name == "add":
                 reply = handle_add_text(session, user, event.raw_text)

@@ -8,6 +8,15 @@ from fluentloop.db.models import ExtractedCandidate, SourceMaterial, User, utc_n
 from fluentloop.learning import promote_candidate
 
 MAX_UPLOAD_CHARS = 10_000
+MATERIAL_TYPES = {
+    "lesson_notes",
+    "word_list",
+    "expression_list",
+    "homework",
+    "exercise",
+    "teacher_feedback",
+    "other",
+}
 
 
 def store_material(
@@ -17,6 +26,8 @@ def store_material(
     *,
     type_: str = "other",
 ) -> SourceMaterial:
+    if type_ not in MATERIAL_TYPES:
+        raise ValueError("Unsupported material type")
     if len(raw_text.encode("utf-8")) > MAX_UPLOAD_CHARS:
         raise ValueError("Material is too large; paste it in chunks")
     material = SourceMaterial(user_id=user.id, type=type_, raw_text=raw_text)

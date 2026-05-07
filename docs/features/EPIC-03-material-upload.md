@@ -67,6 +67,10 @@ be processed by EPIC-04 (AI extraction).
 - Added `SourceMaterial` storage with the 10 KB cap and an extraction handoff.
 - Added `/upload` FSM behavior: the next free-text message is stored and
   passed to extraction.
+- `/upload` now offers inline material-type buttons (`lesson_notes`,
+  `word_list`, `expression_list`, `homework`, `exercise`,
+  `teacher_feedback`, `other`) and stores the chosen type; pasting directly
+  still defaults to `other`.
 - Oversized upload errors are returned as friendly Telegram replies rather
   than bubbling exceptions.
 - Free text without an active practice session now stores a pending FSM state

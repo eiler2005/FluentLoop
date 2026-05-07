@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:55 UTC` (`08:55 Moscow`)
-- Total wall time so far: `10h 10m`
+- Last updated: `2026-05-07 05:57 UTC` (`08:57 Moscow`)
+- Total wall time so far: `10h 12m`
 
 ## Epics done
 
@@ -107,6 +107,8 @@
 - EPIC-10 follow-up hardening added `Hard` override for correct answers; the
   callback converts the existing `Good` SRS result into `Hard` without
   double-counting the review.
+- EPIC-03 follow-up hardening added `/upload` material-type inline buttons and
+  validation while preserving `other` as the direct-paste default.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

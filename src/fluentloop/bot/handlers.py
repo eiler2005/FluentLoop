@@ -27,6 +27,7 @@ from fluentloop.learning import (
     toggle_favorite,
 )
 from fluentloop.materials import (
+    MATERIAL_TYPES,
     approve_all,
     approve_candidate,
     edit_candidate,
@@ -150,6 +151,37 @@ def handle_upload_prompt() -> BotReply:
             ]
         ],
     )
+
+
+def _upload_type_buttons() -> list[list[InlineButton]]:
+    return [
+        [
+            _button("Lesson notes", "upload_type:lesson_notes"),
+            _button("Word list", "upload_type:word_list"),
+        ],
+        [
+            _button("Expressions", "upload_type:expression_list"),
+            _button("Homework", "upload_type:homework"),
+        ],
+        [
+            _button("Exercise", "upload_type:exercise"),
+            _button("Teacher feedback", "upload_type:teacher_feedback"),
+        ],
+        [_button("Other", "upload_type:other")],
+    ]
+
+
+def handle_upload_start() -> BotReply:
+    return BotReply(
+        "Choose material type, or paste the material now to use other.",
+        buttons=_upload_type_buttons(),
+    )
+
+
+def handle_upload_type_choice(type_: str) -> BotReply:
+    if type_ not in MATERIAL_TYPES:
+        return BotReply("Unsupported material type.")
+    return BotReply(f"Paste {type_} material in the next message.")
 
 
 def is_allowed(settings: Settings, telegram_user_id: int) -> bool:
