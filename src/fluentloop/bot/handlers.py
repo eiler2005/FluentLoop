@@ -261,6 +261,8 @@ def handle_answer(
     user: User,
     provider: AIProvider,
     answer: str,
+    *,
+    channel_id: str | None = None,
 ) -> BotReply:
     practice_session = get_in_progress_session(session, user)
     if practice_session is None:
@@ -299,7 +301,7 @@ def handle_answer(
         message += f"\n\nExercise {next_index + 1}/7\n{next_item['prompt']}"
     else:
         message += "\n\n" + summarize_session(session, practice_session)
-    return BotReply(message)
+    return BotReply(message, channel_id or user.telegram_user_id)
 
 
 def handle_dispute(

@@ -247,8 +247,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_add_text(session, user, event.raw_text)
                 state_store.clear(event.chat_id, telegram_user_id)
             else:
-                reply = handle_answer(session, user, provider, event.raw_text)
-            await event.reply(reply.text)
+                reply = handle_answer(
+                    session,
+                    user,
+                    provider,
+                    event.raw_text,
+                    channel_id=settings.telegram_channel_id,
+                )
+            await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
 
     await client.start(bot_token=settings.telegram_bot_token)
     me = await client.get_me()
