@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:59 UTC` (`08:59 Moscow`)
-- Total wall time so far: `10h 14m`
+- Last updated: `2026-05-07 06:01 UTC` (`09:01 Moscow`)
+- Total wall time so far: `10h 16m`
 
 ## Epics done
 
@@ -110,6 +110,9 @@
   double-counting the review.
 - EPIC-03 follow-up hardening added `/upload` material-type inline buttons and
   validation while preserving `other` as the direct-paste default.
+- EPIC-10 follow-up hardening added AI-suggested new items to the EPIC-04
+  approval queue through `AnswerFeedback.suggested_candidates`; no suggested
+  item is auto-added.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

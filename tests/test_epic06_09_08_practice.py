@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 
 from fluentloop.ai.provider import StubProvider
+from fluentloop.ai.schemas import AnswerFeedback, ExtractedItem
 from fluentloop.bot.handlers import (
     handle_answer,
     handle_attempt_ack,
@@ -13,6 +14,7 @@ from fluentloop.bot.handlers import (
     handle_today,
 )
 from fluentloop.db.models import (
+    ExtractedCandidate,
     MistakeEvent,
     MistakePattern,
     PracticeAttempt,
@@ -30,6 +32,26 @@ from fluentloop.practice import (
 )
 from fluentloop.srs import get_due_items, record_result
 from fluentloop.users import ensure_user
+
+
+class SuggestingProvider(StubProvider):
+    def light_call(self, task: str, payload: dict) -> AnswerFeedback:
+        if task == "epic_10_check_answer":
+            return AnswerFeedback(
+                status="correct",
+                corrected_answer=payload.get("expected_answer", ""),
+                natural_answer=payload.get("expected_answer", ""),
+                explanation="Good answer; this phrase is worth keeping.",
+                suggested_candidates=[
+                    ExtractedItem(
+                        type="expression",
+                        text="align on scope",
+                        meaning="согласовать объем работ",
+                        tags=["planning"],
+                    )
+                ],
+            )
+        return super().light_call(task, payload)  # type: ignore[return-value]
 
 
 def test_srs_intervals_and_due_order(db_session, settings) -> None:
@@ -243,6 +265,21 @@ def test_hard_override_converts_correct_srs_result(db_session, settings) -> None
     assert state.review_count == 1
     assert state.last_interval_days == 1.0
     assert attempt.feedback["srs_override"] == "Hard"
+
+
+def test_feedback_suggested_candidates_go_to_approval_queue(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    start_or_resume_session(db_session, user)
+    reply = handle_answer(db_session, user, SuggestingProvider(), "align on")
+    assert "queued for approval: /candidates" in reply.text
+    candidate = db_session.scalar(select(ExtractedCandidate))
+    assert candidate is not None
+    assert candidate.status == "pending"
+    assert candidate.text == "align on scope"
+    assert candidate.tags == ["planning"]
 
 
 def test_answer_without_session_does_not_create_practice(db_session, settings) -> None:

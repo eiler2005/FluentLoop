@@ -17,7 +17,12 @@ from fluentloop.bot.state import StateStore
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.exercises import EXERCISE_TYPES
-from fluentloop.feedback import apply_feedback, check_answer, write_dispute
+from fluentloop.feedback import (
+    apply_feedback,
+    check_answer,
+    queue_feedback_suggestions,
+    write_dispute,
+)
 from fluentloop.grammar import seed_concepts
 from fluentloop.learning import (
     create_learning_item,
@@ -493,6 +498,7 @@ def handle_answer(
     index, exercise = current
     feedback = check_answer(provider, exercise, answer)
     pattern = apply_feedback(session, user, exercise, answer, feedback)
+    suggestion_queue = queue_feedback_suggestions(session, user, exercise, feedback)
     attempt = record_attempt(
         session, practice_session, index, exercise, answer, feedback.model_dump()
     )
@@ -512,6 +518,12 @@ def handle_answer(
         message += (
             f"\n#mistakes Recurring pattern #{pattern.id} detected. "
             f"Use /mistakes focus {pattern.id} or /mistakes ignore {pattern.id}."
+        )
+    if suggestion_queue is not None:
+        material_id, count = suggestion_queue
+        message += (
+            f"\nSuggested {count} new candidate(s) queued for approval: "
+            f"/candidates {material_id}."
         )
     message += f"\nDisagree? Use the buttons or send /dispute {attempt.id} <reason>."
     if follow_up is not None:

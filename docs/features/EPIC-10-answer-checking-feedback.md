@@ -105,3 +105,6 @@ bot can silently train mistake patterns from its own miscalls.
 - Correct-answer feedback now also carries `Hard`; tapping it converts the
   latest SRS `Good` result for the attempt's target items into `Hard` without
   double-counting the review.
+- `AnswerFeedback.suggested_candidates` now queues AI-suggested new items as
+  pending EPIC-04 candidates under a `teacher_feedback` source material; they
+  are surfaced via `/candidates <material_id>` and are never auto-added.

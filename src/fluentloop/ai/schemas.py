@@ -39,6 +39,7 @@ class AnswerFeedback(BaseModel):
     detected_mistake_type: str = ""
     should_create_mistake_event: bool = False
     should_create_or_update_mistake_pattern: bool = False
+    suggested_candidates: list[ExtractedItem] = Field(default_factory=list)
 
 
 Validated = ExtractionResult | GenerationResult | AnswerFeedback

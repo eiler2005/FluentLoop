@@ -8,7 +8,13 @@ from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
 from fluentloop.ai.schemas import AnswerFeedback
-from fluentloop.db.models import MistakeEvent, MistakePattern, User
+from fluentloop.db.models import (
+    ExtractedCandidate,
+    MistakeEvent,
+    MistakePattern,
+    SourceMaterial,
+    User,
+)
 from fluentloop.mistakes import ingest_mistake_event
 from fluentloop.srs import record_result
 
@@ -73,6 +79,46 @@ def apply_feedback(
         session.flush()
         return ingest_mistake_event(session, event)
     return None
+
+
+def queue_feedback_suggestions(
+    session: Session,
+    user: User,
+    exercise: dict,
+    feedback: AnswerFeedback,
+) -> tuple[int, int] | None:
+    if not feedback.suggested_candidates:
+        return None
+    material = SourceMaterial(
+        user_id=user.id,
+        type="teacher_feedback",
+        raw_text=(
+            "Answer feedback suggested new learning candidates.\n\n"
+            f"Prompt: {exercise.get('prompt', '')}\n"
+            f"Expected: {exercise.get('expected_answer', '')}\n"
+            f"Explanation: {feedback.explanation}"
+        ),
+        summary="Suggested candidates from answer feedback",
+    )
+    session.add(material)
+    session.flush()
+    count = 0
+    for item in feedback.suggested_candidates:
+        candidate = ExtractedCandidate(
+            source_material_id=material.id,
+            type=item.type,
+            text=item.text,
+            meaning=item.meaning,
+            explanation=item.explanation,
+            examples=item.examples,
+            tags=item.tags,
+            confidence=item.confidence,
+            status="pending",
+        )
+        session.add(candidate)
+        count += 1
+    session.flush()
+    return material.id, count
 
 
 def write_dispute(
