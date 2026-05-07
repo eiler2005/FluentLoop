@@ -43,6 +43,7 @@ from fluentloop.practice import (
     start_or_resume_session,
     summarize_session,
 )
+from fluentloop.srs import convert_last_good_to_hard
 from fluentloop.stats import collect_stats, render_stats
 from fluentloop.users import ensure_user, format_settings, update_setting
 
@@ -121,8 +122,10 @@ def _item_buttons(item_id: int, status: str, is_favorite: bool) -> list[InlineBu
     return buttons
 
 
-def _dispute_buttons(attempt_id: int) -> list[list[InlineButton]]:
-    return [
+def _dispute_buttons(
+    attempt_id: int, *, allow_hard: bool = False
+) -> list[list[InlineButton]]:
+    buttons = [
         [
             _button("Got it", f"attempt:ack:{attempt_id}"),
             _button("I disagree", f"dispute:{attempt_id}:equally_valid"),
@@ -132,6 +135,9 @@ def _dispute_buttons(attempt_id: int) -> list[list[InlineButton]]:
             _button("Style issue", f"dispute:{attempt_id}:style_preference"),
         ],
     ]
+    if allow_hard:
+        buttons.insert(1, [_button("Hard", f"attempt:hard:{attempt_id}")])
+    return buttons
 
 
 def handle_upload_prompt() -> BotReply:
@@ -491,7 +497,7 @@ def handle_answer(
     return BotReply(
         message,
         channel_id or user.telegram_user_id,
-        buttons=_dispute_buttons(attempt.id),
+        buttons=_dispute_buttons(attempt.id, allow_hard=feedback.status == "correct"),
     )
 
 
@@ -505,6 +511,25 @@ def handle_attempt_ack(session: Session, user: User, attempt_id: int) -> BotRepl
     if practice_session is None or practice_session.user_id != user.id:
         return BotReply("Attempt not found.")
     return BotReply(f"Got it. Keeping attempt #{attempt.id} as-is.")
+
+
+def handle_attempt_hard(session: Session, user: User, attempt_id: int) -> BotReply:
+    from fluentloop.db.models import PracticeAttempt, PracticeSession
+
+    attempt = session.get(PracticeAttempt, attempt_id)
+    if attempt is None:
+        return BotReply("Attempt not found.")
+    practice_session = session.get(PracticeSession, attempt.practice_session_id)
+    if practice_session is None or practice_session.user_id != user.id:
+        return BotReply("Attempt not found.")
+    if attempt.status != "correct":
+        return BotReply("Hard override is only available for correct answers.")
+    for item_id in attempt.target_learning_item_ids:
+        convert_last_good_to_hard(session, item_id)
+    attempt.feedback = {**attempt.feedback, "srs_override": "Hard"}
+    session.add(attempt)
+    session.flush()
+    return BotReply(f"Marked attempt #{attempt.id} as Hard for SRS.")
 
 
 def handle_dispute(

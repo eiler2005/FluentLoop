@@ -56,6 +56,26 @@ def record_result(
     return state
 
 
+def convert_last_good_to_hard(session: Session, item_id: int) -> ReviewState:
+    state = session.scalar(
+        select(ReviewState).where(ReviewState.learning_item_id == item_id)
+    )
+    if state is None:
+        raise ValueError("Review state not found")
+    if state.last_result != "Good":
+        return state
+    reviewed_at = state.last_reviewed_at or datetime.now(UTC)
+    state.success_count = max(0, state.success_count - 1)
+    state.fail_count += 1
+    state.difficulty += 0.5
+    state.last_result = "Hard"
+    state.last_interval_days = 1.0
+    state.due_at = reviewed_at + timedelta(days=1)
+    session.add(state)
+    session.flush()
+    return state
+
+
 def get_due_items(
     session: Session,
     user_id: int,

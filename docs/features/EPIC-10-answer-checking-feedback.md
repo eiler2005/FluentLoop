@@ -102,3 +102,6 @@ bot can silently train mistake patterns from its own miscalls.
 - Feedback now carries inline `Got it`, `I disagree`, `AI was wrong`, and
   `Style issue` buttons; each dispute callback writes the same JSONL audit row
   as `/dispute <attempt_id> <reason>`. The command fallback remains deployed.
+- Correct-answer feedback now also carries `Hard`; tapping it converts the
+  latest SRS `Good` result for the attempt's target items into `Hard` without
+  double-counting the review.

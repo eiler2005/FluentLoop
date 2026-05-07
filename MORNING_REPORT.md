@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:47 UTC` (`08:47 Moscow`)
-- Total wall time so far: `10h 02m`
+- Last updated: `2026-05-07 05:53 UTC` (`08:53 Moscow`)
+- Total wall time so far: `10h 08m`
 
 ## Epics done
 
@@ -59,6 +59,7 @@
 | 05:23 | `7cc0cb5` | ✅ private smoke + channel send/delete smoke | channel id discovered and env deployed |
 | 05:26 | `a06ae2d` | ✅ private smoke + channel send/delete smoke | practice feedback/next prompts route to channel |
 | 05:42 | `3a1c0ae` | ✅ container private smoke + channel send/delete smoke + VPS seed | callback UX + channel logical topic tags |
+| 05:48 | `98aefee` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-04 candidate edit flow |
 
 ## Surprises / anomalies
 
@@ -102,6 +103,9 @@
 - EPIC-04 follow-up hardening added the missing candidate edit flow: inline
   `Edit` → field picker (`Text`, `Meaning`, `Tags`) → private text input →
   edited candidate remains eligible for explicit approval/skip.
+- EPIC-10 follow-up hardening added `Hard` override for correct answers; the
+  callback converts the existing `Good` SRS result into `Hard` without
+  double-counting the review.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

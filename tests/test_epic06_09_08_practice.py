@@ -8,6 +8,7 @@ from fluentloop.ai.provider import StubProvider
 from fluentloop.bot.handlers import (
     handle_answer,
     handle_attempt_ack,
+    handle_attempt_hard,
     handle_dispute,
     handle_today,
 )
@@ -16,6 +17,7 @@ from fluentloop.db.models import (
     MistakePattern,
     PracticeAttempt,
     PracticeSession,
+    ReviewState,
 )
 from fluentloop.exercises import EXERCISE_TYPES, render_for_item
 from fluentloop.learning import create_learning_item
@@ -204,6 +206,7 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
     assert reply.buttons is not None
     button_data = {button.data for row in reply.buttons for button in row}
     assert "attempt:ack:1" in button_data
+    assert "attempt:hard:1" in button_data
     assert "dispute:1:equally_valid" in button_data
 
 
@@ -213,6 +216,33 @@ def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
     reply = handle_today(db_session, user, channel_id="-100123")
     assert reply.target_chat_id == "-100123"
     assert reply.text.startswith("#practice_flow\nToday's English practice")
+
+
+def test_hard_override_converts_correct_srs_result(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(db_session, user, type_="expression", text="align on")
+    start_or_resume_session(db_session, user)
+    reply = handle_answer(db_session, user, StubProvider(), "align on")
+    attempt = db_session.scalar(select(PracticeAttempt))
+    assert attempt is not None
+    assert "attempt:hard:1" in {
+        button.data for row in (reply.buttons or []) for button in row
+    }
+    state = db_session.scalar(
+        select(ReviewState).where(ReviewState.learning_item_id == item.id)
+    )
+    assert state is not None
+    assert state.last_result == "Good"
+    assert state.success_count == 1
+
+    hard = handle_attempt_hard(db_session, user, attempt.id)
+    assert "Hard" in hard.text
+    assert state.last_result == "Hard"
+    assert state.success_count == 0
+    assert state.fail_count == 1
+    assert state.review_count == 1
+    assert state.last_interval_days == 1.0
+    assert attempt.feedback["srs_override"] == "Hard"
 
 
 def test_answer_without_session_does_not_create_practice(db_session, settings) -> None:

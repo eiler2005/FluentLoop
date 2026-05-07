@@ -12,6 +12,7 @@ from fluentloop.bot.handlers import (
     handle_answer,
     handle_approve_all,
     handle_attempt_ack,
+    handle_attempt_hard,
     handle_candidate_action,
     handle_candidate_edit_menu,
     handle_candidate_edit_prompt,
@@ -375,6 +376,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 else:
                     reply = handle_attempt_ack(session, user, attempt_id)
                 await event.answer("Got it")
+            elif len(parts) == 3 and parts[0] == "attempt" and parts[1] == "hard":
+                try:
+                    attempt_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply("Attempt not found.")
+                else:
+                    reply = handle_attempt_hard(session, user, attempt_id)
+                await event.answer("Marked Hard")
             else:
                 reply = BotReply("Unknown button action. Send /help.")
                 await event.answer("Unknown action")
