@@ -41,12 +41,18 @@ def test_settings_update_and_validation(db_session, settings) -> None:
     }
     assert "settings:practice_duration_minutes:25" in button_data
     assert "settings:explanation_language:mixed" in button_data
+    assert "settings:focus_areas:business,IT" in button_data
+    assert "settings:timezone:Europe/Moscow" in button_data
 
     updated = handle_setting_update(
         db_session, user, "practice_duration_minutes", "15"
     )
     assert "15 min" in updated.text
     assert updated.buttons is not None
+    focused = handle_setting_update(db_session, user, "focus_areas", "business,IT")
+    assert "business, IT" in focused.text
+    timezone = handle_setting_update(db_session, user, "timezone", "Europe/Moscow")
+    assert "Europe/Moscow" in timezone.text
 
 
 def test_learning_item_creates_review_state_and_favorite(db_session, settings) -> None:

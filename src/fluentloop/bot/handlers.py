@@ -83,6 +83,14 @@ def _settings_buttons(user: User) -> list[list[InlineButton]]:
             _button("C1-", "settings:level:C1-"),
         ],
         [
+            _button("Business+IT", "settings:focus_areas:business,IT"),
+            _button("Grammar", "settings:focus_areas:grammar"),
+            _button(
+                "All focus",
+                "settings:focus_areas:business,IT,conversational,grammar",
+            ),
+        ],
+        [
             _button("10 min", "settings:practice_duration_minutes:10"),
             _button("15 min", "settings:practice_duration_minutes:15"),
             _button("25 min", "settings:practice_duration_minutes:25"),
@@ -96,6 +104,10 @@ def _settings_buttons(user: User) -> list[list[InlineButton]]:
             _button("20:00", "settings:reminder_time:20:00"),
             _button("20:30", "settings:reminder_time:20:30"),
             _button("21:00", "settings:reminder_time:21:00"),
+        ],
+        [
+            _button("Moscow TZ", "settings:timezone:Europe/Moscow"),
+            _button("Berlin TZ", "settings:timezone:Europe/Berlin"),
         ],
         [_button("Refresh", "settings:refresh:now")],
     ]

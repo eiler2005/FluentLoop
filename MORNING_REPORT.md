@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 06:08 UTC` (`09:08 Moscow`)
-- Total wall time so far: `10h 23m`
+- Last updated: `2026-05-07 06:09 UTC` (`09:09 Moscow`)
+- Total wall time so far: `10h 24m`
 
 ## Epics done
 
@@ -117,6 +117,8 @@
   item is auto-added.
 - EPIC-11 follow-up hardening added `Examples` for mistake patterns so stored
   wrong/correct examples can be inspected before focus/ignore.
+- EPIC-02 follow-up hardening added inline focus-area and timezone presets to
+  `/settings`, with command fallback preserved for custom values.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
