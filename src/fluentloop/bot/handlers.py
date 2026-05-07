@@ -579,8 +579,12 @@ def handle_answer(
     message_thread_id: int | None = None,
     next_channel_id: str | None = None,
     next_message_thread_id: int | None = None,
+    feedback_copy_channel_id: str | None = None,
+    feedback_copy_message_thread_id: int | None = None,
     summary_channel_id: str | None = None,
     summary_message_thread_id: int | None = None,
+    progress_channel_id: str | None = None,
+    progress_message_thread_id: int | None = None,
 ) -> BotReply:
     practice_session = get_in_progress_session(session, user)
     if practice_session is None:
@@ -623,6 +627,17 @@ def handle_answer(
             f"/candidates {material_id}."
         )
     message += f"\nDisagree? Use the buttons or send /dispute {attempt.id} <reason>."
+    if feedback_copy_channel_id:
+        extra_replies.append(
+            BotReply(
+                message,
+                feedback_copy_channel_id,
+                buttons=_dispute_buttons(
+                    attempt.id, allow_hard=feedback.status == "correct"
+                ),
+                message_thread_id=feedback_copy_message_thread_id,
+            )
+        )
     if follow_up is not None:
         next_index, next_item = follow_up
         next_heading = "#next_prompt\n" if channel_id else ""
@@ -635,8 +650,7 @@ def handle_answer(
                     message_thread_id=next_message_thread_id,
                 )
             )
-        else:
-            message += "\n\n" + next_text
+        message += "\n\n" + next_text
     else:
         summary_heading = "#summary\n" if channel_id else ""
         summary_text = summary_heading + summarize_session(session, practice_session)
@@ -648,8 +662,7 @@ def handle_answer(
                     message_thread_id=summary_message_thread_id,
                 )
             )
-        else:
-            message += "\n\n" + summary_text
+        message += "\n\n" + summary_text
     return BotReply(
         message,
         channel_id or user.telegram_user_id,

@@ -601,29 +601,42 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 feedback_target = workspace_destination(settings, "feedback")
                 next_target = workspace_destination(settings, "next_prompt")
                 summary_target = workspace_destination(settings, "summary")
+                practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_answer(
                     session,
                     user,
                     provider,
                     event.raw_text,
                     channel_id=(
-                        str(feedback_target.chat_id)
-                        if feedback_target.chat_id is not None
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
                         else None
                     ),
-                    message_thread_id=feedback_target.message_thread_id,
+                    message_thread_id=practice_target.message_thread_id,
                     next_channel_id=(
                         str(next_target.chat_id)
                         if next_target.message_thread_id is not None
                         else None
                     ),
                     next_message_thread_id=next_target.message_thread_id,
+                    feedback_copy_channel_id=(
+                        str(feedback_target.chat_id)
+                        if feedback_target.message_thread_id is not None
+                        else None
+                    ),
+                    feedback_copy_message_thread_id=feedback_target.message_thread_id,
                     summary_channel_id=(
                         str(summary_target.chat_id)
                         if summary_target.message_thread_id is not None
                         else None
                     ),
                     summary_message_thread_id=summary_target.message_thread_id,
+                    progress_channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.message_thread_id is not None
+                        else None
+                    ),
+                    progress_message_thread_id=practice_target.message_thread_id,
                 )
                 if reply.text.startswith("No active exercise."):
                     state_store.set(

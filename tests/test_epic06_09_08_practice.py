@@ -233,7 +233,9 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
     assert "dispute:1:equally_valid" in button_data
 
 
-def test_answer_splits_forum_feedback_and_next_prompt(db_session, settings) -> None:
+def test_answer_keeps_forum_practice_flow_primary_with_topic_copies(
+    db_session, settings
+) -> None:
     user = ensure_user(db_session, 123456789, settings)
     create_learning_item(db_session, user, type_="expression", text="align on")
     start_or_resume_session(db_session, user)
@@ -243,17 +245,21 @@ def test_answer_splits_forum_feedback_and_next_prompt(db_session, settings) -> N
         StubProvider(),
         "align on",
         channel_id="-100999",
-        message_thread_id=30,
+        message_thread_id=29,
         next_channel_id="-100999",
         next_message_thread_id=31,
+        feedback_copy_channel_id="-100999",
+        feedback_copy_message_thread_id=30,
     )
     assert reply.target_chat_id == "-100999"
-    assert reply.message_thread_id == 30
+    assert reply.message_thread_id == 29
     assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt" not in reply.text
-    assert len(reply.extra_replies) == 1
-    assert reply.extra_replies[0].message_thread_id == 31
-    assert reply.extra_replies[0].text.startswith("#next_prompt\nExercise 2/7")
+    assert "#next_prompt\nExercise 2/7" in reply.text
+    assert len(reply.extra_replies) == 2
+    assert reply.extra_replies[0].message_thread_id == 30
+    assert reply.extra_replies[0].text.startswith("#feedback\nAttempt #")
+    assert reply.extra_replies[1].message_thread_id == 31
+    assert reply.extra_replies[1].text.startswith("#next_prompt\nExercise 2/7")
 
 
 def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
