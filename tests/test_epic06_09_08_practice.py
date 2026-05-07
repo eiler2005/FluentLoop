@@ -5,7 +5,12 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 
 from fluentloop.ai.provider import StubProvider
-from fluentloop.bot.handlers import handle_answer, handle_dispute
+from fluentloop.bot.handlers import (
+    handle_answer,
+    handle_attempt_ack,
+    handle_dispute,
+    handle_today,
+)
 from fluentloop.db.models import (
     MistakeEvent,
     MistakePattern,
@@ -177,6 +182,9 @@ def test_feedback_dispute_logs_and_removes_mistake_event(
     assert attempt.status == "disputed"
     assert list((tmp_path / "disputes").glob("*.jsonl"))
 
+    ack = handle_attempt_ack(db_session, user, attempt.id)
+    assert f"attempt #{attempt.id}" in ack.text
+
 
 def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
@@ -190,7 +198,21 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
         channel_id="-100123",
     )
     assert reply.target_chat_id == "-100123"
+    assert reply.text.startswith("#feedback\nAttempt #")
+    assert "#next_prompt\nExercise 2/7" in reply.text
     assert "Exercise 2/7" in reply.text
+    assert reply.buttons is not None
+    button_data = {button.data for row in reply.buttons for button in row}
+    assert "attempt:ack:1" in button_data
+    assert "dispute:1:equally_valid" in button_data
+
+
+def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    reply = handle_today(db_session, user, channel_id="-100123")
+    assert reply.target_chat_id == "-100123"
+    assert reply.text.startswith("#practice_flow\nToday's English practice")
 
 
 def test_answer_without_session_does_not_create_practice(db_session, settings) -> None:

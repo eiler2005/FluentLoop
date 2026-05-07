@@ -86,5 +86,7 @@ This is the canonical "approval required" gate from PRD §5.5 and §13.
   `AI_PROVIDER=stub` keeps spend at zero.
 - Added `/candidates <material_id>` plus `/candidate add <id>` and
   `/candidate skip <id>` for one-by-one candidate review in Telegram.
+- Added inline `Approve all`, `Review one by one`, and `Skip all` buttons on
+  extraction summaries, plus per-candidate inline `Add` / `Skip` buttons.
 - Malformed extraction/provider failures now return a friendly "try again or
   rephrase" response instead of crashing handler execution.

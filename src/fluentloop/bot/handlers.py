@@ -30,6 +30,7 @@ from fluentloop.materials import (
     approve_all,
     approve_candidate,
     extract_candidates,
+    skip_all,
     skip_candidate,
     store_material,
 )
@@ -50,9 +51,97 @@ ITEM_STATUS_USAGE = (
 
 
 @dataclass(frozen=True)
+class InlineButton:
+    text: str
+    data: str
+
+
+@dataclass(frozen=True)
 class BotReply:
     text: str
     target_chat_id: int | str | None = None
+    buttons: list[list[InlineButton]] | None = None
+
+
+def _button(text: str, data: str) -> InlineButton:
+    return InlineButton(text=text, data=data)
+
+
+def _settings_buttons(user: User) -> list[list[InlineButton]]:
+    return [
+        [
+            _button("B2+", "settings:level:B2+"),
+            _button("B2+/C1-", "settings:level:B2+/C1-"),
+            _button("C1-", "settings:level:C1-"),
+        ],
+        [
+            _button("10 min", "settings:practice_duration_minutes:10"),
+            _button("15 min", "settings:practice_duration_minutes:15"),
+            _button("25 min", "settings:practice_duration_minutes:25"),
+        ],
+        [
+            _button("RU", "settings:explanation_language:ru"),
+            _button("EN", "settings:explanation_language:en"),
+            _button("Mixed", "settings:explanation_language:mixed"),
+        ],
+        [
+            _button("20:00", "settings:reminder_time:20:00"),
+            _button("20:30", "settings:reminder_time:20:30"),
+            _button("21:00", "settings:reminder_time:21:00"),
+        ],
+        [_button("Refresh", "settings:refresh:now")],
+    ]
+
+
+def _candidate_buttons(candidate_id: int) -> list[InlineButton]:
+    return [
+        _button(f"Add #{candidate_id}", f"candidate:add:{candidate_id}"),
+        _button(f"Skip #{candidate_id}", f"candidate:skip:{candidate_id}"),
+    ]
+
+
+def _favorite_button(item_id: int, is_favorite: bool) -> InlineButton:
+    marker = "Unstar" if is_favorite else "Star"
+    return _button(f"{marker} #{item_id}", f"favorite:toggle:{item_id}")
+
+
+def _item_buttons(item_id: int, status: str, is_favorite: bool) -> list[InlineButton]:
+    buttons = [_favorite_button(item_id, is_favorite)]
+    if status == "active":
+        buttons.extend(
+            [
+                _button(f"Archive #{item_id}", f"item:archive:{item_id}"),
+                _button(f"Suspend #{item_id}", f"item:suspend:{item_id}"),
+            ]
+        )
+    else:
+        buttons.append(_button(f"Restore #{item_id}", f"item:restore:{item_id}"))
+    return buttons
+
+
+def _dispute_buttons(attempt_id: int) -> list[list[InlineButton]]:
+    return [
+        [
+            _button("Got it", f"attempt:ack:{attempt_id}"),
+            _button("I disagree", f"dispute:{attempt_id}:equally_valid"),
+        ],
+        [
+            _button("AI was wrong", f"dispute:{attempt_id}:ai_wrong"),
+            _button("Style issue", f"dispute:{attempt_id}:style_preference"),
+        ],
+    ]
+
+
+def handle_upload_prompt() -> BotReply:
+    return BotReply(
+        "No active exercise. Treat this text as lesson material?",
+        buttons=[
+            [
+                _button("Treat as lesson material", "upload:confirm:pending"),
+                _button("Cancel", "upload:cancel:pending"),
+            ]
+        ],
+    )
 
 
 def is_allowed(settings: Settings, telegram_user_id: int) -> bool:
@@ -77,7 +166,7 @@ def handle_help() -> BotReply:
 
 
 def handle_settings(session: Session, user: User) -> BotReply:
-    return BotReply(format_settings(user))
+    return BotReply(format_settings(user), buttons=_settings_buttons(user))
 
 
 def handle_setting_update(
@@ -87,7 +176,9 @@ def handle_setting_update(
         update_setting(session, user, field, value)
     except ValueError as exc:
         return BotReply(f"Could not update setting: {exc}")
-    return BotReply("Updated.\n" + format_settings(user))
+    return BotReply(
+        "Updated.\n" + format_settings(user), buttons=_settings_buttons(user)
+    )
 
 
 def handle_add(
@@ -127,7 +218,10 @@ def handle_add(
         )
     except ValueError as exc:
         return BotReply(f"Could not add item: {exc}")
-    return BotReply(f"Added #{item.id} {item.type}: {item.text}")
+    return BotReply(
+        f"Added #{item.id} {item.type}: {item.text}",
+        buttons=[[_favorite_button(item.id, item.is_favorite)]],
+    )
 
 
 def parse_add_payload(raw: str) -> tuple[str, str, str, list[str]]:
@@ -171,7 +265,13 @@ def handle_upload(
         candidates = extract_candidates(session, material, provider)
     except ValueError as exc:
         return BotReply(f"Could not extract material: {exc}")
-    return BotReply(candidate_summary(candidates))
+    material_id = candidates[0].source_material_id if candidates else material.id
+    buttons: list[list[InlineButton]] = [
+        [_button("Approve all", f"approve:all:{material_id}")],
+        [_button("Review one by one", f"candidates:list:{material_id}")],
+        [_button("Skip all", f"approve:skip:{material_id}")],
+    ]
+    return BotReply(candidate_summary(candidates), buttons=buttons)
 
 
 def handle_approve_all(session: Session, user: User, material_id: int) -> BotReply:
@@ -182,6 +282,16 @@ def handle_approve_all(session: Session, user: User, material_id: int) -> BotRep
         return BotReply("Material not found.")
     count = approve_all(session, user, source)
     return BotReply(f"Added {count} learning items.")
+
+
+def handle_skip_all(session: Session, user: User, material_id: int) -> BotReply:
+    from fluentloop.db.models import SourceMaterial
+
+    source = session.get(SourceMaterial, material_id)
+    if source is None or source.user_id != user.id:
+        return BotReply("Material not found.")
+    count = skip_all(session, source)
+    return BotReply(f"Skipped {count} pending candidates.")
 
 
 def handle_candidates(session: Session, user: User, material_id: int) -> BotReply:
@@ -205,8 +315,13 @@ def handle_candidates(session: Session, user: User, material_id: int) -> BotRepl
             f"- #{candidate.id} [{candidate.status}] "
             f"{candidate.type}: {candidate.text}"
         )
+    buttons = [
+        _candidate_buttons(candidate.id)
+        for candidate in candidates
+        if candidate.status == "pending"
+    ]
     lines.append("Use /candidate add <id> or /candidate skip <id>.")
-    return BotReply("\n".join(lines))
+    return BotReply("\n".join(lines), buttons=buttons or None)
 
 
 def handle_candidate_action(
@@ -248,11 +363,17 @@ def handle_today(
     practice_session = start_or_resume_session(session, user)
     current = next_exercise(session, practice_session)
     if current is None:
+        text = "Today's practice is complete."
+        if channel_id:
+            text = "#summary\n" + text
         return BotReply(
-            "Today's practice is complete.", channel_id or user.telegram_user_id
+            text, channel_id or user.telegram_user_id
         )
     index, exercise = current
-    text = f"Today's English practice\n\nExercise {index + 1}/7\n{exercise['prompt']}"
+    title = "Today's English practice"
+    if channel_id:
+        title = "#practice_flow\n" + title
+    text = f"{title}\n\nExercise {index + 1}/7\n{exercise['prompt']}"
     return BotReply(text, channel_id or user.telegram_user_id)
 
 
@@ -280,8 +401,9 @@ def handle_answer(
         session, practice_session, index, exercise, answer, feedback.model_dump()
     )
     follow_up = next_exercise(session, practice_session)
+    heading = "#feedback\n" if channel_id else ""
     message = (
-        f"Attempt #{attempt.id}\n"
+        f"{heading}Attempt #{attempt.id}\n"
         f"{feedback.status.title()}.\n"
         f"Better: {feedback.natural_answer or feedback.corrected_answer}\n"
         f"Why: {feedback.explanation}"
@@ -292,16 +414,39 @@ def handle_answer(
         message += "\nI'll add this as a weak point unless you dispute it."
     if pattern is not None and pattern.confidence == "low":
         message += (
-            f"\nRecurring pattern #{pattern.id} detected. "
+            f"\n#mistakes Recurring pattern #{pattern.id} detected. "
             f"Use /mistakes focus {pattern.id} or /mistakes ignore {pattern.id}."
         )
-    message += f"\nDisagree? Send /dispute {attempt.id} <reason>."
+    message += f"\nDisagree? Use the buttons or send /dispute {attempt.id} <reason>."
     if follow_up is not None:
         next_index, next_item = follow_up
-        message += f"\n\nExercise {next_index + 1}/7\n{next_item['prompt']}"
+        next_heading = "#next_prompt\n" if channel_id else ""
+        message += (
+            f"\n\n{next_heading}Exercise {next_index + 1}/7\n"
+            f"{next_item['prompt']}"
+        )
     else:
-        message += "\n\n" + summarize_session(session, practice_session)
-    return BotReply(message, channel_id or user.telegram_user_id)
+        summary_heading = "#summary\n" if channel_id else ""
+        message += "\n\n" + summary_heading + summarize_session(
+            session, practice_session
+        )
+    return BotReply(
+        message,
+        channel_id or user.telegram_user_id,
+        buttons=_dispute_buttons(attempt.id),
+    )
+
+
+def handle_attempt_ack(session: Session, user: User, attempt_id: int) -> BotReply:
+    from fluentloop.db.models import PracticeAttempt, PracticeSession
+
+    attempt = session.get(PracticeAttempt, attempt_id)
+    if attempt is None:
+        return BotReply("Attempt not found.")
+    practice_session = session.get(PracticeSession, attempt.practice_session_id)
+    if practice_session is None or practice_session.user_id != user.id:
+        return BotReply("Attempt not found.")
+    return BotReply(f"Got it. Keeping attempt #{attempt.id} as-is.")
 
 
 def handle_dispute(
@@ -348,7 +493,15 @@ def handle_stats(session: Session, user: User) -> BotReply:
 
 
 def handle_mistakes(session: Session, user: User) -> BotReply:
-    return BotReply(mistake_patterns(active_patterns(session, user.id)))
+    patterns = active_patterns(session, user.id)
+    buttons = [
+        [
+            _button(f"Focus #{pattern.id}", f"mistake:focus:{pattern.id}"),
+            _button(f"Ignore #{pattern.id}", f"mistake:ignore:{pattern.id}"),
+        ]
+        for pattern in patterns
+    ]
+    return BotReply(mistake_patterns(patterns), buttons=buttons or None)
 
 
 def handle_mistake_action(
@@ -372,8 +525,10 @@ def handle_favorites(session: Session, user: User) -> BotReply:
     items = favorite_items(session, user.id)
     if not items:
         return BotReply("No favorites yet.")
+    buttons = [[_favorite_button(item.id, item.is_favorite)] for item in items]
     return BotReply(
-        "Favorites\n" + "\n".join(f"- #{item.id} {item.text}" for item in items)
+        "Favorites\n" + "\n".join(f"- #{item.id} {item.text}" for item in items),
+        buttons=buttons,
     )
 
 
@@ -385,7 +540,10 @@ def handle_favorite_toggle(session: Session, user: User, item_id: int) -> BotRep
         return BotReply("Learning item not found.")
     toggle_favorite(session, item)
     marker = "favorite" if item.is_favorite else "not favorite"
-    return BotReply(f"Marked #{item.id} as {marker}: {item.text}")
+    return BotReply(
+        f"Marked #{item.id} as {marker}: {item.text}",
+        buttons=[[_favorite_button(item.id, item.is_favorite)]],
+    )
 
 
 def handle_items(session: Session, user: User, status: str = "active") -> BotReply:
@@ -399,7 +557,10 @@ def handle_items(session: Session, user: User, status: str = "active") -> BotRep
     for item in items:
         favorite = " *" if item.is_favorite else ""
         lines.append(f"- #{item.id} [{item.type}] {item.text}{favorite}")
-    return BotReply("\n".join(lines))
+    buttons = [
+        _item_buttons(item.id, item.status, item.is_favorite) for item in items
+    ]
+    return BotReply("\n".join(lines), buttons=buttons)
 
 
 def handle_item_status(
@@ -418,7 +579,10 @@ def handle_item_status(
     if target is None:
         return BotReply(ITEM_STATUS_USAGE)
     set_item_status(session, item, target)
-    return BotReply(f"Marked #{item.id} as {target}: {item.text}")
+    return BotReply(
+        f"Marked #{item.id} as {target}: {item.text}",
+        buttons=[_item_buttons(item.id, item.status, item.is_favorite)],
+    )
 
 
 def handle_rules(session: Session) -> BotReply:

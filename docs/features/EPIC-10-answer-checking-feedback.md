@@ -99,5 +99,6 @@ bot can silently train mistake patterns from its own miscalls.
 - `/dispute` writes the JSONL audit row, marks the attempt as disputed, and
   removes the latest matching mistake event so disputed answers do not train
   mistake patterns.
-- Inline `[Got it]` / `[I disagree]` buttons remain a callback UX polish item;
-  the command fallback is deployed and tested for the Telegram MVP.
+- Feedback now carries inline `Got it`, `I disagree`, `AI was wrong`, and
+  `Style issue` buttons; each dispute callback writes the same JSONL audit row
+  as `/dispute <attempt_id> <reason>`. The command fallback remains deployed.

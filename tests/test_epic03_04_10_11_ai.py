@@ -9,7 +9,10 @@ from fluentloop.bot.handlers import (
     handle_candidate_action,
     handle_candidates,
     handle_mistake_action,
+    handle_mistakes,
+    handle_skip_all,
     handle_upload,
+    handle_upload_prompt,
 )
 from fluentloop.db.models import ExtractedCandidate, LearningItem, MistakeEvent
 from fluentloop.feedback import apply_feedback, check_answer
@@ -47,9 +50,17 @@ def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) 
     provider = StubProvider(tmp_path / "usage.jsonl")
     reply = handle_upload(db_session, user, provider, "push back on and align on")
     assert "Send /approve" in reply.text
+    assert reply.buttons is not None
+    assert reply.buttons[0][0].data.startswith("approve:all:")
+    assert reply.buttons[1][0].data.startswith("candidates:list:")
+    assert reply.buttons[2][0].data.startswith("approve:skip:")
     material_id = int(reply.text.split("/approve ", 1)[1].split()[0])
     listed = handle_candidates(db_session, user, material_id)
     assert "Use /candidate add" in listed.text
+    assert listed.buttons is not None
+    listed_data = {button.data for row in listed.buttons for button in row}
+    assert any(data.startswith("candidate:add:") for data in listed_data)
+    assert any(data.startswith("candidate:skip:") for data in listed_data)
     candidate = db_session.scalar(select(ExtractedCandidate))
     assert candidate is not None
     skipped = handle_candidate_action(db_session, user, "skip", candidate.id)
@@ -62,6 +73,19 @@ def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) 
         select(LearningItem).where(LearningItem.user_id == user.id)
     )
     assert item is not None
+
+    second = handle_upload(db_session, user, provider, "circle back and follow up")
+    second_material_id = int(second.text.split("/approve ", 1)[1].split()[0])
+    skipped_all = handle_skip_all(db_session, user, second_material_id)
+    assert "Skipped" in skipped_all.text
+
+
+def test_free_text_upload_prompt_buttons() -> None:
+    reply = handle_upload_prompt()
+    assert "Treat this text as lesson material" in reply.text
+    assert reply.buttons is not None
+    data = {button.data for row in reply.buttons for button in row}
+    assert data == {"upload:confirm:pending", "upload:cancel:pending"}
 
 
 def test_upload_handler_returns_friendly_size_error(
@@ -118,6 +142,11 @@ def test_mistake_pattern_actions(db_session, settings) -> None:
         db_session.flush()
         pattern = ingest_mistake_event(db_session, event)
     assert pattern is not None
+    listed = handle_mistakes(db_session, user)
+    assert listed.buttons is not None
+    listed_data = {button.data for row in listed.buttons for button in row}
+    assert f"mistake:focus:{pattern.id}" in listed_data
+    assert f"mistake:ignore:{pattern.id}" in listed_data
     reply = handle_mistake_action(db_session, user, "focus", pattern.id)
     assert "Promoted" in reply.text
     assert pattern.confidence == "high"

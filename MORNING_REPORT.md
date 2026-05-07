@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:26 UTC` (`08:26 Moscow`)
-- Total wall time so far: `09h 41m`
+- Last updated: `2026-05-07 05:38 UTC` (`08:38 Moscow`)
+- Total wall time so far: `09h 53m`
 
 ## Epics done
 
@@ -87,11 +87,17 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`34 passed`).
+  (`36 passed`).
 - `TELEGRAM_CHANNEL_ID` is now configured in ignored env files and deployed to
   the VPS. Channel send/delete smoke passed; `/today` posts practice to the
   channel, while private answers route feedback/progress/next prompts back to
   the channel.
+- Telegram callback UX hardening added inline settings presets, upload
+  confirm/cancel, approve all/review/skip all, one-by-one add/skip, favorite
+  stars, item lifecycle actions, mistake focus/ignore, and feedback
+  acknowledge/dispute buttons. Channel practice posts now carry logical topic
+  tags: `#practice_flow`, `#feedback`, `#next_prompt`, `#summary`, and
+  `#mistakes`.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
@@ -112,5 +118,5 @@
 ## Recommended morning order of business
 
 1. Send `/today` manually to the bot in Telegram and check the channel UX.
-2. Continue hardening inline callback flows for `/settings`, `/add`, approval,
-   favorites, and disputes.
+2. Check callback buttons in Telegram after the latest deploy: `/settings`,
+   `/upload`, `/items`, `/favorites`, `/mistakes`, and a short `/today` flow.

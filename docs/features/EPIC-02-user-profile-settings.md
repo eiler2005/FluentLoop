@@ -66,7 +66,8 @@ via `/settings`.
 
 - Implemented persistent user defaults and validated setting updates through
   service functions used by the bot handlers.
-- Added `/settings set <field> <value>` for practical Telegram-side edits;
-  richer inline keyboard editing remains a later UX polish.
+- Added `/settings set <field> <value>` for practical Telegram-side edits.
+- Added inline preset buttons for level, practice duration, explanation
+  language, reminder time, and refresh; command fallback stays available.
 - Audit coverage now exercises all editable fields and verifies `updated_at`
   changes on update.

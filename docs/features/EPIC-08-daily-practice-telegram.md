@@ -98,5 +98,9 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   partial, incorrect, and answered counts.
 - Reminder messages now include a Telegram `Start` inline button wired to the
   same `/today` session-start path.
+- Channel-mode practice messages use logical channel topics in the message
+  text: `#practice_flow`, `#feedback`, `#next_prompt`, `#summary`, and
+  `#mistakes`. Native Telegram forum topics remain out of scope for a channel;
+  they require a forum supergroup.
 - Audit coverage verifies all seven attempts complete a session and set
   `completed_at`.

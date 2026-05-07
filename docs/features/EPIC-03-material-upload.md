@@ -69,6 +69,6 @@ be processed by EPIC-04 (AI extraction).
   passed to extraction.
 - Oversized upload errors are returned as friendly Telegram replies rather
   than bubbling exceptions.
-- Free text without an active practice session now points the user to
-  `/upload` as the safe text fallback for "treat as lesson material"; inline
-  buttons remain a callback-UX polish item.
+- Free text without an active practice session now stores a pending FSM state
+  and offers inline `Treat as lesson material` / `Cancel` buttons; `/upload`
+  remains the safe text fallback.

@@ -11,6 +11,7 @@ from fluentloop.bot.handlers import (
     handle_add_text,
     handle_answer,
     handle_approve_all,
+    handle_attempt_ack,
     handle_candidate_action,
     handle_candidates,
     handle_dispute,
@@ -24,10 +25,12 @@ from fluentloop.bot.handlers import (
     handle_rules,
     handle_setting_update,
     handle_settings,
+    handle_skip_all,
     handle_start,
     handle_stats,
     handle_today,
     handle_upload,
+    handle_upload_prompt,
 )
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
@@ -43,6 +46,28 @@ ITEM_STATUS_USAGE = (
 )
 CANDIDATE_USAGE = "Use /candidate add <id> or /candidate skip <id>."
 CHANNEL_DISCOVERY_PATH = Path("data/channel_discovery.json")
+
+
+def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
+    if not reply.buttons:
+        return None
+    from telethon import Button
+
+    return [
+        [
+            Button.inline(button.text, button.data.encode("utf-8"))
+            for button in row
+        ]
+        for row in reply.buttons
+    ]
+
+
+async def send_reply(client, fallback_chat_id, reply: BotReply) -> None:  # type: ignore[no-untyped-def]
+    await client.send_message(
+        reply.target_chat_id or fallback_chat_id,
+        reply.text,
+        buttons=_telethon_buttons(reply),
+    )
 
 
 async def maybe_record_channel(event, settings: Settings) -> bool:  # type: ignore[no-untyped-def]
@@ -202,12 +227,13 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_rules(session)
             else:
                 reply = handle_help()
-            await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
+            await send_reply(client, event.chat_id, reply)
 
-    @client.on(events.CallbackQuery(data=b"start_today"))
-    async def on_start_today(event) -> None:  # type: ignore[no-untyped-def]
+    @client.on(events.CallbackQuery)
+    async def on_callback(event) -> None:  # type: ignore[no-untyped-def]
         sender = await event.get_sender()
         telegram_user_id = int(sender.id)
+        raw_data = bytes(event.data or b"").decode("utf-8", errors="replace")
         with session_scope(session_factory) as session:
             if (
                 settings.telegram_allowed_user_id is not None
@@ -216,11 +242,118 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 await event.answer("This is a personal FluentLoop bot.")
                 return
             user = ensure_user(session, telegram_user_id, settings)
-            reply = handle_today(
-                session, user, channel_id=settings.telegram_channel_id
-            )
-            await event.answer("Starting practice")
-            await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
+            parts = raw_data.split(":", 2)
+            if raw_data in {"start_today", "today:start"}:
+                reply = handle_today(
+                    session, user, channel_id=settings.telegram_channel_id
+                )
+                await event.answer("Starting practice")
+            elif len(parts) == 3 and parts[0] == "settings":
+                field, value = parts[1], parts[2]
+                if field == "refresh":
+                    reply = handle_settings(session, user)
+                else:
+                    reply = handle_setting_update(session, user, field, value)
+                await event.answer("Settings updated")
+            elif len(parts) == 3 and parts[0] == "approve" and parts[1] in {
+                "all",
+                "skip",
+            }:
+                try:
+                    material_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply("Use /approve <material_id>.")
+                else:
+                    if parts[1] == "all":
+                        reply = handle_approve_all(session, user, material_id)
+                    else:
+                        reply = handle_skip_all(session, user, material_id)
+                await event.answer("Approval updated")
+            elif raw_data == "upload:confirm:pending":
+                state_store = StateStore(session)
+                state = state_store.get(event.chat_id, telegram_user_id)
+                if (
+                    state is None
+                    or state.name != "confirm_upload"
+                    or not state.payload.get("raw_text")
+                ):
+                    reply = BotReply("Nothing pending. Send /upload first.")
+                else:
+                    reply = handle_upload(
+                        session, user, provider, str(state.payload["raw_text"])
+                    )
+                    state_store.clear(event.chat_id, telegram_user_id)
+                await event.answer("Material upload")
+            elif raw_data == "upload:cancel:pending":
+                StateStore(session).clear(event.chat_id, telegram_user_id)
+                reply = BotReply("Cancelled.")
+                await event.answer("Cancelled")
+            elif len(parts) == 3 and parts[0] == "candidates":
+                try:
+                    material_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply("Use /candidates <material_id>.")
+                else:
+                    reply = handle_candidates(session, user, material_id)
+                await event.answer("Candidate list")
+            elif len(parts) == 3 and parts[0] == "candidate":
+                try:
+                    candidate_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply(CANDIDATE_USAGE)
+                else:
+                    reply = handle_candidate_action(
+                        session, user, parts[1], candidate_id
+                    )
+                await event.answer("Candidate handled")
+            elif len(parts) == 3 and parts[0] == "favorite" and parts[1] == "toggle":
+                try:
+                    item_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply("Use /favorite <item_id>.")
+                else:
+                    reply = handle_favorite_toggle(session, user, item_id)
+                await event.answer("Favorite updated")
+            elif len(parts) == 3 and parts[0] == "item":
+                try:
+                    item_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply(ITEM_STATUS_USAGE)
+                else:
+                    reply = handle_item_status(session, user, item_id, parts[1])
+                await event.answer("Item updated")
+            elif len(parts) == 3 and parts[0] == "mistake":
+                try:
+                    pattern_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply(
+                        "Use /mistakes focus <id> or /mistakes ignore <id>."
+                    )
+                else:
+                    reply = handle_mistake_action(
+                        session, user, parts[1], pattern_id
+                    )
+                await event.answer("Mistake pattern updated")
+            elif len(parts) == 3 and parts[0] == "dispute":
+                try:
+                    attempt_id = int(parts[1])
+                except ValueError:
+                    reply = BotReply("Use /dispute <attempt_id> <reason>.")
+                else:
+                    reply = handle_dispute(session, user, attempt_id, parts[2])
+                await event.answer("Dispute logged")
+            elif len(parts) == 3 and parts[0] == "attempt" and parts[1] == "ack":
+                try:
+                    attempt_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply("Attempt not found.")
+                else:
+                    reply = handle_attempt_ack(session, user, attempt_id)
+                await event.answer("Got it")
+            else:
+                reply = BotReply("Unknown button action. Send /help.")
+                await event.answer("Unknown action")
+            await send_reply(client, event.chat_id, reply)
 
     @client.on(events.NewMessage)
     async def on_free_text(event) -> None:  # type: ignore[no-untyped-def]
@@ -254,7 +387,15 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     event.raw_text,
                     channel_id=settings.telegram_channel_id,
                 )
-            await client.send_message(reply.target_chat_id or event.chat_id, reply.text)
+                if reply.text.startswith("No active exercise."):
+                    state_store.set(
+                        event.chat_id,
+                        telegram_user_id,
+                        "confirm_upload",
+                        {"raw_text": event.raw_text},
+                    )
+                    reply = handle_upload_prompt()
+            await send_reply(client, event.chat_id, reply)
 
     await client.start(bot_token=settings.telegram_bot_token)
     me = await client.get_me()
