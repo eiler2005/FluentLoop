@@ -13,6 +13,11 @@ cannot reliably post full practice to the channel.
 **Why I'd prefer to ask:** A private channel id is sensitive enough that it
 should not be guessed or committed.
 
+**Resolved 2026-05-07:** After the bot was added as channel admin, Bot API
+updates exposed `FluentLoop English`. `TELEGRAM_CHANNEL_ID` was written only to
+ignored local/VPS env files, channel send/delete smoke passed, and channel-mode
+practice routing is deployed.
+
 ## 2. Docker daemon unavailable locally
 
 **Epic:** EPIC-01-bot-foundation.md  

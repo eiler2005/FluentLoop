@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-06 22:11 UTC` (`01:11 Moscow`)
-- Total wall time so far: `02h 26m`
+- Last updated: `2026-05-07 05:26 UTC` (`08:26 Moscow`)
+- Total wall time so far: `09h 41m`
 
 ## Epics done
 
@@ -17,7 +17,7 @@
 | 05 | EPIC-05-learning-items | this commit | ✅ | ✅ 21:06 UTC | CRUD + duplicate/status command audit |
 | 06 | EPIC-06-spaced-repetition | this commit | ✅ | skipped | 7-day Good interval audit |
 | 07 | EPIC-07-automatic-practice-generation | this commit | ✅ | skipped | no repeats + high-confidence mistakes |
-| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 20:28 UTC | Start button + completion audit |
+| 08 | EPIC-08-daily-practice-telegram | this commit | ✅ | ✅ 05:26 UTC | channel mode + feedback routing |
 | 09 | EPIC-09-exercise-types | this commit | ✅ | skipped | 6-type registry |
 | 10 | EPIC-10-answer-checking-feedback | this commit | ✅ | ✅ 22:04 UTC | attempt feedback + dispute command |
 | 11 | EPIC-11-mistake-events-and-patterns | this commit | ✅ | ✅ 22:10 UTC | auto ingestion + archive audit |
@@ -29,7 +29,7 @@
 
 | # | Epic | Question | Reverted? |
 |---|---|---|---|
-| — | Channel discovery | [Q1](NIGHT_QUESTIONS.md#1-channel-discovery-did-not-expose-fluentloop-english) | no |
+| — | Channel discovery | resolved 2026-05-07 | no |
 
 ## Epics not attempted
 
@@ -56,6 +56,8 @@
 | 21:28 | `e4981c9` | ✅ Bot API outbound smoke + VPS seed | EPIC-01-05 strict audit fixes |
 | 22:04 | `4d562fd` | ✅ Bot API outbound smoke + VPS seed | EPIC-06-10 strict audit fixes |
 | 22:10 | `113ba96` | ✅ Bot API outbound smoke + VPS seed | EPIC-11-14 strict audit fixes |
+| 05:23 | `7cc0cb5` | ✅ private smoke + channel send/delete smoke | channel id discovered and env deployed |
+| 05:26 | `a06ae2d` | ✅ private smoke + channel send/delete smoke | practice feedback/next prompts route to channel |
 
 ## Surprises / anomalies
 
@@ -63,8 +65,9 @@
   `uv --python 3.11`, which created `.venv/` and passed lint/tests.
 - Local Docker daemon was unavailable, but VPS Docker build succeeded and the
   container reached healthy status.
-- Bot-mode Telethon handshake passed for the configured bot; Bot API and
-  Telethon could not discover the private channel id from available updates.
+- Bot-mode Telethon handshake passed for the configured bot. Channel id
+  discovery was later resolved after the bot was added as admin and Bot API
+  updates exposed `FluentLoop English`.
 - `/opt/fluentloop-bot` initially required root-owned directory setup; deploy
   script now uses sudo only to create/chown that service directory.
 - Telegram command coverage was widened after the first deploy: `/add`,
@@ -84,7 +87,11 @@
 - `/items [active|archived|suspended]` lists learning items, and `/item
   archive|suspend|restore <item_id>` manages lifecycle from Telegram.
 - Current green gate: `ruff check src tests scripts` and `pytest -q`
-  (`32 passed`).
+  (`34 passed`).
+- `TELEGRAM_CHANNEL_ID` is now configured in ignored env files and deployed to
+  the VPS. Channel send/delete smoke passed; `/today` posts practice to the
+  channel, while private answers route feedback/progress/next prompts back to
+  the channel.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
@@ -104,8 +111,6 @@
 
 ## Recommended morning order of business
 
-1. Add `TELEGRAM_CHANNEL_ID` to `.env` or create a fresh channel event visible
-   to the bot, then rerun `python scripts/discover_channel.py`.
-2. Send `/start` manually to the bot in Telegram and check the live UX.
-3. Continue hardening inline callback flows for `/settings`, `/add`, approval,
+1. Send `/today` manually to the bot in Telegram and check the channel UX.
+2. Continue hardening inline callback flows for `/settings`, `/add`, approval,
    favorites, and disputes.
