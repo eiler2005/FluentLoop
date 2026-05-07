@@ -10,6 +10,7 @@ Lightweight ADRs. One file per significant decision. Numbered sequentially.
 | [0002](0002-telegram-library-choice.md) | Telegram library choice (Telethon bot mode) | Accepted (2026-05-06) |
 | [0003](0003-ai-model-tiering-and-cost.md) | AI model tiering and cost (OpenAI gpt-4o-mini + gpt-4o) | Accepted (2026-05-06) |
 | [0004](0004-exercise-pre-generation-strategy.md) | Exercise pre-generation strategy (overnight 03:00 user TZ) | Accepted (2026-05-06) |
+| [0005](0005-forum-workspace-routing.md) | Forum workspace routing (Telethon + Bot API topic sends) | Accepted (2026-05-07) |
 
 ## Conventions
 

@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from fluentloop.bot.handlers import handle_favorites, handle_rules
+from fluentloop.bot.handlers import (
+    BotReply,
+    InlineButton,
+    handle_favorites,
+    handle_rules,
+)
 from fluentloop.channel import (
     find_channel_from_updates,
     read_recorded_channel,
@@ -11,6 +16,7 @@ from fluentloop.learning import create_learning_item, set_item_status, toggle_fa
 from fluentloop.mistakes import archive_pattern, ingest_mistake_event
 from fluentloop.practice import cache_session
 from fluentloop.stats import collect_stats, render_stats, weekly_summary
+from fluentloop.telegram_bot_api import inline_keyboard
 from fluentloop.users import ensure_user
 
 
@@ -156,3 +162,17 @@ def test_channel_discovery_cache_round_trips(tmp_path) -> None:
     )
     assert read_recorded_channel(path, "FluentLoop English") == -100123
     assert read_recorded_channel(path, "Other") is None
+
+
+def test_bot_api_inline_keyboard_payload() -> None:
+    reply = BotReply(
+        "Hi",
+        "-1001",
+        buttons=[[InlineButton("Start practice", "today:start")]],
+        message_thread_id=42,
+    )
+    assert inline_keyboard(reply) == {
+        "inline_keyboard": [
+            [{"text": "Start practice", "callback_data": "today:start"}]
+        ]
+    }

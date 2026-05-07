@@ -24,6 +24,7 @@ class Settings:
     telegram_bot_token: str
     telegram_allowed_user_id: int | None
     telegram_channel_id: str | None
+    telegram_forum_group_id: str | None
     db_url: str
     timezone: str
     reminder_time_default: str
@@ -39,12 +40,27 @@ class Settings:
     backup_minute: int
     backup_retention_days: int
     telegram_channel_title: str
+    telegram_forum_title: str
+    telegram_topic_help_id: int | None
+    telegram_topic_practice_flow_id: int | None
+    telegram_topic_materials_upload_id: int | None
+    telegram_topic_feedback_id: int | None
+    telegram_topic_next_prompt_id: int | None
+    telegram_topic_summary_id: int | None
+    telegram_topic_mistakes_id: int | None
+    telegram_topic_stats_id: int | None
+
+
+def _optional_int(name: str) -> int | None:
+    raw = os.environ.get(name, "").strip()
+    return int(raw) if raw else None
 
 
 def get_settings() -> Settings:
     load_env()
     allowed_raw = os.environ.get("TELEGRAM_ALLOWED_USER_ID", "").strip()
     channel_id = os.environ.get("TELEGRAM_CHANNEL_ID", "").strip() or None
+    forum_group_id = os.environ.get("TELEGRAM_FORUM_GROUP_ID", "").strip() or None
     db_url = os.environ.get("DB_URL", "sqlite:///data/fluentloop.sqlite")
     if db_url.startswith("sqlite:////app/") and not Path("/app").exists():
         db_url = db_url.replace("sqlite:////app/", "sqlite:///")
@@ -54,6 +70,7 @@ def get_settings() -> Settings:
         telegram_bot_token=os.environ.get("TELEGRAM_BOT_TOKEN", ""),
         telegram_allowed_user_id=int(allowed_raw) if allowed_raw else None,
         telegram_channel_id=channel_id,
+        telegram_forum_group_id=forum_group_id,
         db_url=db_url,
         timezone=os.environ.get("TIMEZONE", "Europe/Moscow"),
         reminder_time_default=os.environ.get("REMINDER_TIME_DEFAULT", "20:00"),
@@ -73,4 +90,19 @@ def get_settings() -> Settings:
         telegram_channel_title=os.environ.get(
             "TELEGRAM_CHANNEL_TITLE", "FluentLoop English"
         ),
+        telegram_forum_title=os.environ.get(
+            "TELEGRAM_FORUM_TITLE", "FluentLoop English Forum"
+        ),
+        telegram_topic_help_id=_optional_int("TELEGRAM_TOPIC_HELP_ID"),
+        telegram_topic_practice_flow_id=_optional_int(
+            "TELEGRAM_TOPIC_PRACTICE_FLOW_ID"
+        ),
+        telegram_topic_materials_upload_id=_optional_int(
+            "TELEGRAM_TOPIC_MATERIALS_UPLOAD_ID"
+        ),
+        telegram_topic_feedback_id=_optional_int("TELEGRAM_TOPIC_FEEDBACK_ID"),
+        telegram_topic_next_prompt_id=_optional_int("TELEGRAM_TOPIC_NEXT_PROMPT_ID"),
+        telegram_topic_summary_id=_optional_int("TELEGRAM_TOPIC_SUMMARY_ID"),
+        telegram_topic_mistakes_id=_optional_int("TELEGRAM_TOPIC_MISTAKES_ID"),
+        telegram_topic_stats_id=_optional_int("TELEGRAM_TOPIC_STATS_ID"),
     )

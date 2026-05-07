@@ -13,6 +13,7 @@ from fluentloop.bot.handlers import (
     is_allowed,
 )
 from fluentloop.bot.state import StateStore
+from fluentloop.telegram_workspace import workspace_destination, workspace_enabled
 
 
 def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
@@ -35,6 +36,25 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     }
     materials = handle_materials_channel_hub("-100123")
     assert "#materials_upload" in materials.text
+    threaded = handle_channel_help("-100999", message_thread_id=42)
+    assert threaded.message_thread_id == 42
+
+
+def test_forum_workspace_destinations(settings) -> None:
+    forum_settings = settings.__class__(
+        **{
+            **settings.__dict__,
+            "telegram_forum_group_id": "-100999",
+            "telegram_topic_help_id": 10,
+            "telegram_topic_practice_flow_id": 11,
+        }
+    )
+    assert workspace_enabled(forum_settings)
+    help_target = workspace_destination(forum_settings, "help")
+    assert help_target.chat_id == "-100999"
+    assert help_target.message_thread_id == 10
+    practice = workspace_destination(forum_settings, "practice_flow")
+    assert practice.message_thread_id == 11
 
 
 def test_single_user_gate_and_container_mount_are_configured(settings) -> None:

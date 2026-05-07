@@ -17,6 +17,7 @@ def settings() -> Settings:
         telegram_bot_token="token",
         telegram_allowed_user_id=123456789,
         telegram_channel_id=None,
+        telegram_forum_group_id=None,
         db_url="sqlite:///:memory:",
         timezone="Europe/Moscow",
         reminder_time_default="20:00",
@@ -32,6 +33,15 @@ def settings() -> Settings:
         backup_minute=0,
         backup_retention_days=14,
         telegram_channel_title="FluentLoop English",
+        telegram_forum_title="FluentLoop English Forum",
+        telegram_topic_help_id=None,
+        telegram_topic_practice_flow_id=None,
+        telegram_topic_materials_upload_id=None,
+        telegram_topic_feedback_id=None,
+        telegram_topic_next_prompt_id=None,
+        telegram_topic_summary_id=None,
+        telegram_topic_mistakes_id=None,
+        telegram_topic_stats_id=None,
     )
 
 

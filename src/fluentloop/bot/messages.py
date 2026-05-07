@@ -4,20 +4,22 @@ from fluentloop.db.models import ExtractedCandidate, MistakePattern
 
 HELP = """How FluentLoop works
 
-Channel:
-- FluentLoop English shows prompts, feedback, progress, summaries, and material hubs.
-- #practice_flow starts or resumes practice.
-- #materials_upload is for lesson notes, word lists, homework, exercises,
-  and teacher feedback.
+Telegram workspace:
+- FluentLoop English Forum is the main place to study.
+- Practice Flow starts or resumes practice.
+- #materials_upload / Materials Upload is for lesson notes, word lists,
+  homework, exercises, and teacher feedback.
+- Feedback, Next Prompts, Mistakes, Summaries, and Stats keep the work tidy.
+- FluentLoop English is the announcement/digest channel.
 
 Bot DM:
-- Write free-text answers here.
-- Upload material text here after tapping Upload material in the channel
-  or sending /upload.
+- Write free-text answers here if you started from the announcement channel.
+- Upload material text here after tapping Upload material, or send /upload
+  in the forum Materials Upload topic.
 - Use commands here when buttons are inconvenient.
 
 Commands:
-/start - create or load profile and post channel hubs
+/start - create or load profile and post workspace hubs
 /today - start today's practice
 /review - review due items
 /upload - upload lesson material

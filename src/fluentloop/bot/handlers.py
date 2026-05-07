@@ -69,6 +69,8 @@ class BotReply:
     text: str
     target_chat_id: int | str | None = None
     buttons: list[list[InlineButton]] | None = None
+    message_thread_id: int | None = None
+    extra_replies: tuple[BotReply, ...] = ()
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -201,39 +203,46 @@ def handle_upload_type_choice(type_: str) -> BotReply:
     return BotReply(f"Paste {type_} material in the next message.")
 
 
-def handle_channel_hub(channel_id: str) -> BotReply:
+def handle_channel_hub(
+    channel_id: str, *, message_thread_id: int | None = None
+) -> BotReply:
     return BotReply(
         "#practice_flow\n"
         "FluentLoop English practice hub.\n\n"
-        "Practice flow lives here in the channel:\n"
-        "- #practice_flow for session starts\n"
+        "Practice flow lives here in the workspace:\n"
+        "- #practice_flow / Practice Flow for session starts\n"
         "- #feedback for answer feedback\n"
         "- #next_prompt for the next exercise\n"
         "- #summary for session results\n\n"
-        "Free-text answers still go to the bot DM because Telegram channels "
-        "do not accept subscriber replies as bot input.",
+        "In the forum group, you can answer in the active practice topic. "
+        "In the announcement channel, free-text answers still go to the bot DM.",
         channel_id,
         buttons=[
             [_button("Start practice", "today:start")],
             [_button("Upload material", "materials:start")],
         ],
+        message_thread_id=message_thread_id,
     )
 
 
-def handle_channel_help(channel_id: str) -> BotReply:
+def handle_channel_help(
+    channel_id: str, *, message_thread_id: int | None = None
+) -> BotReply:
     return BotReply(
         "#help\n"
         "How FluentLoop works\n\n"
-        "This channel is the visible learning workspace.\n"
-        "- #practice_flow: start/resume practice\n"
-        "- #feedback: answer checks and explanations\n"
-        "- #next_prompt: the next exercise\n"
-        "- #summary: session results\n"
-        "- #mistakes: recurring weak points\n"
-        "- #materials_upload: lesson notes and teacher feedback intake\n\n"
-        "Use the bot DM for free-text input:\n"
-        "- answer exercises in the bot DM\n"
-        "- paste lesson/material text in the bot DM\n"
+        "FluentLoop English Forum is the working space:\n"
+        "- Practice Flow: start/resume practice\n"
+        "- Feedback: answer checks and explanations\n"
+        "- Next Prompts: the next exercise when it is split from feedback\n"
+        "- Summaries: session and weekly results\n"
+        "- Mistakes: recurring weak points\n"
+        "- Materials Upload: lesson notes and teacher feedback intake\n"
+        "- Stats: progress snapshots\n\n"
+        "FluentLoop English stays as the announcement/digest channel.\n\n"
+        "Use the bot DM when Telegram needs private text input:\n"
+        "- answer there if you started from the announcement channel\n"
+        "- paste material text there after tapping Upload material\n"
         "- use commands when buttons are inconvenient\n\n"
         "Start from the buttons below, or send /help to the bot.",
         channel_id,
@@ -241,19 +250,23 @@ def handle_channel_help(channel_id: str) -> BotReply:
             [_button("Start practice", "today:start")],
             [_button("Upload material", "materials:start")],
         ],
+        message_thread_id=message_thread_id,
     )
 
 
-def handle_materials_channel_hub(channel_id: str) -> BotReply:
+def handle_materials_channel_hub(
+    channel_id: str, *, message_thread_id: int | None = None
+) -> BotReply:
     return BotReply(
         "#materials_upload\n"
         "Lesson materials inbox.\n\n"
         "Use this topic for lesson notes, word lists, homework, exercises, "
-        "and teacher feedback. Tap Upload material, choose the type, then "
-        "paste the text in the bot DM so it can be extracted into approval "
-        "candidates.",
+        "and teacher feedback. Send /upload here, or tap Upload material and "
+        "paste the text in the bot DM. New learning items still require "
+        "approval before they become active.",
         channel_id,
         buttons=[[_button("Upload material", "materials:start")]],
+        message_thread_id=message_thread_id,
     )
 
 
@@ -270,7 +283,10 @@ def handle_start(
     user = ensure_user(session, telegram_user_id, settings)
     seed_concepts(session)
     return BotReply(
-        start_message(bool(settings.telegram_channel_id)), user.telegram_user_id
+        start_message(
+            bool(settings.telegram_forum_group_id or settings.telegram_channel_id)
+        ),
+        user.telegram_user_id,
     )
 
 
@@ -528,6 +544,7 @@ def handle_today(
     user: User,
     *,
     channel_id: str | None = None,
+    message_thread_id: int | None = None,
 ) -> BotReply:
     practice_session = start_or_resume_session(session, user)
     current = next_exercise(session, practice_session)
@@ -536,14 +553,20 @@ def handle_today(
         if channel_id:
             text = "#summary\n" + text
         return BotReply(
-            text, channel_id or user.telegram_user_id
+            text,
+            channel_id or user.telegram_user_id,
+            message_thread_id=message_thread_id,
         )
     index, exercise = current
     title = "Today's English practice"
     if channel_id:
         title = "#practice_flow\n" + title
     text = f"{title}\n\nExercise {index + 1}/7\n{exercise['prompt']}"
-    return BotReply(text, channel_id or user.telegram_user_id)
+    return BotReply(
+        text,
+        channel_id or user.telegram_user_id,
+        message_thread_id=message_thread_id,
+    )
 
 
 def handle_answer(
@@ -553,6 +576,11 @@ def handle_answer(
     answer: str,
     *,
     channel_id: str | None = None,
+    message_thread_id: int | None = None,
+    next_channel_id: str | None = None,
+    next_message_thread_id: int | None = None,
+    summary_channel_id: str | None = None,
+    summary_message_thread_id: int | None = None,
 ) -> BotReply:
     practice_session = get_in_progress_session(session, user)
     if practice_session is None:
@@ -572,6 +600,7 @@ def handle_answer(
     )
     follow_up = next_exercise(session, practice_session)
     heading = "#feedback\n" if channel_id else ""
+    extra_replies: list[BotReply] = []
     message = (
         f"{heading}Attempt #{attempt.id}\n"
         f"{feedback.status.title()}.\n"
@@ -597,19 +626,36 @@ def handle_answer(
     if follow_up is not None:
         next_index, next_item = follow_up
         next_heading = "#next_prompt\n" if channel_id else ""
-        message += (
-            f"\n\n{next_heading}Exercise {next_index + 1}/7\n"
-            f"{next_item['prompt']}"
-        )
+        next_text = f"{next_heading}Exercise {next_index + 1}/7\n{next_item['prompt']}"
+        if next_channel_id:
+            extra_replies.append(
+                BotReply(
+                    next_text,
+                    next_channel_id,
+                    message_thread_id=next_message_thread_id,
+                )
+            )
+        else:
+            message += "\n\n" + next_text
     else:
         summary_heading = "#summary\n" if channel_id else ""
-        message += "\n\n" + summary_heading + summarize_session(
-            session, practice_session
-        )
+        summary_text = summary_heading + summarize_session(session, practice_session)
+        if summary_channel_id:
+            extra_replies.append(
+                BotReply(
+                    summary_text,
+                    summary_channel_id,
+                    message_thread_id=summary_message_thread_id,
+                )
+            )
+        else:
+            message += "\n\n" + summary_text
     return BotReply(
         message,
         channel_id or user.telegram_user_id,
         buttons=_dispute_buttons(attempt.id, allow_hard=feedback.status == "correct"),
+        message_thread_id=message_thread_id,
+        extra_replies=tuple(extra_replies),
     )
 
 

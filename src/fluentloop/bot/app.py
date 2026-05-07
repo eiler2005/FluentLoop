@@ -47,6 +47,8 @@ from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.db.session import session_scope
 from fluentloop.scheduler import build_scheduler
+from fluentloop.telegram_bot_api import pin_bot_api_message, send_bot_api_reply
+from fluentloop.telegram_workspace import workspace_destination, workspace_enabled
 from fluentloop.users import ensure_user
 
 LOG = logging.getLogger(__name__)
@@ -71,22 +73,47 @@ def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
     ]
 
 
-async def send_reply(client, fallback_chat_id, reply: BotReply):  # type: ignore[no-untyped-def]
-    return await client.send_message(
-        reply.target_chat_id or fallback_chat_id,
-        reply.text,
-        buttons=_telethon_buttons(reply),
-    )
-
-
-async def pin_reply(client, fallback_chat_id, reply: BotReply) -> None:  # type: ignore[no-untyped-def]
-    message = await send_reply(client, fallback_chat_id, reply)
-    try:
-        await client.pin_message(
+async def send_reply(  # type: ignore[no-untyped-def]
+    client,
+    fallback_chat_id,
+    reply: BotReply,
+    settings: Settings | None = None,
+):
+    if reply.message_thread_id is not None:
+        if settings is None:
+            raise RuntimeError("Forum topic replies need Settings for Bot API")
+        message = await send_bot_api_reply(settings.telegram_bot_token, reply)
+    else:
+        message = await client.send_message(
             reply.target_chat_id or fallback_chat_id,
-            message,
-            notify=False,
+            reply.text,
+            buttons=_telethon_buttons(reply),
         )
+    for extra in reply.extra_replies:
+        await send_reply(client, fallback_chat_id, extra, settings)
+    return message
+
+
+async def pin_reply(  # type: ignore[no-untyped-def]
+    settings: Settings,
+    client,
+    fallback_chat_id,
+    reply: BotReply,
+) -> None:
+    message = await send_reply(client, fallback_chat_id, reply, settings)
+    try:
+        if reply.message_thread_id is not None:
+            await pin_bot_api_message(
+                settings.telegram_bot_token,
+                reply.target_chat_id or fallback_chat_id,
+                message.message_id,
+            )
+        else:
+            await client.pin_message(
+                reply.target_chat_id or fallback_chat_id,
+                message,
+                notify=False,
+            )
     except Exception:
         LOG.exception("Could not pin Telegram help message")
 
@@ -94,7 +121,7 @@ async def pin_reply(client, fallback_chat_id, reply: BotReply) -> None:  # type:
 async def maybe_record_channel(event, settings: Settings) -> bool:  # type: ignore[no-untyped-def]
     chat = await event.get_chat()
     title = getattr(chat, "title", None)
-    if title != settings.telegram_channel_title:
+    if title not in {settings.telegram_channel_title, settings.telegram_forum_title}:
         return False
     chat_id = event.chat_id
     if chat_id is None:
@@ -104,8 +131,8 @@ async def maybe_record_channel(event, settings: Settings) -> bool:  # type: igno
         title=title,
         channel_id=int(chat_id),
     )
-    LOG.info("Discovered Telegram channel %r from incoming channel event", title)
-    return True
+    LOG.info("Discovered Telegram workspace chat %r from incoming event", title)
+    return title == settings.telegram_channel_title
 
 
 async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
@@ -136,33 +163,63 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             command = parts[0]
             if command == "/start":
                 reply = handle_start(session, settings, telegram_user_id)
-                if settings.telegram_channel_id:
+                if workspace_enabled(settings):
+                    help_target = workspace_destination(settings, "help")
+                    practice_target = workspace_destination(settings, "practice_flow")
+                    materials_target = workspace_destination(
+                        settings, "materials_upload"
+                    )
                     await pin_reply(
+                        settings,
                         client,
                         event.chat_id,
-                        handle_channel_help(settings.telegram_channel_id),
+                        handle_channel_help(
+                            str(help_target.chat_id),
+                            message_thread_id=help_target.message_thread_id,
+                        ),
                     )
                     await send_reply(
                         client,
                         event.chat_id,
-                        handle_channel_hub(settings.telegram_channel_id),
+                        handle_channel_hub(
+                            str(practice_target.chat_id),
+                            message_thread_id=practice_target.message_thread_id,
+                        ),
+                        settings,
                     )
                     await send_reply(
                         client,
                         event.chat_id,
-                        handle_materials_channel_hub(settings.telegram_channel_id),
+                        handle_materials_channel_hub(
+                            str(materials_target.chat_id),
+                            message_thread_id=materials_target.message_thread_id,
+                        ),
+                        settings,
                     )
             elif command == "/help":
                 reply = handle_help()
-                if settings.telegram_channel_id:
+                if workspace_enabled(settings):
+                    help_target = workspace_destination(settings, "help")
                     await pin_reply(
+                        settings,
                         client,
                         event.chat_id,
-                        handle_channel_help(settings.telegram_channel_id),
+                        handle_channel_help(
+                            str(help_target.chat_id),
+                            message_thread_id=help_target.message_thread_id,
+                        ),
                     )
             elif command in {"/today", "/review"}:
+                practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_today(
-                    session, user, channel_id=settings.telegram_channel_id
+                    session,
+                    user,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
                 )
             elif command == "/settings":
                 if len(parts) == 3 and parts[1] == "set":
@@ -284,7 +341,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_rules(session)
             else:
                 reply = handle_help()
-            await send_reply(client, event.chat_id, reply)
+            await send_reply(client, event.chat_id, reply, settings)
 
     @client.on(events.CallbackQuery)
     async def on_callback(event) -> None:  # type: ignore[no-untyped-def]
@@ -301,8 +358,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             user = ensure_user(session, telegram_user_id, settings)
             parts = raw_data.split(":", 2)
             if raw_data in {"start_today", "today:start"}:
+                practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_today(
-                    session, user, channel_id=settings.telegram_channel_id
+                    session,
+                    user,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
                 )
                 await event.answer("Starting practice")
             elif raw_data == "materials:start":
@@ -464,7 +529,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             else:
                 reply = BotReply("Unknown button action. Send /help.")
                 await event.answer("Unknown action")
-            await send_reply(client, event.chat_id, reply)
+            await send_reply(client, event.chat_id, reply, settings)
 
     @client.on(events.NewMessage)
     async def on_free_text(event) -> None:  # type: ignore[no-untyped-def]
@@ -506,12 +571,32 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 state_store.clear(event.chat_id, telegram_user_id)
             else:
+                feedback_target = workspace_destination(settings, "feedback")
+                next_target = workspace_destination(settings, "next_prompt")
+                summary_target = workspace_destination(settings, "summary")
                 reply = handle_answer(
                     session,
                     user,
                     provider,
                     event.raw_text,
-                    channel_id=settings.telegram_channel_id,
+                    channel_id=(
+                        str(feedback_target.chat_id)
+                        if feedback_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=feedback_target.message_thread_id,
+                    next_channel_id=(
+                        str(next_target.chat_id)
+                        if next_target.message_thread_id is not None
+                        else None
+                    ),
+                    next_message_thread_id=next_target.message_thread_id,
+                    summary_channel_id=(
+                        str(summary_target.chat_id)
+                        if summary_target.message_thread_id is not None
+                        else None
+                    ),
+                    summary_message_thread_id=summary_target.message_thread_id,
                 )
                 if reply.text.startswith("No active exercise."):
                     state_store.set(
@@ -521,7 +606,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         {"raw_text": event.raw_text},
                     )
                     reply = handle_upload_prompt()
-            await send_reply(client, event.chat_id, reply)
+            await send_reply(client, event.chat_id, reply, settings)
 
     await client.start(bot_token=settings.telegram_bot_token)
     me = await client.get_me()

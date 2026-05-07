@@ -102,11 +102,20 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   text: `#practice_flow`, `#feedback`, `#next_prompt`, `#summary`, and
   `#mistakes`. Native Telegram forum topics remain out of scope for a channel;
   they require a forum supergroup.
+- Forum workspace mode is now supported for the `FluentLoop English Forum`
+  supergroup. When `TELEGRAM_FORUM_GROUP_ID` and topic env vars are present,
+  the bot routes practice/help/materials/feedback/next-prompt/summary/mistake
+  messages to real Telegram topics via Bot API `message_thread_id`.
+- `FluentLoop English` remains the announcement/digest channel; the forum
+  group is the primary study workspace.
 - `/start` now also posts channel hub messages when channel mode is configured:
   a `#practice_flow` practice entry point and a `#materials_upload` lesson
   material inbox. Channel buttons start practice or open the private upload
   flow for text entry.
 - `/start` and `/help` also post a `#help` channel message explaining the
   channel-vs-DM workflow and attempt to pin it in the channel.
+- `scripts/setup_telegram_workspace.py` can discover the forum group, create
+  the standard topics, write ignored env values, generate Telegram avatars,
+  set chat/bot photos, and pin forum help.
 - Audit coverage verifies all seven attempts complete a session and set
   `completed_at`.

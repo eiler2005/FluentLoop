@@ -130,6 +130,19 @@
   post a `#help` message in the channel and attempt to pin it.
 - A real `#help` message was posted and pinned in `FluentLoop English` after
   deploy; smoke verified channel send/pin/delete permissions first.
+- Added `FluentLoop English Forum` as the primary study workspace. The setup
+  script discovered the forum group, created real Telegram topics for Help,
+  Practice Flow, Materials Upload, Feedback, Next Prompts, Summaries, Mistakes,
+  and Stats, wrote the ignored topic ids to `.env`, generated JPEG avatars, set
+  avatars for the bot/channel/forum, and pinned forum help.
+- The bot now routes forum messages with Bot API `message_thread_id`: practice
+  starts in Practice Flow, answer checks go to Feedback, follow-up prompts go
+  to Next Prompts, summaries go to Summaries, and the old channel remains an
+  announcement/digest fallback.
+- Deployed the forum workspace build to the VPS. Container startup logs show
+  `@fluentloop_ai_bot` connected; VPS smoke passed for private Bot API delivery,
+  forum topic send/pin/delete, demo-data seeding, and forum env loading. A
+  status message was posted to the forum `Stats` topic.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
