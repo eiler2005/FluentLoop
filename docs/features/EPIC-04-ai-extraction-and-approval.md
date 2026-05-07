@@ -88,5 +88,8 @@ This is the canonical "approval required" gate from PRD §5.5 and §13.
   `/candidate skip <id>` for one-by-one candidate review in Telegram.
 - Added inline `Approve all`, `Review one by one`, and `Skip all` buttons on
   extraction summaries, plus per-candidate inline `Add` / `Skip` buttons.
+- Added candidate edit flow before approval: `Edit` lets the user choose
+  `Text`, `Meaning`, or `Tags`, send the replacement in private chat, and keep
+  the edited candidate eligible for explicit `Add` or `Skip`.
 - Malformed extraction/provider failures now return a friendly "try again or
   rephrase" response instead of crashing handler execution.

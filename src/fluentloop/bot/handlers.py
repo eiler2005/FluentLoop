@@ -29,6 +29,7 @@ from fluentloop.learning import (
 from fluentloop.materials import (
     approve_all,
     approve_candidate,
+    edit_candidate,
     extract_candidates,
     skip_all,
     skip_candidate,
@@ -96,6 +97,7 @@ def _settings_buttons(user: User) -> list[list[InlineButton]]:
 def _candidate_buttons(candidate_id: int) -> list[InlineButton]:
     return [
         _button(f"Add #{candidate_id}", f"candidate:add:{candidate_id}"),
+        _button(f"Edit #{candidate_id}", f"candidate:edit:{candidate_id}"),
         _button(f"Skip #{candidate_id}", f"candidate:skip:{candidate_id}"),
     ]
 
@@ -352,6 +354,62 @@ def handle_candidate_action(
     except ValueError:
         return BotReply("Candidate not found.")
     return BotReply("Use /candidate add <id> or /candidate skip <id>.")
+
+
+def handle_candidate_edit_menu(
+    session: Session, user: User, candidate_id: int
+) -> BotReply:
+    from fluentloop.db.models import ExtractedCandidate, SourceMaterial
+
+    candidate = session.get(ExtractedCandidate, candidate_id)
+    if candidate is None:
+        return BotReply("Candidate not found.")
+    source = session.get(SourceMaterial, candidate.source_material_id)
+    if source is None or source.user_id != user.id:
+        return BotReply("Candidate not found.")
+    if candidate.status not in {"pending", "edited"}:
+        return BotReply("Candidate already handled.")
+    return BotReply(
+        f"Edit candidate #{candidate.id}\n"
+        f"Text: {candidate.text}\n"
+        f"Meaning: {candidate.meaning}\n"
+        f"Tags: {', '.join(candidate.tags)}",
+        buttons=[
+            [
+                _button("Text", f"candidate_field:{candidate.id}:text"),
+                _button("Meaning", f"candidate_field:{candidate.id}:meaning"),
+                _button("Tags", f"candidate_field:{candidate.id}:tags"),
+            ]
+        ],
+    )
+
+
+def handle_candidate_edit_prompt(candidate_id: int, field: str) -> BotReply:
+    if field not in {"text", "meaning", "tags"}:
+        return BotReply("Use text, meaning, or tags.")
+    hint = "comma-separated tags" if field == "tags" else f"new {field}"
+    return BotReply(f"Send {hint} for candidate #{candidate_id}.")
+
+
+def handle_candidate_edit_value(
+    session: Session, user: User, candidate_id: int, field: str, value: str
+) -> BotReply:
+    from fluentloop.db.models import ExtractedCandidate
+
+    candidate = session.get(ExtractedCandidate, candidate_id)
+    if candidate is None:
+        return BotReply("Candidate not found.")
+    try:
+        edit_candidate(session, user, candidate, field, value)
+    except ValueError as exc:
+        return BotReply(f"Could not edit candidate: {exc}")
+    return BotReply(
+        f"Edited candidate #{candidate.id}.\n"
+        f"[{candidate.status}] {candidate.type}: {candidate.text}\n"
+        f"Meaning: {candidate.meaning}\n"
+        f"Tags: {', '.join(candidate.tags)}",
+        buttons=[_candidate_buttons(candidate.id)],
+    )
 
 
 def handle_today(

@@ -7,6 +7,9 @@ from fluentloop.ai.schemas import Validated
 from fluentloop.bot.handlers import (
     handle_approve_all,
     handle_candidate_action,
+    handle_candidate_edit_menu,
+    handle_candidate_edit_prompt,
+    handle_candidate_edit_value,
     handle_candidates,
     handle_mistake_action,
     handle_mistakes,
@@ -60,6 +63,7 @@ def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) 
     assert listed.buttons is not None
     listed_data = {button.data for row in listed.buttons for button in row}
     assert any(data.startswith("candidate:add:") for data in listed_data)
+    assert any(data.startswith("candidate:edit:") for data in listed_data)
     assert any(data.startswith("candidate:skip:") for data in listed_data)
     candidate = db_session.scalar(select(ExtractedCandidate))
     assert candidate is not None
@@ -78,6 +82,53 @@ def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) 
     second_material_id = int(second.text.split("/approve ", 1)[1].split()[0])
     skipped_all = handle_skip_all(db_session, user, second_material_id)
     assert "Skipped" in skipped_all.text
+
+
+def test_candidate_edit_flow_before_approval(tmp_path, db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    provider = StubProvider(tmp_path / "usage.jsonl")
+    reply = handle_upload(db_session, user, provider, "push back on and align on")
+    material_id = int(reply.text.split("/approve ", 1)[1].split()[0])
+    candidate = db_session.scalar(select(ExtractedCandidate))
+    assert candidate is not None
+
+    menu = handle_candidate_edit_menu(db_session, user, candidate.id)
+    assert menu.buttons is not None
+    assert f"candidate_field:{candidate.id}:text" in {
+        button.data for row in menu.buttons for button in row
+    }
+
+    prompt = handle_candidate_edit_prompt(candidate.id, "tags")
+    assert "comma-separated tags" in prompt.text
+
+    edited = handle_candidate_edit_value(
+        db_session,
+        user,
+        candidate.id,
+        "text",
+        "push back on a proposal",
+    )
+    assert "Edited candidate" in edited.text
+    assert "push back on a proposal" in edited.text
+    assert candidate.status == "edited"
+    assert edited.buttons is not None
+
+    tags = handle_candidate_edit_value(
+        db_session,
+        user,
+        candidate.id,
+        "tags",
+        "meetings, stakeholders",
+    )
+    assert "meetings, stakeholders" in tags.text
+
+    approved = handle_approve_all(db_session, user, material_id)
+    assert "Added" in approved.text
+    item = db_session.scalar(
+        select(LearningItem).where(LearningItem.text == "push back on a proposal")
+    )
+    assert item is not None
+    assert item.tags == ["meetings", "stakeholders"]
 
 
 def test_free_text_upload_prompt_buttons() -> None:

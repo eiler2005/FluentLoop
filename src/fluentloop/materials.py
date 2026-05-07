@@ -72,7 +72,7 @@ def approve_all(session: Session, user: User, material: SourceMaterial) -> int:
     candidates = session.scalars(
         select(ExtractedCandidate).where(
             ExtractedCandidate.source_material_id == material.id,
-            ExtractedCandidate.status == "pending",
+            ExtractedCandidate.status.in_(("pending", "edited")),
         )
     )
     count = 0
@@ -85,7 +85,7 @@ def approve_all(session: Session, user: User, material: SourceMaterial) -> int:
 def approve_candidate(
     session: Session, user: User, candidate: ExtractedCandidate
 ) -> int:
-    if candidate.status != "pending":
+    if candidate.status not in {"pending", "edited"}:
         return 0
     source = session.get(SourceMaterial, candidate.source_material_id)
     if source is None or source.user_id != user.id:
@@ -100,7 +100,7 @@ def skip_candidate(
     source = session.get(SourceMaterial, candidate.source_material_id)
     if source is None or source.user_id != user.id:
         raise ValueError("Candidate not found")
-    if candidate.status != "pending":
+    if candidate.status not in {"pending", "edited"}:
         return 0
     candidate.status = "skipped"
     candidate.terminal_at = utc_now()
@@ -113,7 +113,7 @@ def skip_all(session: Session, material: SourceMaterial) -> int:
     candidates = session.scalars(
         select(ExtractedCandidate).where(
             ExtractedCandidate.source_material_id == material.id,
-            ExtractedCandidate.status == "pending",
+            ExtractedCandidate.status.in_(("pending", "edited")),
         )
     )
     count = 0
@@ -123,3 +123,43 @@ def skip_all(session: Session, material: SourceMaterial) -> int:
         session.add(candidate)
         count += 1
     return count
+
+
+def edit_candidate(
+    session: Session,
+    user: User,
+    candidate: ExtractedCandidate,
+    field: str,
+    value: str,
+) -> ExtractedCandidate:
+    source = session.get(SourceMaterial, candidate.source_material_id)
+    if source is None or source.user_id != user.id:
+        raise ValueError("Candidate not found")
+    if candidate.status not in {"pending", "edited"}:
+        raise ValueError("Candidate already handled")
+    if field == "text":
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("Text is required")
+        duplicate = session.scalar(
+            select(ExtractedCandidate).where(
+                ExtractedCandidate.source_material_id
+                == candidate.source_material_id,
+                ExtractedCandidate.type == candidate.type,
+                ExtractedCandidate.text == normalized,
+                ExtractedCandidate.id != candidate.id,
+            )
+        )
+        if duplicate is not None:
+            raise ValueError("Duplicate candidate text")
+        candidate.text = normalized
+    elif field == "meaning":
+        candidate.meaning = value.strip()
+    elif field == "tags":
+        candidate.tags = [tag.strip() for tag in value.split(",") if tag.strip()]
+    else:
+        raise ValueError("Use text, meaning, or tags")
+    candidate.status = "edited"
+    session.add(candidate)
+    session.flush()
+    return candidate

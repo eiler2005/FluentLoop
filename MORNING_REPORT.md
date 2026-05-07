@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:44 UTC` (`08:44 Moscow`)
-- Total wall time so far: `09h 59m`
+- Last updated: `2026-05-07 05:47 UTC` (`08:47 Moscow`)
+- Total wall time so far: `10h 02m`
 
 ## Epics done
 
@@ -99,6 +99,9 @@
   acknowledge/dispute buttons. Channel practice posts now carry logical topic
   tags: `#practice_flow`, `#feedback`, `#next_prompt`, `#summary`, and
   `#mistakes`.
+- EPIC-04 follow-up hardening added the missing candidate edit flow: inline
+  `Edit` → field picker (`Text`, `Meaning`, `Tags`) → private text input →
+  edited candidate remains eligible for explicit approval/skip.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

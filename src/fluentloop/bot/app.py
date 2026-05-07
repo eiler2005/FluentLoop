@@ -13,6 +13,9 @@ from fluentloop.bot.handlers import (
     handle_approve_all,
     handle_attempt_ack,
     handle_candidate_action,
+    handle_candidate_edit_menu,
+    handle_candidate_edit_prompt,
+    handle_candidate_edit_value,
     handle_candidates,
     handle_dispute,
     handle_favorite_toggle,
@@ -302,10 +305,32 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 except ValueError:
                     reply = BotReply(CANDIDATE_USAGE)
                 else:
-                    reply = handle_candidate_action(
-                        session, user, parts[1], candidate_id
-                    )
+                    if parts[1] == "edit":
+                        reply = handle_candidate_edit_menu(
+                            session, user, candidate_id
+                        )
+                    else:
+                        reply = handle_candidate_action(
+                            session, user, parts[1], candidate_id
+                        )
                 await event.answer("Candidate handled")
+            elif raw_data.startswith("candidate_field:"):
+                field_parts = raw_data.split(":", 2)
+                try:
+                    candidate_id = int(field_parts[1])
+                except (IndexError, ValueError):
+                    reply = BotReply("Candidate not found.")
+                else:
+                    field = field_parts[2] if len(field_parts) == 3 else ""
+                    reply = handle_candidate_edit_prompt(candidate_id, field)
+                    if field in {"text", "meaning", "tags"}:
+                        StateStore(session).set(
+                            telegram_user_id,
+                            telegram_user_id,
+                            "edit_candidate",
+                            {"candidate_id": candidate_id, "field": field},
+                        )
+                await event.answer("Candidate edit")
             elif len(parts) == 3 and parts[0] == "favorite" and parts[1] == "toggle":
                 try:
                     item_id = int(parts[2])
@@ -378,6 +403,15 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 state_store.clear(event.chat_id, telegram_user_id)
             elif state is not None and state.name == "add":
                 reply = handle_add_text(session, user, event.raw_text)
+                state_store.clear(event.chat_id, telegram_user_id)
+            elif state is not None and state.name == "edit_candidate":
+                reply = handle_candidate_edit_value(
+                    session,
+                    user,
+                    int(state.payload["candidate_id"]),
+                    str(state.payload["field"]),
+                    event.raw_text,
+                )
                 state_store.clear(event.chat_id, telegram_user_id)
             else:
                 reply = handle_answer(
