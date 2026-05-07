@@ -5,6 +5,7 @@ from pathlib import Path
 from fluentloop.bot.handlers import (
     command_catalog,
     exercise_type_count,
+    handle_channel_help,
     handle_channel_hub,
     handle_help,
     handle_materials_channel_hub,
@@ -19,7 +20,12 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     assert "FluentLoop is ready" in reply.text
     assert "/start" in command_catalog()
     assert "/help" in handle_help().text
+    assert "#materials_upload" in handle_help().text
     assert exercise_type_count() == 6
+    help_reply = handle_channel_help("-100123")
+    assert help_reply.target_chat_id == "-100123"
+    assert help_reply.text.startswith("#help\nHow FluentLoop works")
+    assert help_reply.buttons is not None
     channel = handle_channel_hub("-100123")
     assert channel.target_chat_id == "-100123"
     assert "#practice_flow" in channel.text

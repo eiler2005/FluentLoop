@@ -79,3 +79,5 @@ be processed by EPIC-04 (AI extraction).
 - Channel mode includes a `#materials_upload` hub post with an `Upload material`
   button; the button opens the private bot upload flow because channel posts
   cannot collect subscriber free text directly.
+- The pinned channel `#help` explains that material buttons start in the
+  channel and text entry happens in the bot DM.

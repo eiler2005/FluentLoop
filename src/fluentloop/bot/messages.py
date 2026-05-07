@@ -2,32 +2,42 @@ from __future__ import annotations
 
 from fluentloop.db.models import ExtractedCandidate, MistakePattern
 
-HELP = """Commands
-/start - create or load profile
+HELP = """How FluentLoop works
+
+Channel:
+- FluentLoop English shows prompts, feedback, progress, summaries, and material hubs.
+- #practice_flow starts or resumes practice.
+- #materials_upload is for lesson notes, word lists, homework, exercises,
+  and teacher feedback.
+
+Bot DM:
+- Write free-text answers here.
+- Upload material text here after tapping Upload material in the channel
+  or sending /upload.
+- Use commands here when buttons are inconvenient.
+
+Commands:
+/start - create or load profile and post channel hubs
 /today - start today's practice
 /review - review due items
-/add - add a learning item
+/upload - upload lesson material
 /add expression | push back on | мягко возражать | meetings,stakeholders
-/approve <material_id> - approve all pending candidates for a material
 /candidates <material_id> - review extracted candidates
 /candidate add <candidate_id> - add one candidate
+/candidate edit <candidate_id> - edit one candidate
 /candidate skip <candidate_id> - skip one candidate
-/upload - upload lesson material
+/approve <material_id> - approve all pending candidates for a material
 /dispute <attempt_id> <reason> - dispute feedback
 /mistakes - show mistake patterns
-/mistakes focus <pattern_id> - promote a recurring mistake
-/mistakes ignore <pattern_id> - archive a recurring mistake
+/mistakes focus|ignore|examples <pattern_id>
 /rules - show grammar concepts
 /stats - show progress
 /favorites - show favorite items
-/favorite <item_id> - toggle favorite on an item
-/items [active|archived|suspended] - list learning items
-/item archive <item_id> - archive an item
-/item suspend <item_id> - pause an item
-/item restore <item_id> - restore an item
+/items [active|archived|suspended]
+/item archive|suspend|restore <item_id>
 /settings - change settings
 /settings set reminder_time 20:30
-/help - show help"""
+/help - show this help"""
 
 
 def start_message(channel_enabled: bool = False) -> str:

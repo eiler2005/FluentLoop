@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 06:19 UTC` (`09:19 Moscow`)
-- Total wall time so far: `10h 34m`
+- Last updated: `2026-05-07 06:22 UTC` (`09:22 Moscow`)
+- Total wall time so far: `10h 37m`
 
 ## Epics done
 
@@ -125,6 +125,8 @@
   `#practice_flow` for practice and `#materials_upload` for lesson/material
   intake. The material hub button opens the private upload FSM because channel
   posts cannot collect free-text answers directly.
+- Bot `/help` now explains the channel-vs-DM workflow. `/start` and `/help`
+  post a `#help` message in the channel and attempt to pin it.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

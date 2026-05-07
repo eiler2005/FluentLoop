@@ -18,6 +18,7 @@ from fluentloop.bot.handlers import (
     handle_candidate_edit_prompt,
     handle_candidate_edit_value,
     handle_candidates,
+    handle_channel_help,
     handle_channel_hub,
     handle_dispute,
     handle_favorite_toggle,
@@ -70,12 +71,24 @@ def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
     ]
 
 
-async def send_reply(client, fallback_chat_id, reply: BotReply) -> None:  # type: ignore[no-untyped-def]
-    await client.send_message(
+async def send_reply(client, fallback_chat_id, reply: BotReply):  # type: ignore[no-untyped-def]
+    return await client.send_message(
         reply.target_chat_id or fallback_chat_id,
         reply.text,
         buttons=_telethon_buttons(reply),
     )
+
+
+async def pin_reply(client, fallback_chat_id, reply: BotReply) -> None:  # type: ignore[no-untyped-def]
+    message = await send_reply(client, fallback_chat_id, reply)
+    try:
+        await client.pin_message(
+            reply.target_chat_id or fallback_chat_id,
+            message,
+            notify=False,
+        )
+    except Exception:
+        LOG.exception("Could not pin Telegram help message")
 
 
 async def maybe_record_channel(event, settings: Settings) -> bool:  # type: ignore[no-untyped-def]
@@ -124,6 +137,11 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             if command == "/start":
                 reply = handle_start(session, settings, telegram_user_id)
                 if settings.telegram_channel_id:
+                    await pin_reply(
+                        client,
+                        event.chat_id,
+                        handle_channel_help(settings.telegram_channel_id),
+                    )
                     await send_reply(
                         client,
                         event.chat_id,
@@ -136,6 +154,12 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     )
             elif command == "/help":
                 reply = handle_help()
+                if settings.telegram_channel_id:
+                    await pin_reply(
+                        client,
+                        event.chat_id,
+                        handle_channel_help(settings.telegram_channel_id),
+                    )
             elif command in {"/today", "/review"}:
                 reply = handle_today(
                     session, user, channel_id=settings.telegram_channel_id

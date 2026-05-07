@@ -220,6 +220,30 @@ def handle_channel_hub(channel_id: str) -> BotReply:
     )
 
 
+def handle_channel_help(channel_id: str) -> BotReply:
+    return BotReply(
+        "#help\n"
+        "How FluentLoop works\n\n"
+        "This channel is the visible learning workspace.\n"
+        "- #practice_flow: start/resume practice\n"
+        "- #feedback: answer checks and explanations\n"
+        "- #next_prompt: the next exercise\n"
+        "- #summary: session results\n"
+        "- #mistakes: recurring weak points\n"
+        "- #materials_upload: lesson notes and teacher feedback intake\n\n"
+        "Use the bot DM for free-text input:\n"
+        "- answer exercises in the bot DM\n"
+        "- paste lesson/material text in the bot DM\n"
+        "- use commands when buttons are inconvenient\n\n"
+        "Start from the buttons below, or send /help to the bot.",
+        channel_id,
+        buttons=[
+            [_button("Start practice", "today:start")],
+            [_button("Upload material", "materials:start")],
+        ],
+    )
+
+
 def handle_materials_channel_hub(channel_id: str) -> BotReply:
     return BotReply(
         "#materials_upload\n"

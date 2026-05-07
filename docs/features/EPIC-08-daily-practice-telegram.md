@@ -106,5 +106,7 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   a `#practice_flow` practice entry point and a `#materials_upload` lesson
   material inbox. Channel buttons start practice or open the private upload
   flow for text entry.
+- `/start` and `/help` also post a `#help` channel message explaining the
+  channel-vs-DM workflow and attempt to pin it in the channel.
 - Audit coverage verifies all seven attempts complete a session and set
   `completed_at`.
