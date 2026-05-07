@@ -143,6 +143,16 @@
   `@fluentloop_ai_bot` connected; VPS smoke passed for private Bot API delivery,
   forum topic send/pin/delete, demo-data seeding, and forum env loading. A
   status message was posted to the forum `Stats` topic.
+- Demo data now includes three 15-minute B2+/C1- lessons for stakeholder
+  alignment/polite pushback, incident updates/risk mitigation, and
+  product/architecture trade-offs. The VPS seed reports 16 active demo items
+  and 3 lesson materials, and study instructions were posted to Practice Flow
+  plus a lesson list to Materials Upload.
+- Telegram avatars were refreshed as one FluentLoop-branded set: central `FL`
+  loop mark on every surface, with London/New York/English cues only as
+  background atmosphere.
+- Final status about the demo lessons and unified FluentLoop avatars was posted
+  to the forum `Stats` topic after the VPS smoke passed.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

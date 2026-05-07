@@ -32,17 +32,20 @@ AVATARS = {
     "bot": {
         "filename": "fluentloop-bot.jpg",
         "title": "FL",
-        "palette": ((28, 94, 117), (76, 189, 159), (244, 190, 92)),
+        "scene": "english",
+        "palette": ((24, 83, 122), (74, 174, 214), (255, 215, 99)),
     },
     "channel": {
         "filename": "fluentloop-channel.jpg",
-        "title": "FE",
-        "palette": ((42, 130, 87), (113, 214, 109), (247, 201, 96)),
+        "title": "FL",
+        "scene": "new_york",
+        "palette": ((27, 73, 101), (238, 141, 76), (255, 219, 114)),
     },
     "forum": {
         "filename": "fluentloop-forum.jpg",
-        "title": "FF",
-        "palette": ((232, 143, 63), (255, 203, 111), (45, 136, 168)),
+        "title": "FL",
+        "scene": "london",
+        "palette": ((90, 55, 140), (229, 85, 88), (255, 204, 102)),
     },
 }
 
@@ -205,8 +208,67 @@ def _font(size: int) -> ImageFont.ImageFont:
     return ImageFont.load_default()
 
 
+def _draw_london(draw: ImageDraw.ImageDraw) -> None:
+    base = 392
+    draw.rectangle((0, base, 512, 512), fill=(26, 39, 61, 235))
+    draw.rectangle((58, 252, 118, base), fill=(255, 235, 166, 230))
+    draw.polygon((48, 252, 88, 210, 128, 252), fill=(255, 218, 107, 235))
+    draw.ellipse((74, 270, 102, 298), fill=(42, 64, 87, 245))
+    draw.line((88, 210, 88, 174), fill=(255, 245, 205, 230), width=8)
+    draw.rectangle((310, 260, 342, base), fill=(245, 229, 168, 230))
+    draw.ellipse((294, 226, 358, 290), outline=(245, 229, 168, 230), width=12)
+    draw.line((326, 214, 326, 184), fill=(245, 229, 168, 230), width=7)
+    draw.rectangle((352, 292, 424, base), fill=(255, 244, 206, 220))
+    draw.rectangle((372, 238, 404, 292), fill=(255, 244, 206, 220))
+    draw.polygon((358, 238, 388, 196, 418, 238), fill=(255, 214, 105, 230))
+
+
+def _draw_new_york(draw: ImageDraw.ImageDraw) -> None:
+    base = 398
+    draw.rectangle((0, base, 512, 512), fill=(21, 38, 59, 235))
+    buildings = [
+        (36, 290, 86, base),
+        (92, 248, 150, base),
+        (158, 272, 205, base),
+        (216, 220, 275, base),
+        (286, 260, 336, base),
+        (346, 236, 408, base),
+        (418, 294, 470, base),
+    ]
+    for index, box in enumerate(buildings):
+        shade = 205 + (index % 3) * 15
+        draw.rectangle(box, fill=(shade, 230, 238, 226))
+        x1, y1, x2, y2 = box
+        for x in range(x1 + 9, x2 - 8, 18):
+            for y in range(y1 + 18, y2 - 18, 30):
+                draw.rectangle((x, y, x + 7, y + 10), fill=(255, 213, 100, 220))
+    draw.polygon((216, 220, 246, 160, 275, 220), fill=(255, 214, 105, 235))
+    draw.line((246, 160, 246, 118), fill=(255, 240, 176, 235), width=8)
+    draw.arc((70, 330, 442, 470), start=198, end=342, fill=(255, 110, 90, 185), width=8)
+
+
+def _draw_english(draw: ImageDraw.ImageDraw) -> None:
+    draw.rounded_rectangle((64, 276, 256, 374), radius=40, fill=(255, 255, 255, 185))
+    draw.polygon((184, 368, 220, 426, 236, 368), fill=(255, 255, 255, 185))
+    draw.rounded_rectangle((260, 246, 446, 344), radius=40, fill=(255, 242, 188, 178))
+    draw.polygon((312, 338, 284, 392, 342, 338), fill=(255, 242, 188, 178))
+    draw.arc(
+        (92, 132, 420, 460),
+        start=198,
+        end=342,
+        fill=(255, 215, 99, 210),
+        width=18,
+    )
+    draw.ellipse((98, 384, 136, 422), fill=(255, 215, 99, 235))
+    draw.ellipse((376, 384, 414, 422), fill=(255, 215, 99, 235))
+
+
 def generate_avatar(
-    path: Path, title: str, palette: tuple[tuple[int, int, int], ...]
+    path: Path,
+    title: str,
+    palette: tuple[tuple[int, int, int], ...],
+    *,
+    scene: str,
 ) -> None:
     size = 512
     img = Image.new("RGB", (size, size))
@@ -223,25 +285,39 @@ def generate_avatar(
 
     overlay = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
-    draw.ellipse((82, 82, 430, 430), outline=(255, 255, 255, 76), width=22)
+    if scene == "london":
+        _draw_london(draw)
+    elif scene == "new_york":
+        _draw_new_york(draw)
+    else:
+        _draw_english(draw)
+    draw.ellipse((74, 74, 438, 438), outline=(255, 255, 255, 72), width=16)
     draw.arc(
-        (118, 118, 394, 394),
-        start=215,
+        (112, 112, 400, 400),
+        start=204,
         end=520,
-        fill=(255, 255, 255, 160),
-        width=28,
+        fill=(255, 255, 255, 170),
+        width=26,
     )
+    draw.arc(
+        (154, 154, 358, 358),
+        start=24,
+        end=338,
+        fill=(255, 215, 99, 205),
+        width=18,
+    )
+    draw.rounded_rectangle((150, 150, 362, 352), radius=68, fill=(14, 31, 48, 92))
     shadow = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     shadow_draw = ImageDraw.Draw(shadow)
-    font = _font(144)
+    font = _font(138)
     bbox = shadow_draw.textbbox((0, 0), title, font=font)
     text_x = (size - (bbox[2] - bbox[0])) / 2
-    text_y = (size - (bbox[3] - bbox[1])) / 2 - 10
+    text_y = 176
     shadow_draw.text((text_x + 5, text_y + 7), title, font=font, fill=(0, 0, 0, 90))
     shadow = shadow.filter(ImageFilter.GaussianBlur(5))
     overlay.alpha_composite(shadow)
     draw = ImageDraw.Draw(overlay)
-    draw.text((text_x, text_y), title, font=font, fill=(255, 255, 255, 245))
+    draw.text((text_x, text_y), title, font=font, fill=(255, 255, 255, 248))
     img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
     path.parent.mkdir(parents=True, exist_ok=True)
     img.save(path, "JPEG", quality=94, optimize=True)
@@ -251,7 +327,12 @@ def generate_avatars() -> dict[str, Path]:
     assets: dict[str, Path] = {}
     for key, spec in AVATARS.items():
         path = ASSET_DIR / str(spec["filename"])
-        generate_avatar(path, str(spec["title"]), spec["palette"])
+        generate_avatar(
+            path,
+            str(spec["title"]),
+            spec["palette"],
+            scene=str(spec["scene"]),
+        )
         assets[key] = path
         print(f"OK: generated {key} avatar at {path.relative_to(REPO_ROOT)}")
     return assets

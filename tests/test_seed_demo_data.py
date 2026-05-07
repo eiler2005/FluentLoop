@@ -41,8 +41,9 @@ def test_seed_demo_data_is_idempotent_and_covers_core_entities(
     engine = make_engine(db_url)
     factory = make_session_factory(engine)
     with factory() as session:
-        assert session.scalar(select(func.count()).select_from(LearningItem)) >= 7
-        assert session.scalar(select(func.count()).select_from(SourceMaterial)) == 1
+        assert first["lesson_count"] == 3
+        assert session.scalar(select(func.count()).select_from(LearningItem)) >= 16
+        assert session.scalar(select(func.count()).select_from(SourceMaterial)) == 4
         assert session.scalar(select(func.count()).select_from(MistakePattern)) == 1
         assert (
             session.scalar(select(func.count()).select_from(PracticeSessionCached))

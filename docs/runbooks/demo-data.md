@@ -32,6 +32,10 @@ ssh <ssh-user>@<vps-host> \
 - One user from `TELEGRAM_ALLOWED_USER_ID`.
 - Demo learning items across expressions, words, grammar rules, and mistake
   patterns.
+- Three 15-minute B2+/C1- demo lessons:
+  stakeholder alignment and polite pushback, incident update and risk
+  mitigation, and product/architecture trade-offs for London/New York
+  collaboration.
 - A lesson-material upload with stub-extracted candidates and approval into
   learning items.
 - A promoted high-confidence mistake pattern.
