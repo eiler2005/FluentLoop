@@ -29,7 +29,12 @@ def main() -> int:
     if not token:
         print("FAIL: TELEGRAM_BOT_TOKEN must be set", file=sys.stderr)
         return 2
-    from fluentloop.channel import find_channel_from_updates
+    from fluentloop.channel import find_channel_from_updates, read_recorded_channel
+
+    recorded = read_recorded_channel(Path("data/channel_discovery.json"), title)
+    if recorded is not None:
+        print(f"OK: channel {title!r} discovered from bot runtime cache")
+        return 0
 
     url = f"https://api.telegram.org/bot{token}/getUpdates?limit=100"
     with urllib.request.urlopen(url, timeout=10) as resp:

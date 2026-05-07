@@ -38,6 +38,7 @@ class Settings:
     backup_hour: int
     backup_minute: int
     backup_retention_days: int
+    telegram_channel_title: str
 
 
 def get_settings() -> Settings:
@@ -69,4 +70,7 @@ def get_settings() -> Settings:
         backup_hour=int(os.environ.get("BACKUP_HOUR", "4")),
         backup_minute=int(os.environ.get("BACKUP_MINUTE", "0")),
         backup_retention_days=int(os.environ.get("BACKUP_RETENTION_DAYS", "14")),
+        telegram_channel_title=os.environ.get(
+            "TELEGRAM_CHANNEL_TITLE", "FluentLoop English"
+        ),
     )

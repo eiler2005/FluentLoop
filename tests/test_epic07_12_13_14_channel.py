@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from fluentloop.bot.handlers import handle_favorites, handle_rules
-from fluentloop.channel import find_channel_from_updates
+from fluentloop.channel import (
+    find_channel_from_updates,
+    read_recorded_channel,
+    record_channel_discovery,
+)
 from fluentloop.grammar import link_parent, parents_of, seed_concepts, unlink_parent
 from fluentloop.learning import create_learning_item, set_item_status, toggle_favorite
 from fluentloop.mistakes import archive_pattern, ingest_mistake_event
@@ -141,3 +145,14 @@ def test_channel_discovery_from_updates() -> None:
         }
     ]
     assert find_channel_from_updates(updates, "FluentLoop English") == -100123
+
+
+def test_channel_discovery_cache_round_trips(tmp_path) -> None:
+    path = tmp_path / "channel_discovery.json"
+    record_channel_discovery(
+        path,
+        title="FluentLoop English",
+        channel_id=-100123,
+    )
+    assert read_recorded_channel(path, "FluentLoop English") == -100123
+    assert read_recorded_channel(path, "Other") is None

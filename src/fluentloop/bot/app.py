@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from sqlalchemy.orm import sessionmaker
 
@@ -29,6 +30,7 @@ from fluentloop.bot.handlers import (
     handle_upload,
 )
 from fluentloop.bot.state import StateStore
+from fluentloop.channel import record_channel_discovery
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.db.session import session_scope
@@ -40,6 +42,24 @@ ITEM_STATUS_USAGE = (
     "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
 )
 CANDIDATE_USAGE = "Use /candidate add <id> or /candidate skip <id>."
+CHANNEL_DISCOVERY_PATH = Path("data/channel_discovery.json")
+
+
+async def maybe_record_channel(event, settings: Settings) -> bool:  # type: ignore[no-untyped-def]
+    chat = await event.get_chat()
+    title = getattr(chat, "title", None)
+    if title != settings.telegram_channel_title:
+        return False
+    chat_id = event.chat_id
+    if chat_id is None:
+        return False
+    record_channel_discovery(
+        CHANNEL_DISCOVERY_PATH,
+        title=title,
+        channel_id=int(chat_id),
+    )
+    LOG.info("Discovered Telegram channel %r from incoming channel event", title)
+    return True
 
 
 async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
@@ -54,6 +74,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
 
     @client.on(events.NewMessage(pattern=r"^/"))
     async def on_command(event) -> None:  # type: ignore[no-untyped-def]
+        if await maybe_record_channel(event, settings):
+            return
         sender = await event.get_sender()
         telegram_user_id = int(sender.id)
         with session_scope(session_factory) as session:
@@ -203,6 +225,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
     @client.on(events.NewMessage)
     async def on_free_text(event) -> None:  # type: ignore[no-untyped-def]
         if str(event.raw_text).startswith("/"):
+            return
+        if await maybe_record_channel(event, settings):
             return
         sender = await event.get_sender()
         telegram_user_id = int(sender.id)

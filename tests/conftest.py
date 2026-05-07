@@ -31,6 +31,7 @@ def settings() -> Settings:
         backup_hour=4,
         backup_minute=0,
         backup_retention_days=14,
+        telegram_channel_title="FluentLoop English",
     )
 
 
