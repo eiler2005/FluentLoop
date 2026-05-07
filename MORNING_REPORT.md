@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 06:22 UTC` (`09:22 Moscow`)
-- Total wall time so far: `10h 37m`
+- Last updated: `2026-05-07 06:25 UTC` (`09:25 Moscow`)
+- Total wall time so far: `10h 40m`
 
 ## Epics done
 
@@ -66,6 +66,7 @@
 | 06:07 | `7fd7824` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-11 pattern examples |
 | 06:10 | `7ea5518` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-02 settings presets |
 | 06:17 | `e8d862f` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-08 channel hubs |
+| 06:24 | `fd5387c` | ✅ healthy container + private smoke + channel send/pin/delete smoke + VPS seed | pinned channel help |
 
 ## Surprises / anomalies
 
@@ -127,6 +128,8 @@
   posts cannot collect free-text answers directly.
 - Bot `/help` now explains the channel-vs-DM workflow. `/start` and `/help`
   post a `#help` message in the channel and attempt to pin it.
+- A real `#help` message was posted and pinned in `FluentLoop English` after
+  deploy; smoke verified channel send/pin/delete permissions first.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
