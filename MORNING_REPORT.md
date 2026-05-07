@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:38 UTC` (`08:38 Moscow`)
-- Total wall time so far: `09h 53m`
+- Last updated: `2026-05-07 05:44 UTC` (`08:44 Moscow`)
+- Total wall time so far: `09h 59m`
 
 ## Epics done
 
@@ -58,6 +58,7 @@
 | 22:10 | `113ba96` | ✅ Bot API outbound smoke + VPS seed | EPIC-11-14 strict audit fixes |
 | 05:23 | `7cc0cb5` | ✅ private smoke + channel send/delete smoke | channel id discovered and env deployed |
 | 05:26 | `a06ae2d` | ✅ private smoke + channel send/delete smoke | practice feedback/next prompts route to channel |
+| 05:42 | `3a1c0ae` | ✅ container private smoke + channel send/delete smoke + VPS seed | callback UX + channel logical topic tags |
 
 ## Surprises / anomalies
 
@@ -98,6 +99,8 @@
   acknowledge/dispute buttons. Channel practice posts now carry logical topic
   tags: `#practice_flow`, `#feedback`, `#next_prompt`, `#summary`, and
   `#mistakes`.
+- Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
+  smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with
   seed business/IT prompts instead of repeating the same approved item, and
   completion messages include persisted attempt counts.
