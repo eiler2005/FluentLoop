@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 06:11 UTC` (`09:11 Moscow`)
-- Total wall time so far: `10h 26m`
+- Last updated: `2026-05-07 06:15 UTC` (`09:15 Moscow`)
+- Total wall time so far: `10h 30m`
 
 ## Epics done
 
@@ -120,6 +120,10 @@
   wrong/correct examples can be inspected before focus/ignore.
 - EPIC-02 follow-up hardening added inline focus-area and timezone presets to
   `/settings`, with command fallback preserved for custom values.
+- Channel onboarding now posts two channel hub topics after `/start`:
+  `#practice_flow` for practice and `#materials_upload` for lesson/material
+  intake. The material hub button opens the private upload FSM because channel
+  posts cannot collect free-text answers directly.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

@@ -18,12 +18,14 @@ from fluentloop.bot.handlers import (
     handle_candidate_edit_prompt,
     handle_candidate_edit_value,
     handle_candidates,
+    handle_channel_hub,
     handle_dispute,
     handle_favorite_toggle,
     handle_favorites,
     handle_help,
     handle_item_status,
     handle_items,
+    handle_materials_channel_hub,
     handle_mistake_action,
     handle_mistakes,
     handle_rules,
@@ -121,6 +123,17 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             command = parts[0]
             if command == "/start":
                 reply = handle_start(session, settings, telegram_user_id)
+                if settings.telegram_channel_id:
+                    await send_reply(
+                        client,
+                        event.chat_id,
+                        handle_channel_hub(settings.telegram_channel_id),
+                    )
+                    await send_reply(
+                        client,
+                        event.chat_id,
+                        handle_materials_channel_hub(settings.telegram_channel_id),
+                    )
             elif command == "/help":
                 reply = handle_help()
             elif command in {"/today", "/review"}:
@@ -268,6 +281,20 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     session, user, channel_id=settings.telegram_channel_id
                 )
                 await event.answer("Starting practice")
+            elif raw_data == "materials:start":
+                StateStore(session).set(
+                    telegram_user_id,
+                    telegram_user_id,
+                    "upload",
+                    {"type": "other"},
+                )
+                upload_reply = handle_upload_start()
+                reply = BotReply(
+                    upload_reply.text,
+                    telegram_user_id,
+                    upload_reply.buttons,
+                )
+                await event.answer("Open the bot DM to paste material")
             elif len(parts) == 3 and parts[0] == "settings":
                 field, value = parts[1], parts[2]
                 if field == "refresh":

@@ -102,5 +102,9 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   text: `#practice_flow`, `#feedback`, `#next_prompt`, `#summary`, and
   `#mistakes`. Native Telegram forum topics remain out of scope for a channel;
   they require a forum supergroup.
+- `/start` now also posts channel hub messages when channel mode is configured:
+  a `#practice_flow` practice entry point and a `#materials_upload` lesson
+  material inbox. Channel buttons start practice or open the private upload
+  flow for text entry.
 - Audit coverage verifies all seven attempts complete a session and set
   `completed_at`.

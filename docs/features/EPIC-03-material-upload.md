@@ -76,3 +76,6 @@ be processed by EPIC-04 (AI extraction).
 - Free text without an active practice session now stores a pending FSM state
   and offers inline `Treat as lesson material` / `Cancel` buttons; `/upload`
   remains the safe text fallback.
+- Channel mode includes a `#materials_upload` hub post with an `Upload material`
+  button; the button opens the private bot upload flow because channel posts
+  cannot collect subscriber free text directly.

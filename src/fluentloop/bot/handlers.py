@@ -201,6 +201,38 @@ def handle_upload_type_choice(type_: str) -> BotReply:
     return BotReply(f"Paste {type_} material in the next message.")
 
 
+def handle_channel_hub(channel_id: str) -> BotReply:
+    return BotReply(
+        "#practice_flow\n"
+        "FluentLoop English practice hub.\n\n"
+        "Practice flow lives here in the channel:\n"
+        "- #practice_flow for session starts\n"
+        "- #feedback for answer feedback\n"
+        "- #next_prompt for the next exercise\n"
+        "- #summary for session results\n\n"
+        "Free-text answers still go to the bot DM because Telegram channels "
+        "do not accept subscriber replies as bot input.",
+        channel_id,
+        buttons=[
+            [_button("Start practice", "today:start")],
+            [_button("Upload material", "materials:start")],
+        ],
+    )
+
+
+def handle_materials_channel_hub(channel_id: str) -> BotReply:
+    return BotReply(
+        "#materials_upload\n"
+        "Lesson materials inbox.\n\n"
+        "Use this topic for lesson notes, word lists, homework, exercises, "
+        "and teacher feedback. Tap Upload material, choose the type, then "
+        "paste the text in the bot DM so it can be extracted into approval "
+        "candidates.",
+        channel_id,
+        buttons=[[_button("Upload material", "materials:start")]],
+    )
+
+
 def is_allowed(settings: Settings, telegram_user_id: int) -> bool:
     return (
         settings.telegram_allowed_user_id is None
