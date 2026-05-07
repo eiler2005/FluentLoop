@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 05:57 UTC` (`08:57 Moscow`)
-- Total wall time so far: `10h 12m`
+- Last updated: `2026-05-07 05:59 UTC` (`08:59 Moscow`)
+- Total wall time so far: `10h 14m`
 
 ## Epics done
 
@@ -61,6 +61,7 @@
 | 05:42 | `3a1c0ae` | ✅ container private smoke + channel send/delete smoke + VPS seed | callback UX + channel logical topic tags |
 | 05:48 | `98aefee` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-04 candidate edit flow |
 | 05:54 | `4b5487d` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-10 Hard override |
+| 05:58 | `e09fd46` | ✅ healthy container + private smoke + channel send/delete smoke + VPS seed | EPIC-03 upload type picker |
 
 ## Surprises / anomalies
 
