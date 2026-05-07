@@ -201,7 +201,11 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     else:
                         reply = handle_dispute(session, user, attempt_id, parts[2])
             elif command == "/mistakes":
-                if len(parts) >= 3 and parts[1] in {"focus", "ignore"}:
+                if len(parts) >= 3 and parts[1] in {
+                    "focus",
+                    "ignore",
+                    "examples",
+                }:
                     try:
                         pattern_id = int(parts[2])
                     except ValueError:

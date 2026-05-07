@@ -215,6 +215,10 @@ def test_mistake_pattern_actions(db_session, settings) -> None:
     listed_data = {button.data for row in listed.buttons for button in row}
     assert f"mistake:focus:{pattern.id}" in listed_data
     assert f"mistake:ignore:{pattern.id}" in listed_data
+    assert f"mistake:examples:{pattern.id}" in listed_data
+    examples = handle_mistake_action(db_session, user, "examples", pattern.id)
+    assert "Examples for pattern" in examples.text
+    assert "Wrong:" in examples.text
     reply = handle_mistake_action(db_session, user, "focus", pattern.id)
     assert "Promoted" in reply.text
     assert pattern.confidence == "high"

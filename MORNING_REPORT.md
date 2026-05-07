@@ -3,8 +3,8 @@
 ## Time
 
 - Started: `2026-05-06 19:45 UTC` (`22:45 Moscow`)
-- Last updated: `2026-05-07 06:04 UTC` (`09:04 Moscow`)
-- Total wall time so far: `10h 19m`
+- Last updated: `2026-05-07 06:05 UTC` (`09:05 Moscow`)
+- Total wall time so far: `10h 20m`
 
 ## Epics done
 
@@ -114,6 +114,8 @@
 - EPIC-10 follow-up hardening added AI-suggested new items to the EPIC-04
   approval queue through `AnswerFeedback.suggested_candidates`; no suggested
   item is auto-added.
+- EPIC-11 follow-up hardening added `Examples` for mistake patterns so stored
+  wrong/correct examples can be inspected before focus/ignore.
 - Local Bot API smoke hit a transient SSL EOF on the Mac after this deploy, so
   smoke was rerun inside the VPS Python 3.11 container and passed there.
 - EPIC-07/08 audit fix: practice sessions now fill sparse item libraries with

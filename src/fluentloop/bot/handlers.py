@@ -625,6 +625,7 @@ def handle_mistakes(session: Session, user: User) -> BotReply:
         [
             _button(f"Focus #{pattern.id}", f"mistake:focus:{pattern.id}"),
             _button(f"Ignore #{pattern.id}", f"mistake:ignore:{pattern.id}"),
+            _button(f"Examples #{pattern.id}", f"mistake:examples:{pattern.id}"),
         ]
         for pattern in patterns
     ]
@@ -645,7 +646,21 @@ def handle_mistake_action(
     if action == "ignore":
         archive_pattern(session, pattern)
         return BotReply(f"Archived pattern #{pattern.id}: {pattern.description}")
-    return BotReply("Use /mistakes focus <id> or /mistakes ignore <id>.")
+    if action == "examples":
+        wrong = pattern.wrong_examples or ["No wrong examples stored."]
+        correct = pattern.correct_examples or ["No corrected examples stored."]
+        lines = [f"Examples for pattern #{pattern.id}: {pattern.description}"]
+        for index, (wrong_example, correct_example) in enumerate(
+            zip(wrong[-5:], correct[-5:], strict=False),
+            start=1,
+        ):
+            lines.append(f"{index}. Wrong: {wrong_example}")
+            lines.append(f"   Better: {correct_example}")
+        return BotReply("\n".join(lines))
+    return BotReply(
+        "Use /mistakes focus <id>, /mistakes ignore <id>, "
+        "or /mistakes examples <id>."
+    )
 
 
 def handle_favorites(session: Session, user: User) -> BotReply:
