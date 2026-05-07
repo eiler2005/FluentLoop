@@ -63,9 +63,10 @@ the AI. This is captured as a P1 enhancement, not MVP-blocking. See
 - Real values live only in `.env` (local), in the VPS environment, or in a
   password manager. **Never** in git, commit messages, logs, or example files.
 - `.env.example` is the only env file tracked. It contains placeholders only.
+- Confidential deploy-only values may live in `secrets/deploy.env`
+  (gitignored, mode 600). See `docs/runbooks/secrets-management.md`.
 - Pre-commit checklist:
-  - `git diff --cached | grep -E '(BOT_TOKEN|API_KEY|sk-[A-Za-z0-9]{20})'`
-    must return nothing.
+  - `python3 scripts/secret_scan.py` must return `secret-scan: ok`.
   - No real Telegram user IDs (numeric IDs are personally identifying).
   - No email addresses.
 - If a secret leaks: rotate immediately (BotFather `/revoke`, AI provider
@@ -87,7 +88,6 @@ the AI. This is captured as a P1 enhancement, not MVP-blocking. See
 Before pushing to a remote (when there is one):
 
 1. `git status` — no `.env`, no `data/`, no `secrets/`, no `*.session`.
-2. `grep -rE '(BOT_TOKEN|API_KEY)\s*=\s*[^<]' . --include='*.md' --include='*.py' --include='*.yml'`
-   returns only placeholders or `<placeholder>` style values.
+2. `python3 scripts/secret_scan.py` returns `secret-scan: ok`.
 3. No real numeric Telegram user IDs in tracked files.
 4. PRD / epic / ADR docs reflect any behavior change in this commit.

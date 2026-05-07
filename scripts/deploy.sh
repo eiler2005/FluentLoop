@@ -13,16 +13,29 @@
 # MORNING_REPORT.md.
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOCAL_ENV="${REPO_ROOT}/.env"
+DEPLOY_ENV="${DEPLOY_ENV:-${REPO_ROOT}/secrets/deploy.env}"
+
+if [[ -f "$DEPLOY_ENV" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$DEPLOY_ENV"
+  set +a
+fi
+
 VPS_USER="${VPS_USER:-deploy}"
-VPS_HOST="${VPS_HOST:-<vps-host>}"
+VPS_HOST="${VPS_HOST:-}"
 VPS_PORT="${VPS_PORT:-22}"
 REMOTE_DIR="${REMOTE_DIR:-/opt/fluentloop-bot}"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LOCAL_ENV="${REPO_ROOT}/.env"
-
 if [[ ! -f "$LOCAL_ENV" ]]; then
   echo "FAIL: local .env missing at ${LOCAL_ENV}" >&2
+  exit 1
+fi
+
+if [[ -z "$VPS_HOST" ]]; then
+  echo "FAIL: VPS_HOST must be set via env or ${DEPLOY_ENV}" >&2
   exit 1
 fi
 

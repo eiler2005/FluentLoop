@@ -34,7 +34,7 @@ Full product specification: [`PRD.md`](PRD.md).
 | [`docs/architecture.md`](docs/architecture.md) | Tech architecture (the *how*). Stub until ADR-0002/3/4 land. |
 | [`docs/adr/`](docs/adr/) | Architecture decision records. |
 | [`docs/features/`](docs/features/) | 15 epics, one per PRD §28 backlog item. |
-| [`docs/runbooks/`](docs/runbooks/) | Operational procedures. Placeholder. |
+| [`docs/runbooks/`](docs/runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 
 ## Repository layout
 

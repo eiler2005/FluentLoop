@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: fluentloop-secret-scan
+        name: FluentLoop secret scan
+        entry: python3 scripts/secret_scan.py
+        language: system
+        pass_filenames: false
+      - id: fluentloop-ruff
+        name: FluentLoop ruff
+        entry: uv run --python 3.11 --with ruff ruff check src tests scripts
+        language: system
+        pass_filenames: false

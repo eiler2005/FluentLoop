@@ -13,7 +13,7 @@ uv run --python 3.11 python scripts/seed_demo_data.py
 For an isolated audit database:
 
 ```bash
-TELEGRAM_ALLOWED_USER_ID=123456789 \
+TELEGRAM_ALLOWED_USER_ID=<telegram-allowed-user-id> \
   uv run --python 3.11 python scripts/seed_demo_data.py \
   --db-url sqlite:////tmp/fluentloop-audit.sqlite
 ```

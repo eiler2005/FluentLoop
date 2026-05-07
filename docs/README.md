@@ -10,7 +10,8 @@
 | [`adr/0004-exercise-pre-generation-strategy.md`](adr/0004-exercise-pre-generation-strategy.md) | Stub: morning batch pre-generation of the day's session. |
 | [`features/`](features/) | 15 epic files, one per PRD §28 backlog item. |
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
-| [`runbooks/`](runbooks/) | Operational procedures. Placeholder until something deploys. |
+| [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
+| [`runbooks/secrets-management.md`](runbooks/secrets-management.md) | Public-git secret and confidential-data handling. |
 
 ## How to read these docs
 
