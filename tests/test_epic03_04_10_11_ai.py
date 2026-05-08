@@ -161,7 +161,7 @@ def test_upload_handler_returns_friendly_size_error(
 ) -> None:
     user = ensure_user(db_session, 123456789, settings)
     provider = StubProvider(tmp_path / "usage.jsonl")
-    reply = handle_upload(db_session, user, provider, "x" * 10_001)
+    reply = handle_upload(db_session, user, provider, "x" * 20_001)
     assert "Could not store material" in reply.text
 
 

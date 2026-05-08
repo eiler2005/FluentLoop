@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 from fluentloop.db.models import LearningItem
@@ -19,9 +19,10 @@ class Exercise:
     hint: str
     explanation: str
     target_learning_item_ids: list[int]
+    metadata: dict[str, object] = field(default_factory=dict)
 
     def as_dict(self) -> dict:
-        return {
+        payload = {
             "exercise_type": self.exercise_type,
             "prompt": self.prompt,
             "expected_answer": self.expected_answer,
@@ -29,6 +30,10 @@ class Exercise:
             "explanation": self.explanation,
             "target_learning_item_ids": self.target_learning_item_ids,
         }
+        if self.metadata:
+            payload["metadata"] = self.metadata
+            payload.update(self.metadata)
+        return payload
 
 
 class ExerciseType(Protocol):

@@ -137,7 +137,7 @@ def _high_confidence_pattern_exercises(session: Session, user: User) -> list[Exe
     return exercises
 
 
-def compose_session(
+def _legacy_compose_session(
     session: Session, user: User, *, target_date: date | None = None
 ) -> list[dict]:
     selected = get_due_items(session, user.id, limit=7)
@@ -171,6 +171,17 @@ def compose_session(
         exercises.append(seed_pool[seed_index % len(seed_pool)])
         seed_index += 1
     return [exercise.as_dict() for exercise in exercises[:7]]
+
+
+def compose_session(
+    session: Session, user: User, *, target_date: date | None = None
+) -> list[dict]:
+    try:
+        from fluentloop.learning_engine import compose_learning_session
+
+        return compose_learning_session(session, user, target_date=target_date)
+    except Exception:
+        return _legacy_compose_session(session, user, target_date=target_date)
 
 
 def cache_session(

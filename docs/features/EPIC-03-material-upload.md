@@ -21,7 +21,7 @@ be processed by EPIC-04 (AI extraction).
   optional `summary`, `created_at`.
 - `type` enum: `lesson_notes`, `word_list`, `expression_list`, `homework`,
   `exercise`, `teacher_feedback`, `other`. Bot asks; default to `other`.
-- Upload size cap (e.g. 10 KB / ~2000 words). If exceeded, suggest the
+- Upload size cap (20 KB). If exceeded, suggest the
   user paste in chunks.
 - Acknowledge with "Got it. Processing…" before handing off to EPIC-04.
 
@@ -39,7 +39,7 @@ be processed by EPIC-04 (AI extraction).
   `SourceMaterial` row.
 - A free-text message offers "Treat as lesson material" inline button; on
   accept, stored same way.
-- Material >10 KB triggers a friendly "please paste in chunks" reply and
+- Material >20 KB triggers a friendly "please paste in chunks" reply and
   is **not** stored.
 - The stored row has `raw_text` exactly equal to the user's message and
   `created_at` set.
@@ -64,7 +64,7 @@ be processed by EPIC-04 (AI extraction).
 
 ## Notes from implementation
 
-- Added `SourceMaterial` storage with the 10 KB cap and an extraction handoff.
+- Added `SourceMaterial` storage with a 20 KB cap and an extraction handoff.
 - Added `/upload` FSM behavior: the next free-text message is stored and
   passed to extraction.
 - `/upload` now offers inline material-type buttons (`lesson_notes`,

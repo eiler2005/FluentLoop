@@ -23,6 +23,11 @@ from fluentloop.db.models import (
 )
 from fluentloop.exercises import EXERCISE_TYPES, render_for_item
 from fluentloop.learning import create_learning_item
+from fluentloop.learning_engine import (
+    choose_session_mode,
+    compose_learning_session,
+    score_learning_items,
+)
 from fluentloop.practice import (
     compose_session,
     next_exercise,
@@ -120,6 +125,96 @@ def test_compose_session_avoids_item_duplicates_and_uses_seed_fillers(
     assert targeted.count(item.id) == 1
     assert len(exercises) == 7
     assert any(not exercise["target_learning_item_ids"] for exercise in exercises)
+    assert [exercise["stage"] for exercise in exercises] == [
+        "warmup",
+        "input",
+        "controlled_practice",
+        "controlled_practice",
+        "grammar_or_mistake_focus",
+        "free_production",
+        "recap",
+    ]
+    assert all("metadata" in exercise for exercise in exercises)
+    assert exercises[-1]["target_skill"] == "active_recall"
+    assert "without looking back" in exercises[-1]["prompt"]
+
+
+def test_learning_engine_mode_selection_review_and_mistake_focus(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    for index in range(5):
+        create_learning_item(
+            db_session,
+            user,
+            type_="expression",
+            text=f"due expression {index}",
+        )
+    assert choose_session_mode(db_session, user) == "review"
+
+    other = ensure_user(db_session, 987654321, settings)
+    db_session.add(
+        MistakePattern(
+            user_id=other.id,
+            description="Recurring article issue",
+            mistake_type="articles",
+            confidence="high",
+            status="active",
+            event_count=3,
+        )
+    )
+    db_session.flush()
+    assert choose_session_mode(db_session, other) == "mistake_focus"
+
+
+def test_learning_engine_prioritizes_due_items_over_random_active(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    due = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="due target",
+        tags=["stakeholders"],
+    )
+    future = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="future target",
+        tags=["stakeholders"],
+    )
+    future_state = db_session.scalar(
+        select(ReviewState).where(ReviewState.learning_item_id == future.id)
+    )
+    assert future_state is not None
+    future_state.due_at = datetime.now(UTC) + timedelta(days=30)
+    db_session.flush()
+
+    scored = score_learning_items(db_session, user)
+    assert scored[0].item.id == due.id
+    assert "due" in scored[0].reasons
+
+
+def test_compose_learning_session_returns_staged_metadata(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="push back on",
+        meaning="мягко возражать",
+        tags=["stakeholders"],
+    )
+    exercises = compose_learning_session(db_session, user)
+    assert len(exercises) == 7
+    assert exercises[0]["mode"] in {"mixed", "review", "lesson", "mistake_focus"}
+    assert exercises[0]["topic"]
+    assert exercises[0]["lesson_goal"]
+    assert all(
+        exercise["metadata"]["stage"] == exercise["stage"] for exercise in exercises
+    )
 
 
 def test_session_summary_counts_attempt_statuses(db_session, settings) -> None:
@@ -224,8 +319,8 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
     )
     assert reply.target_chat_id == "-100123"
     assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt\nExercise 2/7" in reply.text
-    assert "Exercise 2/7" in reply.text
+    assert "#next_prompt\nStep 2/7" in reply.text
+    assert "Step 2/7" in reply.text
     assert reply.buttons is not None
     button_data = {button.data for row in reply.buttons for button in row}
     assert "attempt:ack:1" in button_data
@@ -254,12 +349,12 @@ def test_answer_keeps_forum_practice_flow_primary_with_topic_copies(
     assert reply.target_chat_id == "-100999"
     assert reply.message_thread_id == 29
     assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt\nExercise 2/7" in reply.text
+    assert "#next_prompt\nStep 2/7" in reply.text
     assert len(reply.extra_replies) == 2
     assert reply.extra_replies[0].message_thread_id == 30
     assert reply.extra_replies[0].text.startswith("#feedback\nAttempt #")
     assert reply.extra_replies[1].message_thread_id == 31
-    assert reply.extra_replies[1].text.startswith("#next_prompt\nExercise 2/7")
+    assert reply.extra_replies[1].text.startswith("#next_prompt\nStep 2/7")
 
 
 def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
@@ -267,7 +362,11 @@ def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
     create_learning_item(db_session, user, type_="expression", text="align on")
     reply = handle_today(db_session, user, channel_id="-100123")
     assert reply.target_chat_id == "-100123"
-    assert reply.text.startswith("#practice_flow\nToday's English practice")
+    assert reply.text.startswith("#practice_flow\nToday's English practice - 15 min")
+    assert "Mode: " in reply.text
+    assert "Topic: " in reply.text
+    assert "Goal: " in reply.text
+    assert "Step 1/7 - Warm-up" in reply.text
 
 
 def test_hard_override_converts_correct_srs_result(db_session, settings) -> None:

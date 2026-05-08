@@ -22,6 +22,12 @@ unit of work. The 15 epics are one-to-one with PRD §28 backlog.
 | 13 | [stats-and-weekly-summary](EPIC-13-stats-and-weekly-summary.md) | Done | `/stats` + weekly digest. |
 | 14 | [favorites](EPIC-14-favorites.md) | Done | `is_favorite` flag and prioritization. |
 | 15 | [optional-web-interface](EPIC-15-optional-web-interface.md) | **Deferred** | Re-evaluate after 4–6 weeks of bot usage. |
+| 16 | [learning-engine-v1](EPIC-16-learning-engine-v1.md) | Done | Staged `/today` Learning Engine. |
+| 17 | [persistent-lesson-plans](EPIC-17-persistent-lesson-plans.md) | Planned | LessonPlan / LessonStep / LessonPlanItem from source materials. |
+| 18 | [deepseek-llm-gateway](EPIC-18-deepseek-llm-gateway.md) | Planned | Centralized DeepSeek JSON gateway with fallback. |
+| 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Planned | AI-generated high-value exercise prompts. |
+| 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Planned | Practical business/IT grammar concepts in practice. |
+| 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Planned | Local material chunks and keyword retrieval. |
 
 ## Dependency graph
 
@@ -68,6 +74,10 @@ unit of work. The 15 epics are one-to-one with PRD §28 backlog.
 
 
    EPIC-15 (web UI) — deferred, not on critical path.
+
+   EPIC-16 → EPIC-17 → EPIC-18 → EPIC-19 → EPIC-20 → EPIC-21
+   (learning engine, lesson plans, DeepSeek, AI exercises, grammar brain,
+   light material context search)
 ```
 
 ## Suggested implementation order
@@ -82,6 +92,8 @@ EPIC-01 → EPIC-02 → EPIC-05 → EPIC-06 → EPIC-09 → EPIC-08 → EPIC-07 
                                           EPIC-13, EPIC-14
                                               ↓
                                           EPIC-15 (deferred)
+                                          ↓
+              EPIC-16 → EPIC-17 → EPIC-18 → EPIC-19 → EPIC-20 → EPIC-21
 ```
 
 The order above prioritizes the **end-to-end loop** as early as possible:

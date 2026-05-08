@@ -558,10 +558,11 @@ def handle_today(
             message_thread_id=message_thread_id,
         )
     index, exercise = current
-    title = "Today's English practice"
+    title = _practice_header(practice_session.exercises)
     if channel_id:
         title = "#practice_flow\n" + title
-    text = f"{title}\n\nExercise {index + 1}/7\n{exercise['prompt']}"
+    rendered_step = _render_step(index, exercise, len(practice_session.exercises))
+    text = f"{title}\n\n{rendered_step}"
     return BotReply(
         text,
         channel_id or user.telegram_user_id,
@@ -641,7 +642,9 @@ def handle_answer(
     if follow_up is not None:
         next_index, next_item = follow_up
         next_heading = "#next_prompt\n" if channel_id else ""
-        next_text = f"{next_heading}Exercise {next_index + 1}/7\n{next_item['prompt']}"
+        next_text = next_heading + _render_step(
+            next_index, next_item, len(practice_session.exercises)
+        )
         if next_channel_id:
             extra_replies.append(
                 BotReply(
@@ -670,6 +673,44 @@ def handle_answer(
         message_thread_id=message_thread_id,
         extra_replies=tuple(extra_replies),
     )
+
+
+def _practice_header(exercises: list[dict]) -> str:
+    metadata = _exercise_metadata(exercises[0] if exercises else {})
+    mode = str(metadata.get("mode", "mixed")).replace("_", " ")
+    topic = metadata.get("topic", "Business/IT communication")
+    goal = metadata.get("lesson_goal", "Practice useful workplace English.")
+    return (
+        "Today's English practice - 15 min\n"
+        f"Mode: {mode}\n"
+        f"Topic: {topic}\n"
+        f"Goal: {goal}"
+    )
+
+
+def _exercise_metadata(exercise: dict) -> dict:
+    metadata = exercise.get("metadata")
+    if isinstance(metadata, dict):
+        return metadata
+    return exercise
+
+
+def _stage_label(stage: str) -> str:
+    labels = {
+        "warmup": "Warm-up",
+        "input": "Input",
+        "controlled_practice": "Controlled practice",
+        "grammar_or_mistake_focus": "Grammar / mistake focus",
+        "free_production": "Free production",
+        "recap": "Recap",
+    }
+    return labels.get(stage, stage.replace("_", " ").title())
+
+
+def _render_step(index: int, exercise: dict, total: int) -> str:
+    metadata = _exercise_metadata(exercise)
+    stage = _stage_label(str(metadata.get("stage", "practice")))
+    return f"Step {index + 1}/{total} - {stage}\n{exercise['prompt']}"
 
 
 def handle_attempt_ack(session: Session, user: User, attempt_id: int) -> BotReply:

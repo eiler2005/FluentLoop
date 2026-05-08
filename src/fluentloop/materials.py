@@ -7,7 +7,7 @@ from fluentloop.ai.provider import AIProvider
 from fluentloop.db.models import ExtractedCandidate, SourceMaterial, User, utc_now
 from fluentloop.learning import promote_candidate
 
-MAX_UPLOAD_CHARS = 10_000
+MAX_UPLOAD_CHARS = 20_000
 MATERIAL_TYPES = {
     "lesson_notes",
     "word_list",
