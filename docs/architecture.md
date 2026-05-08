@@ -184,6 +184,8 @@ EPIC-13):
 
 - `User` — single row.
 - `SourceMaterial` + `ExtractedCandidate` — upload-and-approve pipeline.
+- `MaterialChunk` — bounded local chunks for keyword context search over
+  uploaded materials.
 - `LearningItem` — words, expressions, grammar rules, mistake patterns.
 - `GrammarConcept` — graph (parent/child) for grammar topics.
 - `MistakeEvent` + `MistakePattern` — mistake-as-training loop.

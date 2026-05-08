@@ -7,6 +7,7 @@ from fluentloop.ai.provider import AIProvider
 from fluentloop.db.models import ExtractedCandidate, SourceMaterial, User, utc_now
 from fluentloop.learning import promote_candidate
 from fluentloop.lesson_plans import ensure_lesson_plan_for_source
+from fluentloop.material_context import index_source_material
 
 MAX_UPLOAD_CHARS = 20_000
 MATERIAL_TYPES = {
@@ -34,6 +35,7 @@ def store_material(
     material = SourceMaterial(user_id=user.id, type=type_, raw_text=raw_text)
     session.add(material)
     session.flush()
+    index_source_material(session, material)
     return material
 
 

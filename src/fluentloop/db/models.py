@@ -71,6 +71,23 @@ class SourceMaterial(Base, TimestampMixin):
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
+class MaterialChunk(Base, TimestampMixin):
+    __tablename__ = "material_chunks"
+    __table_args__ = (
+        UniqueConstraint(
+            "source_material_id", "chunk_index", name="uq_material_chunk_index"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source_material_id: Mapped[int] = mapped_column(
+        ForeignKey("source_materials.id"), index=True
+    )
+    chunk_index: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    tags_json: Mapped[list[str]] = mapped_column(JSON, default=list)
+
+
 class ExtractedCandidate(Base, TimestampMixin):
     __tablename__ = "extracted_candidates"
     __table_args__ = (

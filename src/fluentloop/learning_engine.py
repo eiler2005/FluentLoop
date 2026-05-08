@@ -23,6 +23,7 @@ from fluentloop.lesson_plans import (
     lesson_items,
     lesson_steps,
 )
+from fluentloop.material_context import build_material_context
 from fluentloop.srs import get_due_items
 
 SESSION_STAGES = (
@@ -251,6 +252,14 @@ def compose_learning_session(
         topic_goal = TopicGoal(plan.topic, plan.goal)
     else:
         topic_goal = select_topic_and_goal(scored_items, patterns)
+    material_context = []
+    if plan is not None and plan.source_material_id is not None:
+        material_context = build_material_context(
+            session,
+            user,
+            f"{topic_goal.topic} {topic_goal.lesson_goal}",
+            source_material_id=plan.source_material_id,
+        )
     exercises = build_staged_exercises(
         session,
         user,
@@ -262,6 +271,8 @@ def compose_learning_session(
     )
     if plan is not None:
         exercises = _apply_lesson_plan_steps(session, plan, exercises)
+    if material_context:
+        exercises = _apply_material_context(exercises, material_context)
     if ai_gateway is not None:
         exercises = enhance_staged_exercises_with_ai(ai_gateway, exercises)
     return exercises
@@ -662,4 +673,29 @@ def _apply_lesson_plan_steps(
             exercise["prompt"] = step.prompt_template
         elif step.instruction:
             exercise["prompt"] = f"{step.instruction}\n\n{exercise['prompt']}"
+    return exercises
+
+
+def _apply_material_context(
+    exercises: list[dict[str, Any]], context: list[dict]
+) -> list[dict[str, Any]]:
+    if not context:
+        return exercises
+    snippet = context[0]["text"].strip().replace("\n", " ")
+    if len(snippet) > 420:
+        snippet = snippet[:417].rstrip() + "..."
+    chunk_ids = [chunk["chunk_id"] for chunk in context]
+    for exercise in exercises:
+        metadata = exercise.get("metadata")
+        if isinstance(metadata, dict):
+            metadata["material_context_chunk_ids"] = chunk_ids
+            metadata["material_context"] = context
+    input_step = next(
+        (exercise for exercise in exercises if exercise.get("stage") == "input"),
+        None,
+    )
+    if input_step is not None:
+        input_step["prompt"] = (
+            f"Material context: {snippet}\n\n{input_step['prompt']}"
+        )
     return exercises

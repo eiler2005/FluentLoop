@@ -1,6 +1,6 @@
 # EPIC-21 — Light Material Context Search v1
 
-**Status:** Planned
+**Status:** Done (2026-05-08)
 **PRD references:** §5.1, §9, §13, §25.2
 **Depends on:** EPIC-20
 
@@ -41,3 +41,13 @@ infrastructure.
 - Live smoke: back up the DB, index the provided lesson material, search for a
   topic, run `/today`, verify context influence, and check logs.
 
+## Notes from implementation
+
+- Added `MaterialChunk` as an additive table linked to `SourceMaterial`.
+- New source materials are indexed automatically into bounded local chunks.
+- Added local keyword search and context-building helpers without embeddings,
+  LangChain, or an external vector database.
+- Lesson-mode Learning Engine sessions attach bounded material context to
+  metadata and prepend the input step with a short source snippet.
+- AI exercise generation payloads can receive the same bounded material
+  context.

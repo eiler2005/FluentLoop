@@ -94,6 +94,9 @@ def _payload_for_generation(base_exercise: dict[str, Any]) -> dict[str, Any]:
         "prompt": base_exercise.get("prompt", ""),
         "expected_answer": base_exercise.get("expected_answer", ""),
         "target_learning_item_ids": base_exercise.get("target_learning_item_ids", []),
+        "material_context": (base_exercise.get("metadata") or {}).get(
+            "material_context", []
+        ),
         "level": base_exercise.get("difficulty", "B2+/C1-"),
         "style": "concise Telegram-friendly business/IT English",
     }
