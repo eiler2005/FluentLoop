@@ -46,6 +46,7 @@ from fluentloop.channel import record_channel_discovery
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.db.session import session_scope
+from fluentloop.materials import MAX_UPLOAD_CHARS
 from fluentloop.scheduler import build_scheduler
 from fluentloop.telegram_bot_api import pin_bot_api_message, send_bot_api_reply
 from fluentloop.telegram_workspace import workspace_destination, workspace_enabled
@@ -157,6 +158,49 @@ async def maybe_record_channel(event, settings: Settings) -> bool:  # type: igno
     return title == settings.telegram_channel_title
 
 
+def _reply_in_workspace_topic(
+    reply: BotReply, settings: Settings, topic: str
+) -> BotReply:
+    target = workspace_destination(settings, topic)
+    if target.chat_id is None or target.message_thread_id is None:
+        return reply
+    return BotReply(
+        reply.text,
+        target.chat_id,
+        reply.buttons,
+        target.message_thread_id,
+        reply.extra_replies,
+    )
+
+
+def _material_upload_reply(reply: BotReply, event, settings: Settings) -> BotReply:  # type: ignore[no-untyped-def]
+    if _is_forum_chat(event.chat_id, settings):
+        return _reply_in_workspace_topic(reply, settings, "materials_upload")
+    return reply
+
+
+async def _material_text_from_event(event) -> str:  # type: ignore[no-untyped-def]
+    raw_text = str(event.raw_text or "").strip()
+    file = getattr(event.message, "file", None)
+    if file is None:
+        return raw_text
+    size = getattr(file, "size", None)
+    if size is not None and size > MAX_UPLOAD_CHARS:
+        raise ValueError("Material is too large; paste it in chunks")
+    blob = await event.download_media(file=bytes)
+    if not isinstance(blob, bytes) or not blob:
+        raise ValueError("Could not read the attached file")
+    if len(blob) > MAX_UPLOAD_CHARS:
+        raise ValueError("Material is too large; paste it in chunks")
+    try:
+        file_text = blob.decode("utf-8").strip()
+    except UnicodeDecodeError as exc:
+        raise ValueError("Only UTF-8 text, .txt, or .md files are supported") from exc
+    if raw_text and not raw_text.startswith("/"):
+        return f"{raw_text}\n\n{file_text}".strip()
+    return file_text
+
+
 async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
     from telethon import TelegramClient, events
 
@@ -262,17 +306,28 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     )
             elif command == "/upload":
                 upload_type = parts[1] if len(parts) >= 2 else "other"
-                StateStore(session).set(
-                    event.chat_id,
-                    telegram_user_id,
-                    "upload",
-                    {"type": upload_type},
-                )
-                reply = (
-                    handle_upload_start()
-                    if len(parts) < 2
-                    else handle_upload_type_choice(upload_type)
-                )
+                if getattr(event.message, "file", None) is not None:
+                    try:
+                        material_text = await _material_text_from_event(event)
+                    except ValueError as exc:
+                        reply = BotReply(f"Could not read material: {exc}")
+                    else:
+                        reply = handle_upload(
+                            session, user, provider, material_text, type_=upload_type
+                        )
+                else:
+                    StateStore(session).set(
+                        event.chat_id,
+                        telegram_user_id,
+                        "upload",
+                        {"type": upload_type},
+                    )
+                    reply = (
+                        handle_upload_start()
+                        if len(parts) < 2
+                        else handle_upload_type_choice(upload_type)
+                    )
+                reply = _material_upload_reply(reply, event, settings)
             elif command == "/approve":
                 if len(parts) < 2:
                     reply = BotReply("Use /approve <material_id>.")
@@ -457,6 +512,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     {"type": upload_type},
                 )
                 reply = handle_upload_type_choice(upload_type)
+                reply = _material_upload_reply(reply, event, settings)
                 await event.answer("Upload type")
             elif len(parts) == 3 and parts[0] == "candidates":
                 try:
@@ -577,14 +633,25 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             state_store = StateStore(session)
             state = state_store.get(event.chat_id, telegram_user_id)
             if state is not None and state.name == "upload":
-                reply = handle_upload(
-                    session,
-                    user,
-                    provider,
-                    event.raw_text,
-                    type_=str(state.payload.get("type", "other")),
-                )
+                try:
+                    material_text = await _material_text_from_event(event)
+                except ValueError as exc:
+                    reply = BotReply(f"Could not read material: {exc}")
+                else:
+                    if not material_text:
+                        reply = BotReply(
+                            "Send material as pasted text or a UTF-8 .md/.txt file."
+                        )
+                    else:
+                        reply = handle_upload(
+                            session,
+                            user,
+                            provider,
+                            material_text,
+                            type_=str(state.payload.get("type", "other")),
+                        )
                 state_store.clear(event.chat_id, telegram_user_id)
+                reply = _material_upload_reply(reply, event, settings)
             elif state is not None and state.name == "add":
                 reply = handle_add_text(session, user, event.raw_text)
                 state_store.clear(event.chat_id, telegram_user_id)
