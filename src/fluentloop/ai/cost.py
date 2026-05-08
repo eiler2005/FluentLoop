@@ -29,6 +29,7 @@ def append_usage(
     prompt_tokens: int,
     completion_tokens: int,
     cost_usd: float,
+    **extra: object,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     row = {
@@ -39,6 +40,7 @@ def append_usage(
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,
         "cost_usd": cost_usd,
+        **extra,
     }
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(row, ensure_ascii=False) + "\n")

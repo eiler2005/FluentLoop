@@ -33,6 +33,11 @@ class Settings:
     openai_api_key: str
     openai_model_light: str
     openai_model_heavy: str
+    deepseek_api_key: str
+    deepseek_base_url: str
+    deepseek_chat_model: str
+    deepseek_timeout_seconds: float
+    deepseek_max_retries: int
     log_level: str
     pre_gen_hour: int
     pre_gen_minute: int
@@ -81,6 +86,15 @@ def get_settings() -> Settings:
         openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
         openai_model_light=os.environ.get("OPENAI_MODEL_LIGHT", "gpt-4o-mini"),
         openai_model_heavy=os.environ.get("OPENAI_MODEL_HEAVY", "gpt-4o"),
+        deepseek_api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
+        deepseek_base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+        deepseek_chat_model=os.environ.get(
+            "DEEPSEEK_CHAT_MODEL", "deepseek-v4-flash"
+        ),
+        deepseek_timeout_seconds=float(
+            os.environ.get("DEEPSEEK_TIMEOUT_SECONDS", "30")
+        ),
+        deepseek_max_retries=int(os.environ.get("DEEPSEEK_MAX_RETRIES", "2")),
         log_level=os.environ.get("LOG_LEVEL", "INFO"),
         pre_gen_hour=int(os.environ.get("PRE_GEN_HOUR", "3")),
         pre_gen_minute=int(os.environ.get("PRE_GEN_MINUTE", "0")),

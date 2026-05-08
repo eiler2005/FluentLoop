@@ -32,6 +32,12 @@ REQUIRED = (
     "LOG_LEVEL",
 )
 
+DEEPSEEK_REQUIRED = (
+    "DEEPSEEK_API_KEY",
+    "DEEPSEEK_BASE_URL",
+    "DEEPSEEK_CHAT_MODEL",
+)
+
 PLACEHOLDER_MARKERS = ("<", "TODO", "FILL_ME", "REPLACE_ME")
 
 # Sentinel values that are intentionally non-real (overnight build mode).
@@ -67,9 +73,13 @@ def main() -> int:
         print(f"FAIL: .env unreadable: {exc}", file=sys.stderr)
         return 2
 
+    required = list(REQUIRED)
+    if values.get("AI_PROVIDER", "").lower() == "deepseek":
+        required.extend(DEEPSEEK_REQUIRED)
+
     missing: list[str] = []
     placeholder: list[str] = []
-    for key in REQUIRED:
+    for key in required:
         val = values.get(key, "")
         sentinel_ok = val in SENTINELS.get(key, ())
         if not val:
@@ -89,7 +99,7 @@ def main() -> int:
             )
         return 1
 
-    print(f"OK: {len(REQUIRED)} required keys set in {env_path}")
+    print(f"OK: {len(required)} required keys set in {env_path}")
     return 0
 
 

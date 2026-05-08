@@ -12,6 +12,7 @@ Lightweight ADRs. One file per significant decision. Numbered sequentially.
 | [0004](0004-exercise-pre-generation-strategy.md) | Exercise pre-generation strategy (overnight 03:00 user TZ) | Accepted (2026-05-06) |
 | [0005](0005-forum-workspace-routing.md) | Forum workspace routing (Telethon + Bot API topic sends) | Accepted (2026-05-07) |
 | [0006](0006-public-git-secret-hygiene.md) | Public git secret hygiene | Accepted (2026-05-07) |
+| [0007](0007-deepseek-llm-gateway.md) | DeepSeek LLM gateway for learning engine roadmap | Accepted (2026-05-08) |
 
 ## Conventions
 

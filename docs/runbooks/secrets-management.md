@@ -9,7 +9,7 @@ AI-provider keys, SQLite learning data, and one VPS deployment.
 - `TELEGRAM_BOT_TOKEN`.
 - `TELEGRAM_API_ID` and `TELEGRAM_API_HASH`.
 - `TELEGRAM_ALLOWED_USER_ID`, chat ids, forum group ids, and topic ids.
-- OpenAI/Anthropic API keys and any future provider credentials.
+- OpenAI/Anthropic/DeepSeek API keys and any future provider credentials.
 - Real VPS IP/hostname, SSH username when paired with the host, private SSH key
   paths, and deploy-only ports.
 - `.env`, `.env.*`, and everything under `secrets/`.

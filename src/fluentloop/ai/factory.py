@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from fluentloop.ai.provider import AIProvider, OpenAIProvider, StubProvider
+from fluentloop.ai.provider import (
+    AIProvider,
+    DeepSeekProvider,
+    OpenAIProvider,
+    StubProvider,
+)
 from fluentloop.config import Settings, get_settings
 
 
@@ -13,5 +18,13 @@ def make_provider(settings: Settings | None = None) -> AIProvider:
             api_key=cfg.openai_api_key,
             light_model=cfg.openai_model_light,
             heavy_model=cfg.openai_model_heavy,
+        )
+    if cfg.ai_provider == "deepseek":
+        return DeepSeekProvider(
+            api_key=cfg.deepseek_api_key,
+            base_url=cfg.deepseek_base_url,
+            model=cfg.deepseek_chat_model,
+            timeout_seconds=cfg.deepseek_timeout_seconds,
+            max_retries=cfg.deepseek_max_retries,
         )
     raise ValueError(f"unknown AI_PROVIDER: {cfg.ai_provider}")

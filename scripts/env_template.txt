@@ -33,6 +33,13 @@ OPENAI_API_KEY=<FILL_ME_FROM_OPENCLAW_SIGNALS_ENV>
 OPENAI_MODEL_LIGHT=gpt-4o-mini
 OPENAI_MODEL_HEAVY=gpt-4o
 
+# DeepSeek (set AI_PROVIDER=deepseek when switching runtime provider).
+DEEPSEEK_API_KEY=<FILL_ME_FROM_DEEPSEEK>
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_CHAT_MODEL=deepseek-v4-flash
+DEEPSEEK_TIMEOUT_SECONDS=30
+DEEPSEEK_MAX_RETRIES=2
+
 # ---------------------------------------------------------------------------
 # Storage
 # ---------------------------------------------------------------------------

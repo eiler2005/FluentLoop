@@ -13,6 +13,8 @@ from fluentloop.ai.schemas import (
     GenerationResult,
     Validated,
 )
+from fluentloop.llm.gateway import DeepSeekGateway
+from fluentloop.llm.tasks import LLMTask
 
 
 class AIProvider(ABC):
@@ -173,3 +175,55 @@ class OpenAIProvider(AIProvider):
         return ExtractionResult.model_validate_json(
             response.choices[0].message.content or "{}"
         )
+
+
+class DeepSeekProvider(AIProvider):
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        base_url: str,
+        model: str,
+        timeout_seconds: float,
+        max_retries: int,
+        usage_path: Path | str = "data/usage_log.jsonl",
+    ) -> None:
+        self.gateway = DeepSeekGateway(
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
+            timeout_seconds=timeout_seconds,
+            max_retries=max_retries,
+            usage_path=usage_path,
+        )
+        self.stub = StubProvider(usage_path)
+
+    def light_call(self, task: str, payload: dict[str, Any]) -> Validated:
+        return self._call(task, payload)
+
+    def heavy_call(self, task: str, payload: dict[str, Any]) -> Validated:
+        return self._call(task, payload)
+
+    def _call(self, task: str, payload: dict[str, Any]) -> Validated:
+        if task == "epic_04_extract":
+            return self.gateway.run_json(
+                LLMTask.MATERIAL_EXTRACTION,
+                payload,
+                ExtractionResult,
+                fallback=lambda: self.stub.heavy_call(task, payload),
+            )
+        if task == "epic_07_generate_exercise":
+            return self.gateway.run_json(
+                LLMTask.EXERCISE_GENERATION,
+                payload,
+                GenerationResult,
+                fallback=GenerationResult(),
+            )
+        if task == "epic_10_check_answer":
+            return self.gateway.run_json(
+                LLMTask.ANSWER_CHECK,
+                payload,
+                AnswerFeedback,
+                fallback=lambda: self.stub.light_call(task, payload),
+            )
+        return self.stub.heavy_call(task, payload)

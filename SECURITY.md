@@ -11,7 +11,7 @@ goes wrong.
 | Asset | Storage | Sensitivity | Notes |
 |---|---|---|---|
 | `TELEGRAM_BOT_TOKEN` | `.env` (local), VPS env, gitignored | Critical | Compromise = full bot impersonation, ability to message the user as "the bot". |
-| AI provider API key (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) | `.env` (local), VPS env, gitignored | Critical | Compromise = billing fraud + leak of any text sent through it. |
+| AI provider API key (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `DEEPSEEK_API_KEY`) | `.env` (local), VPS env, gitignored | Critical | Compromise = billing fraud + leak of any text sent through it. |
 | User lesson data (notes, mistakes, answers) | `data/` directory, SQLite, gitignored | High | Contains real names, client info, internal project topics. |
 | Bot session / state files | `data/`, `state/`, gitignored | Medium | Re-creatable but losing them resets progress. |
 | `data/backups/` daily SQLite snapshot | Local, gitignored | High | Same sensitivity as the live DB. |
@@ -22,7 +22,7 @@ goes wrong.
 - **No public web endpoint** in MVP (Telegram is the only interface).
 - **Realistic risks:**
   - Accidental commit of `.env` or a leaked token in a log line.
-  - AI provider data retention — anything sent to OpenAI / Anthropic is
+  - AI provider data retention — anything sent to OpenAI / Anthropic / DeepSeek is
     governed by their terms.
   - VPS compromise via SSH (mitigated by key-only auth, fail2ban — handled in
     a deployment epic later).
@@ -46,9 +46,8 @@ What this means in practice:
 - Lesson notes may contain colleague names, client names, internal project
   names, and informal commentary. All of that is transmitted to the chosen
   AI provider.
-- Provider data retention follows their published terms (OpenAI: typically
-  30-day API logs unless zero-retention is enabled; Anthropic: 30 days for
-  abuse monitoring unless contractually overridden).
+- Provider data retention follows the published terms for the configured AI
+  provider.
 - The user must consciously decide they accept this. There is no way to
   build the product without it.
 

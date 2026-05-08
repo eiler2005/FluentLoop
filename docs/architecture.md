@@ -11,7 +11,8 @@ decisions as ADRs in [`adr/`](adr/).
 
 - **One Docker container** on a personal VPS, running Python 3.11.
 - **Telethon 1.36+ in bot mode** as the Telegram client (ADR-0002).
-- **OpenAI two-tier:** `gpt-4o-mini` (light) + `gpt-4o` (heavy) (ADR-0003).
+- **AI provider:** OpenAI two-tier for the original MVP (ADR-0003); DeepSeek
+  gateway for the learning-engine roadmap (ADR-0007).
 - **SQLite** via SQLAlchemy 2.x, single-file DB, mounted from host.
 - **APScheduler** in-process for daily reminders, overnight pre-gen
   (ADR-0004), and daily SQLite backups.
@@ -45,9 +46,10 @@ decisions as ADRs in [`adr/`](adr/).
 - Concurrency: single user, single writer, no contention. `journal_mode
   = WAL` to allow the backup job to read while the bot writes.
 
-## 3. AI provider — OpenAI two-tier
+## 3. AI provider — OpenAI two-tier plus DeepSeek gateway
 
 **Decision:** [ADR-0003](adr/0003-ai-model-tiering-and-cost.md).
+**Roadmap update:** [ADR-0007](adr/0007-deepseek-llm-gateway.md).
 
 | Tier | Model | Tasks |
 |---|---|---|
@@ -62,9 +64,15 @@ decisions as ADRs in [`adr/`](adr/).
   choice is per *task type*, not per call site.
 - Cost telemetry: `usage_log` table (or JSONL) with token counts per
   call, summed weekly.
-- Privacy: lesson notes, mistakes, and answers go to OpenAI. See
+- Privacy: lesson notes, mistakes, and answers go to the configured AI
+  provider. See
   [`../SECURITY.md`](../SECURITY.md) for the disclosure and the
   P1-tracked optional redaction list.
+
+For EPIC-18 onward, DeepSeek is available through `src/fluentloop/llm/` using
+the OpenAI-compatible API. Runtime can select it with `AI_PROVIDER=deepseek`
+and the `DEEPSEEK_*` env variables. Business modules must call the gateway or
+`AIProvider` abstraction rather than constructing provider clients directly.
 
 ## 4. Pre-generation pipeline
 
@@ -188,8 +196,8 @@ EPIC-13):
 
 ## TODOs
 
-- [ ] Add a redact-list mechanism for sending lesson notes to OpenAI
-      (P1 — see [`../SECURITY.md`](../SECURITY.md)).
+- [ ] Add a redact-list mechanism for sending lesson notes to the configured
+      AI provider (P1 — see [`../SECURITY.md`](../SECURITY.md)).
 - [ ] Wire up `verify.sh` once the container exists (EPIC-01 deliverable).
 - [ ] Off-VPS backup strategy (P1).
 - [ ] Decide ADR-0005 if/when we add a redact list (worth its own ADR
