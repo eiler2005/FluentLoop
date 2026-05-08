@@ -195,6 +195,68 @@ class PracticeSessionCached(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(String(16), default="ready")
 
 
+class LessonPlan(Base, TimestampMixin):
+    __tablename__ = "lesson_plans"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    source_material_id: Mapped[int | None] = mapped_column(
+        ForeignKey("source_materials.id"), nullable=True, index=True
+    )
+    title: Mapped[str] = mapped_column(String(256))
+    topic: Mapped[str] = mapped_column(String(256), default="Business/IT communication")
+    goal: Mapped[str] = mapped_column(Text, default="")
+    level: Mapped[str] = mapped_column(String(16), default="B2+/C1-")
+    language_focus_json: Mapped[list[str]] = mapped_column(JSON, default=list)
+    tags_json: Mapped[list[str]] = mapped_column(JSON, default=list)
+    status: Mapped[str] = mapped_column(String(16), default="active", index=True)
+
+
+class LessonStep(Base, TimestampMixin):
+    __tablename__ = "lesson_steps"
+    __table_args__ = (
+        UniqueConstraint(
+            "lesson_plan_id", "order_index", name="uq_lesson_step_plan_order"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    lesson_plan_id: Mapped[int] = mapped_column(
+        ForeignKey("lesson_plans.id"), index=True
+    )
+    order_index: Mapped[int] = mapped_column(Integer)
+    step_type: Mapped[str] = mapped_column(String(64), index=True)
+    title: Mapped[str] = mapped_column(String(256))
+    instruction: Mapped[str] = mapped_column(Text, default="")
+    exercise_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    estimated_minutes: Mapped[int] = mapped_column(Integer, default=2)
+    target_skill: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    prompt_template: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+
+class LessonPlanItem(Base, TimestampMixin):
+    __tablename__ = "lesson_plan_items"
+    __table_args__ = (
+        UniqueConstraint(
+            "lesson_plan_id",
+            "learning_item_id",
+            "role",
+            name="uq_lesson_plan_item_role",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    lesson_plan_id: Mapped[int] = mapped_column(
+        ForeignKey("lesson_plans.id"), index=True
+    )
+    learning_item_id: Mapped[int] = mapped_column(
+        ForeignKey("learning_items.id"), index=True
+    )
+    role: Mapped[str] = mapped_column(String(32), default="target")
+    priority: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class MistakeEvent(Base, TimestampMixin):
     __tablename__ = "mistake_events"
 

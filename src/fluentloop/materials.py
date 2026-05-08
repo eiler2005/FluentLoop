@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from fluentloop.ai.provider import AIProvider
 from fluentloop.db.models import ExtractedCandidate, SourceMaterial, User, utc_now
 from fluentloop.learning import promote_candidate
+from fluentloop.lesson_plans import ensure_lesson_plan_for_source
 
 MAX_UPLOAD_CHARS = 20_000
 MATERIAL_TYPES = {
@@ -90,6 +91,8 @@ def approve_all(session: Session, user: User, material: SourceMaterial) -> int:
     for candidate in candidates:
         promote_candidate(session, user, candidate)
         count += 1
+    if count:
+        ensure_lesson_plan_for_source(session, user, material)
     return count
 
 
@@ -102,6 +105,7 @@ def approve_candidate(
     if source is None or source.user_id != user.id:
         raise ValueError("Candidate not found")
     promote_candidate(session, user, candidate)
+    ensure_lesson_plan_for_source(session, user, source)
     return 1
 
 

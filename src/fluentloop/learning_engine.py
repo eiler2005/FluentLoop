@@ -16,6 +16,11 @@ from fluentloop.db.models import (
 )
 from fluentloop.exercises import Exercise, render_for_item
 from fluentloop.learning import active_items
+from fluentloop.lesson_plans import (
+    available_lesson_plan,
+    lesson_items,
+    lesson_steps,
+)
 from fluentloop.srs import get_due_items
 
 SESSION_STAGES = (
@@ -91,6 +96,8 @@ def _active_patterns(
 def choose_session_mode(
     session: Session, user: User, *, now: datetime | None = None
 ) -> str:
+    if available_lesson_plan(session, user) is not None:
+        return "lesson"
     due_items = get_due_items(session, user.id, limit=20, now=_current(now))
     if len(due_items) >= 5:
         return "review"
@@ -231,11 +238,17 @@ def compose_learning_session(
     target_date: object | None = None,
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
-    mode = choose_session_mode(session, user, now=now)
-    scored_items = score_learning_items(session, user, now=now)
+    plan = available_lesson_plan(session, user)
+    mode = "lesson" if plan is not None else choose_session_mode(session, user, now=now)
+    scored_items = _scored_items_for_lesson_plan(session, plan)
+    if not scored_items:
+        scored_items = score_learning_items(session, user, now=now)
     patterns = _active_patterns(session, user.id, limit=3)
-    topic_goal = select_topic_and_goal(scored_items, patterns)
-    return build_staged_exercises(
+    if plan is not None:
+        topic_goal = TopicGoal(plan.topic, plan.goal)
+    else:
+        topic_goal = select_topic_and_goal(scored_items, patterns)
+    exercises = build_staged_exercises(
         session,
         user,
         mode=mode,
@@ -244,6 +257,20 @@ def compose_learning_session(
         scored_items=scored_items,
         patterns=patterns,
     )
+    if plan is not None:
+        exercises = _apply_lesson_plan_steps(session, plan, exercises)
+    return exercises
+
+
+def _scored_items_for_lesson_plan(
+    session: Session, plan: object | None
+) -> list[ScoredLearningItem]:
+    if plan is None:
+        return []
+    return [
+        ScoredLearningItem(item=item, score=150 - index, reasons=("lesson_plan",))
+        for index, item in enumerate(lesson_items(session, plan))
+    ]
 
 
 def build_staged_exercises(
@@ -577,3 +604,23 @@ def _dedupe_target_ids(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if isinstance(metadata, dict):
             metadata["target_item_ids"] = target_ids
     return steps
+
+
+def _apply_lesson_plan_steps(
+    session: Session, plan: object, exercises: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    steps = lesson_steps(session, plan)
+    for exercise, step in zip(exercises, steps, strict=False):
+        exercise["stage"] = step.step_type
+        exercise["lesson_plan_id"] = step.lesson_plan_id
+        exercise["lesson_step_id"] = step.id
+        metadata = exercise.get("metadata")
+        if isinstance(metadata, dict):
+            metadata["stage"] = step.step_type
+            metadata["lesson_plan_id"] = step.lesson_plan_id
+            metadata["lesson_step_id"] = step.id
+        if step.prompt_template:
+            exercise["prompt"] = step.prompt_template
+        elif step.instruction:
+            exercise["prompt"] = f"{step.instruction}\n\n{exercise['prompt']}"
+    return exercises

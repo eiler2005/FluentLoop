@@ -182,6 +182,8 @@ EPIC-13):
 - `ReviewState` — spaced-repetition bookkeeping per learning item.
 - `PracticeSession` + `PracticeAttempt` — what happened during practice.
 - `practice_session_cached` — overnight pre-gen output (ADR-0004).
+- `LessonPlan` + `LessonStep` + `LessonPlanItem` — reusable staged lesson
+  plans linked to source materials and existing learning items.
 - `usage_log` — per-AI-call token counts (cost telemetry).
 
 ## TODOs

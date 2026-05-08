@@ -1,6 +1,6 @@
 # EPIC-17 — Persistent LessonPlan v1
 
-**Status:** Planned
+**Status:** Done (2026-05-08)
 **PRD references:** §9, §10, §13, §14, §22.1, §24
 **Depends on:** EPIC-16
 **Blocks:** EPIC-18, EPIC-19, EPIC-21
@@ -43,3 +43,14 @@ a source of approved `LearningItem` rows.
   lesson material, run `/today`, complete at least two steps, verify attempts
   and SRS, and check logs.
 
+## Notes from implementation
+
+- Added `LessonPlan`, `LessonStep`, and `LessonPlanItem` as additive SQLite
+  tables managed through the existing `Base.metadata.create_all` startup path.
+- Added deterministic lesson-plan helpers that infer topic/goal from source
+  material and link existing learning items instead of duplicating them.
+- Approval now creates an active lesson plan when approved items exist for a
+  source material.
+- The Learning Engine now prefers an available lesson plan and annotates
+  exercises with `lesson_plan_id` and `lesson_step_id`, while preserving
+  fallback staged composition.
