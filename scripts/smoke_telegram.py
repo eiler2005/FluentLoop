@@ -19,10 +19,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import urllib.error
 import urllib.request
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 def load_env() -> None:
@@ -51,12 +54,86 @@ def call_bot(token: str, method: str, payload: dict) -> dict:
         raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
 
 
+def git_value(args: list[str]) -> str | None:
+    repo_root = Path(__file__).resolve().parent.parent
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    value = result.stdout.strip()
+    return value or None
+
+
+def current_time_label() -> str:
+    timezone_name = os.environ.get("TIMEZONE", "Europe/Moscow")
+    try:
+        tz = ZoneInfo(timezone_name)
+    except ZoneInfoNotFoundError:
+        tz = None
+    if tz is not None:
+        now = datetime.now(tz).astimezone()
+    else:
+        now = datetime.now().astimezone()
+    return now.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def build_label(explicit_build_id: str | None = None) -> str:
+    if explicit_build_id:
+        return explicit_build_id
+    env_build = os.environ.get("FLUENTLOOP_BUILD_ID") or os.environ.get("BUILD_ID")
+    if env_build:
+        return env_build
+    build_number = git_value(["rev-list", "--count", "HEAD"])
+    commit_sha = git_value(["rev-parse", "--short", "HEAD"])
+    if build_number and commit_sha:
+        return f"{build_number} ({commit_sha})"
+    return commit_sha or build_number or "unknown"
+
+
+def format_smoke_message(
+    text: str,
+    *,
+    plans: list[str],
+    build_id: str | None = None,
+) -> str:
+    if not plans:
+        return text
+    lines = [
+        text,
+        "",
+        f"Build: {build_label(build_id)}",
+        f"Time: {current_time_label()}",
+        "",
+        "Plan:",
+    ]
+    lines.extend(f"- {plan}" for plan in plans)
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--text",
         default="FluentLoop deploy smoke: Bot API outbound check passed.",
         help="message text to send to TELEGRAM_ALLOWED_USER_ID",
+    )
+    parser.add_argument(
+        "--plan",
+        action="append",
+        default=[],
+        help="one implementation/validation note to include in the smoke message",
+    )
+    parser.add_argument(
+        "--build-id",
+        default=None,
+        help="explicit build identifier; defaults to git commit count and short SHA",
     )
     args = parser.parse_args()
     load_env()
@@ -84,12 +161,17 @@ def main() -> int:
         return 1
 
     try:
+        text = format_smoke_message(
+            args.text,
+            plans=args.plan,
+            build_id=args.build_id,
+        )
         sent = call_bot(
             token,
             "sendMessage",
             {
                 "chat_id": chat_id,
-                "text": args.text,
+                "text": text,
             },
         )
     except RuntimeError as exc:
