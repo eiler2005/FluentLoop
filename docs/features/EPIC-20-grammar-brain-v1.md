@@ -1,6 +1,6 @@
 # EPIC-20 — Grammar Brain v1
 
-**Status:** Planned
+**Status:** Done (2026-05-08)
 **PRD references:** §11, §17, §18, §22.4
 **Depends on:** EPIC-19
 **Blocks:** EPIC-21
@@ -41,3 +41,14 @@ selected by the Learning Engine and connected to mistakes and items.
   pattern, run `/today`, answer grammar focus, verify feedback/SRS, and check
   logs.
 
+## Notes from implementation
+
+- Expanded seeded grammar concepts into practical B2+/C1 business/IT
+  micro-skills and made seeding idempotently add missing concepts to existing
+  databases.
+- Added richer parent links for articles, modal verbs, hedging, diplomatic
+  disagreement, conditionals, reported speech, and business prepositions.
+- Added grammar focus selection from linked mistake patterns, linked items, and
+  keyword matching.
+- Grammar/mistake focus steps now include relevant concept metadata and
+  practical business examples.

@@ -16,6 +16,7 @@ from fluentloop.db.models import (
     User,
 )
 from fluentloop.exercises import Exercise, render_for_item
+from fluentloop.grammar import select_focus_concept
 from fluentloop.learning import active_items
 from fluentloop.lesson_plans import (
     available_lesson_plan,
@@ -423,6 +424,7 @@ def build_grammar_or_mistake_focus_step(
 ) -> dict[str, Any]:
     if patterns:
         pattern = patterns[0]
+        concept = select_focus_concept(session, items=items, patterns=patterns)
         wrong = (pattern.wrong_examples or ["We need align priorities before sprint."])[
             -1
         ]
@@ -437,10 +439,10 @@ def build_grammar_or_mistake_focus_step(
         )
         exercise = Exercise(
             "error_correction",
-            f"Fix this recurring {pattern.mistake_type} issue:\n\"{wrong}\"",
+            _mistake_focus_prompt(pattern, wrong, concept),
             expected,
-            "Use the recurring mistake pattern as your clue.",
-            pattern.description,
+            _concept_hint(concept) or "Use the recurring mistake pattern as your clue.",
+            _concept_explanation(concept) or pattern.description,
             target_ids,
         )
     else:
@@ -455,7 +457,7 @@ def build_grammar_or_mistake_focus_step(
         if grammar_item is not None:
             exercise = render_for_item(grammar_item, "grammar_rewrite")
         else:
-            concept = session.scalar(select(GrammarConcept).order_by(GrammarConcept.id))
+            concept = select_focus_concept(session, items=items, patterns=patterns)
             if concept is not None:
                 exercise = Exercise(
                     "grammar_rewrite",
@@ -481,7 +483,7 @@ def build_grammar_or_mistake_focus_step(
                     "Seed grammar prompt appears only as fallback.",
                     [],
                 )
-    return _with_metadata(
+    result = _with_metadata(
         exercise,
         stage="grammar_or_mistake_focus",
         mode=mode,
@@ -489,6 +491,13 @@ def build_grammar_or_mistake_focus_step(
         lesson_goal=lesson_goal,
         target_skill="grammar_or_mistake_repair",
     )
+    concept = select_focus_concept(session, items=items, patterns=patterns)
+    if concept is not None:
+        result["grammar_concept_id"] = concept.id
+        metadata = result.get("metadata")
+        if isinstance(metadata, dict):
+            metadata["grammar_concept_id"] = concept.id
+    return result
 
 
 def build_free_production_step(
@@ -567,6 +576,32 @@ def _seed_controlled_practice(index: int) -> Exercise:
         "Seed translation prompt appears only until enough items exist.",
         [],
     )
+
+
+def _mistake_focus_prompt(
+    pattern: MistakePattern, wrong: str, concept: GrammarConcept | None
+) -> str:
+    if concept is None:
+        return f"Fix this recurring {pattern.mistake_type} issue:\n\"{wrong}\""
+    return (
+        f"Grammar focus: {concept.title}.\n"
+        f"{concept.description}\n"
+        f"Fix this recurring {pattern.mistake_type} issue:\n\"{wrong}\""
+    )
+
+
+def _concept_hint(concept: GrammarConcept | None) -> str:
+    if concept is None:
+        return ""
+    if concept.examples:
+        return concept.examples[0]
+    return concept.description
+
+
+def _concept_explanation(concept: GrammarConcept | None) -> str:
+    if concept is None:
+        return ""
+    return concept.description
 
 
 def _with_metadata(
