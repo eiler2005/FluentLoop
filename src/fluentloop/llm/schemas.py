@@ -6,6 +6,9 @@ from pydantic import BaseModel, Field
 class LLMExercise(BaseModel):
     exercise_type: str
     stage: str = ""
+    mode: str = ""
+    topic: str = ""
+    lesson_goal: str = ""
     title: str = ""
     prompt: str
     expected_answer: str = ""
@@ -26,4 +29,3 @@ class LLMTextResult(BaseModel):
     title: str = ""
     text: str = ""
     tags: list[str] = Field(default_factory=list)
-

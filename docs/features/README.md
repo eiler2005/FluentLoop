@@ -25,7 +25,7 @@ unit of work. The 15 epics are one-to-one with PRD §28 backlog.
 | 16 | [learning-engine-v1](EPIC-16-learning-engine-v1.md) | Done | Staged `/today` Learning Engine. |
 | 17 | [persistent-lesson-plans](EPIC-17-persistent-lesson-plans.md) | Done | LessonPlan / LessonStep / LessonPlanItem from source materials. |
 | 18 | [deepseek-llm-gateway](EPIC-18-deepseek-llm-gateway.md) | Done | Centralized DeepSeek JSON gateway with fallback. |
-| 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Planned | AI-generated high-value exercise prompts. |
+| 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Done | AI-generated high-value exercise prompts. |
 | 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Planned | Practical business/IT grammar concepts in practice. |
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Planned | Local material chunks and keyword retrieval. |
 

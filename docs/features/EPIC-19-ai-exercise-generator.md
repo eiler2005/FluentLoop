@@ -1,6 +1,6 @@
 # EPIC-19 — AI Exercise Generator v1
 
-**Status:** Planned
+**Status:** Done (2026-05-08)
 **PRD references:** §13, §15, §25.2
 **Depends on:** EPIC-18
 **Blocks:** EPIC-20, EPIC-21
@@ -41,3 +41,12 @@ where deterministic templates are too repetitive.
   grammar/business prompt, answer them, verify feedback, attempts, SRS, and
   logs.
 
+## Notes from implementation
+
+- Added `src/fluentloop/ai_exercises.py` as a small generator layer over the
+  DeepSeek gateway.
+- The Learning Engine can enhance high-value stages when a gateway is supplied:
+  `grammar_or_mistake_focus` and `free_production`.
+- AI-generated exercise dicts preserve the existing exercise contract and add
+  `ai_generated`, tags, difficulty, and stage metadata.
+- Empty or invalid model output falls back to the deterministic base exercise.

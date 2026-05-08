@@ -7,6 +7,7 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from fluentloop.ai_exercises import enhance_staged_exercises_with_ai
 from fluentloop.db.models import (
     GrammarConcept,
     LearningItem,
@@ -237,6 +238,7 @@ def compose_learning_session(
     *,
     target_date: object | None = None,
     now: datetime | None = None,
+    ai_gateway: object | None = None,
 ) -> list[dict[str, Any]]:
     plan = available_lesson_plan(session, user)
     mode = "lesson" if plan is not None else choose_session_mode(session, user, now=now)
@@ -259,6 +261,8 @@ def compose_learning_session(
     )
     if plan is not None:
         exercises = _apply_lesson_plan_steps(session, plan, exercises)
+    if ai_gateway is not None:
+        exercises = enhance_staged_exercises_with_ai(ai_gateway, exercises)
     return exercises
 
 

@@ -24,6 +24,14 @@ class GeneratedExercise(BaseModel):
     hint: str = ""
     explanation: str = ""
     target_learning_item_ids: list[int] = Field(default_factory=list)
+    stage: str = ""
+    mode: str = ""
+    topic: str = ""
+    lesson_goal: str = ""
+    target_skill: str = ""
+    target_item_ids: list[int] = Field(default_factory=list)
+    difficulty: str = "B2+/C1-"
+    tags: list[str] = Field(default_factory=list)
 
 
 class GenerationResult(BaseModel):
