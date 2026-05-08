@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from fluentloop.db.models import ExtractedCandidate, MistakePattern
+from fluentloop.lesson_overview import infer_lesson_overview
 
 HELP = """How FluentLoop works
 
@@ -22,6 +25,7 @@ Commands:
 /start - create or load profile and post workspace hubs
 /today - start today's practice
 /review - review due items
+/skip - skip current exercise and show the answer
 /upload - upload lesson material
 /add expression | push back on | мягко возражать | meetings,stakeholders
 /candidates <material_id> - review extracted candidates
@@ -51,16 +55,78 @@ def start_message(channel_enabled: bool = False) -> str:
     return f"FluentLoop is ready.\n{where}\nSend /upload, /add, or /today."
 
 
-def candidate_summary(candidates: list[ExtractedCandidate]) -> str:
+MAX_TELEGRAM_MESSAGE_CHARS = 3900
+
+
+def candidate_summary(
+    candidates: list[ExtractedCandidate],
+    *,
+    raw_text: str = "",
+    material_type: str = "",
+) -> str:
     counts: dict[str, int] = {}
     for candidate in candidates:
         counts[candidate.type] = counts.get(candidate.type, 0) + 1
     parts = ", ".join(f"{value} {key}" for key, value in sorted(counts.items()))
     material_id = candidates[0].source_material_id if candidates else "?"
-    return (
-        f"Found {parts or '0 candidates'}.\n"
-        f"Send /approve {material_id} to add all pending candidates."
+    overview = infer_lesson_overview(
+        raw_text,
+        item_texts=[candidate.text for candidate in candidates],
+        tags=[tag for candidate in candidates for tag in (candidate.tags or [])],
     )
+    lines = [
+        f"Lesson: {overview.title}",
+        f"Theme: {overview.theme}",
+        f"Focus: {overview.focus}",
+        "Knowledge areas:",
+        *_format_list("Topics", overview.knowledge_areas),
+        *_format_list("Grammar", overview.grammar_rules),
+        *_format_list("Skills", overview.communication_skills),
+        *_format_list("Mistake risks", overview.mistake_risks),
+        "",
+        f"Found {len(candidates)} candidate(s): {parts or '0 candidates'}.",
+    ]
+    if candidates:
+        lines.append("Candidates:")
+        _append_bounded(
+            lines,
+            (_candidate_line(candidate) for candidate in candidates),
+            overflow=(
+                "List shortened only because Telegram has a message limit. "
+                f"Use /candidates {material_id} to review the full list."
+            ),
+        )
+    lines.append(
+        "After approval, I'll create a lesson pool and rotate it into /today."
+    )
+    lines.append(f"Send /approve {material_id} to add all pending candidates.")
+    return "\n".join(lines)
+
+
+def _format_list(label: str, values: Iterable[str]) -> list[str]:
+    compact = [value for value in values if value]
+    if not compact:
+        return []
+    return [f"- {label}: {', '.join(compact)}"]
+
+
+def _candidate_line(candidate: ExtractedCandidate) -> str:
+    meaning = candidate.meaning or candidate.explanation
+    suffix = f" - {meaning[:80]}" if meaning else ""
+    return f"- {candidate.type}: {candidate.text}{suffix}"
+
+
+def _append_bounded(
+    lines: list[str], extra_lines: Iterable[str], *, overflow: str
+) -> None:
+    current_length = len("\n".join(lines))
+    for line in extra_lines:
+        projected = current_length + len(line) + 1
+        if projected > MAX_TELEGRAM_MESSAGE_CHARS:
+            lines.append(overflow)
+            return
+        lines.append(line)
+        current_length = projected
 
 
 def mistake_patterns(patterns: list[MistakePattern]) -> str:

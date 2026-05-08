@@ -23,6 +23,7 @@ from fluentloop.bot.handlers import (
     handle_dispute,
     handle_favorite_toggle,
     handle_favorites,
+    handle_feedback_explain,
     handle_help,
     handle_item_status,
     handle_items,
@@ -33,6 +34,7 @@ from fluentloop.bot.handlers import (
     handle_setting_update,
     handle_settings,
     handle_skip_all,
+    handle_skip_current,
     handle_start,
     handle_stats,
     handle_today,
@@ -115,6 +117,13 @@ async def send_reply(  # type: ignore[no-untyped-def]
     for extra in reply.extra_replies:
         await send_reply(client, fallback_chat_id, extra, settings)
     return message
+
+
+async def answer_callback(event, text: str) -> None:  # type: ignore[no-untyped-def]
+    try:
+        await event.answer(text)
+    except Exception as exc:  # noqa: BLE001 - Telegram may expire callback ids.
+        LOG.warning("Could not answer callback query: %s", type(exc).__name__)
 
 
 async def pin_reply(  # type: ignore[no-untyped-def]
@@ -337,7 +346,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     except ValueError:
                         reply = BotReply("Use /approve <material_id>.")
                     else:
-                        reply = handle_approve_all(session, user, material_id)
+                        reply = handle_approve_all(session, user, material_id, provider)
+                reply = _material_upload_reply(reply, event, settings)
             elif command == "/candidates":
                 if len(parts) < 2:
                     reply = BotReply("Use /candidates <material_id>.")
@@ -348,6 +358,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         reply = BotReply("Use /candidates <material_id>.")
                     else:
                         reply = handle_candidates(session, user, material_id)
+                reply = _material_upload_reply(reply, event, settings)
             elif command == "/candidate":
                 if len(parts) < 3:
                     reply = BotReply(CANDIDATE_USAGE)
@@ -358,8 +369,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         reply = BotReply(CANDIDATE_USAGE)
                     else:
                         reply = handle_candidate_action(
-                            session, user, parts[1], candidate_id
+                            session, user, parts[1], candidate_id, provider
                         )
+                reply = _material_upload_reply(reply, event, settings)
             elif command == "/stats":
                 reply = handle_stats(session, user)
             elif command == "/dispute":
@@ -372,6 +384,42 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         reply = BotReply("Use /dispute <attempt_id> <reason>.")
                     else:
                         reply = handle_dispute(session, user, attempt_id, parts[2])
+            elif command == "/feedback":
+                if len(parts) < 3 or parts[1] != "explain":
+                    reply = BotReply("Use /feedback explain <attempt_id>.")
+                else:
+                    try:
+                        attempt_id = int(parts[2])
+                    except ValueError:
+                        reply = BotReply("Use /feedback explain <attempt_id>.")
+                    else:
+                        reply = handle_feedback_explain(session, user, attempt_id)
+            elif command == "/skip":
+                next_target = workspace_destination(settings, "next_prompt")
+                summary_target = workspace_destination(settings, "summary")
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_skip_current(
+                    session,
+                    user,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                    next_channel_id=(
+                        str(next_target.chat_id)
+                        if next_target.message_thread_id is not None
+                        else None
+                    ),
+                    next_message_thread_id=next_target.message_thread_id,
+                    summary_channel_id=(
+                        str(summary_target.chat_id)
+                        if summary_target.message_thread_id is not None
+                        else None
+                    ),
+                    summary_message_thread_id=summary_target.message_thread_id,
+                )
             elif command == "/mistakes":
                 if len(parts) >= 3 and parts[1] in {
                     "focus",
@@ -432,7 +480,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 settings.telegram_allowed_user_id is not None
                 and settings.telegram_allowed_user_id != telegram_user_id
             ):
-                await event.answer("This is a personal FluentLoop bot.")
+                await answer_callback(event, "This is a personal FluentLoop bot.")
                 return
             user = ensure_user(session, telegram_user_id, settings)
             parts = raw_data.split(":", 2)
@@ -448,7 +496,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     ),
                     message_thread_id=practice_target.message_thread_id,
                 )
-                await event.answer("Starting practice")
+                await answer_callback(event, "Starting practice")
             elif raw_data == "materials:start":
                 StateStore(session).set(
                     telegram_user_id,
@@ -462,14 +510,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     telegram_user_id,
                     upload_reply.buttons,
                 )
-                await event.answer("Open the bot DM to paste material")
+                await answer_callback(event, "Open the bot DM to paste material")
             elif len(parts) == 3 and parts[0] == "settings":
                 field, value = parts[1], parts[2]
                 if field == "refresh":
                     reply = handle_settings(session, user)
                 else:
                     reply = handle_setting_update(session, user, field, value)
-                await event.answer("Settings updated")
+                await answer_callback(event, "Settings updated")
             elif len(parts) == 3 and parts[0] == "approve" and parts[1] in {
                 "all",
                 "skip",
@@ -480,10 +528,13 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply("Use /approve <material_id>.")
                 else:
                     if parts[1] == "all":
-                        reply = handle_approve_all(session, user, material_id)
+                        reply = handle_approve_all(
+                            session, user, material_id, provider
+                        )
                     else:
                         reply = handle_skip_all(session, user, material_id)
-                await event.answer("Approval updated")
+                reply = _material_upload_reply(reply, event, settings)
+                await answer_callback(event, "Approval updated")
             elif raw_data == "upload:confirm:pending":
                 state_store = StateStore(session)
                 state = state_store.get(event.chat_id, telegram_user_id)
@@ -498,11 +549,12 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         session, user, provider, str(state.payload["raw_text"])
                     )
                     state_store.clear(event.chat_id, telegram_user_id)
-                await event.answer("Material upload")
+                reply = _material_upload_reply(reply, event, settings)
+                await answer_callback(event, "Material upload")
             elif raw_data == "upload:cancel:pending":
                 StateStore(session).clear(event.chat_id, telegram_user_id)
                 reply = BotReply("Cancelled.")
-                await event.answer("Cancelled")
+                await answer_callback(event, "Cancelled")
             elif raw_data.startswith("upload_type:"):
                 upload_type = raw_data.removeprefix("upload_type:")
                 StateStore(session).set(
@@ -513,7 +565,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 reply = handle_upload_type_choice(upload_type)
                 reply = _material_upload_reply(reply, event, settings)
-                await event.answer("Upload type")
+                await answer_callback(event, "Upload type")
             elif len(parts) == 3 and parts[0] == "candidates":
                 try:
                     material_id = int(parts[2])
@@ -521,7 +573,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply("Use /candidates <material_id>.")
                 else:
                     reply = handle_candidates(session, user, material_id)
-                await event.answer("Candidate list")
+                reply = _material_upload_reply(reply, event, settings)
+                await answer_callback(event, "Candidate list")
             elif len(parts) == 3 and parts[0] == "candidate":
                 try:
                     candidate_id = int(parts[2])
@@ -534,9 +587,10 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         )
                     else:
                         reply = handle_candidate_action(
-                            session, user, parts[1], candidate_id
+                            session, user, parts[1], candidate_id, provider
                         )
-                await event.answer("Candidate handled")
+                reply = _material_upload_reply(reply, event, settings)
+                await answer_callback(event, "Candidate handled")
             elif raw_data.startswith("candidate_field:"):
                 field_parts = raw_data.split(":", 2)
                 try:
@@ -553,7 +607,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             "edit_candidate",
                             {"candidate_id": candidate_id, "field": field},
                         )
-                await event.answer("Candidate edit")
+                reply = _material_upload_reply(reply, event, settings)
+                await answer_callback(event, "Candidate edit")
             elif len(parts) == 3 and parts[0] == "favorite" and parts[1] == "toggle":
                 try:
                     item_id = int(parts[2])
@@ -561,7 +616,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply("Use /favorite <item_id>.")
                 else:
                     reply = handle_favorite_toggle(session, user, item_id)
-                await event.answer("Favorite updated")
+                await answer_callback(event, "Favorite updated")
             elif len(parts) == 3 and parts[0] == "item":
                 try:
                     item_id = int(parts[2])
@@ -569,7 +624,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply(ITEM_STATUS_USAGE)
                 else:
                     reply = handle_item_status(session, user, item_id, parts[1])
-                await event.answer("Item updated")
+                await answer_callback(event, "Item updated")
             elif len(parts) == 3 and parts[0] == "mistake":
                 try:
                     pattern_id = int(parts[2])
@@ -581,7 +636,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = handle_mistake_action(
                         session, user, parts[1], pattern_id
                     )
-                await event.answer("Mistake pattern updated")
+                await answer_callback(event, "Mistake pattern updated")
             elif len(parts) == 3 and parts[0] == "dispute":
                 try:
                     attempt_id = int(parts[1])
@@ -589,7 +644,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply("Use /dispute <attempt_id> <reason>.")
                 else:
                     reply = handle_dispute(session, user, attempt_id, parts[2])
-                await event.answer("Dispute logged")
+                await answer_callback(event, "Dispute logged")
             elif len(parts) == 3 and parts[0] == "attempt" and parts[1] == "ack":
                 try:
                     attempt_id = int(parts[2])
@@ -597,7 +652,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply("Attempt not found.")
                 else:
                     reply = handle_attempt_ack(session, user, attempt_id)
-                await event.answer("Got it")
+                await answer_callback(event, "Got it")
             elif len(parts) == 3 and parts[0] == "attempt" and parts[1] == "hard":
                 try:
                     attempt_id = int(parts[2])
@@ -605,10 +660,45 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply("Attempt not found.")
                 else:
                     reply = handle_attempt_hard(session, user, attempt_id)
-                await event.answer("Marked Hard")
+                await answer_callback(event, "Marked Hard")
+            elif len(parts) == 3 and parts[0] == "feedback" and parts[1] == "explain":
+                try:
+                    attempt_id = int(parts[2])
+                except ValueError:
+                    reply = BotReply("Attempt not found.")
+                else:
+                    reply = handle_feedback_explain(session, user, attempt_id)
+                await answer_callback(event, "Teacher details")
+            elif raw_data == "practice:skip":
+                next_target = workspace_destination(settings, "next_prompt")
+                summary_target = workspace_destination(settings, "summary")
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_skip_current(
+                    session,
+                    user,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                    next_channel_id=(
+                        str(next_target.chat_id)
+                        if next_target.message_thread_id is not None
+                        else None
+                    ),
+                    next_message_thread_id=next_target.message_thread_id,
+                    summary_channel_id=(
+                        str(summary_target.chat_id)
+                        if summary_target.message_thread_id is not None
+                        else None
+                    ),
+                    summary_message_thread_id=summary_target.message_thread_id,
+                )
+                await answer_callback(event, "Skipped")
             else:
                 reply = BotReply("Unknown button action. Send /help.")
-                await event.answer("Unknown action")
+                await answer_callback(event, "Unknown action")
             await send_reply(client, event.chat_id, reply, settings)
 
     @client.on(events.NewMessage)
@@ -664,6 +754,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     event.raw_text,
                 )
                 state_store.clear(event.chat_id, telegram_user_id)
+                reply = _material_upload_reply(reply, event, settings)
             else:
                 feedback_target = workspace_destination(settings, "feedback")
                 next_target = workspace_destination(settings, "next_prompt")

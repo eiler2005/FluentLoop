@@ -9,10 +9,10 @@
 ## Goal
 
 The user starts their day, gets a reminder at their preferred time, opens
-the bot, runs through 7 exercises, and finishes with a short summary. The
-session must feel snappy (cached batch from EPIC-07, no AI wait at the
-start) and survivable: leaving mid-session and coming back hours later
-just resumes where they left off.
+the bot, runs through a 15-minute lesson of about 15-20 micro-drills, and
+finishes with a short summary. The session should prefer the active lesson
+pool when one exists, remain snappy, and stay survivable: leaving mid-session
+and coming back hours later resumes the right local-day session.
 
 This epic also owns the daily SQLite backup, since both run on APScheduler.
 
@@ -25,13 +25,17 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   inline button to start.
 - Session state in the DB (not in-memory): `PracticeSession` per PRD §24
   with `started_at`, `completed_at`, `status` (`in_progress`,
-  `completed`, `abandoned`).
+  `completed`, `abandoned`, `superseded`).
 - Each exercise becomes a `PracticeAttempt` row when answered.
+- `/skip` and inline skip button — records a skipped `PracticeAttempt`,
+  reveals the correct answer/explanation, and advances to the next prompt.
 - Resume logic: if the user fires `/today` and there's an
   `in_progress` session for today, continue from the next unanswered
-  exercise (don't restart).
+  exercise. If a stale legacy session conflicts with a newly active
+  LessonPlan, mark it `superseded` and start the lesson-plan session.
 - Session summary on completion: how many correct / partial / incorrect,
-  what the next-review schedule looks like, key feedback highlights.
+  skipped and answered counts, what the next-review schedule looks like,
+  key feedback highlights.
 - `/review` command — start an ad-hoc session of due items only,
   generated on demand from EPIC-07's logic.
 - Daily SQLite backup job (APScheduler):
@@ -51,15 +55,18 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
 - At `reminder_time` in the user's TZ, the bot sends the reminder
   message with a "Start" button.
 - Pressing "Start" or sending `/today` begins the session and presents
-  exercise 1/7.
+  exercise 1/N, where N is usually 15-20 micro-drills for a 15-minute lesson.
 - After answering, the bot shows feedback (placeholder until EPIC-10)
   and presents the next exercise.
 - Closing Telegram after exercise 3 and returning hours later via
   `/today` resumes at exercise 4.
-- Completing all 7 exercises produces the summary message and marks
+- Completing all 15-20 micro-drills produces the summary message and marks
   the session `completed`.
+- Sending `/skip` during practice reveals the expected answer and explanation,
+  records a skipped attempt, and advances the session.
 - The next day's `/today` starts a fresh session (yesterday's session is
-  not "in progress").
+  not "in progress"). The day boundary is based on the user's configured
+  timezone, not UTC.
 - Backup files appear in `data/backups/` once per day; the 15th-oldest
   is deleted on the day it would become 15 days old.
 
@@ -117,5 +124,13 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
 - `scripts/setup_telegram_workspace.py` can discover the forum group, create
   the standard topics, write ignored env values, generate Telegram avatars,
   set chat/bot photos, and pin forum help.
-- Audit coverage verifies all seven attempts complete a session and set
+- Audit coverage verifies a full dynamic session completes and sets
   `completed_at`.
+- `/today` now uses the user's configured timezone for `target_date_local`.
+- If the user approves a new active LessonPlan after an older 7-step session
+  already exists for the day, `/today` supersedes the stale session and serves
+  the current lesson-plan micro-drills.
+- Practice headers include the LessonPlan title when available, plus mode,
+  topic, goal, focus, and "why now" selection rationale.
+- The current Telegram flow supports `/skip` and an inline `Skip / show answer`
+  button; skipped attempts count in the dynamic session summary.

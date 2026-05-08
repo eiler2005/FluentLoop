@@ -18,6 +18,8 @@ infrastructure.
 - Implement local keyword or SQLite search.
 - Provide 2-5 relevant chunks to the Learning Engine and AI Exercise Generator
   when available.
+- Use lesson title, topic, goal, knowledge areas, and target items as search
+  signals when building context for a session.
 - Fall back safely when no chunks exist.
 
 ## Out of scope
@@ -51,3 +53,5 @@ infrastructure.
   metadata and prepend the input step with a short source snippet.
 - AI exercise generation payloads can receive the same bounded material
   context.
+- The retrieval layer remains local and deterministic; it is a future building
+  block for stronger knowledge-area lesson assembly, not a full RAG system.

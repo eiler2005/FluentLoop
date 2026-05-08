@@ -3,6 +3,7 @@ from __future__ import annotations
 import shutil
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -19,6 +20,7 @@ from fluentloop.db.models import (
 from fluentloop.exercises import EXERCISE_TYPES, Exercise, render_for_item
 from fluentloop.grammar import parents_of
 from fluentloop.learning import active_items
+from fluentloop.lesson_plans import available_lesson_plan
 from fluentloop.srs import get_due_items
 
 
@@ -193,7 +195,13 @@ def cache_session(
             PracticeSessionCached.target_date_local == target_date,
         )
     )
+    plan = available_lesson_plan(session, user)
     if cached is not None:
+        if _cached_session_is_stale_for_plan(cached, plan):
+            cached.exercises = compose_session(session, user, target_date=target_date)
+            cached.status = "ready"
+            session.add(cached)
+            session.flush()
         return cached
     cached = PracticeSessionCached(
         user_id=user.id,
@@ -212,7 +220,7 @@ def start_or_resume_session(
     *,
     target_date: date | None = None,
 ) -> PracticeSession:
-    local_date = target_date or datetime.now(UTC).date()
+    local_date = target_date or _local_date(user)
     current = session.scalar(
         select(PracticeSession).where(
             PracticeSession.user_id == user.id,
@@ -221,7 +229,12 @@ def start_or_resume_session(
         )
     )
     if current is not None:
-        return current
+        if _active_session_is_stale_for_plan(session, user, current):
+            current.status = "superseded"
+            session.add(current)
+            session.flush()
+        else:
+            return current
     cached = cache_session(session, user, target_date=local_date)
     current = PracticeSession(
         user_id=user.id,
@@ -234,13 +247,52 @@ def start_or_resume_session(
     return current
 
 
+def _local_date(user: User) -> date:
+    try:
+        tz = ZoneInfo(user.timezone)
+    except ZoneInfoNotFoundError:
+        tz = UTC
+    return datetime.now(tz).date()
+
+
+def _cached_session_is_stale_for_plan(
+    cached: PracticeSessionCached, plan: object | None
+) -> bool:
+    if plan is None:
+        return False
+    return _exercises_are_stale_for_plan(cached.exercises, plan)
+
+
+def _active_session_is_stale_for_plan(
+    session: Session, user: User, current: PracticeSession
+) -> bool:
+    plan = available_lesson_plan(session, user)
+    if plan is None:
+        return False
+    return _exercises_are_stale_for_plan(current.exercises, plan)
+
+
+def _exercises_are_stale_for_plan(exercises: list[dict], plan: object) -> bool:
+    if not exercises:
+        return True
+    metadata = exercises[0].get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = exercises[0]
+    plan_id = metadata.get("lesson_plan_id")
+    if plan_id != getattr(plan, "id", None):
+        return True
+    if str(metadata.get("mode", "")) != "lesson":
+        return True
+    return len(exercises) < 15
+
+
 def get_in_progress_session(
     session: Session,
     user: User,
     *,
     target_date: date | None = None,
 ) -> PracticeSession | None:
-    local_date = target_date or datetime.now(UTC).date()
+    local_date = target_date or _local_date(user)
     return session.scalar(
         select(PracticeSession).where(
             PracticeSession.user_id == user.id,
@@ -302,7 +354,7 @@ def summarize_session(session: Session, practice_session: PracticeSession) -> st
             .order_by(PracticeAttempt.exercise_index)
         )
     )
-    counts = {"correct": 0, "partial": 0, "incorrect": 0}
+    counts = {"correct": 0, "partial": 0, "incorrect": 0, "skipped": 0}
     for attempt in attempts:
         if attempt.status in counts:
             counts[attempt.status] += 1
@@ -311,7 +363,8 @@ def summarize_session(session: Session, practice_session: PracticeSession) -> st
         f"Correct: {counts['correct']}\n"
         f"Partial: {counts['partial']}\n"
         f"Incorrect: {counts['incorrect']}\n"
-        f"Answered: {len(attempts)}/7"
+        f"Skipped: {counts['skipped']}\n"
+        f"Answered: {len(attempts)}/{len(practice_session.exercises)}"
     )
 
 

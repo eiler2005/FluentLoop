@@ -16,13 +16,13 @@ sessions, and attempts.
 
 - Add `src/fluentloop/learning_engine.py` as a thin orchestration layer.
 - Support session modes: `review`, `lesson`, `mixed`, `mistake_focus`.
-- Generate about seven stages: `warmup`, `input`, two
-  `controlled_practice`, `grammar_or_mistake_focus`, `free_production`, and
-  `recap`.
+- Generate 15-20 micro-drills by default across the same pedagogical stages:
+  `warmup`, `input`, `controlled_practice`, `grammar_or_mistake_focus`,
+  `free_production`, and `recap`.
 - Include metadata on every exercise: stage, mode, topic, lesson goal, target
   skill, and target item ids.
-- Update Telegram rendering so `/today` shows mode, topic, goal, and
-  `Step X/7 — Stage name`.
+- Update Telegram rendering so `/today` shows mode, topic, goal, focus, why-now
+  rationale, and dynamic `Step X/N — Stage name`.
 - Keep deterministic seed fillers only as fallback.
 
 ## Out of scope
@@ -34,7 +34,8 @@ sessions, and attempts.
 ## Acceptance criteria
 
 - `/today` starts successfully and shows a 15-minute session header.
-- Sessions have about seven staged steps and each step has stage metadata.
+- Sessions have about 15-20 staged micro-drills and each step has stage
+  metadata.
 - Due items are prioritized over random active items.
 - Active mistake patterns can influence the session.
 - Existing answer checking, SRS updates, `PracticeSession`, and
@@ -51,9 +52,15 @@ sessions, and attempts.
 ## Notes from implementation
 
 - Added `src/fluentloop/learning_engine.py` with mode selection, item scoring,
-  topic/goal selection, and seven staged exercise builders.
-- `/today` now renders a 15-minute header with mode, topic, and goal, then
-  serves `Step X/7 - Stage name` prompts.
+  topic/goal selection, and staged exercise builders.
+- `/today` now renders a 15-minute header with mode, topic, goal, focus, and
+  why-now rationale, then serves dynamic `Step X/N - Stage name` prompts.
+- Sessions now use 15-20 micro-drills by default, with the same staged lesson
+  shape but denser controlled practice, grammar/mistake focus, and recap.
+- Rendering is dynamic (`Step X/N`) and no longer assumes a fixed seven-step
+  session.
+- Lesson-plan sessions include the lesson title in the `/today` header when
+  available.
 - Exercise dicts keep the existing `target_learning_item_ids` contract and add
   stage metadata for the new Learning Engine.
 - Deterministic seed prompts remain as fallback; existing answer checking,

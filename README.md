@@ -3,8 +3,9 @@
 Personal Telegram bot for English learning. B2+/C1- focus, business and IT
 context, text-only MVP, single Docker container on a VPS.
 
-> **Status:** MVP implementation slice — EPIC-01 through EPIC-14 have compact
-> code paths and tests; EPIC-15 remains deferred.
+> **Status:** MVP learning-engine slice — EPIC-01 through EPIC-14 and
+> EPIC-16 through EPIC-21 have compact code paths and tests; EPIC-15 remains
+> deferred.
 
 ## What it does (intended MVP)
 
@@ -12,12 +13,16 @@ A daily ~15-minute English practice loop in Telegram, driven by the user's
 own lesson materials:
 
 1. User uploads lesson notes, expressions, teacher feedback.
-2. Bot extracts words / expressions / grammar rules / mistake patterns and
-   asks for approval before saving them.
-3. Bot stores approved items and schedules them for spaced repetition.
-4. Once a day, bot generates a 7-exercise practice session automatically
-   from due items, weak items, mistake patterns, and recent material.
-5. Bot checks answers, explains mistakes, logs them, and updates progress.
+2. Bot extracts a lesson title/theme/focus, knowledge areas, words /
+   expressions / grammar rules / mistake risks, and asks for approval before
+   saving new active items.
+3. Bot stores approved items, links them to a reusable lesson plan, indexes
+   local material chunks, and schedules items for spaced repetition.
+4. Once a day, bot generates a 15-minute session of about 15-20 micro-drills
+   from active lesson plans, due items, weak items, mistake patterns, grammar
+   concepts, and recent material.
+5. Bot checks answers, gives compact teacher feedback, can show detailed
+   stored explanations, supports `/skip`, logs mistakes, and updates progress.
 6. Recurring mistakes turn into mistake patterns and re-appear in future
    practice.
 
@@ -31,9 +36,9 @@ Full product specification: [`PRD.md`](PRD.md).
 | [`AGENTS.md`](AGENTS.md) | Durable rules for any AI agent in this repo. |
 | [`CLAUDE.md`](CLAUDE.md) | Thin Claude Code entrypoint, imports `AGENTS.md`. |
 | [`SECURITY.md`](SECURITY.md) | Threat model, secrets policy, third-party data flow. |
-| [`docs/architecture.md`](docs/architecture.md) | Tech architecture (the *how*). Stub until ADR-0002/3/4 land. |
+| [`docs/architecture.md`](docs/architecture.md) | Tech architecture (the *how*), including Telegram, SQLite, scheduler, AI providers, deployment shape. |
 | [`docs/adr/`](docs/adr/) | Architecture decision records. |
-| [`docs/features/`](docs/features/) | 15 epics, one per PRD §28 backlog item. |
+| [`docs/features/`](docs/features/) | 21 epic files: original MVP backlog plus learning-engine roadmap. |
 | [`docs/runbooks/`](docs/runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 
 ## Repository layout
@@ -50,46 +55,46 @@ FluentLoop/
 ├── .claude/settings.json   Permissions for Claude Code in this project.
 ├── docs/
 │   ├── README.md
-│   ├── architecture.md     Tech architecture (stub for now).
-│   ├── adr/                ADRs 0001–0004 (templates / stubs).
-│   ├── features/           15 epic stubs.
+│   ├── architecture.md     Tech architecture.
+│   ├── adr/                Architecture decision records.
+│   ├── features/           21 epic files.
 │   └── runbooks/
-├── src/                    Empty until EPIC-01.
-├── ansible/                Empty until deployment epic.
-└── tests/                  Empty until EPIC-01.
+├── scripts/                Deploy, smoke, seed, and operational helpers.
+├── src/                    Python package (`fluentloop`).
+└── tests/                  Pytest suite.
 ```
 
-## Next steps
+## Current implementation map
 
-Implementation order (see [`docs/features/README.md`](docs/features/README.md)
-for the full graph):
+The original bot foundation is in place, and the learning-engine roadmap is
+implemented as the current practice path:
 
-```
-EPIC-01 → EPIC-02 → EPIC-05 → EPIC-06 → EPIC-09 → EPIC-08 → EPIC-07 → EPIC-10
-                                              ↓
-                                          EPIC-04 ← EPIC-03 (parallelizable)
-                                              ↓
-                                          EPIC-11 → EPIC-12
-                                              ↓
-                                          EPIC-13, EPIC-14
-                                              ↓
-                                          EPIC-15 (deferred — re-evaluate
-                                          after 4-6 weeks of real usage)
-```
+- EPIC-16: `/today` uses a staged Learning Engine with dynamic `Step X/N`.
+- EPIC-17: uploaded materials can become reusable `LessonPlan` pools.
+- EPIC-18: LLM calls are centralized behind the DeepSeek gateway with fallback.
+- EPIC-19: high-value writing, grammar, and business prompts can be AI-enhanced.
+- EPIC-20: grammar concepts are practical business/IT micro-skills.
+- EPIC-21: uploaded materials are indexed into local chunks for lightweight
+  context search.
+
+See [`docs/features/README.md`](docs/features/README.md) for the full graph.
 
 ## MVP success criteria
 
 Lifted from PRD §26 — the bot is "done enough" when:
 
 1. User can upload text materials after a lesson.
-2. Bot extracts words, expressions, rules, and mistakes.
+2. Bot extracts a lesson overview, knowledge areas, words, expressions, rules,
+   and mistake risks.
 3. User approves what becomes active learning items.
-4. Bot generates a daily 15-minute practice session automatically.
-5. User completes the session in Telegram.
-6. Bot checks answers and explains mistakes.
-7. Recurring mistakes become mistake patterns and surface in future practice.
-8. Spaced repetition schedules due items correctly.
-9. User can view basic progress.
+4. Approved material becomes a reusable lesson pool.
+5. Bot generates a daily 15-minute practice session automatically.
+6. User completes 15-20 micro-drills in Telegram.
+7. User can skip a drill and see the correct answer with a short explanation.
+8. Bot checks answers and explains mistakes in a teacher-like way.
+9. Recurring mistakes become mistake patterns and surface in future practice.
+10. Spaced repetition schedules due items correctly.
+11. User can view basic progress.
 
 Voice, web UI, multi-user, generic content import are explicitly **not** MVP
 goals.

@@ -21,6 +21,8 @@ from fluentloop.feedback import (
     apply_feedback,
     check_answer,
     queue_feedback_suggestions,
+    render_compact_teacher_feedback,
+    render_detailed_teacher_feedback,
     write_dispute,
 )
 from fluentloop.grammar import seed_concepts
@@ -158,6 +160,24 @@ def _dispute_buttons(
     if allow_hard:
         buttons.insert(1, [_button("Hard", f"attempt:hard:{attempt_id}")])
     return buttons
+
+
+def _attempt_buttons(
+    attempt_id: int, *, allow_hard: bool = False
+) -> list[list[InlineButton]]:
+    buttons = _dispute_buttons(attempt_id, allow_hard=allow_hard)
+    buttons.append([_button("Teacher details", f"feedback:explain:{attempt_id}")])
+    return buttons
+
+
+def _practice_buttons() -> list[list[InlineButton]]:
+    return [[_button("Skip / show answer", "practice:skip")]]
+
+
+def _attempt_and_practice_buttons(
+    attempt_id: int, *, allow_hard: bool = False
+) -> list[list[InlineButton]]:
+    return [*_attempt_buttons(attempt_id, allow_hard=allow_hard), *_practice_buttons()]
 
 
 def handle_upload_prompt() -> BotReply:
@@ -400,17 +420,70 @@ def handle_upload(
         [_button("Review one by one", f"candidates:list:{material_id}")],
         [_button("Skip all", f"approve:skip:{material_id}")],
     ]
-    return BotReply(candidate_summary(candidates), buttons=buttons)
+    return BotReply(
+        candidate_summary(
+            candidates,
+            raw_text=material.raw_text,
+            material_type=material.type,
+        ),
+        buttons=buttons,
+    )
 
 
-def handle_approve_all(session: Session, user: User, material_id: int) -> BotReply:
-    from fluentloop.db.models import SourceMaterial
+def handle_approve_all(
+    session: Session,
+    user: User,
+    material_id: int,
+    provider: AIProvider | None = None,
+) -> BotReply:
+    from fluentloop.db.models import LearningItem, LessonPlan, SourceMaterial
 
     source = session.get(SourceMaterial, material_id)
     if source is None:
         return BotReply("Material not found.")
-    count = approve_all(session, user, source)
-    return BotReply(f"Added {count} learning items.")
+    count = approve_all(session, user, source, provider=provider)
+    items = list(
+        session.scalars(
+            select(LearningItem)
+            .where(
+                LearningItem.user_id == user.id,
+                LearningItem.source_material_id == source.id,
+                LearningItem.status == "active",
+            )
+            .order_by(LearningItem.created_at.asc())
+        )
+    )
+    plan = session.scalar(
+        select(LessonPlan)
+        .where(
+            LessonPlan.user_id == user.id,
+            LessonPlan.source_material_id == source.id,
+            LessonPlan.status.in_(("active", "draft")),
+        )
+        .order_by(LessonPlan.updated_at.desc())
+    )
+    lines = [f"Added {count} learning items."]
+    if items:
+        lines.append("Lesson pool:")
+        for item in items:
+            meaning = item.meaning or item.explanation
+            suffix = f" - {meaning[:80]}" if meaning else ""
+            lines.append(f"- {item.type}: {item.text}{suffix}")
+    if plan is not None:
+        lines.extend(
+            [
+                "",
+                f"LessonPlan #{plan.id}: {plan.title}",
+                f"Topic: {plan.topic}",
+                f"Goal: {plan.goal}",
+                f"Pool size: {len(items)} target(s)",
+                (
+                    "Rotation: /today will sample micro-drills by teacher "
+                    "priority, SRS due status, novelty, and recent practice."
+                ),
+            ]
+        )
+    return BotReply("\n".join(lines))
 
 
 def handle_skip_all(session: Session, user: User, material_id: int) -> BotReply:
@@ -454,7 +527,11 @@ def handle_candidates(session: Session, user: User, material_id: int) -> BotRepl
 
 
 def handle_candidate_action(
-    session: Session, user: User, action: str, candidate_id: int
+    session: Session,
+    user: User,
+    action: str,
+    candidate_id: int,
+    provider: AIProvider | None = None,
 ) -> BotReply:
     from fluentloop.db.models import ExtractedCandidate
 
@@ -463,7 +540,7 @@ def handle_candidate_action(
         return BotReply("Candidate not found.")
     try:
         if action == "add":
-            changed = approve_candidate(session, user, candidate)
+            changed = approve_candidate(session, user, candidate, provider=provider)
             text = (
                 f"Added candidate #{candidate.id}."
                 if changed
@@ -566,6 +643,7 @@ def handle_today(
     return BotReply(
         text,
         channel_id or user.telegram_user_id,
+        buttons=_practice_buttons(),
         message_thread_id=message_thread_id,
     )
 
@@ -606,14 +684,7 @@ def handle_answer(
     follow_up = next_exercise(session, practice_session)
     heading = "#feedback\n" if channel_id else ""
     extra_replies: list[BotReply] = []
-    message = (
-        f"{heading}Attempt #{attempt.id}\n"
-        f"{feedback.status.title()}.\n"
-        f"Better: {feedback.natural_answer or feedback.corrected_answer}\n"
-        f"Why: {feedback.explanation}"
-    )
-    if feedback.related_rule:
-        message += f"\nRule: {feedback.related_rule}"
+    message = heading + render_compact_teacher_feedback(attempt.id, feedback)
     if feedback.should_create_mistake_event:
         message += "\nI'll add this as a weak point unless you dispute it."
     if pattern is not None and pattern.confidence == "low":
@@ -627,13 +698,16 @@ def handle_answer(
             f"\nSuggested {count} new candidate(s) queued for approval: "
             f"/candidates {material_id}."
         )
-    message += f"\nDisagree? Use the buttons or send /dispute {attempt.id} <reason>."
+    message += (
+        f"\nDetails: /feedback explain {attempt.id}"
+        f"\nDisagree? Use the buttons or send /dispute {attempt.id} <reason>."
+    )
     if feedback_copy_channel_id:
         extra_replies.append(
             BotReply(
                 message,
                 feedback_copy_channel_id,
-                buttons=_dispute_buttons(
+                buttons=_attempt_buttons(
                     attempt.id, allow_hard=feedback.status == "correct"
                 ),
                 message_thread_id=feedback_copy_message_thread_id,
@@ -650,6 +724,7 @@ def handle_answer(
                 BotReply(
                     next_text,
                     next_channel_id,
+                    buttons=_practice_buttons(),
                     message_thread_id=next_message_thread_id,
                 )
             )
@@ -666,26 +741,155 @@ def handle_answer(
                 )
             )
         message += "\n\n" + summary_text
+    buttons = (
+        _attempt_and_practice_buttons(
+            attempt.id,
+            allow_hard=feedback.status == "correct",
+        )
+        if follow_up is not None
+        else _attempt_buttons(attempt.id, allow_hard=feedback.status == "correct")
+    )
     return BotReply(
         message,
         channel_id or user.telegram_user_id,
-        buttons=_dispute_buttons(attempt.id, allow_hard=feedback.status == "correct"),
+        buttons=buttons,
         message_thread_id=message_thread_id,
         extra_replies=tuple(extra_replies),
     )
 
 
+def handle_skip_current(
+    session: Session,
+    user: User,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+    next_channel_id: str | None = None,
+    next_message_thread_id: int | None = None,
+    summary_channel_id: str | None = None,
+    summary_message_thread_id: int | None = None,
+) -> BotReply:
+    practice_session = get_in_progress_session(session, user)
+    if practice_session is None:
+        return BotReply("No active exercise. Send /today.")
+    current = next_exercise(session, practice_session)
+    if current is None:
+        return BotReply("No active exercise. Send /today.")
+    index, exercise = current
+    feedback = _skip_feedback(exercise)
+    attempt = record_attempt(
+        session,
+        practice_session,
+        index,
+        exercise,
+        "[skipped]",
+        feedback,
+    )
+    follow_up = next_exercise(session, practice_session)
+    heading = "#feedback\n" if channel_id else ""
+    message = heading + _render_skip_feedback(attempt.id, exercise, feedback)
+    extra_replies: list[BotReply] = []
+    if follow_up is not None:
+        next_index, next_item = follow_up
+        next_heading = "#next_prompt\n" if channel_id else ""
+        next_text = next_heading + _render_step(
+            next_index, next_item, len(practice_session.exercises)
+        )
+        if next_channel_id:
+            extra_replies.append(
+                BotReply(
+                    next_text,
+                    next_channel_id,
+                    buttons=_practice_buttons(),
+                    message_thread_id=next_message_thread_id,
+                )
+            )
+        message += "\n\n" + next_text
+        buttons = _practice_buttons()
+    else:
+        summary_heading = "#summary\n" if channel_id else ""
+        summary_text = summary_heading + summarize_session(session, practice_session)
+        if summary_channel_id:
+            extra_replies.append(
+                BotReply(
+                    summary_text,
+                    summary_channel_id,
+                    message_thread_id=summary_message_thread_id,
+                )
+            )
+        message += "\n\n" + summary_text
+        buttons = None
+    return BotReply(
+        message,
+        channel_id or user.telegram_user_id,
+        buttons=buttons,
+        message_thread_id=message_thread_id,
+        extra_replies=tuple(extra_replies),
+    )
+
+
+def _skip_feedback(exercise: dict) -> dict:
+    expected = str(exercise.get("expected_answer") or "").strip()
+    explanation = str(exercise.get("explanation") or "").strip()
+    hint = str(exercise.get("hint") or "").strip()
+    rule = explanation or hint or "Review the target pattern, then try the next one."
+    return {
+        "status": "skipped",
+        "corrected_answer": expected,
+        "natural_answer": expected,
+        "explanation": explanation or hint,
+        "related_rule": rule,
+        "mistake_summary": "Skipped.",
+        "why_wrong": "No answer was submitted; use this as a quick reveal.",
+        "rule": rule,
+        "better_variants": [expected] if expected else [],
+        "micro_drill": "Repeat the correct answer once, then continue.",
+        "teacher_note": "Skipping is fine when you want the model answer first.",
+        "should_create_mistake_event": False,
+        "should_create_or_update_mistake_pattern": False,
+    }
+
+
+def _render_skip_feedback(attempt_id: int, exercise: dict, feedback: dict) -> str:
+    expected = feedback.get("corrected_answer") or "Open answer; compare with the rule."
+    explanation = feedback.get("explanation") or exercise.get("hint") or ""
+    rule = feedback.get("rule") or feedback.get("related_rule") or ""
+    lines = [
+        f"Skipped attempt #{attempt_id}",
+        f"Correct answer: {expected}",
+    ]
+    if explanation:
+        lines.append(f"Why: {explanation}")
+    if rule and rule != explanation:
+        lines.append(f"Rule: {rule}")
+    lines.append("Next time: try the answer first, then use skip to compare.")
+    return "\n".join(lines)
+
+
 def _practice_header(exercises: list[dict]) -> str:
     metadata = _exercise_metadata(exercises[0] if exercises else {})
     mode = str(metadata.get("mode", "mixed")).replace("_", " ")
+    lesson_title = str(metadata.get("lesson_plan_title") or "").strip()
     topic = metadata.get("topic", "Business/IT communication")
     goal = metadata.get("lesson_goal", "Practice useful workplace English.")
-    return (
-        "Today's English practice - 15 min\n"
-        f"Mode: {mode}\n"
-        f"Topic: {topic}\n"
-        f"Goal: {goal}"
+    focus = metadata.get("target_skill", "micro-drills")
+    why_now = metadata.get(
+        "why_now",
+        "teacher priority + due review + new material rotation",
     )
+    lines = ["Today's English practice - 15 min"]
+    if lesson_title:
+        lines.append(f"Lesson: {lesson_title}")
+    lines.extend(
+        [
+            f"Mode: {mode}",
+            f"Topic: {topic}",
+            f"Goal: {goal}",
+            f"Focus: {focus}",
+            f"Why now: {why_now}",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def _exercise_metadata(exercise: dict) -> dict:
@@ -723,6 +927,18 @@ def handle_attempt_ack(session: Session, user: User, attempt_id: int) -> BotRepl
     if practice_session is None or practice_session.user_id != user.id:
         return BotReply("Attempt not found.")
     return BotReply(f"Got it. Keeping attempt #{attempt.id} as-is.")
+
+
+def handle_feedback_explain(session: Session, user: User, attempt_id: int) -> BotReply:
+    from fluentloop.db.models import PracticeAttempt, PracticeSession
+
+    attempt = session.get(PracticeAttempt, attempt_id)
+    if attempt is None:
+        return BotReply("Attempt not found.")
+    practice_session = session.get(PracticeSession, attempt.practice_session_id)
+    if practice_session is None or practice_session.user_id != user.id:
+        return BotReply("Attempt not found.")
+    return BotReply(render_detailed_teacher_feedback(attempt.feedback))
 
 
 def handle_attempt_hard(session: Session, user: User, attempt_id: int) -> BotReply:
@@ -939,6 +1155,7 @@ def command_catalog() -> list[str]:
         "/candidates",
         "/candidate",
         "/upload",
+        "/feedback",
         "/dispute",
         "/mistakes",
         "/rules",

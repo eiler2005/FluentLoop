@@ -47,6 +47,9 @@ where deterministic templates are too repetitive.
   DeepSeek gateway.
 - The Learning Engine can enhance high-value stages when a gateway is supplied:
   `grammar_or_mistake_focus` and `free_production`.
+- AI generation is intentionally selective inside 15-20 micro-drill sessions:
+  simple cloze/guess prompts stay deterministic, while writing-heavy,
+  grammar-heavy, and business follow-up prompts can use the gateway.
 - AI-generated exercise dicts preserve the existing exercise contract and add
   `ai_generated`, tags, difficulty, and stage metadata.
 - Empty or invalid model output falls back to the deterministic base exercise.

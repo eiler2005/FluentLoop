@@ -17,6 +17,9 @@ selected by the Learning Engine and connected to mistakes and items.
   suggestions, business prepositions, countable/uncountable business nouns,
   conditionals for risks, and register/tone.
 - Let grammar or mistake focus stages use relevant `GrammarConcept` rows.
+- Extract lesson-level grammar knowledge areas from uploaded material so future
+  sessions can choose grammar focus from both the user's mistakes and the
+  lesson's intended skill map.
 - Keep explanations short, practical, and Telegram-friendly.
 - Use business/IT examples by default.
 
@@ -52,3 +55,6 @@ selected by the Learning Engine and connected to mistakes and items.
   keyword matching.
 - Grammar/mistake focus steps now include relevant concept metadata and
   practical business examples.
+- Material upload summaries surface grammar knowledge areas and mistake risks,
+  giving the user a readable preview of why a lesson plan will train a given
+  rule.

@@ -2,15 +2,17 @@
 
 | File | Purpose |
 |---|---|
-| [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI provider, deployment. **Stub for now** — filled in after ADRs 0002–0004 are decided. |
+| [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |
 | [`adr/`](adr/) | Architecture decision records. Each captures one significant choice. |
 | [`adr/0001-template.md`](adr/0001-template.md) | Reusable ADR template. |
-| [`adr/0002-telegram-library-choice.md`](adr/0002-telegram-library-choice.md) | Stub: choose between `aiogram` and `python-telegram-bot`. |
-| [`adr/0003-ai-model-tiering-and-cost.md`](adr/0003-ai-model-tiering-and-cost.md) | Stub: two-tier model strategy (light vs heavy) and cost envelope. |
-| [`adr/0004-exercise-pre-generation-strategy.md`](adr/0004-exercise-pre-generation-strategy.md) | Stub: morning batch pre-generation of the day's session. |
-| [`features/`](features/) | 15 epic files, one per PRD §28 backlog item. |
+| [`adr/0002-telegram-library-choice.md`](adr/0002-telegram-library-choice.md) | Accepted Telegram library choice. |
+| [`adr/0003-ai-model-tiering-and-cost.md`](adr/0003-ai-model-tiering-and-cost.md) | Accepted two-tier model strategy and cost envelope. |
+| [`adr/0004-exercise-pre-generation-strategy.md`](adr/0004-exercise-pre-generation-strategy.md) | Accepted morning batch pre-generation strategy. |
+| [`adr/0007-deepseek-llm-gateway.md`](adr/0007-deepseek-llm-gateway.md) | DeepSeek gateway and task-aware model routing. |
+| [`features/`](features/) | 21 epic files: original MVP backlog plus learning-engine roadmap. |
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
+| [`runbooks/deploy.md`](runbooks/deploy.md) | Deploy checklist and Telegram smoke message format. |
 | [`runbooks/secrets-management.md`](runbooks/secrets-management.md) | Public-git secret and confidential-data handling. |
 
 ## How to read these docs

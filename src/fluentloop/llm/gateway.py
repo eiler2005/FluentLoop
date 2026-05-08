@@ -51,28 +51,39 @@ class DeepSeekGateway:
         payload: dict[str, Any],
         schema: type[T],
         *,
+        model: str | None = None,
+        thinking: bool = False,
+        reasoning_effort: str | None = None,
         fallback: T | Callable[[], T] | None = None,
     ) -> T:
+        selected_model = model or self.model
         if not self.api_key and fallback is not None:
-            return self._fallback(task, fallback, "missing_api_key")
+            return self._fallback(task, fallback, "missing_api_key", selected_model)
         if self.client is None:
             raise LLMGatewayError("DeepSeek API key is required")
         last_error: Exception | None = None
         for attempt in range(self.max_retries + 1):
             started = time.monotonic()
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[
+                request: dict[str, Any] = {
+                    "model": selected_model,
+                    "messages": [
                         {"role": "system", "content": system_prompt()},
                         {"role": "user", "content": user_prompt(task, payload, schema)},
                     ],
-                    response_format={"type": "json_object"},
-                    temperature=0.2,
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.2,
+                }
+                if thinking:
+                    request["extra_body"] = {"thinking": {"type": "enabled"}}
+                if reasoning_effort:
+                    request["reasoning_effort"] = reasoning_effort
+                response = self.client.chat.completions.create(
+                    **request,
                 )
                 content = response.choices[0].message.content or "{}"
                 result = schema.model_validate_json(content)
-                self._log(task, response, "success", started)
+                self._log(task, response, "success", started, selected_model)
                 return result
             except (ValidationError, ValueError, TypeError, RuntimeError) as exc:
                 last_error = exc
@@ -83,16 +94,22 @@ class DeepSeekGateway:
                 if attempt >= self.max_retries:
                     break
         if fallback is not None:
-            return self._fallback(task, fallback, type(last_error).__name__)
+            return self._fallback(
+                task, fallback, type(last_error).__name__, selected_model
+            )
         raise LLMGatewayError(f"DeepSeek task failed: {task.value}") from last_error
 
     def _fallback(
-        self, task: LLMTask, fallback: T | Callable[[], T], reason: str
+        self,
+        task: LLMTask,
+        fallback: T | Callable[[], T],
+        reason: str,
+        model: str | None = None,
     ) -> T:
         append_usage(
             self.usage_path,
             provider="deepseek",
-            model=self.model,
+            model=model or self.model,
             task=task.value,
             prompt_tokens=0,
             completion_tokens=0,
@@ -102,14 +119,21 @@ class DeepSeekGateway:
         )
         return fallback() if callable(fallback) else fallback
 
-    def _log(self, task: LLMTask, response: Any, status: str, started: float) -> None:
+    def _log(
+        self,
+        task: LLMTask,
+        response: Any,
+        status: str,
+        started: float,
+        model: str | None = None,
+    ) -> None:
         usage = getattr(response, "usage", None)
         prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
         completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
         append_usage(
             self.usage_path,
             provider="deepseek",
-            model=self.model,
+            model=model or self.model,
             task=task.value,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,

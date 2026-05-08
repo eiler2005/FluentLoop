@@ -82,7 +82,13 @@ def extract_candidates(
     return stored
 
 
-def approve_all(session: Session, user: User, material: SourceMaterial) -> int:
+def approve_all(
+    session: Session,
+    user: User,
+    material: SourceMaterial,
+    *,
+    provider: AIProvider | None = None,
+) -> int:
     candidates = session.scalars(
         select(ExtractedCandidate).where(
             ExtractedCandidate.source_material_id == material.id,
@@ -94,12 +100,16 @@ def approve_all(session: Session, user: User, material: SourceMaterial) -> int:
         promote_candidate(session, user, candidate)
         count += 1
     if count:
-        ensure_lesson_plan_for_source(session, user, material)
+        ensure_lesson_plan_for_source(session, user, material, provider=provider)
     return count
 
 
 def approve_candidate(
-    session: Session, user: User, candidate: ExtractedCandidate
+    session: Session,
+    user: User,
+    candidate: ExtractedCandidate,
+    *,
+    provider: AIProvider | None = None,
 ) -> int:
     if candidate.status not in {"pending", "edited"}:
         return 0
@@ -107,7 +117,7 @@ def approve_candidate(
     if source is None or source.user_id != user.id:
         raise ValueError("Candidate not found")
     promote_candidate(session, user, candidate)
-    ensure_lesson_plan_for_source(session, user, source)
+    ensure_lesson_plan_for_source(session, user, source, provider=provider)
     return 1
 
 

@@ -8,5 +8,9 @@ def make_openai_compatible_client(
 ) -> Any:
     from openai import OpenAI
 
-    return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
-
+    return OpenAI(
+        api_key=api_key,
+        base_url=base_url,
+        timeout=timeout,
+        max_retries=0,
+    )

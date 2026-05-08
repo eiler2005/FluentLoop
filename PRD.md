@@ -63,9 +63,11 @@ The core product loop:
 ```text
 User uploads lesson material
 → Bot extracts words, expressions, grammar rules, and mistakes
+→ Bot summarizes the lesson title, theme, focus, and knowledge areas
 → User approves what should be added to learning storage
 → Bot stores approved learning items
-→ Bot automatically generates daily practice based on progress, level, weak points, and due reviews
+→ Bot builds a reusable lesson pool/lesson plan from the approved items
+→ Bot automatically generates daily practice based on the lesson plan, progress, level, weak points, and due reviews
 → User answers text exercises in Telegram
 → Bot checks answers and explains mistakes
 → Mistakes update progress and may become mistake patterns
@@ -178,20 +180,21 @@ MVP is a text-first Telegram bot.
 7. Manual adding of words, expressions, rules, and mistakes.
 8. Learning items storage.
 9. Spaced repetition state for items.
-10. Automatic daily practice generation from approved data.
-11. Daily practice session in Telegram.
-12. Exercise types:
+10. Persistent lesson pools/plans from approved lesson materials.
+11. Automatic daily practice generation from approved data.
+12. Daily practice session in Telegram.
+13. Exercise types:
     - guess word/expression;
     - translate phrase;
     - cloze;
     - grammar rewrite;
     - error correction;
     - follow-up question.
-13. Immediate answer checking and feedback.
-14. Mistake pattern tracking.
-15. Grammar/rules as connected concepts.
-16. Basic progress stats.
-17. Favorites / important items.
+14. Immediate answer checking and feedback.
+15. Mistake pattern tracking.
+16. Grammar/rules as connected concepts.
+17. Basic progress stats.
+18. Favorites / important items.
 ```
 
 ### P0.5 — optional MVP extension
@@ -254,7 +257,7 @@ The MVP should not include:
 10. Automatic activation of arbitrary newly extracted learning items without user approval.
 ```
 
-Note: automatic exercise generation is not a non-goal. It is explicitly allowed when exercises are generated from approved learning items, user progress, user level, and weak points.
+Note: automatic exercise generation is not a non-goal. It is explicitly allowed when exercises are generated from approved learning items, approved lesson plans, material context, user progress, user level, and weak points.
 
 ---
 
@@ -323,7 +326,19 @@ Grammar: hedging recommendations
 Mistake: I used "must" too directly in business context
 
 Bot:
-I found:
+Lesson:
+Diplomatic stakeholder communication
+
+Theme:
+Explaining disagreement and recommendations at work.
+
+Knowledge areas:
+- Topics: stakeholder communication, business collocations
+- Grammar: hedging recommendations
+- Skills: polite disagreement, concise recommendations
+- Mistake risks: over-direct "must" recommendations
+
+Candidates:
 
 Expressions:
 1. push back on
@@ -346,11 +361,15 @@ Add these to learning?
 ```text
 Given the user sends lesson material
 When the bot processes it
-Then the bot returns extracted words, expressions, grammar rules, and possible mistake patterns
+Then the bot returns a lesson overview plus extracted words, expressions, grammar rules, and possible mistake patterns
 
 Given extracted items are shown
 When the user clicks Add all
 Then all extracted items become active learning items
+
+Given the user approves a lesson material
+When active learning items are created
+Then the bot creates or updates a reusable lesson pool that can rotate into /today
 
 Given the user clicks Review one by one
 Then each extracted item can be added, edited, or skipped
@@ -556,6 +575,8 @@ The user should not need to confirm every generated exercise.
 8. Active mistake patterns.
 9. Active grammar rules.
 10. Previous answer quality.
+11. Active lesson plans from approved source materials.
+12. Lesson knowledge areas such as topic, grammar rules, communication skills, and mistake risks.
 ```
 
 ### Item priority rules
@@ -568,8 +589,10 @@ When generating daily practice, the bot should prioritize:
 3. Active mistake patterns.
 4. Grammar rules connected to recent mistakes.
 5. Recently added lesson items.
-6. Favorite items.
-7. Business/IT relevance.
+6. Active lesson-plan items with high teacher priority.
+7. Favorite items.
+8. Business/IT relevance.
+9. Recent-session penalty, so the same pool can rotate over time.
 ```
 
 ### Exercise mix
@@ -625,37 +648,35 @@ Then the user must be asked for approval
 ## 14. Daily practice
 
 The daily session should take approximately 15 minutes.
+The default session should contain about 15-20 short micro-drills, with fewer
+items for writing-heavy sessions and more items for quick cloze/rewrite drills.
 
 ### Example daily session
 
 ```text
 Today’s English practice — 15 min
+Lesson: Reported Speech: Introverts, Extroverts, and Workplace Opinions
+Mode: lesson
+Topic: Reported speech and workplace personality
+Goal: Report opinions, recommendations, and conflicts naturally in workplace English.
 
-Exercise 1/7
-Guess the expression:
-"to disagree with an idea in a polite but clear way"
+Step 1/16 — Warm-up
+In 1-2 sentences: do you prefer working with introverts or extroverts?
 
-Exercise 2/7
-Translate into English:
-"Нам нужно согласовать приоритеты до начала спринта."
+Step 2/16 — Input
+Notice the pattern: suggest + gerund.
+Example: She suggested having just one meeting a week.
 
-Exercise 3/7
-Fill in the gap:
-We need to ___ the risk before the release.
+Step 3/16 — Controlled practice
+Rewrite using the correct reporting pattern:
+"I think it would be a good idea to have fewer meetings."
 
-Exercise 4/7
-Rewrite this sentence in a more diplomatic business style:
-"We must change the architecture immediately."
+Step 4/16 — Controlled practice
+Complete the phrase:
+People refused ___ take the idea seriously.
 
-Exercise 5/7
-Correct the sentence:
-"We need approval from managements."
-
-Exercise 6/7
-Business follow-up:
-You are in a meeting with a product manager.
-Explain why the current approach is risky.
-Use: trade-off, mitigate, align on.
+Step 16/16 — Recap
+Recall three reporting verbs and one verb pattern without looking back.
 ```
 
 ### Acceptance criteria
@@ -668,6 +689,18 @@ Then the bot sends a daily practice invitation
 Given the user starts the session
 When exercises are due
 Then the bot sends exercises one by one
+
+Given the user starts practice after midnight in their configured timezone
+When /today is triggered
+Then the bot treats it as the new local day, not UTC day
+
+Given the user approves new lesson material while an old practice session is still active
+When /today is triggered
+Then the bot may supersede the stale old session and start the new lesson-plan session
+
+Given the user does not know an answer
+When they choose Skip / show answer or send /skip
+Then the bot records the skipped attempt and shows the correct answer with a short explanation
 
 Given the user completes the session
 When all exercises are finished
@@ -1033,6 +1066,12 @@ Start today’s practice session.
 /review
 Review due items.
 
+/skip
+Skip the current exercise and reveal the correct answer with a short explanation.
+
+/feedback explain <attempt_id>
+Show the stored detailed teacher breakdown for an answer.
+
 /add
 Manually add a word, expression, grammar rule, or mistake.
 
@@ -1066,9 +1105,11 @@ Show help.
 2. Bot asks for lesson materials.
 3. User sends text.
 4. Bot extracts words, expressions, grammar rules, and possible mistake patterns.
-5. User approves items.
-6. Bot stores approved items.
-7. Bot schedules them for future practice.
+5. Bot shows lesson title, theme, focus, knowledge areas, and candidates.
+6. User approves, edits, or skips candidates.
+7. Bot stores approved items.
+8. Bot creates a reusable lesson pool/lesson plan.
+9. Bot schedules the approved items for future practice.
 ```
 
 ### 22.2. Daily practice
@@ -1077,12 +1118,13 @@ Show help.
 1. At reminder time, the bot sends a practice invitation.
 2. User starts the session.
 3. Bot automatically generates exercises from approved data and progress history.
-4. Bot sends exercises one by one.
+4. Bot shows the lesson title, mode, topic, goal, focus, and dynamic Step X/N.
 5. User answers in text.
 6. Bot checks answers.
 7. Bot explains mistakes.
-8. Bot updates review states and progress.
-9. Bot shows a session summary.
+8. User may skip an exercise to reveal the correct answer.
+9. Bot updates review states and progress.
+10. Bot shows a session summary.
 ```
 
 ### 22.3. Mistake becomes training
@@ -1195,6 +1237,21 @@ user_id
 type
 raw_text
 summary
+title
+topic
+lesson_goal
+knowledge_areas
+created_at
+```
+
+### MaterialChunk
+
+```text
+id
+source_material_id
+chunk_index
+text
+tags
 created_at
 ```
 
@@ -1232,6 +1289,44 @@ is_favorite
 status: active | archived | suspended
 created_at
 updated_at
+```
+
+### LessonPlan
+
+```text
+id
+user_id
+source_material_id
+title
+topic
+goal
+status: active | archived
+created_at
+updated_at
+```
+
+### LessonStep
+
+```text
+id
+lesson_plan_id
+position
+stage: warmup | input | controlled_practice | grammar_or_mistake_focus | free_production | recap
+prompt
+target_skill
+metadata
+created_at
+updated_at
+```
+
+### LessonPlanItem
+
+```text
+id
+lesson_plan_id
+learning_item_id
+teacher_priority
+created_at
 ```
 
 ### GrammarConcept
@@ -1300,9 +1395,15 @@ updated_at
 id
 user_id
 type: daily | review | grammar | mistake_based
+mode: review | lesson | mixed | mistake_focus
+target_date_local
+lesson_plan_id
+topic
+lesson_goal
 started_at
 completed_at
-status
+status: in_progress | completed | abandoned | superseded
+exercises
 summary
 created_at
 updated_at
@@ -1314,12 +1415,15 @@ updated_at
 id
 practice_session_id
 learning_item_id
+exercise_index
 exercise_type
 prompt
 user_answer
 correct_answer
 feedback
 score
+status: correct | partial | incorrect | skipped | disputed | unchecked
+target_learning_item_ids
 created_at
 ```
 
@@ -1343,16 +1447,34 @@ Expected output:
 
 ```json
 {
-  "summary": "",
-  "words": [],
-  "expressions": [],
-  "grammar_rules": [],
-  "mistake_patterns": [],
+  "lesson_overview": {
+    "title": "",
+    "theme": "",
+    "communicative_goal": "",
+    "focus": "",
+    "knowledge_areas": {
+      "topics": [],
+      "grammar": [],
+      "skills": [],
+      "mistake_risks": []
+    }
+  },
+  "candidates": [
+    {
+      "type": "word | expression | grammar_rule | mistake_pattern",
+      "text": "",
+      "meaning": "",
+      "explanation": "",
+      "examples": [],
+      "teacher_priority": 1,
+      "why_selected": ""
+    }
+  ],
   "suggested_tags": []
 }
 ```
 
-The extracted items should become candidates. They should not become active learning items until approved by the user.
+The extracted items should become candidates. They should not become active learning items until approved by the user. The bot should show the full candidate list when Telegram message limits allow it, so the user can see what will enter the lesson pool before approval.
 
 ### 25.2. AI exercise generation
 
@@ -1367,6 +1489,8 @@ progress state
 weakness state
 exercise type
 business/IT context
+lesson plan context
+material chunks
 ```
 
 Expected output:
@@ -1374,6 +1498,10 @@ Expected output:
 ```json
 {
   "exercise_type": "",
+  "stage": "",
+  "mode": "",
+  "topic": "",
+  "lesson_goal": "",
   "prompt": "",
   "expected_answer": "",
   "hint": "",
@@ -1382,7 +1510,7 @@ Expected output:
 }
 ```
 
-Exercise generation can be automatic and does not require user confirmation.
+Exercise generation can be automatic and does not require user confirmation. Generated exercises should fit a 15-minute session of 15-20 micro-drills and should remain short enough for Telegram.
 
 ### 25.3. AI answer checking
 
@@ -1403,13 +1531,19 @@ Expected output:
   "status": "correct | partially_correct | incorrect",
   "corrected_answer": "",
   "natural_answer": "",
-  "explanation_ru": "",
-  "related_rule": "",
+  "mistake_summary": "",
+  "why_wrong": "",
+  "rule": "",
+  "better_variants": [],
+  "micro_drill": "",
+  "teacher_note": "",
   "detected_mistake_type": "",
   "should_create_mistake_event": true,
   "should_create_or_update_mistake_pattern": false
 }
 ```
+
+Immediate feedback should be compact: verdict, correction, what was wrong, why, one practical rule, and one better variant. A detailed explanation can be shown later from stored feedback using `/feedback explain <attempt_id>` without requiring another AI call.
 
 ---
 
@@ -1420,17 +1554,20 @@ MVP is successful if:
 ```text
 1. User can upload text materials after a lesson.
 2. Bot extracts useful words, expressions, rules, and mistakes.
-3. User can approve extracted learning items.
-4. Bot stores approved items.
-5. Bot automatically generates daily practice based on progress, level, and weak points.
-6. User can complete daily practice in Telegram.
-7. Bot checks answers and explains mistakes.
-8. Mistakes are logged.
-9. Recurring mistakes become mistake patterns.
-10. Mistake patterns appear in future exercises.
-11. Words and expressions are reviewed according to schedule.
-12. User can view basic progress.
-13. Optional: user can manage items through a lightweight web interface.
+3. Bot explains the lesson title, theme, focus, knowledge areas, and why candidates were selected.
+4. User can approve extracted learning items.
+5. Bot stores approved items and links them to a reusable lesson pool.
+6. Bot automatically generates daily practice based on progress, level, weak points, due items, active lesson plans, and material context.
+7. User can complete a 15-minute practice session with 15-20 Telegram-friendly micro-drills.
+8. User can skip an exercise and immediately see the correct answer with a short explanation.
+9. Bot checks answers and explains mistakes in a teacher-like way.
+10. Detailed feedback is available from stored attempt feedback.
+11. Mistakes are logged.
+12. Recurring mistakes become mistake patterns.
+13. Mistake patterns appear in future exercises.
+14. Words and expressions are reviewed according to schedule.
+15. User can view basic progress.
+16. Optional: user can manage items through a lightweight web interface.
 ```
 
 ---
@@ -1442,8 +1579,11 @@ MVP is successful if:
 ```text
 Bot:
 Today’s English practice — 15 min
+Mode: lesson
+Lesson: Reported Speech: Introverts, Extroverts, and Workplace Opinions
+Goal: Report workplace opinions accurately and diplomatically.
 
-Exercise 1/7
+Step 1/16
 Guess the expression:
 "to politely disagree with an idea or proposal"
 
@@ -1466,7 +1606,7 @@ Next review: in 3 days
 
 ```text
 Bot:
-Exercise 2/7
+Step 6/16
 Translate into English:
 "Нам нужно согласовать приоритеты до начала спринта."
 
@@ -1490,7 +1630,7 @@ Weak points updated:
 
 ```text
 Bot:
-Exercise 3/7
+Step 10/16
 Rewrite this sentence in a more diplomatic business style:
 "We must change the architecture immediately."
 
@@ -1506,6 +1646,30 @@ This is useful in stakeholder communication.
 
 Linked rule:
 Hedging recommendations
+```
+
+### Example 4 — skip and reveal
+
+```text
+Bot:
+Step 11/16
+Choose the more natural reported-speech pattern:
+"She suggested ___ the rollout until Monday."
+
+User:
+/skip
+
+Bot:
+Skipped.
+Correct answer:
+She suggested delaying the rollout until Monday.
+
+Why:
+After "suggest", use a gerund or a that-clause, not an infinitive.
+
+Mini pattern:
+suggest doing something
+suggest that someone do something
 ```
 
 ---
@@ -1528,6 +1692,12 @@ EPIC 12: Grammar Rules Graph
 EPIC 13: Stats and Weekly Summary
 EPIC 14: Favorites
 EPIC 15: Optional Lightweight Web Interface
+EPIC 16: Staged Learning Engine
+EPIC 17: Persistent Lesson Plans
+EPIC 18: Structured LLM Gateway
+EPIC 19: AI Exercise Generation
+EPIC 20: Grammar Brain
+EPIC 21: Light Material Context Search
 ```
 
 ---
@@ -1574,21 +1744,25 @@ Do not implement voice features in MVP.
 
 Core MVP flow:
 1. User uploads lesson notes or word/expression lists.
-2. Bot extracts words, expressions, grammar rules, and mistake patterns.
-3. Extracted items are shown as candidates.
+2. Bot extracts a lesson overview, knowledge areas, words, expressions, grammar rules, and mistake risks.
+3. Extracted items are shown as candidates with the lesson title, theme, focus, and why the items were selected.
 4. User approves what should become active learning items.
-5. Bot stores approved items.
-6. Bot schedules items for spaced repetition.
-7. Bot automatically generates a daily 15-minute practice session based on user level, progress, weak points, due items, favorite items, and mistake patterns.
-8. Exercise generation from approved data does not require confirmation.
-9. Adding new active learning items from uploaded materials requires confirmation.
-10. Practice includes guess word/expression, translate phrase, cloze, grammar rewrite, error correction, and business/IT follow-up questions.
-11. Bot checks answers, gives corrections, explains mistakes, and updates review state.
-12. Mistakes are logged as mistake events.
-13. Recurring mistakes become mistake patterns and appear in future practice.
-14. Grammar rules can be connected as a graph of concepts.
-15. Bot tracks progress, weak items, favorites, due reviews, and basic stats.
-16. Optional MVP extension: lightweight web interface for managing items, approving candidates, and viewing stats.
+5. Bot stores approved items and links them to reusable lesson plans.
+6. Bot indexes material chunks for lightweight local context search.
+7. Bot schedules items for spaced repetition.
+8. Bot automatically generates a daily 15-minute practice session based on user level, progress, weak points, due items, active lesson plans, material context, favorite items, and mistake patterns.
+9. Daily practice contains 15-20 micro-drills across warmup, input/noticing, controlled practice, grammar or mistake focus, free production, and recap.
+10. Exercise generation from approved data does not require confirmation.
+11. Adding new active learning items from uploaded materials requires confirmation.
+12. Practice includes guess word/expression, translate phrase, cloze, grammar rewrite, error correction, and business/IT follow-up questions.
+13. User can skip an exercise to see the correct answer and a short teacher explanation.
+14. Bot checks answers, gives corrections, explains mistakes, and updates review state.
+15. Detailed teacher feedback can be shown from stored attempt feedback.
+16. Mistakes are logged as mistake events.
+17. Recurring mistakes become mistake patterns and appear in future practice.
+18. Grammar rules can be connected as a graph of concepts.
+19. Bot tracks progress, weak items, favorites, due reviews, and basic stats.
+20. Optional MVP extension: lightweight web interface for managing items, approving candidates, and viewing stats.
 
 Focus all examples on business English, IT English, meetings, stakeholder communication, architecture discussions, product discussions, risks, trade-offs, prioritization, and delivery.
 ```

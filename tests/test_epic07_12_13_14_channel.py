@@ -27,7 +27,7 @@ def test_generation_cache_stats_favorites_and_rules(db_session, settings) -> Non
     cached = cache_session(
         db_session, user, target_date=__import__("datetime").date.today()
     )
-    assert len(cached.exercises) == 7
+    assert 15 <= len(cached.exercises) <= 20
     rendered = render_stats(collect_stats(db_session, user))
     assert "Favorites: 1" in rendered
     assert "Recommended focus next week" in weekly_summary(db_session, user)

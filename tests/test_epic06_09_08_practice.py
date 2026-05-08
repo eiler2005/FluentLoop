@@ -11,6 +11,8 @@ from fluentloop.bot.handlers import (
     handle_attempt_ack,
     handle_attempt_hard,
     handle_dispute,
+    handle_feedback_explain,
+    handle_skip_current,
     handle_today,
 )
 from fluentloop.db.models import (
@@ -123,17 +125,18 @@ def test_compose_session_avoids_item_duplicates_and_uses_seed_fillers(
         for target_id in exercise["target_learning_item_ids"]
     ]
     assert targeted.count(item.id) == 1
-    assert len(exercises) == 7
+    assert len(exercises) == 16
     assert any(not exercise["target_learning_item_ids"] for exercise in exercises)
-    assert [exercise["stage"] for exercise in exercises] == [
-        "warmup",
-        "input",
-        "controlled_practice",
-        "controlled_practice",
-        "grammar_or_mistake_focus",
-        "free_production",
-        "recap",
-    ]
+    assert [exercise["stage"] for exercise in exercises].count("warmup") == 1
+    assert [exercise["stage"] for exercise in exercises].count("input") == 2
+    assert [exercise["stage"] for exercise in exercises].count(
+        "controlled_practice"
+    ) == 7
+    assert [exercise["stage"] for exercise in exercises].count(
+        "grammar_or_mistake_focus"
+    ) == 3
+    assert [exercise["stage"] for exercise in exercises].count("free_production") == 1
+    assert [exercise["stage"] for exercise in exercises].count("recap") == 2
     assert all("metadata" in exercise for exercise in exercises)
     assert exercises[-1]["target_skill"] == "active_recall"
     assert "without looking back" in exercises[-1]["prompt"]
@@ -208,7 +211,7 @@ def test_compose_learning_session_returns_staged_metadata(db_session, settings) 
         tags=["stakeholders"],
     )
     exercises = compose_learning_session(db_session, user)
-    assert len(exercises) == 7
+    assert 15 <= len(exercises) <= 20
     assert exercises[0]["mode"] in {"mixed", "review", "lesson", "mistake_focus"}
     assert exercises[0]["topic"]
     assert exercises[0]["lesson_goal"]
@@ -233,7 +236,7 @@ def test_session_summary_counts_attempt_statuses(db_session, settings) -> None:
     )
     summary = summarize_session(db_session, practice)
     assert "Correct: 1" in summary
-    assert "Answered: 1/7" in summary
+    assert "Answered: 1/16" in summary
 
 
 def test_session_completion_marks_completed_after_all_attempts(
@@ -241,7 +244,7 @@ def test_session_completion_marks_completed_after_all_attempts(
 ) -> None:
     user = ensure_user(db_session, 123456789, settings)
     practice = start_or_resume_session(db_session, user)
-    for _ in range(7):
+    for _ in range(len(practice.exercises)):
         current = next_exercise(db_session, practice)
         assert current is not None
         index, exercise = current
@@ -306,6 +309,46 @@ def test_feedback_dispute_logs_and_removes_mistake_event(
     assert f"attempt #{attempt.id}" in ack.text
 
 
+def test_teacher_feedback_explain_renders_stored_breakdown(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    start_or_resume_session(db_session, user)
+    reply = handle_answer(
+        db_session, user, StubProvider(tmp_path / "usage.jsonl"), "wrong"
+    )
+    attempt = db_session.scalar(select(PracticeAttempt))
+    assert attempt is not None
+    assert "Mistake:" in reply.text
+    assert "Details: /feedback explain" in reply.text
+
+    detailed = handle_feedback_explain(db_session, user, attempt.id)
+
+    assert "Teacher breakdown" in detailed.text
+    assert "Teacher rule:" in detailed.text
+    assert "Micro-drill:" in detailed.text
+
+
+def test_skip_current_reveals_answer_and_advances(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    practice = start_or_resume_session(db_session, user)
+
+    reply = handle_skip_current(db_session, user)
+    attempt = db_session.scalar(select(PracticeAttempt))
+    next_item = next_exercise(db_session, practice)
+
+    assert attempt is not None
+    assert attempt.status == "skipped"
+    assert "Correct answer:" in reply.text
+    assert "Step 2/16" in reply.text
+    assert next_item is not None
+    assert next_item[0] == 1
+    assert reply.buttons is not None
+    assert "practice:skip" in {button.data for row in reply.buttons for button in row}
+
+
 def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     create_learning_item(db_session, user, type_="expression", text="align on")
@@ -319,13 +362,14 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
     )
     assert reply.target_chat_id == "-100123"
     assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt\nStep 2/7" in reply.text
-    assert "Step 2/7" in reply.text
+    assert "#next_prompt\nStep 2/16" in reply.text
+    assert "Step 2/16" in reply.text
     assert reply.buttons is not None
     button_data = {button.data for row in reply.buttons for button in row}
     assert "attempt:ack:1" in button_data
     assert "attempt:hard:1" in button_data
     assert "dispute:1:equally_valid" in button_data
+    assert "feedback:explain:1" in button_data
 
 
 def test_answer_keeps_forum_practice_flow_primary_with_topic_copies(
@@ -349,12 +393,12 @@ def test_answer_keeps_forum_practice_flow_primary_with_topic_copies(
     assert reply.target_chat_id == "-100999"
     assert reply.message_thread_id == 29
     assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt\nStep 2/7" in reply.text
+    assert "#next_prompt\nStep 2/16" in reply.text
     assert len(reply.extra_replies) == 2
     assert reply.extra_replies[0].message_thread_id == 30
     assert reply.extra_replies[0].text.startswith("#feedback\nAttempt #")
     assert reply.extra_replies[1].message_thread_id == 31
-    assert reply.extra_replies[1].text.startswith("#next_prompt\nStep 2/7")
+    assert reply.extra_replies[1].text.startswith("#next_prompt\nStep 2/16")
 
 
 def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
@@ -366,7 +410,7 @@ def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
     assert "Mode: " in reply.text
     assert "Topic: " in reply.text
     assert "Goal: " in reply.text
-    assert "Step 1/7 - Warm-up" in reply.text
+    assert "Step 1/16 - Warm-up" in reply.text
 
 
 def test_hard_override_converts_correct_srs_result(db_session, settings) -> None:

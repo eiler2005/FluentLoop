@@ -1,7 +1,10 @@
 # Features
 
 Each epic file maps a chunk of [`../../PRD.md`](../../PRD.md) onto a concrete
-unit of work. The 15 epics are one-to-one with PRD §28 backlog.
+unit of work. EPIC-01 through EPIC-15 are the original PRD backlog; EPIC-16
+through EPIC-21 extend the learning engine with lesson plans, DeepSeek-backed
+LLM routing, teacher feedback, grammar brain, and light material context
+search.
 
 ## Epic index
 
@@ -22,11 +25,11 @@ unit of work. The 15 epics are one-to-one with PRD §28 backlog.
 | 13 | [stats-and-weekly-summary](EPIC-13-stats-and-weekly-summary.md) | Done | `/stats` + weekly digest. |
 | 14 | [favorites](EPIC-14-favorites.md) | Done | `is_favorite` flag and prioritization. |
 | 15 | [optional-web-interface](EPIC-15-optional-web-interface.md) | **Deferred** | Re-evaluate after 4–6 weeks of bot usage. |
-| 16 | [learning-engine-v1](EPIC-16-learning-engine-v1.md) | Done | Staged `/today` Learning Engine. |
-| 17 | [persistent-lesson-plans](EPIC-17-persistent-lesson-plans.md) | Done | LessonPlan / LessonStep / LessonPlanItem from source materials. |
+| 16 | [learning-engine-v1](EPIC-16-learning-engine-v1.md) | Done | Staged `/today` Learning Engine with 15-20 micro-drills. |
+| 17 | [persistent-lesson-plans](EPIC-17-persistent-lesson-plans.md) | Done | LessonPlan / LessonStep / LessonPlanItem lesson pools from source materials. |
 | 18 | [deepseek-llm-gateway](EPIC-18-deepseek-llm-gateway.md) | Done | Centralized DeepSeek JSON gateway with fallback. |
-| 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Done | AI-generated high-value exercise prompts. |
-| 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts in practice. |
+| 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Done | Selective AI-generated high-value exercise prompts. |
+| 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts and knowledge areas in practice. |
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Done | Local material chunks and keyword retrieval. |
 
 ## Dependency graph

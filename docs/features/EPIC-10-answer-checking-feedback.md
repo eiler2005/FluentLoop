@@ -16,8 +16,9 @@ bot can silently train mistake patterns from its own miscalls.
 ## In scope
 
 - AI checking call per PRD §25.3 schema: `status` (correct / partial /
-  incorrect), `corrected_answer`, `natural_answer`, `explanation`,
-  `related_rule`, `detected_mistake_type`, `should_create_mistake_event`,
+  incorrect), `corrected_answer`, `natural_answer`, `mistake_summary`,
+  `why_wrong`, `rule`, `better_variants`, `micro_drill`, `teacher_note`,
+  `detected_mistake_type`, `should_create_mistake_event`,
   `should_create_or_update_mistake_pattern`.
 - Light tier (per ADR-0003) for cloze / exact-match types; heavy tier
   for grammar rewrite / follow-up / "more natural" suggestions.
@@ -42,6 +43,12 @@ bot can silently train mistake patterns from its own miscalls.
 - When the AI suggests a *new* candidate item ("gently push back on"),
   surface it as a candidate via the EPIC-04 approval flow — never
   auto-add.
+- `/feedback explain <attempt_id>` and the `Teacher details` button render
+  the full stored teacher breakdown. They should not call the model again
+  unless stored feedback lacks the detailed fields.
+- `/skip` and `Skip / show answer` record a skipped attempt and show the
+  expected answer with a concise teacher explanation, without creating a
+  mistake event.
 
 ## Out of scope
 
@@ -54,6 +61,9 @@ bot can silently train mistake patterns from its own miscalls.
 - After every answer, the user sees a feedback message within ~3
   seconds (light tier) / ~6 seconds (heavy tier).
 - The five-field structure from PRD §16 is present whenever applicable.
+- Teacher feedback includes the layered fields from PRD §25.3 whenever the
+  checker can produce them, and degrades gracefully when deterministic fallback
+  only has a simpler explanation.
 - `[Got it]` accepts the AI verdict; `[I disagree]` opens the reason
   picker and writes to the dispute log.
 - `[Hard]` on a "correct" verdict downgrades to `Hard` for SRS purposes.
@@ -64,6 +74,8 @@ bot can silently train mistake patterns from its own miscalls.
   on AI miscalls).
 - Suggested-new-candidate flow goes through EPIC-04 — no silent auto-
   adds.
+- Skipped exercises are stored as skipped attempts, reveal the correct answer,
+  and do not create mistake events.
 
 ## Open questions
 
@@ -108,3 +120,9 @@ bot can silently train mistake patterns from its own miscalls.
 - `AnswerFeedback.suggested_candidates` now queues AI-suggested new items as
   pending EPIC-04 candidates under a `teacher_feedback` source material; they
   are surfaced via `/candidates <material_id>` and are never auto-added.
+- `AnswerFeedback` now carries layered teacher-feedback fields: mistake
+  summary, why-wrong explanation, practical rule, better variants, micro-drill,
+  and teacher note.
+- Telegram feedback stays compact after each answer and offers
+  `/feedback explain <attempt_id>` / `Teacher details` for the full stored
+  teacher breakdown without another model call.

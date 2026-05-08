@@ -6,11 +6,11 @@
 
 ## Context
 
-A daily session is 7 exercises (PRD §14). If each exercise is generated
-on demand when the user starts the session, ~3–5 seconds of AI round-trip
-multiply across the batch — 25–35 seconds of waiting before the first
-exercise, plus latency mid-session. That breaks the "15 minutes of
-practice" UX the PRD aims for.
+A daily session was originally scoped as 7 exercises (PRD §14). The current
+Learning Engine expands that into 15-20 micro-drills inside the same
+15-minute lesson, which makes the latency concern even stronger if every
+exercise were generated on demand. Pre-generation and deterministic fallbacks
+keep the first prompt fast.
 
 Pre-generation moves the cost off the user-visible path.
 
@@ -25,8 +25,8 @@ Workflow:
 1. APScheduler `cron` trigger fires `compose_tomorrow_session` at 03:00
    in the user's timezone (`User.timezone`).
 2. The job queries spaced-repetition state, mistake patterns, favorites,
-   and recent uploads, and selects ~7 targets per `EPIC-07`'s priority
-   rules.
+   active lesson plans, material context, and recent uploads, and selects a
+   dynamic target set per `EPIC-07`/`EPIC-16` priority rules.
 3. For each target it generates `(prompt, expected_answer, hint,
    explanation, exercise_type)` via the AI heavy/light tier from
    ADR-0003.

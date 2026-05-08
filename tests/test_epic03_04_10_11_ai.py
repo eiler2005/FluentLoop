@@ -88,6 +88,79 @@ def test_upload_handler_returns_approve_command(tmp_path, db_session, settings) 
     assert "Skipped" in skipped_all.text
 
 
+def test_lesson_notes_upload_returns_larger_pool_and_approval_summary(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    provider = StubProvider(tmp_path / "usage.jsonl")
+    reply = handle_upload(
+        db_session,
+        user,
+        provider,
+        "# Lesson\n\n" + "Stakeholder update and risk mitigation. " * 40,
+        type_="lesson_notes",
+    )
+
+    assert "Found" in reply.text
+    assert "Candidates:" in reply.text
+    assert "lesson pool" in reply.text
+    assert len(list(db_session.scalars(select(ExtractedCandidate)))) >= 20
+
+    material_id = int(reply.text.split("/approve ", 1)[1].split()[0])
+    approved = handle_approve_all(db_session, user, material_id, provider=provider)
+
+    assert "LessonPlan #" in approved.text
+    assert "Pool size:" in approved.text
+    assert "Rotation:" in approved.text
+
+
+def test_introverts_lesson_extracts_reported_speech_not_old_business_fallback(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    provider = StubProvider(tmp_path / "usage.jsonl")
+    raw = """
+    # VB UP
+
+    Do you prefer working with introverts or extroverts?
+    I suggested having just one meeting a week.
+    People refused to take the idea seriously.
+    I insisted on giving it a try.
+    I threatened to stop coming to meetings.
+    He boasted about having a lot of achievements.
+    He claimed that he worked as the manager of a well-known restaurant.
+    I questioned him about the details.
+    He admitted that it wasn't true.
+
+    Verb-pattern table:
+    propose, recommend, admit, deny, regret, suggest, apologize for,
+    insist on, boast about, claim, threaten to, accuse someone of,
+    question someone about.
+    """
+    reply = handle_upload(
+        db_session,
+        user,
+        provider,
+        raw,
+        type_="lesson_notes",
+    )
+
+    assert "Lesson: Reported Speech: Introverts" in reply.text
+    assert "Knowledge areas:" in reply.text
+    assert "expression: suggest having" in reply.text
+    assert "grammar_rule: Verb + preposition + gerund patterns" in reply.text
+    assert "...and" not in reply.text
+    assert "summarize the trade-off" not in reply.text
+
+    material_id = int(reply.text.split("/approve ", 1)[1].split()[0])
+    approved = handle_approve_all(db_session, user, material_id, provider=provider)
+
+    assert "LessonPlan #" in approved.text
+    assert "Reported Speech: Introverts" in approved.text
+    assert "suggest having" in approved.text
+    assert "...and" not in approved.text
+
+
 def test_candidate_edit_flow_before_approval(tmp_path, db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     provider = StubProvider(tmp_path / "usage.jsonl")

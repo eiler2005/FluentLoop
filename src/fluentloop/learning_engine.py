@@ -26,13 +26,23 @@ from fluentloop.lesson_plans import (
 from fluentloop.material_context import build_material_context
 from fluentloop.srs import get_due_items
 
+DEFAULT_MICRO_DRILL_COUNT = 16
 SESSION_STAGES = (
     "warmup",
     "input",
+    "input",
+    "controlled_practice",
+    "controlled_practice",
+    "controlled_practice",
+    "controlled_practice",
+    "controlled_practice",
     "controlled_practice",
     "controlled_practice",
     "grammar_or_mistake_focus",
+    "grammar_or_mistake_focus",
+    "grammar_or_mistake_focus",
     "free_production",
+    "recap",
     "recap",
 )
 
@@ -283,10 +293,48 @@ def _scored_items_for_lesson_plan(
 ) -> list[ScoredLearningItem]:
     if plan is None:
         return []
-    return [
-        ScoredLearningItem(item=item, score=150 - index, reasons=("lesson_plan",))
-        for index, item in enumerate(lesson_items(session, plan))
-    ]
+    scored: list[ScoredLearningItem] = []
+    recent_ids = _recent_practiced_item_ids(session, getattr(plan, "user_id", 0))
+    due_ids = {item.id for item in get_due_items(session, getattr(plan, "user_id", 0))}
+    for index, item in enumerate(lesson_items(session, plan)):
+        score = 180 - index
+        reasons = ["lesson_plan", "teacher_priority"]
+        if item.id in due_ids:
+            score += 70
+            reasons.append("due")
+        if item.id in recent_ids:
+            score -= 45
+            reasons.append("recent_penalty")
+        state = _review_state(session, item.id)
+        if state is not None and state.review_count == 0:
+            score += 25
+            reasons.append("novelty")
+        if item.type in {"grammar_rule", "mistake_pattern"}:
+            score += 20
+            reasons.append("grammar_balance")
+        scored.append(
+            ScoredLearningItem(item=item, score=score, reasons=tuple(reasons))
+        )
+    return sorted(scored, key=lambda row: row.score, reverse=True)
+
+
+def _recent_practiced_item_ids(session: Session, user_id: int) -> set[int]:
+    from fluentloop.db.models import PracticeAttempt, PracticeSession
+
+    rows = session.execute(
+        select(PracticeAttempt.target_learning_item_ids)
+        .join(
+            PracticeSession,
+            PracticeSession.id == PracticeAttempt.practice_session_id,
+        )
+        .where(PracticeSession.user_id == user_id)
+        .order_by(PracticeAttempt.created_at.desc())
+        .limit(80)
+    )
+    ids: set[int] = set()
+    for row in rows:
+        ids.update(row[0] or [])
+    return ids
 
 
 def build_staged_exercises(
@@ -304,13 +352,13 @@ def build_staged_exercises(
         build_warmup_step(
             selected[:1], mode=mode, topic=topic, lesson_goal=lesson_goal
         ),
-        build_input_step(
-            selected[:1], mode=mode, topic=topic, lesson_goal=lesson_goal
+        *build_input_steps(
+            selected[:2], mode=mode, topic=topic, lesson_goal=lesson_goal
         ),
         *build_controlled_practice_steps(
             selected, mode=mode, topic=topic, lesson_goal=lesson_goal
         ),
-        build_grammar_or_mistake_focus_step(
+        *build_grammar_or_mistake_focus_steps(
             session,
             selected,
             patterns,
@@ -322,6 +370,9 @@ def build_staged_exercises(
             selected, mode=mode, topic=topic, lesson_goal=lesson_goal
         ),
         build_recap_step(selected, mode=mode, topic=topic, lesson_goal=lesson_goal),
+        build_recap_step(
+            selected[4:], mode=mode, topic=topic, lesson_goal=lesson_goal
+        ),
     ]
     return _dedupe_target_ids(steps[: len(SESSION_STAGES)])
 
@@ -355,6 +406,23 @@ def build_warmup_step(
         lesson_goal=lesson_goal,
         target_skill="activation",
     )
+
+
+def build_input_steps(
+    items: list[LearningItem], *, mode: str, topic: str, lesson_goal: str
+) -> list[dict[str, Any]]:
+    steps = []
+    for index in range(2):
+        item = items[index] if len(items) > index else None
+        steps.append(
+            build_input_step(
+                [item] if item is not None else [],
+                mode=mode,
+                topic=topic,
+                lesson_goal=lesson_goal,
+            )
+        )
+    return steps
 
 
 def build_input_step(
@@ -403,13 +471,13 @@ def build_controlled_practice_steps(
     items: list[LearningItem], *, mode: str, topic: str, lesson_goal: str
 ) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
-    preferred = ("cloze", "translate")
-    for index in range(2):
+    preferred = ("cloze", "translate", "guess", "cloze", "translate", "guess", "cloze")
+    for index in range(7):
         item = items[index + 1] if len(items) > index + 1 else None
         if item is None:
             exercise = _seed_controlled_practice(index)
         else:
-            exercise_type = _preferred_type(item, preferred[index])
+            exercise_type = _preferred_type(item, preferred[index % len(preferred)])
             exercise = render_for_item(item, exercise_type)
         steps.append(
             _with_metadata(
@@ -422,6 +490,28 @@ def build_controlled_practice_steps(
             )
         )
     return steps
+
+
+def build_grammar_or_mistake_focus_steps(
+    session: Session,
+    items: list[LearningItem],
+    patterns: list[MistakePattern],
+    *,
+    mode: str,
+    topic: str,
+    lesson_goal: str,
+) -> list[dict[str, Any]]:
+    return [
+        build_grammar_or_mistake_focus_step(
+            session,
+            items[index:],
+            patterns[index:] or patterns,
+            mode=mode,
+            topic=topic,
+            lesson_goal=lesson_goal,
+        )
+        for index in range(3)
+    ]
 
 
 def build_grammar_or_mistake_focus_step(
@@ -632,6 +722,7 @@ def _with_metadata(
         "lesson_goal": lesson_goal,
         "target_skill": target_skill,
         "target_item_ids": target_ids,
+        "why_now": "teacher priority + due review + new material rotation",
     }
     data = {
         **exercise.as_dict(),
@@ -660,7 +751,14 @@ def _apply_lesson_plan_steps(
     session: Session, plan: object, exercises: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
     steps = lesson_steps(session, plan)
-    for exercise, step in zip(exercises, steps, strict=False):
+    steps_by_type = {step.step_type: step for step in steps}
+    default_step = steps[0] if steps else None
+    instructed: set[str] = set()
+    for exercise in exercises:
+        stage = str(exercise.get("stage", ""))
+        step = steps_by_type.get(stage) or default_step
+        if step is None:
+            continue
         exercise["stage"] = step.step_type
         exercise["lesson_plan_id"] = step.lesson_plan_id
         exercise["lesson_step_id"] = step.id
@@ -669,10 +767,19 @@ def _apply_lesson_plan_steps(
             metadata["stage"] = step.step_type
             metadata["lesson_plan_id"] = step.lesson_plan_id
             metadata["lesson_step_id"] = step.id
+            metadata["lesson_plan_title"] = getattr(plan, "title", "")
+            metadata["lesson_language_focus"] = getattr(
+                plan, "language_focus_json", []
+            )
+            metadata["lesson_tags"] = getattr(plan, "tags_json", [])
+        exercise["lesson_plan_title"] = getattr(plan, "title", "")
+        exercise["lesson_language_focus"] = getattr(plan, "language_focus_json", [])
+        exercise["lesson_tags"] = getattr(plan, "tags_json", [])
         if step.prompt_template:
             exercise["prompt"] = step.prompt_template
-        elif step.instruction:
+        elif step.instruction and step.step_type not in instructed:
             exercise["prompt"] = f"{step.instruction}\n\n{exercise['prompt']}"
+            instructed.add(step.step_type)
     return exercises
 
 

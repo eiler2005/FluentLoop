@@ -10,11 +10,12 @@ FluentLoop makes many LLM calls per active week. Rough back-of-envelope:
 
 - **Extraction** (PRD §25.1): 1–3 calls per uploaded lesson, ~4 lessons/week
   → ~5–10 calls/week.
-- **Exercise generation** (PRD §25.2): 7 exercises × 4 active days/week
-  → ~28 calls/week. Pre-generation (ADR-0004) batches but doesn't reduce
-  count.
-- **Answer checking** (PRD §25.3): ~7 attempts × 4 active days/week → ~28
-  calls/week.
+- **Exercise generation** (PRD §25.2): the original MVP estimated
+  7 exercises × 4 active days/week → ~28 calls/week. The current
+  Learning Engine uses 15-20 micro-drills, but only high-value stages should
+  call an LLM; simple drills stay deterministic.
+- **Answer checking** (PRD §25.3): 15-20 attempts × 4 active days/week, usually
+  routed to the fast profile.
 - **Weekly report** (PRD §19): 1 call/week.
 
 Total: ~70–80 LLM calls per active week, before retries / regenerations.
@@ -36,6 +37,10 @@ Use **OpenAI** with a two-tier strategy:
 The provider is set via env: `AI_PROVIDER=openai`, with model names in env
 (`OPENAI_MODEL_LIGHT=gpt-4o-mini`, `OPENAI_MODEL_HEAVY=gpt-4o`) so they can
 be tuned without code changes.
+
+**2026-05-08 roadmap update:** ADR-0007 adds DeepSeek as the learning-engine
+provider behind the same abstraction. ADR-0003 remains the original MVP
+provider/cost decision; ADR-0007 owns DeepSeek task routing and fallback.
 
 ## Alternatives considered
 

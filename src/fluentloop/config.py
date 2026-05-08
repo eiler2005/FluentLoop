@@ -36,6 +36,10 @@ class Settings:
     deepseek_api_key: str
     deepseek_base_url: str
     deepseek_chat_model: str
+    deepseek_fast_model: str
+    deepseek_planner_model: str
+    deepseek_extractor_model: str
+    deepseek_planner_reasoning_effort: str
     deepseek_timeout_seconds: float
     deepseek_max_retries: int
     log_level: str
@@ -90,6 +94,19 @@ def get_settings() -> Settings:
         deepseek_base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
         deepseek_chat_model=os.environ.get(
             "DEEPSEEK_CHAT_MODEL", "deepseek-v4-flash"
+        ),
+        deepseek_fast_model=os.environ.get(
+            "DEEPSEEK_FAST_MODEL",
+            os.environ.get("DEEPSEEK_CHAT_MODEL", "deepseek-v4-flash"),
+        ),
+        deepseek_planner_model=os.environ.get(
+            "DEEPSEEK_PLANNER_MODEL", "deepseek-v4-pro"
+        ),
+        deepseek_extractor_model=os.environ.get(
+            "DEEPSEEK_EXTRACTOR_MODEL", "deepseek-v4-pro"
+        ),
+        deepseek_planner_reasoning_effort=os.environ.get(
+            "DEEPSEEK_PLANNER_REASONING_EFFORT", "high"
         ),
         deepseek_timeout_seconds=float(
             os.environ.get("DEEPSEEK_TIMEOUT_SECONDS", "30")

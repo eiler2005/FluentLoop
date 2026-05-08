@@ -93,3 +93,23 @@ This is the canonical "approval required" gate from PRD §5.5 and §13.
   the edited candidate eligible for explicit `Add` or `Skip`.
 - Malformed extraction/provider failures now return a friendly "try again or
   rephrase" response instead of crashing handler execution.
+- Lesson-note extraction now aims for a larger 20-30 target pool when the
+  material is substantial, and the upload summary previews selected targets,
+  meanings, and the fact that approval will create a reusable lesson pool.
+- Approval summaries now show what was added, the created LessonPlan topic and
+  goal, pool size, and how `/today` will rotate the material.
+- Upload summaries now include a teacher-facing lesson overview: title, theme,
+  learning focus, and lightweight knowledge areas (topics, grammar rules,
+  communication skills, mistake risks). Candidate summaries list every extracted
+  target unless Telegram's message limit forces truncation.
+- Material upload responses are routed back to the Materials Upload topic, so
+  uploading and reviewing extraction results does not force the user to switch
+  chats.
+- DeepSeek-backed extraction is enabled through the central gateway when
+  configured. Lesson-style markdown is sent through the stronger extraction
+  profile first, then the fast profile, then deterministic fallback if needed.
+- The extraction prompt is intentionally compact and requests 20-30 useful
+  candidates plus a teacher-style lesson overview rather than generic filler.
+- Telegram callback acknowledgements can expire on longer approval operations;
+  callback-answer failures are logged but do not roll back the database
+  transaction.

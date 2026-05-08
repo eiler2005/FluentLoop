@@ -82,5 +82,8 @@ be processed by EPIC-04 (AI extraction).
 - Forum workspace mode routes the materials hub to the real `Materials Upload`
   topic. The user can send `/upload` in that topic and paste the material as
   the next message, or use the button-to-DM handoff.
+- When material is uploaded from the Materials Upload topic, extraction and
+  approval replies are routed back to that same topic so the flow stays in one
+  place.
 - The pinned channel `#help` explains that material buttons start in the
   channel and text entry happens in the bot DM.

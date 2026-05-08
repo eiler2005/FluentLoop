@@ -7,8 +7,10 @@
 
 ## Goal
 
-Compose a daily 7-exercise practice session **automatically**, **without
-asking the user for confirmation per exercise**. Inputs: due items,
+Compose a daily practice session **automatically**, **without asking the user
+for confirmation per exercise**. The original MVP target was 7 exercises; the
+current EPIC-16+ Learning Engine supersedes this with 15-20 micro-drills inside
+a 15-minute lesson. Inputs: due items,
 weak items, mistake patterns, favorites, recent uploads, level, focus
 areas. Outputs: a `practice_session_cached` row with prompt + expected
 answer + hint + explanation per exercise, ready for EPIC-08 to serve
@@ -54,7 +56,9 @@ instantly.
 ## Acceptance criteria
 
 - When pre-gen runs, a `practice_session_cached` row is created for the
-  user with 7 exercise objects.
+  user with a dynamic exercise list. Legacy 7-exercise caches remain valid
+  only as fallback; current daily sessions should use 15-20 micro-drills when
+  the Learning Engine is active.
 - Cached exercises include enough information for EPIC-08 to render and
   EPIC-10 to check: `prompt`, `expected_answer`, `hint`, `explanation`,
   `exercise_type`, `target_learning_item_ids`.
@@ -73,16 +77,18 @@ instantly.
 - If the user does multiple sessions in one day (e.g. `/today` twice),
   do we re-use the same cached batch or generate a second one? Default:
   re-use; multiple-sessions-per-day is post-MVP.
-- Cost: 7 generation calls per day × heavy/light mix. ADR-0003 must
-  approve the budget.
+- Cost: current sessions use selective AI generation inside 15-20 micro-drills,
+  so simple cloze/guess exercises should stay deterministic and only
+  high-value writing or grammar stages should call the model.
 
 ## Verification plan
 
 1. Seed the DB with 20 learning items, 3 mistake patterns
    (1 high-confidence, 2 low), 2 favorites.
 2. Run the pre-gen job manually.
-3. Inspect `practice_session_cached` — should have 7 exercises with
-   variety across the six types and at least one mistake-based.
+3. Inspect `practice_session_cached` or the generated session payload — should
+   have a dynamic exercise list with variety across the six types and at least
+   one mistake-based exercise when a high-confidence pattern exists.
 4. Run pre-gen again the same day — should be idempotent (same row).
 5. Force the AI provider offline; run `/today` — fallback message
    appears, on-demand path produces a session.
@@ -95,9 +101,11 @@ instantly.
 - Added APScheduler overnight pre-generation job registration using
   `PRE_GEN_HOUR` / `PRE_GEN_MINUTE`.
 - Hardened the composer so the same approved `LearningItem` is not repeated in
-  one 7-exercise session; seed business/IT prompts fill any remaining slots
-  until enough approved items exist.
+  one session; seed business/IT prompts fill any remaining slots until enough
+  approved items exist.
 - High-confidence mistake patterns now contribute error-correction refreshers
   without overriding due-item priority.
 - Audit coverage verifies high-confidence mistake refreshers and sparse-library
   seed fillers using the demo dataset shape.
+- EPIC-16 now owns the current lesson-density behavior: 15-20 micro-drills,
+  dynamic `Step X/N`, lesson-plan preference, and stale-session superseding.

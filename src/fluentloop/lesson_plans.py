@@ -5,6 +5,8 @@ from collections.abc import Iterable
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from fluentloop.ai.provider import AIProvider
+from fluentloop.ai.schemas import LessonPlanDraft
 from fluentloop.db.models import (
     LearningItem,
     LessonPlan,
@@ -13,6 +15,7 @@ from fluentloop.db.models import (
     SourceMaterial,
     User,
 )
+from fluentloop.lesson_overview import infer_lesson_overview
 
 LESSON_PLAN_STATUSES = {"draft", "active", "archived", "completed"}
 LESSON_PLAN_ITEM_ROLES = {
@@ -55,6 +58,7 @@ def create_lesson_plan_from_source(
     *,
     items: Iterable[LearningItem] | None = None,
     status: str = "active",
+    provider: AIProvider | None = None,
 ) -> LessonPlan:
     if source.user_id != user.id:
         raise ValueError("Source material does not belong to the user")
@@ -74,26 +78,37 @@ def create_lesson_plan_from_source(
     linked_items = (
         list(items) if items is not None else _items_for_source(session, user, source)
     )
-    topic = _infer_topic(source, linked_items)
+    draft = _draft_lesson_plan(provider, user, source, linked_items)
+    topic = draft.topic.strip() if draft and draft.topic.strip() else _infer_topic(
+        source, linked_items
+    )
     plan = LessonPlan(
         user_id=user.id,
         source_material_id=source.id,
-        title=_title_for_source(source, topic),
+        title=(draft.title.strip() if draft and draft.title.strip() else None)
+        or _title_for_source(source, topic),
         topic=topic,
-        goal=_goal_for_topic(topic, linked_items),
+        goal=(draft.goal.strip() if draft and draft.goal.strip() else None)
+        or _goal_for_topic(topic, linked_items),
         level=user.level,
-        language_focus_json=_language_focus(linked_items),
-        tags_json=_tags_for_items(linked_items),
+        language_focus_json=(
+            draft.language_focus[:12] if draft and draft.language_focus else None
+        )
+        or _language_focus(linked_items),
+        tags_json=(draft.tags[:12] if draft and draft.tags else None)
+        or _tags_for_items(linked_items),
         status=status,
     )
     session.add(plan)
     session.flush()
-    create_default_lesson_steps(session, plan)
-    link_lesson_items(session, plan, linked_items)
+    create_default_lesson_steps(session, plan, draft=draft)
+    link_lesson_items(session, plan, linked_items, draft=draft)
     return plan
 
 
-def create_default_lesson_steps(session: Session, plan: LessonPlan) -> list[LessonStep]:
+def create_default_lesson_steps(
+    session: Session, plan: LessonPlan, *, draft: LessonPlanDraft | None = None
+) -> list[LessonStep]:
     existing = list(
         session.scalars(
             select(LessonStep)
@@ -104,18 +119,35 @@ def create_default_lesson_steps(session: Session, plan: LessonPlan) -> list[Less
     if existing:
         return existing
     steps: list[LessonStep] = []
+    draft_steps = {step.step_type: step for step in (draft.steps if draft else [])}
     for index, (step_type, title, instruction, minutes) in enumerate(
         DEFAULT_LESSON_STEPS, start=1
     ):
+        draft_step = draft_steps.get(step_type)
         step = LessonStep(
             lesson_plan_id=plan.id,
             order_index=index,
             step_type=step_type,
-            title=title,
-            instruction=instruction,
-            estimated_minutes=minutes,
-            target_skill=step_type,
-            metadata_json={},
+            title=(draft_step.title if draft_step and draft_step.title else title),
+            instruction=(
+                draft_step.instruction
+                if draft_step and draft_step.instruction
+                else instruction
+            ),
+            estimated_minutes=(
+                draft_step.estimated_minutes
+                if draft_step and draft_step.estimated_minutes
+                else minutes
+            ),
+            target_skill=(
+                draft_step.target_skill
+                if draft_step and draft_step.target_skill
+                else step_type
+            ),
+            metadata_json={
+                "teacher_rationale": draft_step.rationale if draft_step else "",
+                "lesson_teacher_rationale": draft.teacher_rationale if draft else "",
+            },
         )
         session.add(step)
         steps.append(step)
@@ -124,11 +156,39 @@ def create_default_lesson_steps(session: Session, plan: LessonPlan) -> list[Less
 
 
 def link_lesson_items(
-    session: Session, plan: LessonPlan, items: Iterable[LearningItem]
+    session: Session,
+    plan: LessonPlan,
+    items: Iterable[LearningItem],
+    *,
+    draft: LessonPlanDraft | None = None,
 ) -> list[LessonPlanItem]:
     links: list[LessonPlanItem] = []
-    for priority, item in enumerate(items, start=1):
-        role = _role_for_item(item)
+    priority_by_text = {
+        item.text.strip().lower(): item
+        for item in (draft.item_priorities if draft else [])
+        if item.text.strip()
+    }
+    sorted_items = sorted(
+        list(items),
+        key=lambda item: (
+            priority_by_text.get(item.text.strip().lower()).priority
+            if item.text.strip().lower() in priority_by_text
+            else 10_000,
+            item.created_at,
+        ),
+    )
+    for fallback_priority, item in enumerate(sorted_items, start=1):
+        priority_draft = priority_by_text.get(item.text.strip().lower())
+        role = (
+            priority_draft.role
+            if priority_draft and priority_draft.role
+            else _role_for_item(item)
+        )
+        priority = (
+            priority_draft.priority
+            if priority_draft and priority_draft.priority
+            else fallback_priority
+        )
         existing = session.scalar(
             select(LessonPlanItem).where(
                 LessonPlanItem.lesson_plan_id == plan.id,
@@ -187,12 +247,61 @@ def lesson_items(session: Session, plan: LessonPlan) -> list[LearningItem]:
 
 
 def ensure_lesson_plan_for_source(
-    session: Session, user: User, source: SourceMaterial
+    session: Session,
+    user: User,
+    source: SourceMaterial,
+    *,
+    provider: AIProvider | None = None,
 ) -> LessonPlan | None:
     items = _items_for_source(session, user, source)
     if not items:
         return None
-    return create_lesson_plan_from_source(session, user, source, items=items)
+    return create_lesson_plan_from_source(
+        session, user, source, items=items, provider=provider
+    )
+
+
+def _draft_lesson_plan(
+    provider: AIProvider | None,
+    user: User,
+    source: SourceMaterial,
+    items: list[LearningItem],
+) -> LessonPlanDraft | None:
+    if provider is None or not items:
+        return None
+    payload = {
+        "source_material": {
+            "id": source.id,
+            "type": source.type,
+            "summary": source.summary or "",
+            "raw_text": source.raw_text[:6000],
+        },
+        "user": {
+            "level": user.level,
+            "focus_areas": user.focus_areas,
+            "practice_duration_minutes": user.practice_duration_minutes,
+        },
+        "items": [
+            {
+                "id": item.id,
+                "type": item.type,
+                "text": item.text,
+                "meaning": item.meaning,
+                "explanation": item.explanation,
+                "examples": item.examples,
+                "tags": item.tags,
+                "role": _role_for_item(item),
+            }
+            for item in items
+        ],
+        "target_exercise_count": 16,
+        "candidate_pool_goal": "20-30 targets when material is substantial",
+    }
+    try:
+        result = provider.heavy_call("epic_17_seed_lesson_plan", payload)
+    except Exception:
+        return None
+    return result if isinstance(result, LessonPlanDraft) else None
 
 
 def _items_for_source(
@@ -212,6 +321,13 @@ def _items_for_source(
 
 
 def _infer_topic(source: SourceMaterial, items: list[LearningItem]) -> str:
+    overview = infer_lesson_overview(
+        source.raw_text,
+        item_texts=[item.text for item in items],
+        tags=[tag for item in items for tag in (item.tags or [])],
+    )
+    if overview.topic != "Business/IT communication":
+        return overview.topic
     text = " ".join(
         [
             source.summary or "",
@@ -232,6 +348,9 @@ def _infer_topic(source: SourceMaterial, items: list[LearningItem]) -> str:
 
 
 def _title_for_source(source: SourceMaterial, topic: str) -> str:
+    overview = infer_lesson_overview(source.raw_text)
+    if overview.title != "15-minute Workplace English Lesson":
+        return overview.title
     marker = source.raw_text.strip().splitlines()[0][:80] if source.raw_text else ""
     if marker.startswith("#"):
         marker = marker.lstrip("#").strip()
@@ -239,6 +358,9 @@ def _title_for_source(source: SourceMaterial, topic: str) -> str:
 
 
 def _goal_for_topic(topic: str, items: list[LearningItem]) -> str:
+    overview = infer_lesson_overview(item_texts=[item.text for item in items])
+    if overview.topic == topic and overview.goal:
+        return overview.goal
     if "Reported speech" in topic:
         return "Report opinions and recommendations naturally in workplace English."
     if "Architecture" in topic:

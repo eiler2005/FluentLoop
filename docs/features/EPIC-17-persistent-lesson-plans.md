@@ -17,6 +17,8 @@ a source of approved `LearningItem` rows.
   `LearningItem` data.
 - Create deterministic draft lesson plans from source material and approved
   items.
+- Store teacher-style lesson overview metadata: title, topic, goal, language
+  focus, knowledge areas, and planning rationale when available.
 - Let `/today` run a lesson-mode session from an available active lesson plan,
   with fallback to EPIC-16 composition.
 
@@ -34,6 +36,8 @@ a source of approved `LearningItem` rows.
   mistake-focus items to a plan.
 - `/today` can use an active lesson plan while preserving SRS and
   `PracticeAttempt` behavior.
+- Approving a new lesson material makes that active lesson plan available to
+  today's practice immediately; stale older daily sessions may be superseded.
 
 ## Verification plan
 
@@ -54,3 +58,11 @@ a source of approved `LearningItem` rows.
 - The Learning Engine now prefers an available lesson plan and annotates
   exercises with `lesson_plan_id` and `lesson_step_id`, while preserving
   fallback staged composition.
+- Approved lesson materials can now use a teacher-style DeepSeek lesson draft
+  to set topic, goal, language focus, step instructions, item priority, and
+  rationale; deterministic planning remains the fallback.
+- A lesson plan is treated as one reusable pool of approved items. `/today`
+  samples 15-20 micro-drills from that pool using teacher priority, SRS due
+  state, novelty, and recent-practice penalty.
+- The Telegram practice header now displays the selected LessonPlan title, so
+  the user can tell which uploaded lesson is driving the current exercises.

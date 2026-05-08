@@ -1,6 +1,6 @@
 # EPIC-16..21 — Learning engine and DeepSeek roadmap
 
-**Status:** Planned
+**Status:** Done
 **Source:** Codex implementation roadmap imported 2026-05-08.
 
 ## Goal
@@ -14,13 +14,15 @@ vector database.
 ## Implementation sequence
 
 1. **EPIC-16 — Learning Engine v1.** Refactor `/today` into staged practice:
-   warmup, input, controlled practice, controlled practice, grammar or mistake
-   focus, free production, recap.
+   warmup, input/noticing, controlled practice, grammar or mistake focus, free
+   production, recap. The live target is 15-20 micro-drills inside a
+   15-minute session, with dynamic `Step X/N`.
 2. **EPIC-17 — Persistent LessonPlan v1.** Add `LessonPlan`, `LessonStep`, and
    `LessonPlanItem`, linked to existing `SourceMaterial` and `LearningItem`
    rows.
 3. **EPIC-18 — DeepSeek LLM Gateway v1.** Centralize DeepSeek calls through a
-   small JSON-validating gateway with deterministic fallback.
+   small JSON-validating gateway with task-aware Pro/Flash routing and
+   deterministic fallback.
 4. **EPIC-19 — AI Exercise Generator v1.** Use the gateway for high-value
    exercise stages where deterministic templates are weak.
 5. **EPIC-20 — Grammar Brain v1.** Expand grammar into practical business/IT
@@ -39,3 +41,21 @@ vector database.
   validation, and commit only after tests plus live validation pass.
 - Do not push to remote unless explicitly requested.
 
+## Latest product decisions
+
+- Uploaded lesson material should produce a teacher-style lesson overview:
+  title, theme, communicative goal, language focus, knowledge areas, and full
+  candidate list where Telegram message limits allow it.
+- Approval creates a reusable lesson pool; `/today` should prefer active
+  lesson plans and supersede stale legacy daily sessions when needed.
+- Lesson planning and substantial extraction use the stronger DeepSeek planner
+  profile first; high-frequency answer checking and most exercise generation
+  use the fast profile. Both paths keep deterministic fallback.
+- Answer feedback is layered: compact correction immediately, detailed stored
+  explanation via `/feedback explain <attempt_id>` or the teacher-details
+  button.
+- Practice supports `/skip` and inline `Skip / show answer`; skipped attempts
+  reveal the correct answer, advance the session, and do not create mistake
+  events.
+- Material upload replies should stay in the Materials Upload topic to avoid
+  forcing the user to switch chats.

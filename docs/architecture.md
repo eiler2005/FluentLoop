@@ -73,6 +73,20 @@ For EPIC-18 onward, DeepSeek is available through `src/fluentloop/llm/` using
 the OpenAI-compatible API. Runtime can select it with `AI_PROVIDER=deepseek`
 and the `DEEPSEEK_*` env variables. Business modules must call the gateway or
 `AIProvider` abstraction rather than constructing provider clients directly.
+The router uses task-aware profiles: Pro for teacher planning and substantial
+lesson extraction, Flash for high-frequency answer checks and concise exercise
+generation.
+
+Current learning-engine runtime behavior:
+
+- Material extraction and lesson planning try the planner/extractor profile
+  first, then the fast profile, then deterministic fallback.
+- Answer checking defaults to the fast profile and stores layered teacher
+  feedback for compact and detailed rendering.
+- The DeepSeek client's hidden SDK retries are disabled; FluentLoop owns the
+  bounded timeout/retry/fallback policy so Telegram flows do not hang.
+- The upload prompt is compact and requests a lesson overview, knowledge areas,
+  and a 20-30 item candidate pool for substantial lesson notes.
 
 ## 4. Pre-generation pipeline
 
@@ -87,6 +101,10 @@ and the `DEEPSEEK_*` env variables. Business modules must call the gateway or
 - On-demand fallback if the cache is missing or stale; user sees
   "preparing exercises…".
 - Tunable via env: `PRE_GEN_HOUR=3`, `PRE_GEN_MINUTE=0`.
+- Current Learning Engine sessions are keyed by the user's local date
+  (`User.timezone`). If an in-progress legacy/stale session conflicts with a
+  newly approved active LessonPlan, the stale session is marked `superseded`
+  and `/today` starts the current lesson-plan session.
 
 ## 5. Scheduler — APScheduler in-process
 
@@ -103,11 +121,12 @@ and the `DEEPSEEK_*` env variables. Business modules must call the gateway or
 
 ## 6. Prompt structure
 
-- Prompts live as constants in `src/fluentloop/prompts/*.py` —
-  per-task module, f-string templates with explicit input/output schema
-  references.
-- Output schemas live in `src/fluentloop/ai/schemas.py` (Pydantic).
-  Mismatched output → one retry on heavy tier → user-friendly fallback.
+- Legacy AI prompts live as constants in `src/fluentloop/prompts/*.py`; the
+  learning-engine gateway prompts live in `src/fluentloop/llm/prompts.py`.
+  Both styles should keep explicit input/output schema references.
+- Output schemas live in `src/fluentloop/ai/schemas.py` and
+  `src/fluentloop/llm/schemas.py` (Pydantic). Mismatched output goes through
+  bounded retry/fallback rather than crashing the Telegram flow.
 - Prompt versions are tagged in code (`EXTRACT_PROMPT_VERSION = "v1"`)
   and logged with each call so model upgrades or prompt tweaks are
   traceable in the cost log.
@@ -138,6 +157,10 @@ and the `DEEPSEEK_*` env variables. Business modules must call the gateway or
   publicly) for VPS-side monitoring — defer to a deployment epic.
 - AI feedback disputes (EPIC-10): user thumbs-down writes to
   `feedback_disputes/YYYY-MM-DD.jsonl` for later audit.
+- Telegram callback acknowledgements can expire during slower live operations
+  such as approving a large candidate pool. Callback-answer failures should be
+  logged and ignored after the DB work has succeeded; they must not roll back
+  extraction approval or practice progress.
 
 ## 10. Deployment
 
@@ -191,6 +214,8 @@ EPIC-13):
 - `MistakeEvent` + `MistakePattern` — mistake-as-training loop.
 - `ReviewState` — spaced-repetition bookkeeping per learning item.
 - `PracticeSession` + `PracticeAttempt` — what happened during practice.
+  Practice sessions use `target_date_local` and may be `superseded` when a
+  newer active lesson plan replaces an older in-progress daily session.
 - `practice_session_cached` — overnight pre-gen output (ADR-0004).
 - `LessonPlan` + `LessonStep` + `LessonPlanItem` — reusable staged lesson
   plans linked to source materials and existing learning items.

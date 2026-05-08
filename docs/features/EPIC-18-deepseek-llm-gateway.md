@@ -16,6 +16,8 @@ business logic does not call provider APIs directly.
   gateway/router.
 - Use DeepSeek's OpenAI-compatible API with configurable environment:
   `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_CHAT_MODEL`,
+  `DEEPSEEK_FAST_MODEL`, `DEEPSEEK_PLANNER_MODEL`,
+  `DEEPSEEK_EXTRACTOR_MODEL`, `DEEPSEEK_PLANNER_REASONING_EFFORT`,
   `DEEPSEEK_TIMEOUT_SECONDS`, and `DEEPSEEK_MAX_RETRIES`.
 - Support JSON tasks for material extraction, seed lesson plans, exercise
   generation, answer checking, grammar explanations, and tone feedback.
@@ -51,3 +53,16 @@ business logic does not call provider APIs directly.
 - Gateway validates Pydantic JSON, retries transient failures, logs usage, and
   supports deterministic fallback when the key is missing or calls fail.
 - Added ADR-0007 and documented `DEEPSEEK_*` runtime variables.
+- Added task-aware DeepSeek routing: `deepseek-v4-pro` is used for teacher
+  lesson planning and lesson-note extraction, while `deepseek-v4-flash` remains
+  the default for answer checks and fast exercise generation.
+- Added task-specific env defaults: `DEEPSEEK_FAST_MODEL`,
+  `DEEPSEEK_PLANNER_MODEL`, `DEEPSEEK_EXTRACTOR_MODEL`, and
+  `DEEPSEEK_PLANNER_REASONING_EFFORT`. `DEEPSEEK_CHAT_MODEL` remains the
+  backward-compatible fallback.
+- Live runtime can enable the provider with `AI_PROVIDER=deepseek`; missing or
+  failing provider calls still fall back deterministically.
+- Material extraction uses a bounded Pro -> Flash -> deterministic path, so a
+  slow or unavailable planning model does not block the upload flow forever.
+- The DeepSeek SDK's hidden retry loop is disabled in favor of the app-level
+  timeout/retry/fallback policy, keeping Telegram interactions predictable.

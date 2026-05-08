@@ -24,6 +24,10 @@ def make_provider(settings: Settings | None = None) -> AIProvider:
             api_key=cfg.deepseek_api_key,
             base_url=cfg.deepseek_base_url,
             model=cfg.deepseek_chat_model,
+            fast_model=cfg.deepseek_fast_model,
+            planner_model=cfg.deepseek_planner_model,
+            extractor_model=cfg.deepseek_extractor_model,
+            planner_reasoning_effort=cfg.deepseek_planner_reasoning_effort,
             timeout_seconds=cfg.deepseek_timeout_seconds,
             max_retries=cfg.deepseek_max_retries,
         )

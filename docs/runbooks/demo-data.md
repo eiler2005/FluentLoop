@@ -2,7 +2,7 @@
 
 Use this during audit and post-deploy smoke testing to ensure the bot has
 enough realistic data to exercise all MVP paths. The script is idempotent and
-uses the stub AI provider internally, so it does not spend OpenAI credit.
+uses the stub AI provider internally, so it does not spend external AI credit.
 
 ## Local
 
@@ -39,7 +39,9 @@ ssh <ssh-user>@<vps-host> \
 - A lesson-material upload with stub-extracted candidates and approval into
   learning items.
 - A promoted high-confidence mistake pattern.
-- A cached practice session for today.
+- A cached/current practice session shape for today. In the current Learning
+  Engine, live `/today` should produce a dynamic 15-20 micro-drill session when
+  enough material exists.
 - One completed practice session with attempts for `/stats` coverage.
 
 The seeded rows use `demo` tags or fixed demo text so repeated runs do not keep
