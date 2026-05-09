@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
@@ -89,6 +89,41 @@ def test_lesson_step_ordering_and_item_links(db_session, settings) -> None:
     assert [link.learning_item_id for link in links] == [first.id, second.id]
     assert links[0].role == "target"
     assert links[1].role == "grammar_focus"
+
+
+def test_lesson_item_linking_handles_mixed_datetime_shapes(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    material = store_material(db_session, user, "[CODEX_TEST] mixed timestamps")
+    first = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="[CODEX_TEST] first naive",
+        source_material_id=material.id,
+    )
+    second = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="[CODEX_TEST] second aware",
+        source_material_id=material.id,
+    )
+    first.created_at = datetime(2026, 1, 1, 12, 0, 0)
+    second.created_at = datetime(2026, 1, 1, 13, 0, 0, tzinfo=UTC)
+    db_session.flush()
+
+    plan = create_lesson_plan_from_source(db_session, user, material)
+    links = list(
+        db_session.scalars(
+            select(LessonPlanItem)
+            .where(LessonPlanItem.lesson_plan_id == plan.id)
+            .order_by(LessonPlanItem.priority)
+        )
+    )
+
+    assert [link.learning_item_id for link in links] == [first.id, second.id]
 
 
 def test_teacher_planner_draft_sets_topic_goal_and_priorities(

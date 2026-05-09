@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from collections import Counter
 from collections.abc import Iterable
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -176,7 +177,7 @@ def link_lesson_items(
             priority_by_text.get(item.text.strip().lower()).priority
             if item.text.strip().lower() in priority_by_text
             else 10_000,
-            item.created_at,
+            _sort_datetime(item.created_at),
         ),
     )
     for fallback_priority, item in enumerate(sorted_items, start=1):
@@ -467,3 +468,11 @@ def _plan_matches(plan: LessonPlan, needle: str) -> bool:
         ]
     ).casefold()
     return needle in haystack
+
+
+def _sort_datetime(value: datetime | None) -> datetime:
+    if value is None:
+        return datetime.min.replace(tzinfo=UTC)
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
