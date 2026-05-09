@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
+from fluentloop.bot.formatting import HTML_PARSE_MODE, bold, code, html_escape, labeled
 from fluentloop.bot.messages import (
     HELP,
     candidate_summary,
@@ -33,6 +34,15 @@ from fluentloop.learning import (
     set_item_status,
     toggle_favorite,
 )
+from fluentloop.lesson_plans import (
+    active_lesson_plans,
+    find_lesson_plan,
+    lesson_items,
+    lesson_plan_by_id,
+    lesson_pool_size,
+    lesson_topic_groups,
+    random_lesson_plan,
+)
 from fluentloop.materials import (
     MATERIAL_TYPES,
     approve_all,
@@ -48,6 +58,7 @@ from fluentloop.practice import (
     get_in_progress_session,
     next_exercise,
     record_attempt,
+    start_explicit_session,
     start_or_resume_session,
     summarize_session,
 )
@@ -73,6 +84,7 @@ class BotReply:
     buttons: list[list[InlineButton]] | None = None
     message_thread_id: int | None = None
     extra_replies: tuple[BotReply, ...] = ()
+    parse_mode: str | None = None
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -624,6 +636,207 @@ def handle_today(
     message_thread_id: int | None = None,
 ) -> BotReply:
     practice_session = start_or_resume_session(session, user)
+    return _practice_session_reply(
+        session,
+        user,
+        practice_session,
+        channel_id=channel_id,
+        message_thread_id=message_thread_id,
+    )
+
+
+def handle_practice(
+    session: Session,
+    user: User,
+    mode: str,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    allowed = {"vocab", "grammar", "mistakes", "writing", "review", "mixed"}
+    if mode not in allowed:
+        return BotReply(
+            "Use /practice vocab, /practice grammar, /practice mistakes, "
+            "/practice writing, /practice review, or /practice mixed."
+        )
+    engine_mode = "mistake_focus" if mode == "mistakes" else mode
+    practice_session = start_explicit_session(session, user, mode=engine_mode)
+    return _practice_session_reply(
+        session,
+        user,
+        practice_session,
+        channel_id=channel_id,
+        message_thread_id=message_thread_id,
+    )
+
+
+def handle_topics(session: Session, user: User) -> BotReply:
+    groups = lesson_topic_groups(session, user)
+    if not groups:
+        return BotReply("No active lesson topics yet. Seed or upload lessons first.")
+    lines = [bold("Topics")]
+    for topic, count in groups[:30]:
+        lines.append(f"- {html_escape(topic)} ({count})")
+    lines.append("")
+    lines.append("Use /lessons <topic> to browse, or /lesson topic <topic> to start.")
+    return BotReply(
+        "\n".join(lines),
+        buttons=[[_button("Random lesson", "lesson:random:0")]],
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_lessons(session: Session, user: User, query: str = "") -> BotReply:
+    plans = active_lesson_plans(session, user, query=query, limit=20)
+    if not plans:
+        suffix = f" for {query!r}" if query else ""
+        return BotReply(f"No active lessons found{suffix}.")
+    title = "Lessons" if not query else f"Lessons matching {query}"
+    lines = [bold(title)]
+    buttons: list[list[InlineButton]] = []
+    for plan in plans:
+        pool_size = lesson_pool_size(session, plan)
+        lines.append(
+            f"#{plan.id} {html_escape(plan.title)} - "
+            f"{html_escape(plan.topic)} - pool {pool_size}"
+        )
+        buttons.append(
+            [
+                _button(f"Start #{plan.id}", f"lesson:start:{plan.id}"),
+                _button(f"Details #{plan.id}", f"lesson:details:{plan.id}"),
+            ]
+        )
+    buttons.append([_button("Random", "lesson:random:0")])
+    return BotReply("\n".join(lines), buttons=buttons, parse_mode=HTML_PARSE_MODE)
+
+
+def handle_lesson(
+    session: Session,
+    user: User,
+    payload: str,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    payload = payload.strip()
+    if payload == "random":
+        plan = random_lesson_plan(session, user)
+        if plan is None:
+            return BotReply("No active lessons yet. Seed or upload lessons first.")
+        return _start_lesson_reply(
+            session,
+            user,
+            plan,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+    if payload.startswith("topic "):
+        query = payload.removeprefix("topic ").strip()
+        if not query:
+            return BotReply("Use /lesson topic <query>.")
+        plan = find_lesson_plan(session, user, query)
+        if plan is None:
+            return BotReply(
+                f"No active lesson matched {query!r}. Try /lessons {query}."
+            )
+        return _start_lesson_reply(
+            session,
+            user,
+            plan,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+    start_requested = payload.startswith("start ")
+    if start_requested:
+        payload = payload.removeprefix("start ").strip()
+    try:
+        lesson_plan_id = int(payload)
+    except ValueError:
+        return BotReply(
+            "Use /lesson <id>, /lesson random, or /lesson topic <query>."
+        )
+    plan = lesson_plan_by_id(session, user, lesson_plan_id)
+    if plan is None:
+        return BotReply("Lesson not found.")
+    if start_requested:
+        return _start_lesson_reply(
+            session,
+            user,
+            plan,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+    return _lesson_details_reply(session, plan)
+
+
+def handle_lesson_callback(
+    session: Session,
+    user: User,
+    action: str,
+    payload: str,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    if action == "random":
+        plan = random_lesson_plan(session, user)
+        if plan is None:
+            return BotReply("No active lessons yet.")
+        return _start_lesson_reply(
+            session,
+            user,
+            plan,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+    try:
+        lesson_plan_id = int(payload)
+    except ValueError:
+        return BotReply("Lesson not found.")
+    plan = lesson_plan_by_id(session, user, lesson_plan_id)
+    if plan is None:
+        return BotReply("Lesson not found.")
+    if action == "start":
+        return _start_lesson_reply(
+            session,
+            user,
+            plan,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+    if action == "details":
+        return _lesson_details_reply(session, plan)
+    return BotReply("Unknown lesson action.")
+
+
+def _start_lesson_reply(
+    session: Session,
+    user: User,
+    plan,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    practice_session = start_explicit_session(
+        session, user, mode="lesson", lesson_plan=plan
+    )
+    return _practice_session_reply(
+        session,
+        user,
+        practice_session,
+        channel_id=channel_id,
+        message_thread_id=message_thread_id,
+    )
+
+
+def _practice_session_reply(
+    session: Session,
+    user: User,
+    practice_session,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
     current = next_exercise(session, practice_session)
     if current is None:
         text = "Today's practice is complete."
@@ -633,6 +846,7 @@ def handle_today(
             text,
             channel_id or user.telegram_user_id,
             message_thread_id=message_thread_id,
+            parse_mode=HTML_PARSE_MODE,
         )
     index, exercise = current
     title = _practice_header(practice_session.exercises)
@@ -645,6 +859,37 @@ def handle_today(
         channel_id or user.telegram_user_id,
         buttons=_practice_buttons(),
         message_thread_id=message_thread_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def _lesson_details_reply(session: Session, plan) -> BotReply:
+    items = lesson_items(session, plan)
+    chunks = [item.text for item in items if item.type in {"word", "expression"}][:8]
+    grammar = [item.text for item in items if item.type == "grammar_rule"][:6]
+    mistakes = [item.text for item in items if item.type == "mistake_pattern"][:5]
+    lines = [
+        f"{bold('Lesson')} #{plan.id}",
+        labeled("Title", plan.title),
+        labeled("Topic", plan.topic),
+        labeled("Goal", plan.goal),
+    ]
+    if plan.language_focus_json:
+        lines.append(labeled("Language focus", ", ".join(plan.language_focus_json[:8])))
+    if chunks:
+        lines.append(labeled("Target chunks", ", ".join(chunks)))
+    if grammar:
+        lines.append(labeled("Grammar", ", ".join(grammar)))
+    if mistakes:
+        lines.append(labeled("Mistake risks", ", ".join(mistakes)))
+    lines.append(labeled("Lesson pool", str(len(items))))
+    return BotReply(
+        "\n".join(lines),
+        buttons=[
+            [_button("Start", f"lesson:start:{plan.id}")],
+            [_button("Random", "lesson:random:0")],
+        ],
+        parse_mode=HTML_PARSE_MODE,
     )
 
 
@@ -700,19 +945,20 @@ def handle_answer(
         )
     message += (
         f"\nDetails: /feedback explain {attempt.id}"
-        f"\nDisagree? Use the buttons or send /dispute {attempt.id} <reason>."
+        f"\nDisagree? Use the buttons or send /dispute {attempt.id} &lt;reason&gt;."
     )
     if feedback_copy_channel_id:
         extra_replies.append(
-            BotReply(
-                message,
-                feedback_copy_channel_id,
-                buttons=_attempt_buttons(
-                    attempt.id, allow_hard=feedback.status == "correct"
-                ),
-                message_thread_id=feedback_copy_message_thread_id,
+                BotReply(
+                    message,
+                    feedback_copy_channel_id,
+                    buttons=_attempt_buttons(
+                        attempt.id, allow_hard=feedback.status == "correct"
+                    ),
+                    message_thread_id=feedback_copy_message_thread_id,
+                    parse_mode=HTML_PARSE_MODE,
+                )
             )
-        )
     if follow_up is not None:
         next_index, next_item = follow_up
         next_heading = "#next_prompt\n" if channel_id else ""
@@ -726,6 +972,7 @@ def handle_answer(
                     next_channel_id,
                     buttons=_practice_buttons(),
                     message_thread_id=next_message_thread_id,
+                    parse_mode=HTML_PARSE_MODE,
                 )
             )
         message += "\n\n" + next_text
@@ -738,6 +985,7 @@ def handle_answer(
                     summary_text,
                     summary_channel_id,
                     message_thread_id=summary_message_thread_id,
+                    parse_mode=HTML_PARSE_MODE,
                 )
             )
         message += "\n\n" + summary_text
@@ -755,6 +1003,7 @@ def handle_answer(
         buttons=buttons,
         message_thread_id=message_thread_id,
         extra_replies=tuple(extra_replies),
+        parse_mode=HTML_PARSE_MODE,
     )
 
 
@@ -802,6 +1051,7 @@ def handle_skip_current(
                     next_channel_id,
                     buttons=_practice_buttons(),
                     message_thread_id=next_message_thread_id,
+                    parse_mode=HTML_PARSE_MODE,
                 )
             )
         message += "\n\n" + next_text
@@ -815,6 +1065,7 @@ def handle_skip_current(
                     summary_text,
                     summary_channel_id,
                     message_thread_id=summary_message_thread_id,
+                    parse_mode=HTML_PARSE_MODE,
                 )
             )
         message += "\n\n" + summary_text
@@ -825,6 +1076,7 @@ def handle_skip_current(
         buttons=buttons,
         message_thread_id=message_thread_id,
         extra_replies=tuple(extra_replies),
+        parse_mode=HTML_PARSE_MODE,
     )
 
 
@@ -855,14 +1107,16 @@ def _render_skip_feedback(attempt_id: int, exercise: dict, feedback: dict) -> st
     explanation = feedback.get("explanation") or exercise.get("hint") or ""
     rule = feedback.get("rule") or feedback.get("related_rule") or ""
     lines = [
-        f"Skipped attempt #{attempt_id}",
-        f"Correct answer: {expected}",
+        bold(f"Skipped attempt #{attempt_id}"),
+        f"{bold('Correct answer:')} {code(expected) if expected else ''}",
     ]
     if explanation:
-        lines.append(f"Why: {explanation}")
+        lines.append(labeled("Why", explanation))
     if rule and rule != explanation:
-        lines.append(f"Rule: {rule}")
-    lines.append("Next time: try the answer first, then use skip to compare.")
+        lines.append(labeled("Rule", rule))
+    lines.append(
+        labeled("Next time", "try the answer first, then use skip to compare.")
+    )
     return "\n".join(lines)
 
 
@@ -877,16 +1131,16 @@ def _practice_header(exercises: list[dict]) -> str:
         "why_now",
         "teacher priority + due review + new material rotation",
     )
-    lines = ["Today's English practice - 15 min"]
+    lines = [bold("Today's English practice - 15 min")]
     if lesson_title:
-        lines.append(f"Lesson: {lesson_title}")
+        lines.append(labeled("Lesson", lesson_title))
     lines.extend(
         [
-            f"Mode: {mode}",
-            f"Topic: {topic}",
-            f"Goal: {goal}",
-            f"Focus: {focus}",
-            f"Why now: {why_now}",
+            labeled("Mode", mode),
+            labeled("Topic", str(topic)),
+            labeled("Goal", str(goal)),
+            labeled("Focus", str(focus)),
+            labeled("Why now", str(why_now)),
         ]
     )
     return "\n".join(lines)
@@ -914,7 +1168,21 @@ def _stage_label(stage: str) -> str:
 def _render_step(index: int, exercise: dict, total: int) -> str:
     metadata = _exercise_metadata(exercise)
     stage = _stage_label(str(metadata.get("stage", "practice")))
-    return f"Step {index + 1}/{total} - {stage}\n{exercise['prompt']}"
+    lesson_title = str(metadata.get("lesson_plan_title") or "").strip()
+    target = ", ".join(str(item) for item in metadata.get("target_item_ids", [])[:3])
+    lines = [bold(f"Step {index + 1}/{total} - {stage}")]
+    if lesson_title:
+        lines.append(labeled("Lesson", lesson_title))
+    if metadata.get("topic"):
+        lines.append(labeled("Topic", str(metadata["topic"])))
+    if metadata.get("target_skill"):
+        lines.append(labeled("Focus", str(metadata["target_skill"])))
+    if target:
+        lines.append(labeled("Target", target))
+    lines.append(labeled("Task", str(exercise["prompt"])))
+    if exercise.get("hint"):
+        lines.append(labeled("Hint", str(exercise["hint"])))
+    return "\n".join(lines)
 
 
 def handle_attempt_ack(session: Session, user: User, attempt_id: int) -> BotReply:
@@ -938,7 +1206,10 @@ def handle_feedback_explain(session: Session, user: User, attempt_id: int) -> Bo
     practice_session = session.get(PracticeSession, attempt.practice_session_id)
     if practice_session is None or practice_session.user_id != user.id:
         return BotReply("Attempt not found.")
-    return BotReply(render_detailed_teacher_feedback(attempt.feedback))
+    return BotReply(
+        render_detailed_teacher_feedback(attempt.feedback),
+        parse_mode=HTML_PARSE_MODE,
+    )
 
 
 def handle_attempt_hard(session: Session, user: User, attempt_id: int) -> BotReply:
@@ -1150,6 +1421,10 @@ def command_catalog() -> list[str]:
         "/start",
         "/today",
         "/review",
+        "/practice",
+        "/topics",
+        "/lessons",
+        "/lesson",
         "/add",
         "/approve",
         "/candidates",

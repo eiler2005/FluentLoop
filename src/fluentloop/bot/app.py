@@ -27,9 +27,13 @@ from fluentloop.bot.handlers import (
     handle_help,
     handle_item_status,
     handle_items,
+    handle_lesson,
+    handle_lesson_callback,
+    handle_lessons,
     handle_materials_channel_hub,
     handle_mistake_action,
     handle_mistakes,
+    handle_practice,
     handle_rules,
     handle_setting_update,
     handle_settings,
@@ -38,6 +42,7 @@ from fluentloop.bot.handlers import (
     handle_start,
     handle_stats,
     handle_today,
+    handle_topics,
     handle_upload,
     handle_upload_prompt,
     handle_upload_start,
@@ -113,6 +118,7 @@ async def send_reply(  # type: ignore[no-untyped-def]
             reply.target_chat_id or fallback_chat_id,
             reply.text,
             buttons=_telethon_buttons(reply),
+            parse_mode=reply.parse_mode,
         )
     for extra in reply.extra_replies:
         await send_reply(client, fallback_chat_id, extra, settings)
@@ -179,6 +185,7 @@ def _reply_in_workspace_topic(
         reply.buttons,
         target.message_thread_id,
         reply.extra_replies,
+        reply.parse_mode,
     )
 
 
@@ -285,11 +292,57 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             message_thread_id=help_target.message_thread_id,
                         ),
                     )
-            elif command in {"/today", "/review"}:
+            elif command == "/today":
                 practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_today(
                     session,
                     user,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+            elif command == "/review":
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_practice(
+                    session,
+                    user,
+                    "review",
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+            elif command == "/practice":
+                mode = parts[1] if len(parts) >= 2 else ""
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_practice(
+                    session,
+                    user,
+                    mode,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+            elif command == "/topics":
+                reply = handle_topics(session, user)
+            elif command == "/lessons":
+                query = event.raw_text.removeprefix("/lessons").strip()
+                reply = handle_lessons(session, user, query)
+            elif command == "/lesson":
+                payload = event.raw_text.removeprefix("/lesson").strip()
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_lesson(
+                    session,
+                    user,
+                    payload,
                     channel_id=(
                         str(practice_target.chat_id)
                         if practice_target.chat_id is not None
@@ -497,6 +550,21 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     message_thread_id=practice_target.message_thread_id,
                 )
                 await answer_callback(event, "Starting practice")
+            elif len(parts) == 3 and parts[0] == "lesson":
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_lesson_callback(
+                    session,
+                    user,
+                    parts[1],
+                    parts[2],
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+                await answer_callback(event, "Lesson")
             elif raw_data == "materials:start":
                 StateStore(session).set(
                     telegram_user_id,

@@ -18,7 +18,7 @@ search.
 | 06 | [spaced-repetition](EPIC-06-spaced-repetition.md) | Done | Simple Again/Hard/Good/Easy intervals + due queue. |
 | 07 | [automatic-practice-generation](EPIC-07-automatic-practice-generation.md) | Done | Daily session composer + overnight pre-generation. |
 | 08 | [daily-practice-telegram](EPIC-08-daily-practice-telegram.md) | Done | `/today`, reminders, session resume, daily backups. |
-| 09 | [exercise-types](EPIC-09-exercise-types.md) | Done | Six exercise types from PRD §15. |
+| 09 | [exercise-types](EPIC-09-exercise-types.md) | Done | Exercise template registry and practice-mode metadata. |
 | 10 | [answer-checking-feedback](EPIC-10-answer-checking-feedback.md) | Done | AI judging + user override + dispute log. |
 | 11 | [mistake-events-and-patterns](EPIC-11-mistake-events-and-patterns.md) | Done | Mistake log, pattern detection (≥3/14d threshold). |
 | 12 | [grammar-rules-graph](EPIC-12-grammar-rules-graph.md) | Done | Grammar concepts as a graph with parent/child links. |
@@ -26,7 +26,7 @@ search.
 | 14 | [favorites](EPIC-14-favorites.md) | Done | `is_favorite` flag and prioritization. |
 | 15 | [optional-web-interface](EPIC-15-optional-web-interface.md) | **Deferred** | Re-evaluate after 4–6 weeks of bot usage. |
 | 16 | [learning-engine-v1](EPIC-16-learning-engine-v1.md) | Done | Staged `/today` Learning Engine with 15-20 micro-drills. |
-| 17 | [persistent-lesson-plans](EPIC-17-persistent-lesson-plans.md) | Done | LessonPlan / LessonStep / LessonPlanItem lesson pools from source materials. |
+| 17 | [persistent-lesson-plans](EPIC-17-persistent-lesson-plans.md) | Done | LessonPlan pools, lesson browser commands, and deterministic B2/B2+ curriculum seed. |
 | 18 | [deepseek-llm-gateway](EPIC-18-deepseek-llm-gateway.md) | Done | Centralized DeepSeek JSON gateway with fallback. |
 | 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Done | Selective AI-generated high-value exercise prompts. |
 | 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts and knowledge areas in practice. |

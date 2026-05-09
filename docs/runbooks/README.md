@@ -8,6 +8,8 @@ Available:
   format with build/time/plan notes.
 - [`demo-data.md`](demo-data.md) — idempotent demo dataset for audit and smoke
   testing.
+- [`curriculum-seed.md`](curriculum-seed.md) — deterministic 20-lesson B2/B2+
+  business/IT curriculum seed.
 
 Planned entries:
 

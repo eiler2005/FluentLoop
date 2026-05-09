@@ -85,7 +85,7 @@ def test_exercise_registry_and_session_resume(db_session, settings) -> None:
         meaning="мягко возражать",
         examples=["I'd like to push back on this proposal."],
     )
-    assert len(EXERCISE_TYPES) == 6
+    assert len(EXERCISE_TYPES) == 14
     rendered = render_for_item(item, "cloze")
     assert "____" in rendered.prompt
     assert "(мягко возражать)" in rendered.prompt
@@ -320,14 +320,14 @@ def test_teacher_feedback_explain_renders_stored_breakdown(
     )
     attempt = db_session.scalar(select(PracticeAttempt))
     assert attempt is not None
-    assert "Mistake:" in reply.text
+    assert "<b>Mistake:</b>" in reply.text
     assert "Details: /feedback explain" in reply.text
 
     detailed = handle_feedback_explain(db_session, user, attempt.id)
 
-    assert "Teacher breakdown" in detailed.text
-    assert "Teacher rule:" in detailed.text
-    assert "Micro-drill:" in detailed.text
+    assert "<b>Teacher breakdown</b>" in detailed.text
+    assert "<b>Teacher rule:</b>" in detailed.text
+    assert "<b>Micro-drill:</b>" in detailed.text
 
 
 def test_skip_current_reveals_answer_and_advances(db_session, settings) -> None:
@@ -341,8 +341,8 @@ def test_skip_current_reveals_answer_and_advances(db_session, settings) -> None:
 
     assert attempt is not None
     assert attempt.status == "skipped"
-    assert "Correct answer:" in reply.text
-    assert "Step 2/16" in reply.text
+    assert "<b>Correct answer:</b>" in reply.text
+    assert "<b>Step 2/16" in reply.text
     assert next_item is not None
     assert next_item[0] == 1
     assert reply.buttons is not None
@@ -361,9 +361,10 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
         channel_id="-100123",
     )
     assert reply.target_chat_id == "-100123"
-    assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt\nStep 2/16" in reply.text
-    assert "Step 2/16" in reply.text
+    assert reply.text.startswith("#feedback\n<b>Feedback - Attempt #")
+    assert "#next_prompt\n<b>Step 2/16" in reply.text
+    assert "<b>Step 2/16" in reply.text
+    assert reply.parse_mode == "html"
     assert reply.buttons is not None
     button_data = {button.data for row in reply.buttons for button in row}
     assert "attempt:ack:1" in button_data
@@ -392,13 +393,13 @@ def test_answer_keeps_forum_practice_flow_primary_with_topic_copies(
     )
     assert reply.target_chat_id == "-100999"
     assert reply.message_thread_id == 29
-    assert reply.text.startswith("#feedback\nAttempt #")
-    assert "#next_prompt\nStep 2/16" in reply.text
+    assert reply.text.startswith("#feedback\n<b>Feedback - Attempt #")
+    assert "#next_prompt\n<b>Step 2/16" in reply.text
     assert len(reply.extra_replies) == 2
     assert reply.extra_replies[0].message_thread_id == 30
-    assert reply.extra_replies[0].text.startswith("#feedback\nAttempt #")
+    assert reply.extra_replies[0].text.startswith("#feedback\n<b>Feedback - Attempt #")
     assert reply.extra_replies[1].message_thread_id == 31
-    assert reply.extra_replies[1].text.startswith("#next_prompt\nStep 2/16")
+    assert reply.extra_replies[1].text.startswith("#next_prompt\n<b>Step 2/16")
 
 
 def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
@@ -406,11 +407,12 @@ def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:
     create_learning_item(db_session, user, type_="expression", text="align on")
     reply = handle_today(db_session, user, channel_id="-100123")
     assert reply.target_chat_id == "-100123"
-    assert reply.text.startswith("#practice_flow\nToday's English practice - 15 min")
-    assert "Mode: " in reply.text
-    assert "Topic: " in reply.text
-    assert "Goal: " in reply.text
-    assert "Step 1/16 - Warm-up" in reply.text
+    assert reply.text.startswith("#practice_flow\n<b>Today's English practice - 15 min")
+    assert "<b>Mode:</b> " in reply.text
+    assert "<b>Topic:</b> " in reply.text
+    assert "<b>Goal:</b> " in reply.text
+    assert "<b>Step 1/16 - Warm-up</b>" in reply.text
+    assert reply.parse_mode == "html"
 
 
 def test_hard_override_converts_correct_srs_result(db_session, settings) -> None:

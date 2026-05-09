@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import asyncio
+
+from fluentloop.bot.formatting import HTML_PARSE_MODE
 from fluentloop.bot.handlers import (
     BotReply,
     InlineButton,
@@ -16,7 +19,7 @@ from fluentloop.learning import create_learning_item, set_item_status, toggle_fa
 from fluentloop.mistakes import archive_pattern, ingest_mistake_event
 from fluentloop.practice import cache_session
 from fluentloop.stats import collect_stats, render_stats, weekly_summary
-from fluentloop.telegram_bot_api import inline_keyboard
+from fluentloop.telegram_bot_api import inline_keyboard, send_bot_api_reply
 from fluentloop.users import ensure_user
 
 
@@ -176,3 +179,24 @@ def test_bot_api_inline_keyboard_payload() -> None:
             [{"text": "Start practice", "callback_data": "today:start"}]
         ]
     }
+
+
+def test_bot_api_reply_sends_html_parse_mode(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_call_bot_api(token: str, method: str, payload: dict) -> dict:
+        captured.update({"token": token, "method": method, "payload": payload})
+        return {"ok": True, "result": {"message_id": 42}}
+
+    monkeypatch.setattr("fluentloop.telegram_bot_api.call_bot_api", fake_call_bot_api)
+    reply = BotReply(
+        "<b>Hi</b>",
+        "-1001",
+        message_thread_id=42,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+    sent = asyncio.run(send_bot_api_reply("token", reply))
+
+    assert sent.message_id == 42
+    assert captured["payload"]["parse_mode"] == "HTML"

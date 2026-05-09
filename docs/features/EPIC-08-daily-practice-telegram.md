@@ -2,7 +2,7 @@
 
 **Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §14, §22.2 (daily practice scenario), §21 (`/today`,
-`/review`)
+`/review`, `/practice`, `/topics`, `/lessons`, `/lesson`)
 **Depends on:** EPIC-07
 **Blocks:** EPIC-10, EPIC-13
 
@@ -38,6 +38,11 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   key feedback highlights.
 - `/review` command — start an ad-hoc session of due items only,
   generated on demand from EPIC-07's logic.
+- `/practice vocab|grammar|mistakes|writing|review|mixed` — start an
+  explicit standalone session by user-facing mode.
+- `/topics`, `/lessons [query]`, `/lesson <id>`, `/lesson random`, and
+  `/lesson topic <query>` — browse lesson pools and explicitly start a
+  selected/random/topic-matched lesson.
 - Daily SQLite backup job (APScheduler):
   - Snapshot `data/fluentloop.sqlite` to
     `data/backups/db-YYYY-MM-DD.sqlite` after the bot's quiet hours.
@@ -134,3 +139,9 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   topic, goal, focus, and "why now" selection rationale.
 - The current Telegram flow supports `/skip` and an inline `Skip / show answer`
   button; skipped attempts count in the dynamic session summary.
+- Explicit lesson starts create a fresh `PracticeSession` from the selected
+  `LessonPlan`; if a different session is already in progress, it is marked
+  `superseded` only because the user chose a new lesson/mode.
+- Telegram prompt and feedback rendering now uses HTML parse mode: bold
+  step/stage headers, labeled Focus/Task/Target lines, and compact teacher
+  feedback sections while preserving the existing buttons.

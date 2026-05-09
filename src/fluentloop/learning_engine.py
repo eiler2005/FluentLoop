@@ -251,12 +251,19 @@ def compose_learning_session(
     target_date: object | None = None,
     now: datetime | None = None,
     ai_gateway: object | None = None,
+    mode_override: str | None = None,
+    lesson_plan: object | None = None,
 ) -> list[dict[str, Any]]:
-    plan = available_lesson_plan(session, user)
-    mode = "lesson" if plan is not None else choose_session_mode(session, user, now=now)
+    plan = lesson_plan if lesson_plan is not None else None
+    if plan is None and mode_override is None:
+        plan = available_lesson_plan(session, user)
+    mode = mode_override or (
+        "lesson" if plan is not None else choose_session_mode(session, user, now=now)
+    )
     scored_items = _scored_items_for_lesson_plan(session, plan)
     if not scored_items:
         scored_items = score_learning_items(session, user, now=now)
+    scored_items = _filter_scored_items_for_mode(scored_items, mode)
     patterns = _active_patterns(session, user.id, limit=3)
     if plan is not None:
         topic_goal = TopicGoal(plan.topic, plan.goal)
@@ -286,6 +293,24 @@ def compose_learning_session(
     if ai_gateway is not None:
         exercises = enhance_staged_exercises_with_ai(ai_gateway, exercises)
     return exercises
+
+
+def _filter_scored_items_for_mode(
+    scored_items: list[ScoredLearningItem], mode: str
+) -> list[ScoredLearningItem]:
+    if mode in {"lesson", "mixed", "review"}:
+        return scored_items
+    allowed = {
+        "vocab": {"word", "expression"},
+        "grammar": {"grammar_rule"},
+        "mistakes": {"mistake_pattern"},
+        "writing": {"word", "expression", "grammar_rule", "mistake_pattern"},
+        "mistake_focus": {"mistake_pattern"},
+    }.get(mode)
+    if allowed is None:
+        return scored_items
+    filtered = [row for row in scored_items if row.item.type in allowed]
+    return filtered or scored_items
 
 
 def _scored_items_for_lesson_plan(
@@ -433,7 +458,7 @@ def build_input_step(
         meaning = item.meaning or item.explanation or "useful workplace language"
         example = item.examples[0] if item.examples else f"We need to use {item.text}."
         exercise = Exercise(
-            "follow_up",
+            "noticing",
             (
                 f"Input: notice this language chunk.\n"
                 f"{item.text} = {meaning}\n"
@@ -447,7 +472,7 @@ def build_input_step(
         )
     else:
         exercise = Exercise(
-            "follow_up",
+            "noticing",
             (
                 "Input: useful phrase for today: I would lean towards...\n"
                 "Write one sentence using it for a project decision."
@@ -471,7 +496,7 @@ def build_controlled_practice_steps(
     items: list[LearningItem], *, mode: str, topic: str, lesson_goal: str
 ) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
-    preferred = ("cloze", "translate", "guess", "cloze", "translate", "guess", "cloze")
+    preferred = _preferred_cycle_for_mode(mode)
     for index in range(7):
         item = items[index + 1] if len(items) > index + 1 else None
         if item is None:
@@ -607,7 +632,7 @@ def build_free_production_step(
     targets = items[:3]
     target_text = ", ".join(item.text for item in targets) or "I would lean towards"
     exercise = Exercise(
-        "follow_up",
+            "mini_writing",
         (
             f"Free production: write 3-4 sentences about {topic.lower()}.\n"
             f"Use at least two of these: {target_text}."
@@ -633,7 +658,7 @@ def build_recap_step(
     targets = items[:4]
     target_text = ", ".join(item.text for item in targets) or "today's key phrases"
     exercise = Exercise(
-        "follow_up",
+            "active_recall",
         (
             "Recap: without looking back, write three things you want to remember "
             f"from today's practice. Include: {target_text}."
@@ -655,8 +680,52 @@ def build_recap_step(
 
 def _preferred_type(item: LearningItem, fallback: str) -> str:
     if item.type in {"grammar_rule", "mistake_pattern"}:
+        if fallback in {"error_correction", "register_choice", "sentence_transform"}:
+            return fallback
         return "grammar_rewrite"
     return fallback
+
+
+def _preferred_cycle_for_mode(mode: str) -> tuple[str, ...]:
+    if mode == "vocab":
+        return (
+            "cloze",
+            "translate",
+            "guess",
+            "chunk_builder",
+            "collocation_drill",
+            "word_family",
+            "active_recall",
+        )
+    if mode in {"grammar", "mistakes", "mistake_focus"}:
+        return (
+            "grammar_rewrite",
+            "error_correction",
+            "sentence_transform",
+            "register_choice",
+            "cloze",
+            "collocation_drill",
+            "active_recall",
+        )
+    if mode == "writing":
+        return (
+            "chunk_builder",
+            "sentence_transform",
+            "register_choice",
+            "mini_writing",
+            "follow_up",
+            "grammar_rewrite",
+            "active_recall",
+        )
+    return (
+        "cloze",
+        "translate",
+        "guess",
+        "chunk_builder",
+        "collocation_drill",
+        "sentence_transform",
+        "cloze",
+    )
 
 
 def _seed_controlled_practice(index: int) -> Exercise:

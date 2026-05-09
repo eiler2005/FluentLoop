@@ -6,12 +6,24 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 
 from fluentloop.ai.provider import StubProvider
-from fluentloop.bot.handlers import handle_today
+from fluentloop.bot.handlers import (
+    handle_lesson,
+    handle_lessons,
+    handle_practice,
+    handle_today,
+    handle_topics,
+)
+from fluentloop.curriculum_b2 import (
+    CURRICULUM_LESSONS,
+    render_curriculum_markdown,
+    seed_b2_curriculum,
+)
 from fluentloop.db.models import LessonPlan, LessonPlanItem, LessonStep, PracticeSession
 from fluentloop.learning import create_learning_item
 from fluentloop.lesson_plans import (
     available_lesson_plan,
     create_lesson_plan_from_source,
+    find_lesson_plan,
     lesson_items,
     lesson_steps,
 )
@@ -146,8 +158,8 @@ def test_today_selects_available_lesson_plan(db_session, settings) -> None:
     practice = db_session.scalar(select(PracticeSession))
 
     assert available_lesson_plan(db_session, user).id == plan.id
-    assert "Mode: lesson" in reply.text
-    assert f"Lesson: {plan.title}" in reply.text
+    assert "<b>Mode:</b> lesson" in reply.text
+    assert f"<b>Lesson:</b> {plan.title}" in reply.text
     assert practice is not None
     assert practice.exercises[0]["lesson_plan_id"] == plan.id
     assert all(exercise["lesson_plan_id"] == plan.id for exercise in practice.exercises)
@@ -203,7 +215,7 @@ def test_today_replaces_legacy_session_when_lesson_plan_is_available(
     assert active is not None
     assert len(active.exercises) >= 15
     assert active.exercises[0]["lesson_plan_id"] == plan.id
-    assert "Step 1/" in reply.text
+    assert "<b>Step 1/" in reply.text
     assert "architecture" not in reply.text.lower()
 
 
@@ -216,8 +228,8 @@ def test_today_falls_back_when_no_lesson_plan_exists(db_session, settings) -> No
     reply = handle_today(db_session, user)
 
     assert db_session.scalar(select(LessonPlan)) is None
-    assert "Mode: mixed" in reply.text
-    assert "Step 1/16 - Warm-up" in reply.text
+    assert "<b>Mode:</b> mixed" in reply.text
+    assert "<b>Step 1/16 - Warm-up</b>" in reply.text
 
 
 def test_approval_creates_lesson_plan_from_material(
@@ -240,3 +252,103 @@ def test_approval_creates_lesson_plan_from_material(
     assert plan.source_material_id == material.id
     assert db_session.scalar(select(LessonStep)) is not None
     assert db_session.scalar(select(LessonPlanItem)) is not None
+
+
+def test_b2_curriculum_seed_creates_20_idempotent_lessons(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+
+    first = seed_b2_curriculum(db_session, user)
+    second = seed_b2_curriculum(db_session, user)
+
+    plans = list(db_session.scalars(select(LessonPlan).order_by(LessonPlan.title)))
+    assert first["lessons"] == 20
+    assert second["lessons"] == 20
+    assert len(plans) == 20
+    assert len(CURRICULUM_LESSONS) == 20
+    assert all(plan.status == "active" for plan in plans)
+    assert all(lesson_items(db_session, plan) for plan in plans)
+
+
+def test_b2_curriculum_markdown_exports_same_titles() -> None:
+    markdown = render_curriculum_markdown()
+
+    assert "B2/B2+ Business and IT English Lesson Catalog" in markdown
+    for lesson in CURRICULUM_LESSONS:
+        assert lesson.title in markdown
+        assert lesson.slug in markdown
+
+
+def test_lesson_browser_commands_and_explicit_start(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    seed_b2_curriculum(db_session, user)
+
+    topics = handle_topics(db_session, user)
+    lessons = handle_lessons(db_session, user, "risk")
+    details_plan = find_lesson_plan(db_session, user, "risk")
+    assert details_plan is not None
+    details = handle_lesson(db_session, user, str(details_plan.id))
+    started = handle_lesson(db_session, user, "topic risk")
+    practice = db_session.scalar(
+        select(PracticeSession)
+        .where(PracticeSession.status == "in_progress")
+        .order_by(PracticeSession.id.desc())
+    )
+
+    assert "<b>Topics</b>" in topics.text
+    assert "risk" in lessons.text.casefold()
+    assert any(
+        button.data.startswith("lesson:start:")
+        for row in (lessons.buttons or [])
+        for button in row
+    )
+    assert f"<b>Lesson</b> #{details_plan.id}" in details.text
+    assert "<b>Today's English practice - 15 min</b>" in started.text
+    assert practice is not None
+    assert practice.exercises[0]["lesson_plan_id"] == details_plan.id
+
+
+def test_lesson_random_supersedes_current_session(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    seed_b2_curriculum(db_session, user)
+    first = handle_practice(db_session, user, "grammar")
+    current = db_session.scalar(
+        select(PracticeSession).where(PracticeSession.status == "in_progress")
+    )
+    assert current is not None
+
+    random_reply = handle_lesson(db_session, user, "random")
+    sessions = list(
+        db_session.scalars(select(PracticeSession).order_by(PracticeSession.id))
+    )
+
+    assert "<b>Mode:</b> grammar" in first.text
+    assert "<b>Mode:</b> lesson" in random_reply.text
+    assert sessions[0].status == "superseded"
+    assert sessions[-1].status == "in_progress"
+
+
+def test_practice_mode_filters_to_grammar(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="push back on")
+    create_learning_item(db_session, user, type_="grammar_rule", text="reported speech")
+
+    reply = handle_practice(db_session, user, "grammar")
+    practice = db_session.scalar(select(PracticeSession))
+
+    assert practice is not None
+    targeted = [
+        exercise
+        for exercise in practice.exercises
+        if exercise.get("target_learning_item_ids")
+    ]
+    assert targeted
+    assert any("reported speech" in exercise["prompt"] for exercise in targeted)
+    assert "<b>Mode:</b> grammar" in reply.text
+
+
+def test_lesson_invalid_queries_are_helpful(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+
+    assert "No active lessons" in handle_lessons(db_session, user).text
+    assert "Use /lesson" in handle_lesson(db_session, user, "").text
+    assert "No active lesson" in handle_lesson(db_session, user, "topic risk").text

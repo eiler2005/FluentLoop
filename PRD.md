@@ -811,6 +811,27 @@ More natural:
 I’d gently push back on releasing it this week because we haven’t mitigated the main risks yet. We should align on priorities first.
 ```
 
+### 15.7. Additional micro-drill templates
+
+The bot may assemble lessons from these internal templates while exposing
+simple user-facing practice modes such as vocabulary, grammar, mistakes,
+writing, review, and mixed:
+
+```text
+noticing
+collocation_drill
+sentence_transform
+word_family
+register_choice
+chunk_builder
+active_recall
+mini_writing
+```
+
+Each template should carry mode tags, stage tags, target item kinds,
+difficulty, and writing weight so the lesson engine can balance 15-20
+micro-drills inside a 15-minute session.
+
 ---
 
 ## 16. Immediate feedback
@@ -1065,6 +1086,24 @@ Start today’s practice session.
 
 /review
 Review due items.
+
+/practice vocab|grammar|mistakes|writing|review|mixed
+Start standalone practice by mode.
+
+/topics
+Browse active lesson topics and knowledge areas.
+
+/lessons [query]
+List active lesson plans, optionally filtered by topic/title/focus/tags.
+
+/lesson <id>
+Show a lesson card with title, topic, goal, focus, target chunks, and pool size.
+
+/lesson random
+Start a random active lesson.
+
+/lesson topic <query>
+Start the best matching active lesson for a topic.
 
 /skip
 Skip the current exercise and reveal the correct answer with a short explanation.

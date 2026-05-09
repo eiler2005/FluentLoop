@@ -1,20 +1,20 @@
 # EPIC-09 — Exercise types
 
 **Status:** Done (2026-05-06 19:58 UTC)
-**PRD references:** §15.1–15.6, §27 (example UX)
+**PRD references:** §15.1–15.7, §27 (example UX)
 **Depends on:** EPIC-05
 **Blocks:** EPIC-07 (consumes the type registry), EPIC-10
 
 ## Goal
 
-Implement the six exercise types from PRD §15 as a registered set of
+Implement the exercise templates from PRD §15 as a registered set of
 renderers and answer-shape definitions. Each type knows how to be rendered
-in Telegram and what shape of answer to expect. EPIC-07 picks types when
-composing a session; EPIC-10 checks answers.
+in Telegram and what shape of answer to expect. EPIC-07/16 picks templates
+when composing a session; EPIC-10 checks answers.
 
 ## In scope
 
-- Six exercise types from PRD §15:
+- Original six exercise types from PRD §15:
   1. **Guess word/expression** — bot gives a definition, user produces
      the term.
   2. **Translate phrase** — RU → EN translation.
@@ -25,12 +25,19 @@ composing a session; EPIC-10 checks answers.
   6. **Business/IT follow-up** — produce a short response to a workplace
      prompt, optionally requiring specific expressions.
 - A type registry: `EXERCISE_TYPES = {"guess": GuessExercise, ...}`.
+- Additional micro-drill templates:
+  `noticing`, `collocation_drill`, `sentence_transform`, `word_family`,
+  `register_choice`, `chunk_builder`, `active_recall`, and `mini_writing`.
+- User-facing practice modes map onto templates:
+  `vocab`, `grammar`, `mistakes`, `writing`, `review`, and `mixed`.
 - Per-type rendering: prompt format, optional hint, what user sees in
   Telegram (plain text vs inline buttons for short choices).
 - Per-type answer shape: free text vs inline-button choice; expected
   answer field semantics.
 - For each type, a `pretty_name` and `target_item_kinds` (e.g. cloze
   prefers `expression` and `word`, rewrite prefers `grammar_rule`).
+- For each type, `mode_tags`, `stage_tags`, `difficulty`, and
+  `writing_weight` so the lesson engine can balance quick drills and writing.
 
 ## Out of scope
 
@@ -40,7 +47,7 @@ composing a session; EPIC-10 checks answers.
 
 ## Acceptance criteria
 
-- Each of the six types renders a well-formed Telegram message given a
+- Each registered type renders a well-formed Telegram message given a
   `LearningItem` and AI-generated parameters.
 - Each type returns a typed result for EPIC-10 to consume:
   `(user_answer: str, exercise_type: str, target_item_ids: list[int])`.
@@ -65,14 +72,19 @@ composing a session; EPIC-10 checks answers.
 
 1. For each type, generate one exercise from a seeded `LearningItem`
    and visually inspect the rendering in Telegram.
-2. Type registry test: `len(EXERCISE_TYPES) == 6` and every entry has
+2. Type registry test: `len(EXERCISE_TYPES) == 14` and every entry has
    `render` and `parse_answer` callable attributes.
 3. Re-run PRD §27 example through the pipeline — expected feedback
    matches the PRD example shape.
 
 ## Notes from implementation
 
-- Added all six exercise types as a registry with renderers, answer semantics,
-  pretty names, and target item-kind hints.
+- Added all six original exercise types as a registry with renderers, answer
+  semantics, pretty names, and target item-kind hints.
+- Extended the registry to 14 templates for 15-20 micro-drill lessons:
+  noticing, collocation drills, sentence transformation, word-family practice,
+  register choice, chunk building, active recall, and mini writing.
+- Added per-template mode/stage metadata so `/practice vocab|grammar|mistakes|writing|review|mixed`
+  can use the same engine as `/today`.
 - Audit coverage exercises the registry in practice sessions and checks that
   rendered exercise dictionaries carry the fields EPIC-10 consumes.

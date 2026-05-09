@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
 from fluentloop.ai.schemas import AnswerFeedback
+from fluentloop.bot.formatting import bold, code, labeled
 from fluentloop.db.models import (
     ExtractedCandidate,
     MistakeEvent,
@@ -86,53 +87,53 @@ def build_teacher_feedback(
 def render_compact_teacher_feedback(attempt_id: int, feedback: AnswerFeedback) -> str:
     better = feedback.natural_answer or feedback.corrected_answer
     lines = [
-        f"Attempt #{attempt_id}",
-        f"{feedback.status.title()}.",
+        bold(f"Feedback - Attempt #{attempt_id}"),
+        labeled("Verdict", f"{feedback.status.title()}."),
     ]
     if better:
-        lines.append(f"Better: {better}")
+        lines.append(f"{bold('Better:')} {code(better)}")
     if feedback.mistake_summary:
-        lines.append(f"Mistake: {feedback.mistake_summary}")
+        lines.append(labeled("Mistake", feedback.mistake_summary))
     why = feedback.why_wrong or feedback.explanation
     if why:
-        lines.append(f"Why: {why}")
+        lines.append(labeled("Why", why))
     rule = feedback.rule or feedback.related_rule
     if rule:
-        lines.append(f"Rule: {rule}")
+        lines.append(labeled("Rule", rule))
     if feedback.better_variants:
-        lines.append(f"Try: {feedback.better_variants[0]}")
+        lines.append(f"{bold('Try:')} {code(feedback.better_variants[0])}")
     if feedback.micro_drill:
-        lines.append(f"Micro-drill: {feedback.micro_drill}")
+        lines.append(labeled("Micro-drill", feedback.micro_drill))
     return "\n".join(lines)
 
 
 def render_detailed_teacher_feedback(feedback: dict) -> str:
     better_variants = feedback.get("better_variants") or []
     lines = [
-        "Teacher breakdown",
-        f"Verdict: {str(feedback.get('status', 'unchecked')).title()}",
+        bold("Teacher breakdown"),
+        labeled("Verdict", str(feedback.get("status", "unchecked")).title()),
     ]
     corrected = feedback.get("corrected_answer") or feedback.get("natural_answer")
     if corrected:
-        lines.append(f"Corrected: {corrected}")
+        lines.append(f"{bold('Corrected:')} {code(corrected)}")
     mistake = feedback.get("mistake_summary")
     if mistake:
-        lines.append(f"What went wrong: {mistake}")
+        lines.append(labeled("What went wrong", mistake))
     why = feedback.get("why_wrong") or feedback.get("explanation")
     if why:
-        lines.append(f"Why it matters: {why}")
+        lines.append(labeled("Why it matters", why))
     rule = feedback.get("rule") or feedback.get("related_rule")
     if rule:
-        lines.append(f"Teacher rule: {rule}")
+        lines.append(labeled("Teacher rule", rule))
     if better_variants:
-        lines.append("Better variants:")
-        lines.extend(f"- {variant}" for variant in better_variants[:3])
+        lines.append(bold("Better variants:"))
+        lines.extend(f"- {code(variant)}" for variant in better_variants[:3])
     micro_drill = feedback.get("micro_drill")
     if micro_drill:
-        lines.append(f"Micro-drill: {micro_drill}")
+        lines.append(labeled("Micro-drill", micro_drill))
     note = feedback.get("teacher_note")
     if note:
-        lines.append(f"Teacher note: {note}")
+        lines.append(labeled("Teacher note", note))
     return "\n".join(lines)
 
 

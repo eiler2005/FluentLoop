@@ -25,6 +25,10 @@ Commands:
 /start - create or load profile and post workspace hubs
 /today - start today's practice
 /review - review due items
+/practice vocab|grammar|mistakes|writing|review|mixed - start a mode
+/topics - browse lesson topics and knowledge areas
+/lessons [query] - list active lesson plans
+/lesson <id>|random|topic <query> - inspect or start lessons
 /skip - skip current exercise and show the answer
 /upload - upload lesson material
 /add expression | push back on | мягко возражать | meetings,stakeholders

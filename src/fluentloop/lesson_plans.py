@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import random
+from collections import Counter
 from collections.abc import Iterable
 
 from sqlalchemy import select
@@ -223,6 +225,69 @@ def available_lesson_plan(session: Session, user: User) -> LessonPlan | None:
     )
 
 
+def active_lesson_plans(
+    session: Session,
+    user: User,
+    *,
+    query: str = "",
+    limit: int = 20,
+) -> list[LessonPlan]:
+    plans = list(
+        session.scalars(
+            select(LessonPlan)
+            .where(
+                LessonPlan.user_id == user.id,
+                LessonPlan.status.in_(("active", "draft")),
+            )
+            .order_by(LessonPlan.updated_at.desc(), LessonPlan.id.desc())
+        )
+    )
+    if query.strip():
+        needle = query.casefold().strip()
+        plans = [plan for plan in plans if _plan_matches(plan, needle)]
+    return plans[:limit]
+
+
+def lesson_plan_by_id(
+    session: Session, user: User, lesson_plan_id: int
+) -> LessonPlan | None:
+    plan = session.get(LessonPlan, lesson_plan_id)
+    if (
+        plan is None
+        or plan.user_id != user.id
+        or plan.status not in {"active", "draft"}
+    ):
+        return None
+    return plan
+
+
+def find_lesson_plan(
+    session: Session, user: User, query: str
+) -> LessonPlan | None:
+    matches = active_lesson_plans(session, user, query=query, limit=10)
+    return matches[0] if matches else None
+
+
+def random_lesson_plan(session: Session, user: User) -> LessonPlan | None:
+    plans = active_lesson_plans(session, user, limit=100)
+    return random.choice(plans) if plans else None
+
+
+def lesson_pool_size(session: Session, plan: LessonPlan) -> int:
+    return len(lesson_items(session, plan))
+
+
+def lesson_topic_groups(session: Session, user: User) -> list[tuple[str, int]]:
+    counter: Counter[str] = Counter()
+    for plan in active_lesson_plans(session, user, limit=500):
+        tags = list(plan.tags_json or [])
+        areas = [tag for tag in tags if not tag.startswith("curriculum:")]
+        labels = areas[:3] or [plan.topic]
+        for label in labels:
+            counter[label] += 1
+    return sorted(counter.items(), key=lambda row: (-row[1], row[0].casefold()))
+
+
 def lesson_steps(session: Session, plan: LessonPlan) -> list[LessonStep]:
     return list(
         session.scalars(
@@ -389,3 +454,16 @@ def _role_for_item(item: LearningItem) -> str:
     if item.type == "mistake_pattern":
         return "mistake_focus"
     return "target"
+
+
+def _plan_matches(plan: LessonPlan, needle: str) -> bool:
+    haystack = " ".join(
+        [
+            plan.title or "",
+            plan.topic or "",
+            plan.goal or "",
+            " ".join(plan.language_focus_json or []),
+            " ".join(plan.tags_json or []),
+        ]
+    ).casefold()
+    return needle in haystack

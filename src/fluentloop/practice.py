@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from fluentloop.db.models import (
     LearningItem,
+    LessonPlan,
     MistakePattern,
     PracticeAttempt,
     PracticeSession,
@@ -176,12 +177,23 @@ def _legacy_compose_session(
 
 
 def compose_session(
-    session: Session, user: User, *, target_date: date | None = None
+    session: Session,
+    user: User,
+    *,
+    target_date: date | None = None,
+    mode: str | None = None,
+    lesson_plan: LessonPlan | None = None,
 ) -> list[dict]:
     try:
         from fluentloop.learning_engine import compose_learning_session
 
-        return compose_learning_session(session, user, target_date=target_date)
+        return compose_learning_session(
+            session,
+            user,
+            target_date=target_date,
+            mode_override=mode,
+            lesson_plan=lesson_plan,
+        )
     except Exception:
         return _legacy_compose_session(session, user, target_date=target_date)
 
@@ -240,6 +252,38 @@ def start_or_resume_session(
         user_id=user.id,
         target_date_local=local_date,
         exercises=cached.exercises,
+        status="in_progress",
+    )
+    session.add(current)
+    session.flush()
+    return current
+
+
+def start_explicit_session(
+    session: Session,
+    user: User,
+    *,
+    target_date: date | None = None,
+    mode: str | None = None,
+    lesson_plan: LessonPlan | None = None,
+) -> PracticeSession:
+    local_date = target_date or _local_date(user)
+    current = get_in_progress_session(session, user, target_date=local_date)
+    if current is not None:
+        current.status = "superseded"
+        session.add(current)
+        session.flush()
+    exercises = compose_session(
+        session,
+        user,
+        target_date=local_date,
+        mode=mode,
+        lesson_plan=lesson_plan,
+    )
+    current = PracticeSession(
+        user_id=user.id,
+        target_date_local=local_date,
+        exercises=exercises,
         status="in_progress",
     )
     session.add(current)

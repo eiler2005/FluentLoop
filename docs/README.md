@@ -13,6 +13,7 @@
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 | [`runbooks/deploy.md`](runbooks/deploy.md) | Deploy checklist and Telegram smoke message format. |
+| [`runbooks/curriculum-seed.md`](runbooks/curriculum-seed.md) | Populate the deterministic 20-lesson B2/B2+ curriculum seed. |
 | [`runbooks/secrets-management.md`](runbooks/secrets-management.md) | Public-git secret and confidential-data handling. |
 
 ## How to read these docs

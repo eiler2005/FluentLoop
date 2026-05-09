@@ -21,6 +21,11 @@ a source of approved `LearningItem` rows.
   focus, knowledge areas, and planning rationale when available.
 - Let `/today` run a lesson-mode session from an available active lesson plan,
   with fallback to EPIC-16 composition.
+- Add lesson browsing/start commands:
+  `/topics`, `/lessons [query]`, `/lesson <id>`, `/lesson random`, and
+  `/lesson topic <query>`.
+- Add a repo-backed deterministic B2/B2+ business/IT curriculum seed with
+  20 active lesson plans and a Markdown export.
 
 ## Out of scope
 
@@ -36,6 +41,10 @@ a source of approved `LearningItem` rows.
   mistake-focus items to a plan.
 - `/today` can use an active lesson plan while preserving SRS and
   `PracticeAttempt` behavior.
+- The user can inspect active lesson plans and start a selected, random, or
+  topic-matched lesson explicitly.
+- The seed command creates exactly 20 B2/B2+ lessons idempotently without a
+  DeepSeek key.
 - Approving a new lesson material makes that active lesson plan available to
   today's practice immediately; stale older daily sessions may be superseded.
 
@@ -66,3 +75,9 @@ a source of approved `LearningItem` rows.
   state, novelty, and recent-practice penalty.
 - The Telegram practice header now displays the selected LessonPlan title, so
   the user can tell which uploaded lesson is driving the current exercises.
+- Added a lesson browser over active lesson plans and knowledge areas:
+  `/topics`, `/lessons [query]`, `/lesson <id>`, `/lesson random`, and
+  `/lesson topic <query>`.
+- Added `scripts/seed_b2_curriculum.py` and
+  `docs/curriculum/b2_b2plus_lesson_catalog.md` as a deterministic 20-lesson
+  B2/B2+ business/IT seed catalog for offline curriculum population.

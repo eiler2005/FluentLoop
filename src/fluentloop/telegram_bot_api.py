@@ -58,6 +58,10 @@ async def send_bot_api_reply(token: str, reply: BotReply) -> SentBotApiMessage:
         "chat_id": reply.target_chat_id,
         "text": reply.text,
     }
+    if reply.parse_mode:
+        payload["parse_mode"] = (
+            "HTML" if reply.parse_mode.lower() == "html" else reply.parse_mode
+        )
     if reply.message_thread_id is not None:
         payload["message_thread_id"] = reply.message_thread_id
     markup = inline_keyboard(reply)

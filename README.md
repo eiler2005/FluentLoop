@@ -21,9 +21,11 @@ own lesson materials:
 4. Once a day, bot generates a 15-minute session of about 15-20 micro-drills
    from active lesson plans, due items, weak items, mistake patterns, grammar
    concepts, and recent material.
-5. Bot checks answers, gives compact teacher feedback, can show detailed
+5. User can browse lesson topics, inspect lesson cards, or explicitly start a
+   random/topic lesson in Telegram.
+6. Bot checks answers, gives compact teacher feedback, can show detailed
    stored explanations, supports `/skip`, logs mistakes, and updates progress.
-6. Recurring mistakes turn into mistake patterns and re-appear in future
+7. Recurring mistakes turn into mistake patterns and re-appear in future
    practice.
 
 Full product specification: [`PRD.md`](PRD.md).
@@ -76,6 +78,11 @@ implemented as the current practice path:
 - EPIC-20: grammar concepts are practical business/IT micro-skills.
 - EPIC-21: uploaded materials are indexed into local chunks for lightweight
   context search.
+- Lesson navigation: `/topics`, `/lessons [query]`, `/lesson <id>`,
+  `/lesson random`, `/lesson topic <query>`, plus `/practice vocab|grammar|mistakes|writing|review|mixed`.
+- Seed catalog: `scripts/seed_b2_curriculum.py` creates 20 deterministic
+  B2/B2+ business/IT lesson plans without DeepSeek and exports
+  `docs/curriculum/b2_b2plus_lesson_catalog.md`.
 
 See [`docs/features/README.md`](docs/features/README.md) for the full graph.
 
