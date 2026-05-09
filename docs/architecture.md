@@ -17,6 +17,9 @@ decisions as ADRs in [`adr/`](adr/).
 - **APScheduler** in-process for daily reminders, overnight pre-gen
   (ADR-0004), and daily SQLite backups.
 - **Long polling** against Telegram (no webhook, no public ports).
+- **Telegram workspace maintenance** syncs Bot API commands, refreshes the
+  pinned Help topic, and safely removes only identifiable bot-authored stale
+  help/smoke messages.
 
 ## 1. Telegram client — Telethon (bot mode)
 
@@ -35,6 +38,11 @@ decisions as ADRs in [`adr/`](adr/).
   helper in `src/fluentloop/bot/state.py` (~50–100 LoC, persisted in
   SQLite so restarts don't lose mid-flow state).
 - Inline keyboards: `telethon.tl.custom.Button.inline(...)`.
+- Bot API is used for forum-topic sends, pins, command-menu sync, and Help-topic
+  maintenance where MTProto topic ergonomics are weaker.
+- `/help` and `/howto` render the same learner guide. `/start` and `/help`
+  refresh the forum Help topic when workspace routing is configured; operators
+  can also run `scripts/telegram_workspace_maintenance.py`.
 - Rate limiting: Telethon handles `FloodWait` automatically.
 
 ## 2. Database — SQLite
@@ -172,6 +180,10 @@ Current learning-engine runtime behavior:
   `aiprojects/vps_management`. Playbooks land in a future epic.
 - `verify.sh` confirms the container is up and the bot answers
   `/start`.
+- `scripts/telegram_workspace_maintenance.py` is the post-deploy workspace
+  refresh path: it calls Bot API `setMyCommands`, clears Help-topic pins,
+  optionally deletes only bot-authored stale help/smoke messages, and pins the
+  current guide.
 
 ## 11. Web UI — deferred
 

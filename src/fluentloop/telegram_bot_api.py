@@ -9,6 +9,25 @@ from typing import Any
 
 from fluentloop.bot.handlers import BotReply
 
+BOT_COMMANDS: tuple[tuple[str, str], ...] = (
+    ("start", "Create or load your FluentLoop profile"),
+    ("today", "Start today's 15-minute practice"),
+    ("review", "Review due items"),
+    ("practice", "Start vocab, grammar, mistakes, writing, review, or mixed mode"),
+    ("topics", "Browse lesson topics and knowledge areas"),
+    ("lessons", "List active lessons, optionally filtered"),
+    ("lesson", "Show or start a lesson by id, random, or topic"),
+    ("skip", "Skip the current prompt and show the answer"),
+    ("feedback", "Show detailed teacher feedback for an attempt"),
+    ("upload", "Upload lesson material"),
+    ("approve", "Approve pending extracted candidates"),
+    ("mistakes", "Show recurring mistake patterns"),
+    ("rules", "Show grammar concepts"),
+    ("stats", "Show progress stats"),
+    ("help", "Show the FluentLoop guide"),
+    ("howto", "Show how to use FluentLoop"),
+)
+
 
 class TelegramBotApiError(RuntimeError):
     pass
@@ -29,6 +48,13 @@ def inline_keyboard(reply: BotReply) -> dict[str, Any] | None:
             for row in reply.buttons
         ]
     }
+
+
+def bot_commands_payload() -> list[dict[str, str]]:
+    return [
+        {"command": command, "description": description}
+        for command, description in BOT_COMMANDS
+    ]
 
 
 def call_bot_api(token: str, method: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -70,6 +96,24 @@ async def send_bot_api_reply(token: str, reply: BotReply) -> SentBotApiMessage:
     parsed = await asyncio.to_thread(call_bot_api, token, "sendMessage", payload)
     message_id = int(parsed["result"]["message_id"])
     return SentBotApiMessage(message_id=message_id, raw=parsed)
+
+
+def set_bot_commands(token: str) -> dict[str, Any]:
+    return call_bot_api(token, "setMyCommands", {"commands": bot_commands_payload()})
+
+
+def delete_bot_api_message(token: str, chat_id: int | str, message_id: int) -> None:
+    call_bot_api(token, "deleteMessage", {"chat_id": chat_id, "message_id": message_id})
+
+
+def unpin_all_forum_topic_messages(
+    token: str, chat_id: int | str, message_thread_id: int
+) -> None:
+    call_bot_api(
+        token,
+        "unpinAllForumTopicMessages",
+        {"chat_id": chat_id, "message_thread_id": message_thread_id},
+    )
 
 
 async def pin_bot_api_message(token: str, chat_id: int | str, message_id: int) -> None:

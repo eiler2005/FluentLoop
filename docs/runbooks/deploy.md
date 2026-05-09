@@ -21,6 +21,13 @@ uv run python scripts/secret_scan.py
 git diff --check
 ```
 
+When Help text or commands changed, verify the Telegram maintenance path before
+deploying:
+
+```bash
+uv run python scripts/telegram_workspace_maintenance.py --dry-run
+```
+
 ## Deploy
 
 ```bash
@@ -62,5 +69,6 @@ uv run python scripts/smoke_telegram.py \
 7. Confirm the session uses dynamic Step X/N with about 15-20 micro-drills.
 8. Answer at least two drills and confirm PracticeAttempt + SRS update.
 9. Use /skip once and confirm the correct answer/explanation is shown.
-10. Check logs for provider, callback, and database errors.
+10. Run `/help` and `/howto`; confirm the Help topic has one fresh pinned guide.
+11. Check logs for provider, callback, and database errors.
 ```

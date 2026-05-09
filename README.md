@@ -7,6 +7,42 @@ context, text-only MVP, single Docker container on a VPS.
 > EPIC-16 through EPIC-21 have compact code paths and tests; EPIC-15 remains
 > deferred.
 
+## TL;DR
+
+FluentLoop is a single-user Telegram learning engine. It turns lesson notes and
+teacher feedback into approved learning items, reusable lesson pools, 15-20
+micro-drill sessions, teacher-style feedback, SRS review, and mistake-focused
+practice. The runtime stays deliberately small: one Docker container, SQLite,
+local files, scheduler, Telegram, and a DeepSeek gateway with deterministic
+fallbacks.
+
+## Start here
+
+For the learner:
+
+```text
+/help or /howto       Read the pinned how-to guide.
+/today                Start the automatic daily lesson.
+/topics               Browse knowledge areas.
+/lessons [query]      Browse lesson pools.
+/lesson random        Start a random active lesson.
+/lesson topic risk    Start the best lesson for a topic.
+/practice grammar     Start a focused practice mode.
+/upload               Add lesson notes in Materials Upload.
+/skip                 Show the answer and move on.
+```
+
+For the operator:
+
+```bash
+uv run --extra dev pytest -q
+uv run --extra dev ruff check src tests
+uv run python -m fluentloop --check
+uv run python scripts/secret_scan.py
+bash scripts/deploy.sh
+uv run python scripts/telegram_workspace_maintenance.py
+```
+
 ## What it does (intended MVP)
 
 A daily ~15-minute English practice loop in Telegram, driven by the user's
@@ -42,6 +78,7 @@ Full product specification: [`PRD.md`](PRD.md).
 | [`docs/adr/`](docs/adr/) | Architecture decision records. |
 | [`docs/features/`](docs/features/) | 21 epic files: original MVP backlog plus learning-engine roadmap. |
 | [`docs/runbooks/`](docs/runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
+| [`docs/testing.md`](docs/testing.md) | Test commands and what each layer proves. |
 
 ## Repository layout
 
@@ -80,6 +117,10 @@ implemented as the current practice path:
   context search.
 - Lesson navigation: `/topics`, `/lessons [query]`, `/lesson <id>`,
   `/lesson random`, `/lesson topic <query>`, plus `/practice vocab|grammar|mistakes|writing|review|mixed`.
+- Help and onboarding: `/help` and `/howto` render the same learner guide, the
+  Help forum topic is refreshed/pinned by
+  `scripts/telegram_workspace_maintenance.py`, and the Telegram command menu is
+  synced through Bot API `setMyCommands`.
 - Seed catalog: `scripts/seed_b2_curriculum.py` creates 20 deterministic
   B2/B2+ business/IT lesson plans without DeepSeek and exports
   `docs/curriculum/b2_b2plus_lesson_catalog.md`.
@@ -105,3 +146,11 @@ Lifted from PRD §26 — the bot is "done enough" when:
 
 Voice, web UI, multi-user, generic content import are explicitly **not** MVP
 goals.
+
+## Secrets and privacy
+
+Runtime secrets stay outside git. Use `.env` on the VPS and gitignored files
+under `secrets/` locally, especially `secrets/fluentloop.env` and
+`secrets/deploy.env`. Lesson notes, answers, and mistakes are private learning
+data; see [`SECURITY.md`](SECURITY.md) before changing provider or logging
+behavior.

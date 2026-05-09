@@ -357,14 +357,15 @@ def post_and_pin_workspace_help(
         return
     text = (
         "#help\n"
-        "FluentLoop English Forum is the main study space.\n\n"
-        "Practice Flow: start and answer daily exercises.\n"
-        "Materials Upload: send /upload, then paste lesson notes or feedback.\n"
-        "Feedback: answer checks and corrections.\n"
-        "Next Prompts: follow-up exercises.\n"
-        "Mistakes: recurring weak points.\n"
-        "Summaries and Stats: progress snapshots.\n\n"
-        "FluentLoop English remains the announcement channel."
+        "How to use FluentLoop\n\n"
+        "Start with /today for the automatic 15-minute lesson, or choose a "
+        "lesson with /lessons and /lesson.\n"
+        "Upload lesson notes in Materials Upload with /upload; approve "
+        "candidates before they become active.\n"
+        "Use /skip to reveal the answer, and /feedback explain <attempt_id> "
+        "for teacher details.\n\n"
+        "Useful commands: /help, /howto, /topics, /lessons, /lesson random, "
+        "/lesson topic <query>, /practice, /upload."
     )
     sent = call_json(
         token,

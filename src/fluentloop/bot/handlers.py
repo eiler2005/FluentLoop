@@ -262,25 +262,31 @@ def handle_channel_help(
 ) -> BotReply:
     return BotReply(
         "#help\n"
-        "How FluentLoop works\n\n"
-        "FluentLoop English Forum is the working space:\n"
-        "- Practice Flow: start/resume practice\n"
-        "- Feedback: answer checks and explanations\n"
-        "- Next Prompts: the next exercise when it is split from feedback\n"
-        "- Summaries: session and weekly results\n"
-        "- Mistakes: recurring weak points\n"
-        "- Materials Upload: lesson notes and teacher feedback intake\n"
-        "- Stats: progress snapshots\n\n"
-        "FluentLoop English stays as the announcement/digest channel.\n\n"
-        "Use the bot DM when Telegram needs private text input:\n"
-        "- answer there if you started from the announcement channel\n"
-        "- paste material text there after tapping Upload material\n"
-        "- use commands when buttons are inconvenient\n\n"
-        "Start from the buttons below, or send /help to the bot.",
+        "How to use FluentLoop\n\n"
+        "1. Start with /today for the automatic 15-minute lesson, or choose a "
+        "lesson with /lessons and /lesson.\n"
+        "2. Answer in text. Use /skip or Skip / show answer when you want the "
+        "model answer first.\n"
+        "3. Read compact teacher feedback. Use /feedback explain <attempt_id> "
+        "for the full breakdown.\n"
+        "4. Upload lesson notes in Materials Upload with /upload; approve "
+        "candidates before they become active learning items.\n\n"
+        "Workspace map:\n"
+        "- Practice Flow: current lesson and answers\n"
+        "- Materials Upload: lesson notes, word lists, homework, feedback\n"
+        "- Feedback: corrections and explanations\n"
+        "- Next Prompts: follow-up prompts\n"
+        "- Mistakes, Summaries, Stats: weak points and progress\n\n"
+        "Useful commands: /today, /practice, /topics, /lessons, /lesson random, "
+        "/lesson topic <query>, /upload, /skip, /help, /howto.",
         channel_id,
         buttons=[
-            [_button("Start practice", "today:start")],
-            [_button("Upload material", "materials:start")],
+            [_button("Today", "today:start"), _button("Lessons", "lessons:list")],
+            [
+                _button("Topics", "topics:list"),
+                _button("Upload material", "materials:start"),
+            ],
+            [_button("Practice modes", "practice:modes")],
         ],
         message_thread_id=message_thread_id,
     )
@@ -1441,6 +1447,7 @@ def command_catalog() -> list[str]:
         "/item",
         "/settings",
         "/help",
+        "/howto",
     ]
 
 

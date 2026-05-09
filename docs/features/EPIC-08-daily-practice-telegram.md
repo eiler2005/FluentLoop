@@ -2,7 +2,7 @@
 
 **Status:** Done (2026-05-06 19:58 UTC)
 **PRD references:** §14, §22.2 (daily practice scenario), §21 (`/today`,
-`/review`, `/practice`, `/topics`, `/lessons`, `/lesson`)
+`/review`, `/practice`, `/topics`, `/lessons`, `/lesson`, `/help`, `/howto`)
 **Depends on:** EPIC-07
 **Blocks:** EPIC-10, EPIC-13
 
@@ -126,6 +126,10 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
   flow for text entry.
 - `/start` and `/help` also post a `#help` channel message explaining the
   channel-vs-DM workflow and attempt to pin it in the channel.
+- `/help` and `/howto` now render the same learner guide, and
+  `scripts/telegram_workspace_maintenance.py` syncs Telegram's command menu,
+  refreshes the pinned Help-topic guide, and safely cleans only identifiable
+  bot-authored stale help/smoke messages.
 - `scripts/setup_telegram_workspace.py` can discover the forum group, create
   the standard topics, write ignored env values, generate Telegram avatars,
   set chat/bot photos, and pin forum help.

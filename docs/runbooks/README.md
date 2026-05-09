@@ -10,6 +10,8 @@ Available:
   testing.
 - [`curriculum-seed.md`](curriculum-seed.md) — deterministic 20-lesson B2/B2+
   business/IT curriculum seed.
+- [`telegram-workspace.md`](telegram-workspace.md) — refresh Telegram command
+  menu, pinned Help guide, and safe bot-authored cleanup.
 
 Planned entries:
 

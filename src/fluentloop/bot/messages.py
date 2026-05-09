@@ -5,21 +5,38 @@ from collections.abc import Iterable
 from fluentloop.db.models import ExtractedCandidate, MistakePattern
 from fluentloop.lesson_overview import infer_lesson_overview
 
-HELP = """How FluentLoop works
+HELP = """How to use FluentLoop
+
+Daily loop:
+1. Send /today for the automatic 15-minute lesson.
+2. Answer each prompt in text.
+3. Use Skip / show answer or /skip when you want the model answer first.
+4. Read compact teacher feedback; use /feedback explain <attempt_id> for details.
+5. Weak items, due reviews, and mistake patterns rotate back into future lessons.
+
+Lessons and topics:
+- /topics shows the knowledge areas in the active lesson base.
+- /lessons [query] lists lesson pools by title, topic, focus, or tags.
+- /lesson <id> shows one lesson card.
+- /lesson random starts a random active lesson.
+- /lesson topic <query> starts the best matching active lesson.
+- /practice vocab|grammar|mistakes|writing|review|mixed starts a focused mode.
+
+Adding material:
+- In #materials_upload / Materials Upload, send /upload, choose the material type,
+  then paste text or attach a UTF-8 .md/.txt lesson file.
+- FluentLoop extracts a lesson title, theme, knowledge areas, expressions, grammar
+  rules, and mistake risks.
+- New learning items become active only after approval with /approve <material_id>
+  or the Approve all button.
 
 Telegram workspace:
-- FluentLoop English Forum is the main place to study.
-- Practice Flow starts or resumes practice.
-- #materials_upload / Materials Upload is for lesson notes, word lists,
-  homework, exercises, and teacher feedback.
-- Feedback, Next Prompts, Mistakes, Summaries, and Stats keep the work tidy.
-- FluentLoop English is the announcement/digest channel.
-
-Bot DM:
-- Write free-text answers here if you started from the announcement channel.
-- Upload material text here after tapping Upload material, or send /upload
-  in the forum Materials Upload topic.
-- Use commands here when buttons are inconvenient.
+- Practice Flow: current lesson and answers.
+- Materials Upload: lesson notes, word lists, homework, exercises, feedback.
+- Feedback: answer checks and teacher explanations.
+- Next Prompts: follow-up prompts when split from feedback.
+- Mistakes, Summaries, and Stats: weak points and progress.
+- Bot DM: private commands and text entry when Telegram needs a direct chat.
 
 Commands:
 /start - create or load profile and post workspace hubs
@@ -30,24 +47,21 @@ Commands:
 /lessons [query] - list active lesson plans
 /lesson <id>|random|topic <query> - inspect or start lessons
 /skip - skip current exercise and show the answer
+/feedback explain <attempt_id> - show detailed teacher feedback
 /upload - upload lesson material
 /add expression | push back on | мягко возражать | meetings,stakeholders
 /candidates <material_id> - review extracted candidates
-/candidate add <candidate_id> - add one candidate
-/candidate edit <candidate_id> - edit one candidate
-/candidate skip <candidate_id> - skip one candidate
+/candidate add|edit|skip <candidate_id> - manage one candidate
 /approve <material_id> - approve all pending candidates for a material
 /dispute <attempt_id> <reason> - dispute feedback
 /mistakes - show mistake patterns
-/mistakes focus|ignore|examples <pattern_id>
 /rules - show grammar concepts
 /stats - show progress
 /favorites - show favorite items
 /items [active|archived|suspended]
 /item archive|suspend|restore <item_id>
 /settings - change settings
-/settings set reminder_time 20:30
-/help - show this help"""
+/help or /howto - show this guide"""
 
 
 def start_message(channel_enabled: bool = False) -> str:

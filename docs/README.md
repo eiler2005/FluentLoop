@@ -14,7 +14,9 @@
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 | [`runbooks/deploy.md`](runbooks/deploy.md) | Deploy checklist and Telegram smoke message format. |
 | [`runbooks/curriculum-seed.md`](runbooks/curriculum-seed.md) | Populate the deterministic 20-lesson B2/B2+ curriculum seed. |
+| [`runbooks/telegram-workspace.md`](runbooks/telegram-workspace.md) | Refresh pinned help, command menu, and safe Telegram cleanup. |
 | [`runbooks/secrets-management.md`](runbooks/secrets-management.md) | Public-git secret and confidential-data handling. |
+| [`testing.md`](testing.md) | Standard verification gate and test coverage map. |
 
 ## How to read these docs
 

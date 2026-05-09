@@ -1130,8 +1130,17 @@ Show progress.
 Change settings.
 
 /help
-Show help.
+Show the learner guide: how to start practice, browse lessons, upload material,
+answer, skip, and read feedback.
+
+/howto
+Alias for /help.
 ```
+
+The Help guide should also be pinned in the Telegram Help topic. The Telegram
+command menu should list the current core commands so the user can discover
+`/today`, `/topics`, `/lessons`, `/lesson`, `/practice`, `/upload`, `/skip`,
+`/feedback`, `/help`, and `/howto` without reading repository docs.
 
 ---
 

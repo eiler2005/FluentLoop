@@ -28,7 +28,8 @@ the next epics without restructuring.
   TELEGRAM_API_ID, TELEGRAM_API_HASH).start(bot_token=TELEGRAM_BOT_TOKEN)`.
   Session file path: `data/sessions/fluentloop-bot.session`.
 - `/start` — greeting message, mention next steps.
-- `/help` — list of commands (initially just `/start` and `/help`).
+- `/help` and `/howto` — the learner guide: how to start practice, browse
+  lessons, upload material, answer, skip, and inspect feedback.
 - Long-polling via Telethon (`client.run_until_disconnected()`).
 - Single-user gate: if `TELEGRAM_ALLOWED_USER_ID` is set and the
   message comes from a different user, reply with a polite "this is a
@@ -55,7 +56,8 @@ the next epics without restructuring.
   the greeting.
 - Sending `/start` from a non-allowed account returns the personal-bot
   message (when `TELEGRAM_ALLOWED_USER_ID` is set).
-- `/help` lists `/start` and `/help`.
+- `/help` and `/howto` show the current learner guide and include the core
+  command list.
 - The session file persists across container restarts (mounted via
   `./data:/app/data`).
 - `ruff check src tests` passes.
@@ -83,6 +85,8 @@ the next epics without restructuring.
 
 - Added Docker/Python 3.11 runtime, package skeleton, Telethon bot mode wiring,
   `/start`, `/help`, single-user gate, logging, SQLite-backed FSM, and tests.
+- `/howto` now aliases `/help`; the Telegram command-menu payload is covered by
+  tests and synced by the workspace maintenance script.
 - Docker daemon was not reachable locally, so the green gate ran through
   `uv --python 3.11`; Docker files are ready for VPS/Docker verification.
 - Audit coverage now asserts the single-user gate, Docker data mount, and

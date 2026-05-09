@@ -14,6 +14,7 @@ from fluentloop.bot.handlers import (
     is_allowed,
 )
 from fluentloop.bot.state import StateStore
+from fluentloop.telegram_bot_api import bot_commands_payload
 from fluentloop.telegram_workspace import workspace_destination, workspace_enabled
 
 
@@ -21,13 +22,23 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     reply = handle_start(db_session, settings, 123456789)
     assert "FluentLoop is ready" in reply.text
     assert "/start" in command_catalog()
+    assert "/howto" in command_catalog()
     assert "/help" in handle_help().text
+    assert "/howto" in handle_help().text
     assert "#materials_upload" in handle_help().text
     assert exercise_type_count() == 14
     help_reply = handle_channel_help("-100123")
     assert help_reply.target_chat_id == "-100123"
-    assert help_reply.text.startswith("#help\nHow FluentLoop works")
+    assert help_reply.text.startswith("#help\nHow to use FluentLoop")
     assert help_reply.buttons is not None
+    help_actions = {button.data for row in help_reply.buttons for button in row}
+    assert {
+        "today:start",
+        "lessons:list",
+        "topics:list",
+        "materials:start",
+        "practice:modes",
+    } <= help_actions
     channel = handle_channel_hub("-100123")
     assert channel.target_chat_id == "-100123"
     assert "#practice_flow" in channel.text
@@ -77,3 +88,12 @@ def test_state_store_round_trips(db_session) -> None:
     assert state.payload == {"step": "text"}
     store.clear(1, 2)
     assert store.get(1, 2) is None
+
+
+def test_telegram_command_menu_payload_uses_bare_commands() -> None:
+    commands = bot_commands_payload()
+    names = {entry["command"] for entry in commands}
+    assert "howto" in names
+    assert "feedback" in names
+    assert all(not entry["command"].startswith("/") for entry in commands)
+    assert all(entry["description"] for entry in commands)

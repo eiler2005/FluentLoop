@@ -279,7 +279,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         ),
                         settings,
                     )
-            elif command == "/help":
+            elif command in {"/help", "/howto"}:
                 reply = handle_help()
                 if workspace_enabled(settings):
                     help_target = workspace_destination(settings, "help")
@@ -550,6 +550,23 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     message_thread_id=practice_target.message_thread_id,
                 )
                 await answer_callback(event, "Starting practice")
+            elif raw_data == "topics:list":
+                reply = handle_topics(session, user)
+                await answer_callback(event, "Topics")
+            elif raw_data == "lessons:list":
+                reply = handle_lessons(session, user, "")
+                await answer_callback(event, "Lessons")
+            elif raw_data == "practice:modes":
+                reply = BotReply(
+                    "Practice modes\n"
+                    "/practice vocab - words and expressions\n"
+                    "/practice grammar - grammar micro-drills\n"
+                    "/practice mistakes - active weak points\n"
+                    "/practice writing - mini-writing prompts\n"
+                    "/practice review - due SRS items\n"
+                    "/practice mixed - balanced practice"
+                )
+                await answer_callback(event, "Practice modes")
             elif len(parts) == 3 and parts[0] == "lesson":
                 practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_lesson_callback(
