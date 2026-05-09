@@ -1,7 +1,8 @@
 # Architecture
 
-> **Status:** v0.1 — decisions for EPIC-01 are locked. ADRs 0002–0004 are
-> Accepted. Schema specifics for individual epics live in those epic files.
+> **Status:** v0.2 — MVP foundation (EPIC-01..14) and learning-engine roadmap
+> (EPIC-16..21) are shipped. ADRs 0002–0007 are Accepted. Schema specifics
+> for individual epics live in those epic files.
 
 The PRD deliberately keeps tech choices out of itself. This document is the
 single place where those choices are recorded, with the underlying
@@ -12,7 +13,9 @@ decisions as ADRs in [`adr/`](adr/).
 - **One Docker container** on a personal VPS, running Python 3.11.
 - **Telethon 1.36+ in bot mode** as the Telegram client (ADR-0002).
 - **AI provider:** OpenAI two-tier for the original MVP (ADR-0003); DeepSeek
-  gateway for the learning-engine roadmap (ADR-0007).
+  gateway for the learning-engine roadmap (ADR-0007). Provider abstraction
+  picks one based on `AI_PROVIDER`; deterministic fallback exists for offline
+  dev and degraded-AI failure modes.
 - **SQLite** via SQLAlchemy 2.x, single-file DB, mounted from host.
 - **APScheduler** in-process for daily reminders, overnight pre-gen
   (ADR-0004), and daily SQLite backups.
@@ -20,6 +23,84 @@ decisions as ADRs in [`adr/`](adr/).
 - **Telegram workspace maintenance** syncs Bot API commands, refreshes the
   pinned Help topic, and safely removes only identifiable bot-authored stale
   help/smoke messages.
+
+## At a glance
+
+Component view — every box is one Python module set inside a single Docker
+container:
+
+```
+              ┌─────────────────────────────────────────────────────┐
+              │ Telegram (forum + DM, single allowed user)          │
+              │   /today  /upload  /lessons  /skip  ...             │
+              └─────────────────────────┬───────────────────────────┘
+                                        │ MTProto long-poll + Bot API
+                                        ▼
+   ┌────────────────────────────────────────────────────────────────────────┐
+   │ src/fluentloop/                                                        │
+   │                                                                        │
+   │  bot/             ┌─── learning_engine ─── lesson_plans ─── practice ──┤
+   │   ├ app.py        │           │                  │              │      │
+   │   ├ handlers/  ───┤           ▼                  ▼              ▼      │
+   │   ├ state.py      │       materials ─────── exercises ─── mistakes     │
+   │   └ workspace/    │           │                  │              │      │
+   │                   │           └──────────┬───────┴──────────────┘      │
+   │                   │                      ▼                             │
+   │                   │       db/  (SQLAlchemy 2.x, Alembic, SQLite)       │
+   │                   │                      │                             │
+   │                   ▼                      ▼                             │
+   │              ai/ provider     llm/ DeepSeek gateway                    │
+   │              (OpenAI tiered)  (task-aware, JSON, fallback)             │
+   └────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+                   APScheduler (in-process, three jobs)
+                   ├─ Daily reminder (User.reminder_time)
+                   ├─ Overnight pre-gen (PRE_GEN_HOUR=3)
+                   └─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
+```
+
+Daily-loop data flow — what happens between bedtime and the morning's
+`/today`:
+
+```
+   night                                              morning
+  ──────────────────────────────────────────────────────────────
+  03:00 user-TZ                                       ~09:00 (or whenever
+  APScheduler                                         the reminder fires)
+   │                                                          │
+   ▼                                                          ▼
+  compose_tomorrow_session(user)              /today handler
+   │                                                  │
+   │  pulls due items + weak items + mistake          │  reads from
+   │  patterns + recent material chunks +             │  practice_session_cached
+   │  active LessonPlans                              │  (instant start)
+   │                                                  │
+   ▼                                                  ▼
+  practice_session_cached                     learner answers ─┐
+  (target_date_local, user_id)                                 │
+                                                       answer-check  ──► AI
+                                                       (DeepSeek Flash)   gateway
+                                                              │
+                                                              ▼
+                                                       feedback + SRS update
+                                                       + mistake event log
+                                                       + stats / favorites
+```
+
+## Runtime topology
+
+One Docker container (`python:3.11-slim`) running:
+
+- the Telethon long-poll loop,
+- APScheduler with three cron-style jobs,
+- the SQLite database on `/app/data` (host-mounted),
+- session files on `/app/data/sessions/`,
+- daily backups on `/app/data/backups/` (14-day rotation),
+- the dispute log on `/app/data/feedback_disputes/`.
+
+No public ports. No webhook. No external orchestrator. Restarts are safe
+(state lives in SQLite + the persisted Telethon session).
 
 ## 1. Telegram client — Telethon (bot mode)
 

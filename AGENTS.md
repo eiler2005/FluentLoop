@@ -12,10 +12,15 @@ notes.
 - **Audience:** Single user. No multi-tenancy in MVP.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 15
-  epic files, one per backlog item from PRD §28.
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 21
+  epic files. EPIC-01 through EPIC-15 mirror the PRD §28 backlog (EPIC-15 is
+  Deferred); EPIC-16 through EPIC-21 are the post-MVP learning-engine roadmap.
+  See [`docs/features/README.md`](docs/features/README.md) for the index.
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
-  + ADRs in [`docs/adr/`](docs/adr/).
+  + ADRs in [`docs/adr/`](docs/adr/) (0002–0007 all Accepted).
+- **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
+  autonomous overnight session brief and morning report. Frozen artifacts —
+  read for context, do not treat as living documentation.
 
 ## Karpathy-style workflow
 
@@ -89,19 +94,32 @@ FluentLoop/
 ├── AGENTS.md                     This file. Durable rules.
 ├── CLAUDE.md                     Thin Claude Code entrypoint, imports AGENTS.md.
 ├── SECURITY.md                   Threat model, secrets policy, privacy disclosure.
+├── CHANGELOG.md                  Versioned release notes.
+├── CONTRIBUTING.md               Dev setup, test commands, ADR-first rule.
+├── LICENSE                       MIT.
 ├── .env.example                  Environment template. Never put real values here.
 ├── .gitignore
+├── .pre-commit-config.yaml       Local hooks: secret scan + ruff.
 ├── .claude/
 │   └── settings.json             Permissions for Claude Code in this project.
+├── .github/
+│   └── workflows/ci.yml          GitHub Actions: secret scan + ruff + pytest.
 ├── docs/
 │   ├── README.md                 Doc index.
-│   ├── architecture.md           Tech architecture (stub until ADR-0002/3/4 land).
-│   ├── adr/                      Architecture decision records.
-│   ├── features/                 15 epic stubs, one per PRD §28 backlog item.
-│   └── runbooks/                 Operational procedures (placeholder).
-├── src/                          Python source. Empty until EPIC-01.
-├── ansible/                      Deploy playbooks. Empty until deployment epic.
-└── tests/                        Test suite. Empty until EPIC-01.
+│   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
+│   ├── testing.md                Standard test gate and what tests cover.
+│   ├── adr/                      Architecture decision records (0002–0007 Accepted).
+│   ├── features/                 21 epic files (EPIC-15 Deferred; rest Done).
+│   ├── runbooks/                 Operational procedures.
+│   ├── curriculum/               Generated B2/B2+ lesson catalog.
+│   └── build-log/                Autonomous-build journal (frozen history).
+├── migrations/                   Alembic schema migrations.
+├── scripts/                      Deploy, smoke, seed, and operational helpers.
+├── secrets/                      Local-only confidential data (gitignored).
+├── data/                         Runtime artifacts: SQLite, sessions, backups (gitignored).
+├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
+├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
+└── tests/                        Pytest suite (16 modules, ~36 tests).
 ```
 
 ## Verification commands
@@ -111,16 +129,14 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # must be 15
+ls docs/features/EPIC-*.md | wc -l    # 21 epic files + 1 roadmap index = 22
 
 # No secrets staged
+python scripts/secret_scan.py
 git diff --cached | grep -E '(BOT_TOKEN|API_KEY|sk-[A-Za-z0-9]{20})' && echo "LEAK!" || echo "clean"
 
-# Markdown links resolve (after EPIC-01 lands a script)
-# python tools/check_links.py
-
-# Once code exists:
-ruff check src tests
+# Style and tests
+ruff check src tests scripts
 pytest -q
 ```
 
@@ -132,5 +148,6 @@ pytest -q
   the PRD first, then the epic, then the code.
 - An epic file may be in `Status: Planned`, `In progress`, `Done`, or
   `Deferred`. Update the status when you start or finish work.
-- New ideas that don't fit the 15 epics → add a P1/P2 entry to PRD §6 first,
-  not a new epic file.
+- New ideas that don't fit the existing epics → add a P1/P2 entry to PRD §6
+  first; only carve out a new epic file once scope is concrete enough to
+  estimate.
