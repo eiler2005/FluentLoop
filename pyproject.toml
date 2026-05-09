@@ -24,7 +24,14 @@ dev = [
   "pytest>=8.2",
   "pytest-asyncio>=0.23",
   "ruff>=0.5",
+  "mypy>=1.10",
 ]
+
+[project.urls]
+Homepage = "https://github.com/eiler2005/FluentLoop"
+Repository = "https://github.com/eiler2005/FluentLoop"
+Issues = "https://github.com/eiler2005/FluentLoop/issues"
+Changelog = "https://github.com/eiler2005/FluentLoop/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -40,3 +47,15 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+exclude = [
+  "tests/",
+  "migrations/",
+  "scripts/",
+]
