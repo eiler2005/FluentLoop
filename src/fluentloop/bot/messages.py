@@ -7,12 +7,19 @@ from fluentloop.lesson_overview import infer_lesson_overview
 
 HELP = """How to use FluentLoop
 
+Learning process in 6 steps:
+1. Upload real material, or use the existing lesson library.
+2. Approve learning items before they become active practice targets.
+3. Train daily with /today or a focused /practice mode.
+4. Read layered feedback: Errors, Native, Why.
+5. Let SRS, weak items, L1 traps, and mistake patterns rotate back.
+6. Reflect with /reflect and use /mentor for the teacher loop.
+
 Daily loop:
-1. Send /today for the automatic 15-minute lesson.
-2. Answer each prompt in text.
-3. Use Skip / show answer or /skip when you want the model answer first.
-4. Read compact teacher feedback; use /feedback explain <attempt_id> for details.
-5. Weak items, due reviews, and mistake patterns rotate back into future lessons.
+- /today starts the automatic 15-minute lesson.
+- Answer in text; optionally tap confidence 1-5 first.
+- Use Skip / show answer or /skip when you want the model answer.
+- Use /feedback explain <attempt_id> for the full teacher breakdown.
 
 Lessons and topics:
 - /topics shows the knowledge areas in the active lesson base.
@@ -30,6 +37,10 @@ Adding material:
   rules, and mistake risks.
 - New learning items become active only after approval with /approve <material_id>
   or the Approve all button.
+
+Full methodology:
+- Read docs/user-guide.md in the repo for the bilingual learner guide, process
+  map, practice-mode map, and GPT Image prompt for a visual learning loop.
 
 Telegram workspace:
 - Practice Flow: current lesson and answers.

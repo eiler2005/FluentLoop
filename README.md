@@ -60,6 +60,7 @@ shipped in a single autonomous overnight build session — see
 
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
 Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002–0007 Accepted).
+Learner-facing methodology and daily workflow: [`docs/user-guide.md`](docs/user-guide.md).
 
 ## Sample session
 

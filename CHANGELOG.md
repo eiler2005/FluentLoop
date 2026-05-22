@@ -30,6 +30,8 @@ All notable changes to FluentLoop are recorded here. Format follows
   Article Lab v1, Debate, Translation Lab, and 4-3-2 Fluency drill cards.
 - EPIC-22 Sprint 6 polish: 30-day Article Lab pipeline, `/practice sprint`,
   Rolling Native Comparison in Coach Journal, and richer Why layer context.
+- Bilingual learner guide with the FluentLoop learning methodology, process
+  map, first-week onboarding, and GPT Image prompt for a visual map.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 

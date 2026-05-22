@@ -3,6 +3,7 @@
 | File | Purpose |
 |---|---|
 | [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |
+| [`user-guide.md`](user-guide.md) | Bilingual learner guide: methodology, daily process, practice modes, process map, and image prompt. |
 | [`adr/`](adr/) | Architecture decision records. Each captures one significant choice. |
 | [`adr/0001-template.md`](adr/0001-template.md) | Reusable ADR template. |
 | [`adr/0002-telegram-library-choice.md`](adr/0002-telegram-library-choice.md) | Accepted Telegram library choice. |
@@ -27,3 +28,5 @@
 - [`features/`](features/) bridges the two: each epic file maps a chunk of
   the PRD onto a concrete unit of work with its own acceptance criteria
   and verification plan.
+- [`user-guide.md`](user-guide.md) is the learner-facing "how to use the bot"
+  guide and the best place to understand the training methodology.
