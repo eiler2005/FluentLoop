@@ -18,6 +18,9 @@ All notable changes to FluentLoop are recorded here. Format follows
   Pimsleur-style sub-day SRS intervals, confidence ratings, reflection logging,
   evaluation probe scaffolding, chunk JSONL import, and named breakthrough
   practice mode entrypoints.
+- EPIC-22 Sprint 2 lesson-format core: Notebook native-diff mining, Discourse
+  scoring metadata, Critical Reading tasks, Vocabulary Lab metadata grouping,
+  Writing Workshop stages, and Mistake Drill extinction-state metadata.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 

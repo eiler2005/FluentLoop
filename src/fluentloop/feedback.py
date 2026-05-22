@@ -16,6 +16,11 @@ from fluentloop.db.models import (
     SourceMaterial,
     User,
 )
+from fluentloop.format_analysis import (
+    mine_notebook_diff,
+    mistake_extinction_state,
+    score_discourse,
+)
 from fluentloop.mistakes import ingest_mistake_event
 from fluentloop.russian_l1_filter import detect_l1_interference
 from fluentloop.srs import record_result
@@ -98,6 +103,21 @@ def build_teacher_feedback(
             if feedback.status != "correct"
             else "Good answer. Keep reusing it in realistic work contexts."
         )
+    metadata = exercise.get("metadata")
+    metadata = metadata if isinstance(metadata, dict) else {}
+    lesson_format = str(
+        metadata.get("lesson_format") or exercise.get("lesson_format") or ""
+    )
+    format_feedback = dict(feedback.format_feedback)
+    if lesson_format == "notebook":
+        diff = mine_notebook_diff(answer, natural)
+        format_feedback["notebook_diff"] = diff
+    elif lesson_format == "discourse":
+        format_feedback["discourse_score"] = score_discourse(answer)
+    elif lesson_format == "mistakes":
+        format_feedback["mistake_extinction"] = mistake_extinction_state(
+            [feedback.status]
+        )
     return feedback.model_copy(
         update={
             "corrected_answer": corrected,
@@ -110,6 +130,7 @@ def build_teacher_feedback(
             "error_layer": error_layer,
             "why_layer": why_layer,
             "l1_hits": l1_hits,
+            "format_feedback": format_feedback,
             "should_create_mistake_event": (
                 feedback.should_create_mistake_event or bool(l1_hits)
             ),
@@ -193,6 +214,24 @@ def render_detailed_teacher_feedback(feedback: dict) -> str:
         lines.append(bold("Russian L1 hits:"))
         for hit in l1_hits[:3]:
             lines.append(f"- {code(hit['matched_text'])} -> {code(hit['suggestion'])}")
+    format_feedback = feedback.get("format_feedback") or {}
+    if isinstance(format_feedback, dict) and format_feedback:
+        lines.append(bold("Format feedback:"))
+        if format_feedback.get("notebook_diff"):
+            diff = format_feedback["notebook_diff"]
+            if isinstance(diff, dict):
+                chunks = diff.get("candidate_chunks") or []
+                lines.append(labeled("Notebook mined chunks", ", ".join(chunks[:3])))
+        if format_feedback.get("discourse_score"):
+            score = format_feedback["discourse_score"]
+            if isinstance(score, dict):
+                lines.append(
+                    labeled("Discourse score", str(score.get("cohesion_score", "")))
+                )
+        if format_feedback.get("mistake_extinction"):
+            state = format_feedback["mistake_extinction"]
+            if isinstance(state, dict):
+                lines.append(labeled("Extinction state", str(state.get("state", ""))))
     if better_variants:
         lines.append(bold("Better variants:"))
         lines.extend(f"- {code(variant)}" for variant in better_variants[:3])
@@ -265,7 +304,23 @@ def queue_micro_drill_from_feedback(
     exercise: dict,
     feedback: AnswerFeedback,
 ) -> tuple[int, int] | None:
-    if not feedback.suggested_candidates:
+    suggested = list(feedback.suggested_candidates)
+    notebook_diff = feedback.format_feedback.get("notebook_diff")
+    if isinstance(notebook_diff, dict):
+        from fluentloop.ai.schemas import ExtractedItem
+
+        for chunk in notebook_diff.get("candidate_chunks") or []:
+            suggested.append(
+                ExtractedItem(
+                    type="chunk",
+                    text=str(chunk),
+                    meaning="",
+                    explanation="Mined from Notebook native rewrite diff.",
+                    tags=["notebook", "native_diff"],
+                    confidence=0.65,
+                )
+            )
+    if not suggested:
         return None
     material = SourceMaterial(
         user_id=user.id,
@@ -281,7 +336,7 @@ def queue_micro_drill_from_feedback(
     session.add(material)
     session.flush()
     count = 0
-    for item in feedback.suggested_candidates:
+    for item in suggested:
         candidate = ExtractedCandidate(
             source_material_id=material.id,
             type=item.type,

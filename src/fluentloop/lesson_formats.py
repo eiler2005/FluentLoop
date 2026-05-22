@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from fluentloop.db.models import LearningItem, MistakePattern
+from fluentloop.format_analysis import critical_reading_card, vocabulary_lab_card
 
 
 @dataclass(frozen=True)
@@ -213,7 +214,18 @@ def apply_lesson_format(
         exercise["lesson_format"] = lesson_format.mode
         exercise["format_title"] = lesson_format.title
 
-    if lesson_format.mode == "diplomatic":
+    if lesson_format.mode == "vocab":
+        card = vocabulary_lab_card(items)
+        _set_prompt(
+            exercises,
+            0,
+            "Vocabulary Lab: field / register / function.",
+            card["prompt"],
+            "Use metadata groupings to turn passive chunks into productive language.",
+        )
+        if exercises:
+            exercises[0]["metadata"]["vocabulary_lab"] = card
+    elif lesson_format.mode == "diplomatic":
         _set_prompt(
             exercises,
             0,
@@ -238,13 +250,16 @@ def apply_lesson_format(
             "Use at least one signpost such as however or therefore.",
         )
     elif lesson_format.mode == "reading":
+        card = critical_reading_card("")
         _set_prompt(
             exercises,
             0,
             "Critical Reading Club: analyze the author's argument.",
-            "Name one claim, one hedge, and one point you would challenge.",
+            card["prompt"],
             "Focus on argumentation, not comprehension only.",
         )
+        if exercises:
+            exercises[0]["metadata"]["critical_reading"] = card
     elif lesson_format.mode == "genre":
         genre = GENRE_SPECS[0]
         _set_prompt(
@@ -261,6 +276,20 @@ def apply_lesson_format(
             "Writing Workshop: outline first, draft later.",
             "Write a 3-5 bullet outline for a proposal to stakeholders.",
             "Do not write the full text yet; plan the structure.",
+        )
+        _set_prompt(
+            exercises,
+            1,
+            "Writing Workshop: draft.",
+            "Turn the outline into 120-160 words. Keep one clear ask.",
+            "Use the outline; do not add a new argument halfway through.",
+        )
+        _set_prompt(
+            exercises,
+            2,
+            "Writing Workshop: revision.",
+            "Revise for reader impact: shorter opening, clearer trade-off, softer ask.",
+            "Cut one vague sentence and add one concrete owner/date.",
         )
     elif lesson_format.mode == "mistakes" and patterns:
         first = patterns[0]
@@ -332,10 +361,14 @@ def scene_builder(payload: str) -> str:
 
 def article_lab_prompt(text: str) -> str:
     source = text.strip() or "paste an article after /article"
+    reading = critical_reading_card(source)
+    tasks = "\n".join(f"- {task}" for task in reading["tasks"])
     return (
         "Article Lab v1\n"
         "Modules: pre-read, vocab pre-teach, 1T cloze, critical question, "
         "cold recall.\n"
+        "Critical reading tasks:\n"
+        f"{tasks}\n"
         f"Source: {source[:500]}"
     )
 

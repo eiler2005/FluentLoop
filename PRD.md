@@ -1629,6 +1629,7 @@ Expected output:
   "why_layer": "",
   "l1_hits": [],
   "confidence_rating": 5,
+  "format_feedback": {},
   "better_variants": [],
   "micro_drill": "",
   "teacher_note": "",
@@ -1643,6 +1644,10 @@ one practical rule, one better variant, and Russian L1 hits when deterministic
 rules apply. Detailed layers are stored with the attempt and can be shown later
 using `/feedback explain <attempt_id>` or the Errors / Native / Why buttons
 without requiring another AI call.
+
+Named EPIC-22 lesson formats may add structured `format_feedback` to the stored
+attempt: Notebook native-diff mined chunks, Discourse Builder cohesion metadata,
+Critical Reading task metadata, and Mistake Drill extinction-state metadata.
 
 ---
 

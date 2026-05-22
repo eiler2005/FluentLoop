@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** In progress — Sprint 1 foundation landed, Sprint 2+ scaffolded
+**Status:** In progress — Sprint 1 foundation landed, Sprint 2 core landed, Sprint 3+ in execution
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -675,11 +675,11 @@ Foundation для всех остальных.
 
 ### Sprint 2 (2 недели) — "Lesson formats core"
 4 формата уроков, которые меняют ощущение продукта. **F2 идёт первым** (highest leverage против Russian L1 pragmatic gap), F7 — параллельно как daily habit.
-- **F2 Diplomatic Rewrite Drill** ← старт спринта
-- F7 Notebook (daily free write)
-- F11 Discourse Builder
-- F3 Critical Reading Club
-- F12 Mistake Drill 2.0 (causal hypothesis + extinction tracking)
+- **F2 Diplomatic Rewrite Drill** — landed as named `/practice diplomatic` format with layered/native feedback.
+- F7 Notebook (daily free write) — landed with native-diff mining into pending candidate chunks.
+- F11 Discourse Builder — landed with deterministic discourse metadata scoring.
+- F3 Critical Reading Club — landed for `/practice reading` and pasted text via Article Lab v1 critical-reading tasks.
+- F12 Mistake Drill 2.0 — landed with causal prompt and extinction-state metadata.
 
 ### Sprint 3 (3 недели) — "Curriculum"
 - Импорт пользовательского `data/curriculum/chunks_v1.jsonl` (~3000 chunks) → `scripts/import_chunks.py` + `LearningItem(kind="chunk")` + alembic migration

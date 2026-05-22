@@ -80,6 +80,7 @@ class AnswerFeedback(BaseModel):
     why_layer: str = ""
     l1_hits: list[dict[str, str]] = Field(default_factory=list)
     confidence_rating: int | None = None
+    format_feedback: dict[str, object] = Field(default_factory=dict)
     better_variants: list[str] = Field(default_factory=list)
     micro_drill: str = ""
     teacher_note: str = ""

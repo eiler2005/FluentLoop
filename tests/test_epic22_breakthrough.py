@@ -5,12 +5,19 @@ from sqlalchemy import select
 from fluentloop.ai.provider import StubProvider
 from fluentloop.bot.handlers import (
     handle_answer,
+    handle_article,
     handle_confidence_rating,
     handle_feedback_layer,
     handle_practice,
 )
 from fluentloop.curriculum_chunks import ChunkRecord, import_chunk_records
-from fluentloop.db.models import LearningItem, MistakeEvent, PracticeAttempt
+from fluentloop.db.models import (
+    ExtractedCandidate,
+    LearningItem,
+    MistakeEvent,
+    MistakePattern,
+    PracticeAttempt,
+)
 from fluentloop.evaluation import build_monthly_probe, writing_metrics
 from fluentloop.learning import create_learning_item
 from fluentloop.lesson_formats import GENRE_SPECS, scenario_cards
@@ -122,3 +129,82 @@ def test_russian_l1_hit_list_is_deterministic() -> None:
         "l1_depend_from",
         "l1_discuss_about",
     ]
+
+
+def test_sprint2_lesson_formats_mine_and_score_core(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(
+        db_session,
+        user,
+        type_="chunk",
+        text="it might be worth considering",
+        metadata={
+            "field": "NEGOTIATION",
+            "register": "professional",
+            "function": "hedging",
+        },
+    )
+
+    notebook = handle_practice(db_session, user, "notebook")
+    assert "Notebook" in notebook.text
+    handle_answer(db_session, user, StubProvider(), "Bad plan.")
+    notebook_attempt = db_session.scalars(select(PracticeAttempt)).first()
+    assert notebook_attempt is not None
+    notebook_diff = notebook_attempt.feedback["format_feedback"]["notebook_diff"]
+    assert notebook_diff["candidate_chunks"]
+    assert db_session.scalar(select(ExtractedCandidate)) is not None
+
+    discourse = handle_practice(db_session, user, "discourse")
+    assert "Discourse Builder" in discourse.text
+    handle_answer(
+        db_session,
+        user,
+        StubProvider(),
+        "The plan is risky. However, we can reduce scope. "
+        "Therefore we should align today.",
+    )
+    attempts = list(
+        db_session.scalars(select(PracticeAttempt).order_by(PracticeAttempt.id))
+    )
+    discourse_score = attempts[-1].feedback["format_feedback"]["discourse_score"]
+    assert discourse_score["has_counterpoint"] is True
+    assert discourse_score["has_recommendation"] is True
+
+    article = handle_article(
+        "The author argues that remote work might reduce focus, "
+        "although the evidence is thin."
+    )
+    assert "Critical reading tasks" in article.text
+    assert "Name the main claim" in article.text
+
+    writing = handle_practice(db_session, user, "writing_workshop")
+    assert "Writing Workshop" in writing.text
+    session_exercise = db_session.scalars(select(PracticeAttempt)).all()
+    assert session_exercise is not None
+
+
+def test_sprint2_mistake_extinction_metadata(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    db_session.add(
+        MistakePattern(
+            user_id=user.id,
+            description="Recurring article issue",
+            mistake_type="articles",
+            confidence="high",
+            status="active",
+            wrong_examples=["We start before sprint."],
+            correct_examples=["We start before the sprint."],
+            event_count=3,
+        )
+    )
+    db_session.flush()
+
+    reply = handle_practice(db_session, user, "mistakes")
+    assert "Mistake Drill" in reply.text
+    handle_answer(db_session, user, StubProvider(), "We start before the sprint.")
+    attempt = db_session.scalar(select(PracticeAttempt))
+
+    assert attempt is not None
+    extinction = attempt.feedback["format_feedback"]["mistake_extinction"]
+    assert extinction["state"] in {"active", "building"}
+    assert extinction["target_streak"] == 5
