@@ -117,6 +117,82 @@ def test_exercise_registry_and_session_resume(db_session, settings) -> None:
     assert second[0] == 1
 
 
+def test_sub_day_srs_refire_appends_same_session_recall(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="align on",
+        meaning="согласовать",
+    )
+    exercise = render_for_item(item, "cloze").as_dict()
+    practice = PracticeSession(
+        user_id=user.id,
+        target_date_local=datetime.now(UTC).date(),
+        exercises=[exercise],
+        status="in_progress",
+    )
+    db_session.add(practice)
+    db_session.flush()
+    state = record_result(db_session, item.id, "Good", now=datetime.now(UTC))
+
+    record_attempt(
+        db_session,
+        practice,
+        0,
+        exercise,
+        "align on",
+        {"status": "correct"},
+    )
+
+    assert state.last_interval_days < 1 / 24
+    assert len(practice.exercises) == 2
+    refire = practice.exercises[1]
+    assert refire["stage"] == "gir_refire"
+    assert refire["metadata"]["gir_refire"] is True
+    assert refire["metadata"]["source_exercise_index"] == 0
+    assert refire["metadata"]["gir_interval_days"] == state.last_interval_days
+    assert refire["target_learning_item_ids"] == [item.id]
+    assert next_exercise(db_session, practice)[0] == 1
+
+
+def test_sub_day_srs_refire_cap_prevents_same_item_loop(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(db_session, user, type_="expression", text="align on")
+    exercise = render_for_item(item, "cloze").as_dict()
+    existing_refires = []
+    for count in range(1, 4):
+        refire = render_for_item(item, "active_recall").as_dict()
+        refire["stage"] = "gir_refire"
+        refire["metadata"] = {
+            "gir_refire": True,
+            "gir_refire_count": count,
+            "source_exercise_index": 0,
+        }
+        existing_refires.append(refire)
+    practice = PracticeSession(
+        user_id=user.id,
+        target_date_local=datetime.now(UTC).date(),
+        exercises=[exercise, *existing_refires],
+        status="in_progress",
+    )
+    db_session.add(practice)
+    db_session.flush()
+    record_result(db_session, item.id, "Good", now=datetime.now(UTC))
+
+    record_attempt(
+        db_session,
+        practice,
+        0,
+        exercise,
+        "align on",
+        {"status": "correct"},
+    )
+
+    assert len(practice.exercises) == 4
+
+
 def test_compose_session_avoids_item_duplicates_and_uses_seed_fillers(
     db_session, settings
 ) -> None:
@@ -372,8 +448,8 @@ def test_answer_targets_channel_when_channel_mode_enabled(db_session, settings) 
     )
     assert reply.target_chat_id == "-100123"
     assert reply.text.startswith("#feedback\n<b>Feedback - Attempt #")
-    assert "#next_prompt\n<b>Step 2/16" in reply.text
-    assert "<b>Step 2/16" in reply.text
+    assert "#next_prompt\n<b>Step 2/17" in reply.text
+    assert "<b>Step 2/17" in reply.text
     assert reply.parse_mode == "html"
     assert reply.buttons is not None
     button_data = {button.data for row in reply.buttons for button in row}
@@ -404,12 +480,12 @@ def test_answer_keeps_forum_practice_flow_primary_with_topic_copies(
     assert reply.target_chat_id == "-100999"
     assert reply.message_thread_id == 29
     assert reply.text.startswith("#feedback\n<b>Feedback - Attempt #")
-    assert "#next_prompt\n<b>Step 2/16" in reply.text
+    assert "#next_prompt\n<b>Step 2/17" in reply.text
     assert len(reply.extra_replies) == 2
     assert reply.extra_replies[0].message_thread_id == 30
     assert reply.extra_replies[0].text.startswith("#feedback\n<b>Feedback - Attempt #")
     assert reply.extra_replies[1].message_thread_id == 31
-    assert reply.extra_replies[1].text.startswith("#next_prompt\n<b>Step 2/16")
+    assert reply.extra_replies[1].text.startswith("#next_prompt\n<b>Step 2/17")
 
 
 def test_today_targets_channel_with_logical_topic(db_session, settings) -> None:

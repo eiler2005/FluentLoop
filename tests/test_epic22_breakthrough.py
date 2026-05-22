@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import pytest
 from sqlalchemy import select
 
 from fluentloop.ai.provider import StubProvider
+from fluentloop.ai.schemas import AnswerFeedback
 from fluentloop.bot.handlers import (
     handle_answer,
     handle_article,
@@ -12,7 +14,11 @@ from fluentloop.bot.handlers import (
     handle_practice,
     handle_scene,
 )
-from fluentloop.curriculum_chunks import ChunkRecord, import_chunk_records
+from fluentloop.curriculum_chunks import (
+    ChunkRecord,
+    import_chunk_records,
+    import_chunks_jsonl,
+)
 from fluentloop.db.models import (
     ExtractedCandidate,
     LearningItem,
@@ -43,6 +49,13 @@ from fluentloop.practice import start_or_resume_session
 from fluentloop.reflections import record_reflection
 from fluentloop.russian_l1_filter import detect_l1_interference
 from fluentloop.users import ensure_user
+
+
+class NativeRewriteErrorProvider(StubProvider):
+    def light_call(self, task: str, payload: dict) -> AnswerFeedback:
+        if task == "epic_22_native_rewrite":
+            raise RuntimeError("native rewrite unavailable")
+        return super().light_call(task, payload)  # type: ignore[return-value]
 
 
 def test_layered_feedback_l1_hit_and_confidence_callbacks(db_session, settings) -> None:
@@ -148,6 +161,61 @@ def test_russian_l1_hit_list_is_deterministic() -> None:
         "l1_depend_from",
         "l1_discuss_about",
     ]
+
+
+def test_russian_l1_hit_list_avoids_correct_phrases() -> None:
+    hits = detect_l1_interference("It depends on the API, so we should discuss this.")
+
+    assert hits == []
+
+
+def test_native_rewrite_error_falls_back_to_answer_feedback(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    start_or_resume_session(db_session, user)
+
+    reply = handle_answer(db_session, user, NativeRewriteErrorProvider(), "align on")
+    attempt = db_session.scalar(select(PracticeAttempt))
+
+    assert "Feedback" in reply.text
+    assert attempt is not None
+    assert attempt.feedback["status"] in {"correct", "partial", "incorrect"}
+    assert attempt.feedback["native_rewrite"]
+
+
+def test_malformed_chunk_jsonl_reports_line_and_imports_nothing(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    path = tmp_path / "chunks.jsonl"
+    path.write_text(
+        "\n".join(
+            [
+                (
+                    '{"id":"chunk_0001","text":"it might be worth considering",'
+                    '"type":"collocation","field":"UNCERTAINTY",'
+                    '"register":"professional","function":"hedging",'
+                    '"cefr_target":"C1"}'
+                ),
+                (
+                    '{"id":"chunk_0002","text":"bad chunk","type":"unknown",'
+                    '"field":"UNCERTAINTY","register":"professional",'
+                    '"function":"hedging","cefr_target":"C1"}'
+                ),
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="line 2"):
+        import_chunks_jsonl(db_session, user, path)
+
+    chunk_count = db_session.scalar(
+        select(LearningItem).where(LearningItem.type == "chunk")
+    )
+    assert chunk_count is None
 
 
 def test_sprint2_lesson_formats_mine_and_score_core(db_session, settings) -> None:

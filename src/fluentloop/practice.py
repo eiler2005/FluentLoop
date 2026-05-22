@@ -15,6 +15,7 @@ from fluentloop.db.models import (
     PracticeAttempt,
     PracticeSession,
     PracticeSessionCached,
+    ReviewState,
     User,
     utc_now,
 )
@@ -24,6 +25,9 @@ from fluentloop.hint_ladder import render_hint_ladder
 from fluentloop.learning import active_items
 from fluentloop.lesson_plans import available_lesson_plan
 from fluentloop.srs import get_due_items
+
+GIR_REFIRE_THRESHOLD_DAYS = 1 / 24
+GIR_REFIRE_MAX_PER_ITEM = 3
 
 
 def _seed_exercises() -> list[Exercise]:
@@ -388,7 +392,133 @@ def record_attempt(
     )
     session.add(attempt)
     session.flush()
+    _append_gir_refire_exercises(
+        session,
+        practice_session,
+        source_exercise_index=exercise_index,
+        exercise=exercise,
+        feedback=feedback,
+    )
     return attempt
+
+
+def _append_gir_refire_exercises(
+    session: Session,
+    practice_session: PracticeSession,
+    *,
+    source_exercise_index: int,
+    exercise: dict,
+    feedback: dict,
+) -> None:
+    if feedback.get("status") == "skipped":
+        return
+    target_ids = _unique_ints(exercise.get("target_learning_item_ids", []))
+    if not target_ids:
+        return
+    exercises = list(practice_session.exercises)
+    appended = False
+    for item_id in target_ids:
+        state = session.scalar(
+            select(ReviewState).where(ReviewState.learning_item_id == item_id)
+        )
+        if state is None or not (
+            0 < state.last_interval_days < GIR_REFIRE_THRESHOLD_DAYS
+        ):
+            continue
+        current_count = _gir_refire_count(exercises, item_id)
+        if current_count >= GIR_REFIRE_MAX_PER_ITEM:
+            continue
+        item = session.get(LearningItem, item_id)
+        if item is None or item.status != "active":
+            continue
+        refire = _gir_refire_exercise(
+            item,
+            source=exercise,
+            source_exercise_index=source_exercise_index,
+            interval_days=state.last_interval_days,
+            refire_count=current_count + 1,
+        )
+        exercises.append(refire)
+        appended = True
+    if appended:
+        practice_session.exercises = exercises
+        session.add(practice_session)
+        session.flush()
+
+
+def _gir_refire_exercise(
+    item: LearningItem,
+    *,
+    source: dict,
+    source_exercise_index: int,
+    interval_days: float,
+    refire_count: int,
+) -> dict:
+    rendered = render_for_item(item, "active_recall").as_dict()
+    metadata = dict(rendered.get("metadata") or {})
+    source_metadata = (
+        source.get("metadata") if isinstance(source.get("metadata"), dict) else {}
+    )
+    metadata.update(
+        {
+            "stage": "gir_refire",
+            "mode": source_metadata.get("mode") or source.get("mode") or "review",
+            "topic": source_metadata.get("topic") or source.get("topic", ""),
+            "lesson_goal": source_metadata.get("lesson_goal")
+            or source.get("lesson_goal", ""),
+            "target_skill": "sub_day_recall",
+            "target_item_ids": [item.id],
+            "gir_refire": True,
+            "source_exercise_index": source_exercise_index,
+            "gir_interval_days": interval_days,
+            "gir_refire_count": refire_count,
+        }
+    )
+    rendered["prompt"] = (
+        f"Sub-day recall ({_format_gir_interval(interval_days)}):\n"
+        f"{rendered['prompt']}"
+    )
+    rendered["hint"] = "Recall it without scrolling back; this is the Pimsleur loop."
+    rendered["metadata"] = metadata
+    rendered.update(metadata)
+    rendered["target_learning_item_ids"] = [item.id]
+    return rendered
+
+
+def _gir_refire_count(exercises: list[dict], item_id: int) -> int:
+    count = 0
+    for exercise in exercises:
+        metadata = exercise.get("metadata")
+        metadata = metadata if isinstance(metadata, dict) else {}
+        if not metadata.get("gir_refire"):
+            continue
+        if item_id in _unique_ints(exercise.get("target_learning_item_ids", [])):
+            count += 1
+    return count
+
+
+def _unique_ints(values: object) -> list[int]:
+    result: list[int] = []
+    seen: set[int] = set()
+    if not isinstance(values, list):
+        return result
+    for value in values:
+        if not isinstance(value, int) or value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def _format_gir_interval(interval_days: float) -> str:
+    seconds = round(interval_days * 86_400)
+    if seconds < 60:
+        return f"{seconds}s"
+    minutes = round(seconds / 60)
+    if minutes < 60:
+        return f"{minutes}m"
+    hours = round(minutes / 60)
+    return f"{hours}h"
 
 
 def record_confidence_rating(
