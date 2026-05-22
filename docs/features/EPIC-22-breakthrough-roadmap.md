@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** Done — Sprint 1-6 implemented, tested, committed, deployed, and smoke-tested
+**Status:** In progress — Phase 2 validation: in-session GIR, negative-path tests, schema verification, and live command smoke
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -753,9 +753,22 @@ GSD используется только как reference: `discuss → plan �
 2. Документация — PRD + этот epic + index/runbook/help text, если меняется UX.
 3. Тесты — focused tests, затем `pytest -q`, `ruff`, `secret_scan`, `git diff --check`.
 4. Коммит и деплой — только после явного разрешения owner'а; schema changes требуют SQLite backup и Alembic migration.
-5. Post-deploy smoke — upload/approve, `/today`, answer/skip, layered feedback, logs; любой fail начинает новый fix slice.
+5. Post-deploy smoke — upload/approve, `/today`, answer/skip, layered feedback, EPIC-22 command smoke, logs; любой fail начинает новый fix slice.
 
 Sprint 1 implementation v1 включает: layered feedback schema/buttons, deterministic Russian L1 hits, Pimsleur-style sub-day intervals, confidence rating callbacks, reflection logging, monthly evaluation probe, chunk import schema, and scaffolded EPIC-22 practice commands.
+
+## Phase 2 validation gate
+
+EPIC-22 возвращается в `Done` только после закрытия review findings:
+
+- in-session GIR re-fire inside a single active practice session;
+- negative-path tests for L1 false positives, native-rewrite fallback,
+  malformed chunk JSONL, migration roundtrip, and GIR re-fire cap;
+- schema verification for `learning_items.metadata_json`, `lesson_plans.format`,
+  and Alembic revision;
+- deploy runbook smoke for `/scene`, `/brief`, `/mentor`, `/article`,
+  `/debate`, `/translate_lab`, `/fluency432`, `/practice sprint`, confidence
+  rating, feedback layers, and `/reflect`.
 
 ---
 

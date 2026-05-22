@@ -22,6 +22,25 @@ uv run alembic upgrade head
 git diff --check
 ```
 
+For EPIC-22 schema changes, verify the live/copy schema before deploy:
+
+```bash
+uv run alembic current
+uv run python - <<'PY'
+from sqlalchemy import create_engine, inspect
+from fluentloop.config import get_settings
+
+settings = get_settings()
+inspector = inspect(create_engine(settings.db_url))
+learning_columns = [c["name"] for c in inspector.get_columns("learning_items")]
+lesson_columns = [c["name"] for c in inspector.get_columns("lesson_plans")]
+lesson_indexes = [idx["name"] for idx in inspector.get_indexes("lesson_plans")]
+print("learning_items.metadata_json:", "metadata_json" in learning_columns)
+print("lesson_plans.format:", "format" in lesson_columns)
+print("ix_lesson_plans_format:", "ix_lesson_plans_format" in lesson_indexes)
+PY
+```
+
 When Help text or commands changed, verify the Telegram maintenance path before
 deploying:
 
@@ -74,6 +93,13 @@ uv run python scripts/smoke_telegram.py \
 9. Use /skip once and confirm the correct answer/explanation is shown.
 10. Run `/help` and `/howto`; confirm the Help topic has one fresh pinned guide.
 11. Check logs for provider, callback, and database errors.
-12. For EPIC-22 changes, confirm layered feedback buttons, confidence rating,
-    `/reflect`, and one named practice mode such as `/practice diplomatic`.
+12. For EPIC-22 changes, confirm layered feedback buttons and confidence
+    rating during a `/today` or `/practice diplomatic` answer.
+13. Run `/reflect <short note>` and `/mentor`; confirm reflection/journal
+    replies do not error.
+14. Smoke operational commands: `/scene 2`, `/brief roadmap review`,
+    `/article <short text>`, `/debate remote work`, `/translate_lab planning`,
+    and `/fluency432 incident update`.
+15. Smoke `/practice sprint` and one lesson-format mode such as
+    `/practice notebook` or `/practice genre`.
 ```
