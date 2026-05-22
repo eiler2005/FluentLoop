@@ -28,6 +28,91 @@ shipped in a single autonomous overnight build session; EPIC-22..24 now add the
 breakthrough pedagogy, shared lesson library, and outcome-measurement layer.
 See [`docs/build-log/`](docs/build-log/) for the frozen build record.
 
+![FluentLoop Quick Start](docs/assets/fluentloop-quick-start.png)
+
+## Start here if you want to learn
+
+If you are here as a learner, not as a developer, read these first:
+
+| What you need | Where to look |
+|---|---|
+| Understand what FluentLoop does | [`docs/user-guide.md`](docs/user-guide.md) |
+| Start this week without thinking too much | [`docs/learning-plans.md`](docs/learning-plans.md) |
+| Prepare your own lesson notes for `/upload` | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) |
+| See the current shared lesson catalog | [`docs/curriculum/b2_b2plus_lesson_catalog.md`](docs/curriculum/b2_b2plus_lesson_catalog.md) |
+
+The simplest path inside Telegram:
+
+```text
+/library
+/subscribe <template_id>
+/baseline <your 120-180 word answer>
+/today
+/outcomes full
+```
+
+If you already have material from a teacher, work, Slack, email, an article, or
+meeting notes, start with:
+
+```text
+/upload
+/approve <material_id>
+/today
+```
+
+## Learning methodology in plain English
+
+FluentLoop is built around a loop, not around random exercises:
+
+```text
+approved input -> daily recall -> layered feedback -> SRS ->
+mistakes/L1 traps -> reflection -> outcomes -> next focus
+```
+
+What that means in practice:
+
+- **Approved input.** You upload material or subscribe to a seed lesson. New
+  learning targets become active only after approval, so the bot does not train
+  noise.
+- **Daily recall.** `/today` asks you to produce English from memory. This is
+  stronger than rereading phrase lists.
+- **Layered feedback.** Feedback is split into `Errors`, `Native`, and `Why`:
+  fix mistakes, sound more natural, and understand the pattern.
+- **Sub-day SRS.** Weak items can come back quickly, even inside the same day,
+  until you can use them actively.
+- **Mistake and L1 loop.** Repeated errors and Russian-transfer traps become
+  explicit practice targets.
+- **Reflection.** `/reflect` and `/mentor` turn hard moments into a private
+  Coach Journal.
+- **Outcome measurement.** `/baseline` records a monthly starting point;
+  `/outcomes` shows learning evidence: retention, chunk use, L1 density,
+  writing metrics, mistake extinction, and reading probes.
+
+## Current lessons and practice surfaces
+
+FluentLoop has three different sources of practice. They are intentionally
+separate:
+
+1. **Your own materials** via `/upload`: teacher notes, phrase lists, Slack or
+   email drafts, articles, and meeting notes. See
+   [`docs/material-upload-guide.md`](docs/material-upload-guide.md).
+2. **20 shared B2/B2+ seed lessons** via `/library` and `/subscribe`. The
+   current catalog is documented in
+   [`docs/curriculum/b2_b2plus_lesson_catalog.md`](docs/curriculum/b2_b2plus_lesson_catalog.md):
+   stakeholder pushback, incidents, architecture trade-offs, reporting verbs,
+   risks, sprint planning, requirements, tech debt, data reports, customer
+   feedback, dependencies, reliability, security/privacy, feedback diplomacy,
+   roadmap updates, postmortems, async updates, deadline negotiation, executive
+   summaries, and disagreement/alignment.
+3. **40 business/IT scenario cards** via `/scene <topic or number>` for quick
+   roleplay and pre-meeting rehearsal. Examples: design review, code review
+   feedback, incident postmortem, scope negotiation, customer escalation,
+   performance review, deadline refusal, and admitting "I do not know" without
+   losing face.
+
+After you subscribe or approve material, your personal lesson base is visible
+through `/topics`, `/lessons`, `/lesson <id>`, and is used by `/today`.
+
 ## Architecture at a glance
 
 ```
