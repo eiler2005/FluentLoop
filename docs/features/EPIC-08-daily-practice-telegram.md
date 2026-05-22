@@ -52,7 +52,9 @@ This epic also owns the daily SQLite backup, since both run on APScheduler.
 
 - Voice input / output — PRD §6 P2.
 - Push notifications outside Telegram — Telegram is the channel.
-- Real-time multi-user contention — single user.
+- Real-time cross-user contention and shared-progress sessions — per-user rows
+  are isolated; concurrent multi-user load testing belongs to admission-policy
+  work.
 - Off-VPS backup (B2 / restic) — P1.
 
 ## Acceptance criteria

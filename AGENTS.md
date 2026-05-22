@@ -10,18 +10,19 @@ notes.
   business and IT focus). Started as a personal tool; now also serves
   an owner-curated shared lesson library for additional admitted users.
 - **Interface:** Telegram, text-only. No voice in MVP.
-- **Audience:** Multiple admitted Telegram users may exist. Lesson plans
-  are owner-curated templates; each subscriber gets cloned per-user
-  copies with isolated progress (ADR-0008, EPIC-23). Operationally still
-  single-tenant: one bot, one container, one set of secrets.
+- **Audience:** The bot is operationally owner/admitted-user controlled.
+  EPIC-23 adds owner-curated lesson templates; each subscriber gets cloned
+  per-user copies with isolated progress (ADR-0008). Admission policy beyond
+  the current environment gate is still a separate ADR-0009 concern.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 21
-  epic files. EPIC-01 through EPIC-15 mirror the PRD §28 backlog (EPIC-15 is
-  Deferred); EPIC-16 through EPIC-21 are the post-MVP learning-engine roadmap.
-  See [`docs/features/README.md`](docs/features/README.md) for the index.
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 23
+  numbered epics plus the EPIC-16..21 roadmap overview. EPIC-01 through
+  EPIC-15 mirror the PRD §28 backlog (EPIC-15 is Deferred); EPIC-16 through
+  EPIC-23 cover the post-MVP learning engine, breakthrough roadmap, and shared
+  lesson library. See [`docs/features/README.md`](docs/features/README.md).
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
-  + ADRs in [`docs/adr/`](docs/adr/) (0002–0007 all Accepted).
+  + ADRs in [`docs/adr/`](docs/adr/) (0002-0008 all Accepted).
 - **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
   autonomous overnight session brief and morning report. Frozen artifacts —
   read for context, do not treat as living documentation.
@@ -36,7 +37,7 @@ notes.
 - **Match local style.** Existing naming, indentation, doc tone wins.
 - **Preserve user work.** Never revert unrelated local edits.
 - **Verifiable goals.** Every change ends with a check that proves it works
-  (test, manual flow, syntax check, `verify.sh`).
+  (test, manual flow, syntax check, smoke script).
 - **Update docs before recommending a commit.** PRD, epic file, ADR, README —
   whichever applies.
 
@@ -84,12 +85,10 @@ destructive action is high.
   similar mistake events within 14 days. User confirmation promotes them to
   `confidence=high`. See `docs/features/EPIC-11-mistake-events-and-patterns.md`.
 - **Single tenancy, shared content.** One bot, one container, one set of
-  secrets. Multiple admitted Telegram users may exist; each has fully
-  isolated progress (SRS, mistakes, sessions). Lesson plans flagged as
-  templates can be discovered via `/library` and cloned per-user on
-  subscribe (ADR-0008, EPIC-23). `TELEGRAM_ALLOWED_USER_ID` is no longer
-  the sole admission gate — admission policy is a separate concern
-  (ADR-0009, to be written).
+  secrets. Lesson plans flagged as templates can be discovered via `/library`
+  and cloned per-user on subscribe (ADR-0008, EPIC-23). The current deployment
+  still uses the existing environment-based admission gate; broader admission
+  policy is a separate concern (ADR-0009, to be written).
 - **Architectural decisions become ADRs before implementation.** If a task
   forces a decision that will affect future work, write the ADR first.
 
@@ -116,8 +115,10 @@ FluentLoop/
 │   ├── README.md                 Doc index.
 │   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
 │   ├── testing.md                Standard test gate and what tests cover.
-│   ├── adr/                      Architecture decision records (0002–0007 Accepted).
-│   ├── features/                 21 epic files (EPIC-15 Deferred; rest Done).
+│   ├── adr/                      Architecture decision records (0002-0008 Accepted).
+│   ├── features/                 23 numbered epics + EPIC-16..21 overview.
+│   ├── user-guide.md             Learner guide and learning-loop map.
+│   ├── material-upload-guide.md  Upload formats and LLM prep prompt.
 │   ├── runbooks/                 Operational procedures.
 │   ├── curriculum/               Generated B2/B2+ lesson catalog.
 │   └── build-log/                Autonomous-build journal (frozen history).
@@ -127,7 +128,7 @@ FluentLoop/
 ├── data/                         Runtime artifacts: SQLite, sessions, backups (gitignored).
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (16 modules, ~36 tests).
+└── tests/                        Pytest suite (19 modules, 117+ tests).
 ```
 
 ## Verification commands
@@ -137,7 +138,7 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # 21 epic files + 1 roadmap index = 22
+ls docs/features/EPIC-*.md | wc -l    # 23 numbered epics + EPIC-16..21 overview
 
 # No secrets staged
 python scripts/secret_scan.py

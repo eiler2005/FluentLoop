@@ -32,6 +32,11 @@ All notable changes to FluentLoop are recorded here. Format follows
   Rolling Native Comparison in Coach Journal, and richer Why layer context.
 - Bilingual learner guide with the FluentLoop learning methodology, process
   map, first-week onboarding, and GPT Image prompt for a visual map.
+- EPIC-23 shared lesson library: `/library`, `/subscribe`, owner-only
+  `/publish`, seed catalog template publishing, and per-user subscription
+  clones with isolated progress.
+- Learner-facing material upload guide with upload-ready templates, good/bad
+  examples, and an external LLM prompt for preparing raw notes.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 
@@ -39,10 +44,14 @@ All notable changes to FluentLoop are recorded here. Format follows
 - EPIC-22 Phase 2 validation is closed: in-session GIR re-fire, negative-path
   tests, migration roundtrip verification, deploy runbook coverage, VPS schema
   verification, and live smoke are now part of the Done evidence.
-- `AGENTS.md` updated to reflect 21 epic files (15 PRD-backlog + 6
-  learning-engine roadmap) and the current docs tree.
+- Telegram `/help` and workspace help now distinguish the user's personal
+  lesson base from the shared B2/B2+ seed library.
+- Documentation index, testing guide, runbooks, source map, and agent rules now
+  reflect EPIC-23, ADR-0008, 19 test modules, and the current shared-library
+  deployment model.
+- `AGENTS.md` updated to reflect the current epic set and docs tree.
 - `docs/architecture.md` upgraded from v0.1 stub framing to v0.2 with all
-  ADRs (0002–0007) Accepted referenced.
+  ADRs (0002-0008) Accepted referenced.
 
 ## [0.1.0] — 2026-05-07
 

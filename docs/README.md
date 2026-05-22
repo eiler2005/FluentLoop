@@ -4,13 +4,15 @@
 |---|---|
 | [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |
 | [`user-guide.md`](user-guide.md) | Bilingual learner guide: methodology, daily process, practice modes, process map, and image prompt. |
+| [`material-upload-guide.md`](material-upload-guide.md) | User-facing cookbook for preparing lesson notes, feedback, articles, transcripts, and LLM-assisted upload material. |
 | [`adr/`](adr/) | Architecture decision records. Each captures one significant choice. |
 | [`adr/0001-template.md`](adr/0001-template.md) | Reusable ADR template. |
 | [`adr/0002-telegram-library-choice.md`](adr/0002-telegram-library-choice.md) | Accepted Telegram library choice. |
 | [`adr/0003-ai-model-tiering-and-cost.md`](adr/0003-ai-model-tiering-and-cost.md) | Accepted two-tier model strategy and cost envelope. |
 | [`adr/0004-exercise-pre-generation-strategy.md`](adr/0004-exercise-pre-generation-strategy.md) | Accepted morning batch pre-generation strategy. |
 | [`adr/0007-deepseek-llm-gateway.md`](adr/0007-deepseek-llm-gateway.md) | DeepSeek gateway and task-aware model routing. |
-| [`features/`](features/) | 21 epic files: original MVP backlog plus learning-engine roadmap. |
+| [`adr/0008-shared-lesson-library.md`](adr/0008-shared-lesson-library.md) | Accepted shared lesson library clone model. |
+| [`features/`](features/) | Epic files: original MVP backlog plus learning-engine roadmap and post-MVP extensions. |
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 | [`runbooks/deploy.md`](runbooks/deploy.md) | Deploy checklist and Telegram smoke message format. |

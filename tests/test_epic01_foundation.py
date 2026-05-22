@@ -22,9 +22,12 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     reply = handle_start(db_session, settings, 123456789)
     assert "FluentLoop is ready" in reply.text
     assert "/start" in command_catalog()
+    assert "/library" in command_catalog()
+    assert "/subscribe" in command_catalog()
     assert "/howto" in command_catalog()
     assert "/help" in handle_help().text
     assert "/howto" in handle_help().text
+    assert "Seed library topics" in handle_help().text
     assert "#materials_upload" in handle_help().text
     assert exercise_type_count() == 14
     help_reply = handle_channel_help("-100123")
@@ -39,6 +42,9 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
         "materials:start",
         "practice:modes",
     } <= help_actions
+    assert "library:list" in help_actions
+    commands = {entry["command"] for entry in bot_commands_payload()}
+    assert {"library", "subscribe"} <= commands
     channel = handle_channel_hub("-100123")
     assert channel.target_chat_id == "-100123"
     assert "#practice_flow" in channel.text
@@ -48,6 +54,7 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     }
     materials = handle_materials_channel_hub("-100123")
     assert "#materials_upload" in materials.text
+    assert "Best paste format" in materials.text
     threaded = handle_channel_help("-100999", message_thread_id=42)
     assert threaded.message_thread_id == 42
 

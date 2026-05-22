@@ -8,7 +8,7 @@ from fluentloop.lesson_overview import infer_lesson_overview
 HELP = """How to use FluentLoop
 
 Learning process in 6 steps:
-1. Upload real material, or use the existing lesson library.
+1. Upload real material, or subscribe to a shared seed lesson.
 2. Approve learning items before they become active practice targets.
 3. Train daily with /today or a focused /practice mode.
 4. Read layered feedback: Errors, Native, Why.
@@ -22,6 +22,8 @@ Daily loop:
 - Use /feedback explain <attempt_id> for the full teacher breakdown.
 
 Lessons and topics:
+- /library [query] shows shared B2/B2+ seed lessons you can copy.
+- /subscribe <template_id> copies a shared lesson into your own lesson base.
 - /topics shows the knowledge areas in the active lesson base.
 - /lessons [query] lists lesson pools by title, topic, focus, or tags.
 - /lesson <id> shows one lesson card.
@@ -29,10 +31,16 @@ Lessons and topics:
 - /lesson topic <query> starts the best matching active lesson.
 - /practice supports vocab, grammar, mistakes, writing, review, mixed,
   diplomatic, notebook, discourse, reading, genre, writing_workshop, and sprint.
+- Seed library topics include pushback, incidents, trade-offs, reporting verbs,
+  risks, sprint scope, requirements, tech debt, reports, prioritisation,
+  dependencies, reliability, security, feedback, roadmap updates, postmortems,
+  async updates, deadlines, exec summaries, and alignment.
 
 Adding material:
 - In #materials_upload / Materials Upload, send /upload, choose the material type,
   then paste text or attach a UTF-8 .md/.txt lesson file.
+- Best format: Context, Vocabulary/chunks, Grammar/patterns,
+  Mistakes/teacher feedback, and My examples.
 - FluentLoop extracts a lesson title, theme, knowledge areas, expressions, grammar
   rules, and mistake risks.
 - New learning items become active only after approval with /approve <material_id>
@@ -41,6 +49,8 @@ Adding material:
 Full methodology:
 - Read docs/user-guide.md in the repo for the bilingual learner guide, process
   map, practice-mode map, and GPT Image prompt for a visual learning loop.
+- Read docs/material-upload-guide.md for upload-ready examples and an LLM prompt
+  that turns raw notes into FluentLoop lesson material.
 
 Telegram workspace:
 - Practice Flow: current lesson and answers.
@@ -55,6 +65,8 @@ Commands:
 /today - start today's practice
 /review - review due items
 /practice <mode> - start a focused or EPIC-22 breakthrough mode
+/library [query] - browse shared B2/B2+ seed lessons
+/subscribe <template_id> - copy a shared lesson into your lesson base
 /topics - browse lesson topics and knowledge areas
 /lessons [query] - list active lesson plans
 /lesson <id>|random|topic <query> - inspect or start lessons

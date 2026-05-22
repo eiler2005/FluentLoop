@@ -40,7 +40,8 @@ not yet driving exercise generation.
 
 ## Out of scope
 
-- Cross-user pattern detection — single user.
+- Cross-user pattern detection — mistake patterns stay per user; shared
+  aggregate insights would need a separate privacy review.
 - Auto-archiving stale patterns (no events in 60 days) — P1
   enhancement.
 - Pattern → grammar concept inference (suggesting that a mistake

@@ -36,11 +36,14 @@ from fluentloop.bot.handlers import (
     handle_lesson,
     handle_lesson_callback,
     handle_lessons,
+    handle_library,
+    handle_library_callback,
     handle_materials_channel_hub,
     handle_mentor,
     handle_mistake_action,
     handle_mistakes,
     handle_practice,
+    handle_publish,
     handle_reflect,
     handle_rules,
     handle_scene,
@@ -50,6 +53,7 @@ from fluentloop.bot.handlers import (
     handle_skip_current,
     handle_start,
     handle_stats,
+    handle_subscribe,
     handle_today,
     handle_topics,
     handle_translate_lab,
@@ -343,6 +347,34 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
             elif command == "/topics":
                 reply = handle_topics(session, user)
+            elif command == "/library":
+                query = event.raw_text.removeprefix("/library").strip()
+                reply = handle_library(session, user, query)
+            elif command == "/subscribe":
+                if len(parts) < 2:
+                    reply = BotReply("Use /subscribe <template_id>.")
+                else:
+                    try:
+                        template_id = int(parts[1])
+                    except ValueError:
+                        reply = BotReply("Use /subscribe <template_id>.")
+                    else:
+                        reply = handle_subscribe(session, user, template_id)
+            elif command == "/publish":
+                if len(parts) < 2:
+                    reply = BotReply("Use /publish <lesson_plan_id>.")
+                else:
+                    try:
+                        plan_id = int(parts[1])
+                    except ValueError:
+                        reply = BotReply("Use /publish <lesson_plan_id>.")
+                    else:
+                        reply = handle_publish(
+                            session,
+                            user,
+                            plan_id,
+                            owner_telegram_user_id=settings.telegram_allowed_user_id,
+                        )
             elif command == "/lessons":
                 query = event.raw_text.removeprefix("/lessons").strip()
                 reply = handle_lessons(session, user, query)
@@ -590,9 +622,15 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif raw_data == "lessons:list":
                 reply = handle_lessons(session, user, "")
                 await answer_callback(event, "Lessons")
+            elif raw_data == "library:list":
+                reply = handle_library(session, user, "")
+                await answer_callback(event, "Library")
             elif raw_data == "practice:modes":
                 reply = handle_practice(session, user, "")
                 await answer_callback(event, "Practice modes")
+            elif len(parts) == 3 and parts[0] == "library":
+                reply = handle_library_callback(session, user, parts[1], parts[2])
+                await answer_callback(event, "Library")
             elif len(parts) == 3 and parts[0] == "lesson":
                 practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_lesson_callback(

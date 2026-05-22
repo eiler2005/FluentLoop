@@ -15,14 +15,14 @@ Telegram smoke trail.
 
 ```bash
 uv run --extra dev pytest -q
-uv run --extra dev ruff check src tests
+uv run --extra dev ruff check src tests scripts
 uv run python -m fluentloop --check
 uv run python scripts/secret_scan.py
 uv run alembic upgrade head
 git diff --check
 ```
 
-For EPIC-22 schema changes, verify the live/copy schema before deploy:
+For schema changes, verify the live/copy schema before deploy:
 
 ```bash
 uv run alembic current
@@ -34,9 +34,13 @@ settings = get_settings()
 inspector = inspect(create_engine(settings.db_url))
 learning_columns = [c["name"] for c in inspector.get_columns("learning_items")]
 lesson_columns = [c["name"] for c in inspector.get_columns("lesson_plans")]
+source_columns = [c["name"] for c in inspector.get_columns("source_materials")]
 lesson_indexes = [idx["name"] for idx in inspector.get_indexes("lesson_plans")]
 print("learning_items.metadata_json:", "metadata_json" in learning_columns)
+print("learning_items.is_template:", "is_template" in learning_columns)
 print("lesson_plans.format:", "format" in lesson_columns)
+print("lesson_plans.is_template:", "is_template" in lesson_columns)
+print("source_materials.is_template:", "is_template" in source_columns)
 print("ix_lesson_plans_format:", "ix_lesson_plans_format" in lesson_indexes)
 PY
 ```
@@ -58,6 +62,20 @@ The deployment keeps the same lightweight shape: one Docker container, SQLite
 mounted in `data/`, Telegram bot, scheduler, and local file storage. The deploy
 script now creates a pre-migration SQLite backup when the DB exists, builds the
 image, runs `alembic upgrade head`, and only then starts the bot container.
+
+## EPIC-23 Seed Library Publish
+
+After a deploy that includes shared-library schema or seed changes, publish the
+deterministic B2/B2+ catalog inside the running container:
+
+```bash
+docker compose exec -T fluentloop python scripts/publish_seed_library.py
+docker compose exec -T fluentloop python scripts/publish_seed_library.py --apply
+```
+
+The first command is a dry run. The apply command should report 20 template
+lesson plans, 20 template source materials, and 80 template learning items on a
+fresh catalog.
 
 ## Telegram Smoke Message
 
@@ -91,15 +109,18 @@ uv run python scripts/smoke_telegram.py \
 7. Confirm the session uses dynamic Step X/N with about 15-20 micro-drills.
 8. Answer at least two drills and confirm PracticeAttempt + SRS update.
 9. Use /skip once and confirm the correct answer/explanation is shown.
-10. Run `/help` and `/howto`; confirm the Help topic has one fresh pinned guide.
-11. Check logs for provider, callback, and database errors.
-12. For EPIC-22 changes, confirm layered feedback buttons and confidence
+10. Run `/library`, `/library risk`, `/subscribe <template_id>`, `/lessons`,
+    and `/lesson <clone_id>`; confirm practice starts from the cloned lesson,
+    not a template row.
+11. Run `/help` and `/howto`; confirm the Help topic has one fresh pinned guide.
+12. Check logs for provider, callback, and database errors.
+13. For EPIC-22 changes, confirm layered feedback buttons and confidence
     rating during a `/today` or `/practice diplomatic` answer.
-13. Run `/reflect <short note>` and `/mentor`; confirm reflection/journal
+14. Run `/reflect <short note>` and `/mentor`; confirm reflection/journal
     replies do not error.
-14. Smoke operational commands: `/scene 2`, `/brief roadmap review`,
+15. Smoke operational commands: `/scene 2`, `/brief roadmap review`,
     `/article <short text>`, `/debate remote work`, `/translate_lab planning`,
     and `/fluency432 incident update`.
-15. Smoke `/practice sprint` and one lesson-format mode such as
+16. Smoke `/practice sprint` and one lesson-format mode such as
     `/practice notebook` or `/practice genre`.
 ```

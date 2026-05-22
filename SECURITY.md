@@ -1,10 +1,11 @@
 # SECURITY.md
 
-FluentLoop is a single-user personal Telegram bot. The threat model is small,
-but the surface still includes a Telegram bot token and learning data that
-contains real names of colleagues, clients, and projects. This file documents
-what is protected, what is sent to third parties, and what to do when something
-goes wrong.
+FluentLoop is a Telegram bot for an owner-curated admitted-user audience. The
+operational surface is still small: one bot, one VPS, one Docker container, and
+one set of secrets. The sensitive part is the learning data, which may contain
+real names of colleagues, clients, and projects. This file documents what is
+protected, what is sent to third parties, and what to do when something goes
+wrong.
 
 ## Protected assets
 
@@ -18,7 +19,8 @@ goes wrong.
 
 ## Threat model
 
-- **Single user, single VPS, single Docker container.** Low attack surface.
+- **Admitted Telegram users, single VPS, single Docker container.** Low attack
+  surface, but per-user lesson progress and private uploads must stay isolated.
 - **No public web endpoint** in MVP (Telegram is the only interface).
 - **Realistic risks:**
   - Accidental commit of `.env` or a leaked token in a log line.

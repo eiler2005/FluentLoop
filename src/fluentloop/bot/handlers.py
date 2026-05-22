@@ -47,6 +47,12 @@ from fluentloop.lesson_formats import (
     scene_builder,
     translation_lab_prompt,
 )
+from fluentloop.lesson_library import (
+    library_template_by_id,
+    library_templates,
+    publish_lesson_template,
+    subscribe_to_template,
+)
 from fluentloop.lesson_plans import (
     active_lesson_plans,
     find_lesson_plan,
@@ -298,11 +304,13 @@ def handle_channel_help(
         "How to use FluentLoop\n\n"
         "1. Start with /today for the automatic 15-minute lesson, or choose a "
         "lesson with /lessons and /lesson.\n"
-        "2. Answer in text. Use /skip or Skip / show answer when you want the "
+        "2. Browse shared seed lessons with /library, then copy one into your "
+        "own lesson base with /subscribe <template_id>.\n"
+        "3. Answer in text. Use /skip or Skip / show answer when you want the "
         "model answer first.\n"
-        "3. Read compact teacher feedback. Use /feedback explain <attempt_id> "
+        "4. Read compact teacher feedback. Use /feedback explain <attempt_id> "
         "for the full breakdown.\n"
-        "4. Upload lesson notes in Materials Upload with /upload; approve "
+        "5. Upload lesson notes in Materials Upload with /upload; approve "
         "candidates before they become active learning items.\n\n"
         "Workspace map:\n"
         "- Practice Flow: current lesson and answers\n"
@@ -310,11 +318,13 @@ def handle_channel_help(
         "- Feedback: corrections and explanations\n"
         "- Next Prompts: follow-up prompts\n"
         "- Mistakes, Summaries, Stats: weak points and progress\n\n"
-        "Useful commands: /today, /practice, /topics, /lessons, /lesson random, "
-        "/lesson topic <query>, /upload, /skip, /help, /howto.",
+        "Useful commands: /today, /library, /subscribe, /practice, /topics, "
+        "/lessons, /lesson random, /lesson topic <query>, /upload, /skip, "
+        "/help, /howto.",
         channel_id,
         buttons=[
             [_button("Today", "today:start"), _button("Lessons", "lessons:list")],
+            [_button("Library", "library:list")],
             [
                 _button("Topics", "topics:list"),
                 _button("Upload material", "materials:start"),
@@ -334,7 +344,10 @@ def handle_materials_channel_hub(
         "Use this topic for lesson notes, word lists, homework, exercises, "
         "and teacher feedback. Send /upload here, or tap Upload material and "
         "paste the text in the bot DM. New learning items still require "
-        "approval before they become active.",
+        "approval before they become active.\n\n"
+        "Best paste format:\n"
+        "Context / Vocabulary or chunks / Grammar or patterns / Mistakes or "
+        "teacher feedback / My examples.",
         channel_id,
         buttons=[[_button("Upload material", "materials:start")]],
         message_thread_id=message_thread_id,
@@ -706,6 +719,117 @@ def handle_practice(
     )
 
 
+def handle_library(session: Session, user: User, query: str = "") -> BotReply:
+    templates = library_templates(session, query=query, limit=20)
+    if not templates:
+        suffix = f" matching {query!r}" if query else ""
+        return BotReply(
+            f"No shared seed lessons found{suffix}. "
+            "Run the seed-library publish step first."
+        )
+    title = "Shared seed library" if not query else f"Shared library matching {query}"
+    lines = [bold(title)]
+    buttons: list[list[InlineButton]] = []
+    for template in templates:
+        pool_size = lesson_pool_size(session, template)
+        lines.append(
+            f"#{template.id} {html_escape(template.title)} - "
+            f"{html_escape(template.topic)} - pool {pool_size}"
+        )
+        buttons.append(
+            [
+                _button(
+                    f"Subscribe #{template.id}",
+                    f"library:subscribe:{template.id}",
+                ),
+                _button(f"Details #{template.id}", f"library:details:{template.id}"),
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "Use /subscribe <template_id> to copy a lesson into your own lesson base.",
+            "After subscribe: /lessons, /lesson <id>, or /today.",
+        ]
+    )
+    return BotReply("\n".join(lines), buttons=buttons, parse_mode=HTML_PARSE_MODE)
+
+
+def handle_subscribe(session: Session, user: User, template_id: int) -> BotReply:
+    try:
+        result = subscribe_to_template(session, user, template_id)
+    except ValueError as exc:
+        return BotReply(f"Could not subscribe: {exc}")
+    note = ""
+    if result.reused_items or result.reused_source:
+        note = (
+            "\nRepeated subscription is allowed: I reused your existing item bank "
+            "where it already matched this template."
+        )
+    return BotReply(
+        "\n".join(
+            [
+                f"Subscribed to template #{template_id}.",
+                f"LessonPlan #{result.plan.id}: {result.plan.title}",
+                f"Topic: {result.plan.topic}",
+                f"Created items: {result.created_items}",
+                f"Reused items: {result.reused_items}",
+                "Open it with /lesson "
+                f"{result.plan.id}, or let /today rotate it in.",
+            ]
+        )
+        + note,
+        buttons=[
+            [
+                _button(f"Start #{result.plan.id}", f"lesson:start:{result.plan.id}"),
+                _button(
+                    f"Details #{result.plan.id}",
+                    f"lesson:details:{result.plan.id}",
+                ),
+            ]
+        ],
+    )
+
+
+def handle_publish(
+    session: Session,
+    user: User,
+    plan_id: int,
+    *,
+    owner_telegram_user_id: int | None,
+) -> BotReply:
+    if (
+        owner_telegram_user_id is None
+        or user.telegram_user_id != owner_telegram_user_id
+    ):
+        return BotReply("Owner-only command.")
+    try:
+        plan = publish_lesson_template(session, user, plan_id)
+    except ValueError as exc:
+        return BotReply(f"Could not publish lesson: {exc}")
+    return BotReply(
+        f"Published template #{plan.id}: {plan.title}. "
+        "It is now visible in /library."
+    )
+
+
+def handle_library_callback(
+    session: Session, user: User, action: str, payload: str
+) -> BotReply:
+    try:
+        template_id = int(payload)
+    except ValueError:
+        return BotReply("Template not found.")
+    if action == "subscribe":
+        return handle_subscribe(session, user, template_id)
+    if action == "details":
+        template = library_template_by_id(session, template_id)
+        if template is None:
+            return BotReply("Template not found.")
+        return _template_details_reply(session, template)
+    return BotReply("Unknown library action.")
+
+
 def handle_topics(session: Session, user: User) -> BotReply:
     groups = lesson_topic_groups(session, user)
     if not groups:
@@ -926,6 +1050,36 @@ def _lesson_details_reply(session: Session, plan) -> BotReply:
             [_button("Start", f"lesson:start:{plan.id}")],
             [_button("Random", "lesson:random:0")],
         ],
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def _template_details_reply(session: Session, template) -> BotReply:
+    items = lesson_items(session, template)
+    chunks = [item.text for item in items if item.type in {"word", "expression"}][:8]
+    grammar = [item.text for item in items if item.type == "grammar_rule"][:6]
+    mistakes = [item.text for item in items if item.type == "mistake_pattern"][:5]
+    lines = [
+        f"{bold('Shared library lesson')} #{template.id}",
+        labeled("Title", template.title),
+        labeled("Topic", template.topic),
+        labeled("Goal", template.goal),
+    ]
+    if template.language_focus_json:
+        lines.append(
+            labeled("Language focus", ", ".join(template.language_focus_json[:8]))
+        )
+    if chunks:
+        lines.append(labeled("Target chunks", ", ".join(chunks)))
+    if grammar:
+        lines.append(labeled("Grammar", ", ".join(grammar)))
+    if mistakes:
+        lines.append(labeled("Mistake risks", ", ".join(mistakes)))
+    lines.append(labeled("Template pool", str(len(items))))
+    lines.append("Subscribe to copy this lesson into your own lesson base.")
+    return BotReply(
+        "\n".join(lines),
+        buttons=[[_button("Subscribe", f"library:subscribe:{template.id}")]],
         parse_mode=HTML_PARSE_MODE,
     )
 
@@ -1556,6 +1710,8 @@ def command_catalog() -> list[str]:
         "/today",
         "/review",
         "/practice",
+        "/library",
+        "/subscribe",
         "/topics",
         "/lessons",
         "/lesson",

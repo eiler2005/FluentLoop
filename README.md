@@ -1,7 +1,7 @@
 # FluentLoop
 
-> Personal Telegram bot for English learning. B2+/C1- focus, business and IT
-> context, text-only MVP, single Docker container on a VPS.
+> Telegram bot for English learning. B2+/C1- focus, business and IT context,
+> text-only MVP, shared seed lesson library, single Docker container on a VPS.
 
 [![CI](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml/badge.svg)](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -12,10 +12,10 @@
 
 ## TL;DR
 
-FluentLoop is a single-user English-learning bot that lives entirely in
-Telegram. You drop in your lesson notes, the bot extracts active learning
-items (with your approval), schedules spaced repetition, and serves a daily
-~15-minute, 15–20-drill practice session in a Telegram forum workspace.
+FluentLoop is an English-learning bot that lives entirely in Telegram. You can
+drop in your own lesson notes or subscribe to an owner-curated B2/B2+ seed
+lesson, then the bot turns approved targets into spaced repetition and a daily
+~15-minute, 15-20-drill practice session in a Telegram forum workspace.
 Mistakes feed a pattern detector; recurring patterns shape future practice.
 The runtime is intentionally small: Telethon, SQLite, APScheduler, a
 DeepSeek-backed LLM gateway with deterministic fallback, all in one
@@ -29,8 +29,8 @@ shipped in a single autonomous overnight build session — see
 
 ```
               ┌─────────────────────────────────────────────────────┐
-              │ Telegram (forum + DM, single allowed user)          │
-              │   /today  /upload  /lessons  /skip  ...             │
+              │ Telegram (forum + DM, admitted users)               │
+              │   /today  /upload  /library  /lessons  /skip  ...    │
               └─────────────────────────┬───────────────────────────┘
                                         │ MTProto long-poll + Bot API
                                         ▼
@@ -59,8 +59,9 @@ shipped in a single autonomous overnight build session — see
 ```
 
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
-Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002–0007 Accepted).
+Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0008 Accepted).
 Learner-facing methodology and daily workflow: [`docs/user-guide.md`](docs/user-guide.md).
+Upload-ready material examples: [`docs/material-upload-guide.md`](docs/material-upload-guide.md).
 
 ## Sample session
 
@@ -123,6 +124,7 @@ Bot          Session done — 15/15 in 14 min.
 | **MVP foundation** — EPIC-01..14 (bot, profile, upload, AI extract+approve, items CRUD, SRS, daily session, exercise types, answer feedback, mistake patterns, grammar graph, stats, favorites) | ✅ Done |
 | **Learning-engine roadmap** — EPIC-16..21 (staged engine, persistent lesson plans, DeepSeek gateway, AI exercise generator, grammar brain, light material context search) | ✅ Done |
 | **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, lesson formats, curriculum, teacher layer, operational drills, polish) | ✅ Done |
+| **Shared lesson library** — EPIC-23 (`/library`, `/subscribe`, seed catalog templates, per-user clones) | ✅ Done |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
@@ -169,7 +171,7 @@ FluentLoop/
 ├── docs/
 │   ├── architecture.md     Tech architecture (the *how*).
 │   ├── testing.md          Standard test gate.
-│   ├── adr/                7 architecture decision records.
+│   ├── adr/                8 architecture decision records.
 │   ├── features/           Epic files and roadmap index.
 │   ├── runbooks/           deploy, demo data, secrets, telegram workspace.
 │   ├── curriculum/         Generated B2/B2+ lesson catalog.
@@ -190,8 +192,10 @@ FluentLoop/
 |---|---|
 | [`PRD.md`](PRD.md) | Product requirements — verbatim, the source of product truth. |
 | [`docs/architecture.md`](docs/architecture.md) | Tech architecture, runtime topology, data model. |
-| [`docs/adr/`](docs/adr/) | One ADR per significant decision (Telethon, AI tiering, pre-gen, forum routing, secret hygiene, DeepSeek). |
-| [`docs/features/README.md`](docs/features/README.md) | 21-epic index with dependency graph and statuses. |
+| [`docs/adr/`](docs/adr/) | One ADR per significant decision (Telethon, AI tiering, pre-gen, forum routing, secret hygiene, DeepSeek, shared library). |
+| [`docs/features/README.md`](docs/features/README.md) | Epic index with dependency graph and statuses. |
+| [`docs/user-guide.md`](docs/user-guide.md) | Learner-facing methodology, process map, daily workflow, and modes. |
+| [`docs/material-upload-guide.md`](docs/material-upload-guide.md) | Upload-ready material formats and LLM prep prompt. |
 | [`docs/runbooks/`](docs/runbooks/) | Operational procedures — deploy, demo data, secrets, telegram workspace, curriculum seed. |
 | [`docs/testing.md`](docs/testing.md) | Standard pre-commit / pre-deploy gate. |
 | [`tests/README.md`](tests/README.md) | What each test module covers, patterns used, CI gate. |
@@ -203,7 +207,7 @@ FluentLoop/
 
 ```bash
 uv run --extra dev pytest -q
-# 16 modules, ~36 tests, < 30 s locally.
+# 19 modules, 117+ tests, < 30 s locally.
 ```
 
 The CI gate (`.github/workflows/ci.yml`) runs `secret_scan` →
@@ -221,10 +225,12 @@ Full breakdown: [`tests/README.md`](tests/README.md).
 **Explicitly not goals** — please don't open PRs for these without prior
 discussion:
 
-- Multi-tenancy or any auth layer beyond `TELEGRAM_ALLOWED_USER_ID`.
+- Full multi-tenant SaaS auth. Admission policy beyond the current environment
+  gate is tracked separately from the shared lesson library.
 - Voice support.
 - A public web UI (EPIC-15 is `Deferred`).
-- Generic content import beyond the user's own lesson notes.
+- Unreviewed generic content import beyond the user's own lesson notes and the
+  deterministic shared seed catalog.
 
 ## Secrets and privacy
 

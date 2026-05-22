@@ -1,6 +1,6 @@
 # Tests
 
-Pytest suite for FluentLoop. Sixteen test modules organized by epic and by
+Pytest suite for FluentLoop. Nineteen test modules organized by epic and by
 operational concern. The suite must stay green on every commit; CI enforces it
 via `.github/workflows/ci.yml`.
 
@@ -45,6 +45,9 @@ and stubs the Telegram client and AI providers — no real network calls.
 | `test_epic19_ai_exercise_generator.py` | AI-assisted high-value exercise generation with deterministic guardrails. |
 | `test_epic20_grammar_brain.py` | Practical business/IT grammar concepts and refresher selection. |
 | `test_epic21_material_context.py` | Material chunking and lightweight keyword retrieval. |
+| `test_epic22_breakthrough.py` | Layered feedback, sub-day GIR, L1 traps, reflection, lesson formats, chunk import, and operational drills. |
+| `test_epic22_migration.py` | Alembic upgrade/downgrade/upgrade roundtrip for EPIC-22/23 schema additions. |
+| `test_epic23_lesson_library.py` | Shared seed library publishing, `/library`, `/subscribe`, duplicate clone reuse, private visibility, and owner-only publish. |
 | `test_bot_upload_documents.py` | Telegram document-upload handler: text decoding, oversize rejection, friendly errors. |
 | `test_seed_demo_data.py` | Idempotency and shape of `scripts/seed_demo_data.py`. |
 | `test_smoke_telegram.py` | Smoke message format: build/time/plan-note headers, sanitized payloads. |
@@ -91,7 +94,7 @@ and stubs the Telegram client and AI providers — no real network calls.
 ```bash
 python scripts/secret_scan.py          # no real-looking tokens in tracked files
 ruff check src tests scripts           # style and basic correctness
-pytest -q                              # ~36 tests, < 30 seconds locally
+pytest -q                              # 117+ tests, < 30 seconds locally
 ```
 
 A red CI is a hard gate — no merges to `main` while the gate is broken.

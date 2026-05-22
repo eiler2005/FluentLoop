@@ -63,8 +63,9 @@ Telegram does poorly.
 - Hosting strategy: same domain as some future landing page or just
   `https://<vps-ip>:<port>` behind basic auth? Default: VPS port +
   token; reverse proxy is an infra decision for later.
-- Read-only by default with explicit "edit mode" toggle, or always
-  editable? Default: always editable (single user).
+- Read-only by default with explicit "edit mode" toggle, or always editable?
+  Default: owner/admin editable; subscriber-facing edits need a separate access
+  model.
 
 ## Verification plan (when un-deferred)
 

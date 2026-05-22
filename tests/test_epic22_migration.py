@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 from fluentloop.db.session import make_engine
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "0001_epic22"
+REVISION = "0002_epic23"
 
 
 def test_epic22_migration_roundtrip_on_copied_sqlite_db(tmp_path) -> None:
@@ -21,21 +21,41 @@ def test_epic22_migration_roundtrip_on_copied_sqlite_db(tmp_path) -> None:
     command.upgrade(config, "head")
     schema = _schema_snapshot(db_path)
     assert "metadata_json" in schema["learning_items_columns"]
+    assert "is_template" in schema["learning_items_columns"]
+    assert "template_of" in schema["learning_items_columns"]
     assert "format" in schema["lesson_plans_columns"]
+    assert "is_template" in schema["lesson_plans_columns"]
+    assert "template_of" in schema["lesson_plans_columns"]
+    assert "is_template" in schema["source_materials_columns"]
+    assert "template_of" in schema["source_materials_columns"]
     assert "ix_lesson_plans_format" in schema["lesson_plans_indexes"]
+    assert "ix_lesson_plans_is_template" in schema["lesson_plans_indexes"]
     assert schema["revision"] == REVISION
 
     command.downgrade(config, "base")
     schema = _schema_snapshot(db_path)
     assert "metadata_json" not in schema["learning_items_columns"]
+    assert "is_template" not in schema["learning_items_columns"]
+    assert "template_of" not in schema["learning_items_columns"]
     assert "format" not in schema["lesson_plans_columns"]
+    assert "is_template" not in schema["lesson_plans_columns"]
+    assert "template_of" not in schema["lesson_plans_columns"]
+    assert "is_template" not in schema["source_materials_columns"]
+    assert "template_of" not in schema["source_materials_columns"]
     assert "ix_lesson_plans_format" not in schema["lesson_plans_indexes"]
 
     command.upgrade(config, "head")
     schema = _schema_snapshot(db_path)
     assert "metadata_json" in schema["learning_items_columns"]
+    assert "is_template" in schema["learning_items_columns"]
+    assert "template_of" in schema["learning_items_columns"]
     assert "format" in schema["lesson_plans_columns"]
+    assert "is_template" in schema["lesson_plans_columns"]
+    assert "template_of" in schema["lesson_plans_columns"]
+    assert "is_template" in schema["source_materials_columns"]
+    assert "template_of" in schema["source_materials_columns"]
     assert "ix_lesson_plans_format" in schema["lesson_plans_indexes"]
+    assert "ix_lesson_plans_is_template" in schema["lesson_plans_indexes"]
     assert schema["revision"] == REVISION
 
 
@@ -62,6 +82,9 @@ def _schema_snapshot(db_path: Path) -> dict[str, object]:
             },
             "lesson_plans_columns": {
                 column["name"] for column in inspector.get_columns("lesson_plans")
+            },
+            "source_materials_columns": {
+                column["name"] for column in inspector.get_columns("source_materials")
             },
             "lesson_plans_indexes": {
                 index["name"] for index in inspector.get_indexes("lesson_plans")

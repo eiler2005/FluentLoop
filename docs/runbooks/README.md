@@ -9,9 +9,11 @@ Available:
 - [`demo-data.md`](demo-data.md) — idempotent demo dataset for audit and smoke
   testing.
 - [`curriculum-seed.md`](curriculum-seed.md) — deterministic 20-lesson B2/B2+
-  business/IT curriculum seed.
+  business/IT curriculum seed and EPIC-23 shared-library publish step.
 - [`telegram-workspace.md`](telegram-workspace.md) — refresh Telegram command
   menu, pinned Help guide, and safe bot-authored cleanup.
+- [`secrets-management.md`](secrets-management.md) — local/VPS secret catalog
+  rules and pre-commit scanning.
 
 Planned entries:
 

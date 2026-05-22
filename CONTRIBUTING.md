@@ -1,9 +1,9 @@
 # Contributing to FluentLoop
 
-FluentLoop is a personal-use Telegram bot, but the repository is public and
-PRs are welcome — bug fixes, doc clarifications, small features that fit the
-"single user, single Docker container" shape. Anything bigger, please open
-an issue first so we can talk about scope.
+FluentLoop is a personal/admitted-user Telegram bot, but the repository is
+public and PRs are welcome — bug fixes, doc clarifications, and small features
+that fit the "one bot, one Docker container" shape. Anything bigger, please
+open an issue first so we can talk about scope.
 
 ## Before you start
 
@@ -100,11 +100,13 @@ GitHub Issues. Please include:
 These are intentionally **not** goals — please don't open PRs for them
 without prior discussion:
 
-- Multi-tenancy or multi-user auth (FluentLoop is single-user by design).
+- Full multi-tenant SaaS auth. FluentLoop may admit multiple Telegram users,
+  but operationally remains one bot, one container, and one set of secrets.
 - Voice support (text-only MVP).
 - Public web UI (see [`docs/features/EPIC-15-optional-web-interface.md`](docs/features/EPIC-15-optional-web-interface.md)
   — `Status: Deferred`).
-- Generic content import beyond the user's own lesson notes.
+- Unreviewed generic content import beyond the user's own lesson notes and the
+  deterministic shared seed catalog.
 
 If you have a use case that genuinely doesn't fit any of the above
 exclusions, open an issue and tag it `proposal` so we can talk about whether

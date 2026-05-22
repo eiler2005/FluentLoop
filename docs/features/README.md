@@ -2,9 +2,8 @@
 
 Each epic file maps a chunk of [`../../PRD.md`](../../PRD.md) onto a concrete
 unit of work. EPIC-01 through EPIC-15 are the original PRD backlog; EPIC-16
-through EPIC-21 extend the learning engine with lesson plans, DeepSeek-backed
-LLM routing, teacher feedback, grammar brain, and light material context
-search.
+through EPIC-21 extend the learning engine; EPIC-22 adds the breakthrough
+learning loop; EPIC-23 adds the shared seed lesson library.
 
 ## Epic index
 
@@ -32,7 +31,7 @@ search.
 | 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts and knowledge areas in practice. |
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Done | Local material chunks and keyword retrieval. |
 | 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | Done | Phase 1-2 implemented, deployed, and validated: in-session GIR, negative-path tests, schema verification, and live smoke. |
-| 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Planned | Owner-curated lesson plans discoverable by other admitted users; clone-on-subscribe with isolated per-user progress (ADR-0008). |
+| 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Done | Shared seed lesson library via `/library` and `/subscribe`; cloned per-user progress, deployed and smoke validated (ADR-0008). |
 
 ## Dependency graph
 
@@ -81,8 +80,11 @@ search.
    EPIC-15 (web UI) — deferred, not on critical path.
 
    EPIC-16 → EPIC-17 → EPIC-18 → EPIC-19 → EPIC-20 → EPIC-21
-   (learning engine, lesson plans, DeepSeek, AI exercises, grammar brain,
-   light material context search)
+    (learning engine, lesson plans, DeepSeek, AI exercises, grammar brain,
+    light material context search)
+
+   EPIC-22 → EPIC-23
+   (breakthrough learning loop, shared seed lesson library)
 ```
 
 ## Suggested implementation order
@@ -99,6 +101,8 @@ EPIC-01 → EPIC-02 → EPIC-05 → EPIC-06 → EPIC-09 → EPIC-08 → EPIC-07 
                                           EPIC-15 (deferred)
                                           ↓
               EPIC-16 → EPIC-17 → EPIC-18 → EPIC-19 → EPIC-20 → EPIC-21
+                                           ↓
+                                      EPIC-22 → EPIC-23
 ```
 
 The order above prioritizes the **end-to-end loop** as early as possible:

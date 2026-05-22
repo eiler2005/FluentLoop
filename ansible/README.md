@@ -1,7 +1,8 @@
 # ansible/
 
-Deploy playbooks for VPS. Empty until the deployment epic begins
-(post-MVP-foundation).
+Reserved for future Ansible-based VPS automation. The current production deploy
+path is still `scripts/deploy.sh`; this directory intentionally contains no
+active playbooks yet.
 
 Patterns to inherit from `vps_management` when this lands:
 

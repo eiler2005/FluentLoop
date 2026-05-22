@@ -725,7 +725,8 @@ Foundation для всех остальных.
 - **Gamification** (XP, leagues, lives) — шум для C1-aiming professional.
 - **Voice mode сейчас** — confirm'нули, P2. Text-first → доказываем педагогику → потом voice.
 - **Personal Corpus (Gmail/Calendar OAuth)** — не делаем; Pre-Meeting Brief (F14) покрывает 80% эффекта через paste.
-- **Open-source** — нет. Private single-user.
+- **Public SaaS / open signup** — нет. Это owner/admitted-user бот; repo может
+  быть публичным, но продукт не становится self-serve платформой.
 - **Web UI / Telegram Mini App** — потом, после педагогической петли.
 - **Скейлить exercise types ради количества** — только новые **классы** (discourse / pragmatic / genre / chunks).
 

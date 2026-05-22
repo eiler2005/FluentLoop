@@ -219,6 +219,7 @@ def available_lesson_plan(session: Session, user: User) -> LessonPlan | None:
         select(LessonPlan)
         .where(
             LessonPlan.user_id == user.id,
+            LessonPlan.is_template.is_(False),
             LessonPlan.status.in_(("active", "draft")),
         )
         .order_by(LessonPlan.status.asc(), LessonPlan.updated_at.desc())
@@ -238,6 +239,7 @@ def active_lesson_plans(
             select(LessonPlan)
             .where(
                 LessonPlan.user_id == user.id,
+                LessonPlan.is_template.is_(False),
                 LessonPlan.status.in_(("active", "draft")),
             )
             .order_by(LessonPlan.updated_at.desc(), LessonPlan.id.desc())
@@ -256,6 +258,7 @@ def lesson_plan_by_id(
     if (
         plan is None
         or plan.user_id != user.id
+        or plan.is_template
         or plan.status not in {"active", "draft"}
     ):
         return None

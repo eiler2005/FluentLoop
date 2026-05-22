@@ -1,6 +1,6 @@
 # EPIC-23 — Shared Lesson Library
 
-- **Status:** Planned
+- **Status:** Done — seed catalog templates, subscribe clones, learner docs, deploy, and smoke validated
 - **Owner:** Denis Ermilov
 - **Depends on:** EPIC-17 (persistent lesson plans), ADR-0008
 - **Blocks:** ADR-0009 (admission policy), public discovery of bot
@@ -14,6 +14,10 @@ pushback, incident updates, RFC trade-offs, postmortems, performance
 feedback, async communication, deadline negotiation, exec summaries,
 etc.). Other admitted users currently see none of them — every user is
 expected to upload their own material from scratch.
+
+Implementation note: v1 publishes only the deterministic B2/B2+ seed catalog
+(`curriculum:b2-b2plus`) into the shared library. Private owner uploads remain
+private unless explicitly published later by the owner.
 
 The owner wants this content to function as a **shared library**:
 discoverable by any admitted user, subscribable on demand, with a clean
@@ -36,8 +40,8 @@ In:
 - Existing `/lessons`, `/lesson`, `/today` keep working unchanged
   because they already filter by `user_id`. Clones look identical to
   user-uploaded plans from their point of view.
-- Mark all 21 current plans (and their materials/items) on `user_id=2`
-  as templates via a one-off migration step.
+- Publish only deterministic B2/B2+ seed catalog plans tagged
+  `curriculum:b2-b2plus` into the first public library.
 - Owner-only path to author new templates: existing upload flow
   produces a `user_id=2` plan; an admin command (`/publish <plan_id>`)
   flips it to `is_template=true`.
@@ -61,8 +65,9 @@ Out (explicit non-goals for this epic):
    `source_materials.template_of`, `learning_items.is_template`,
    `learning_items.template_of`. All default `is_template=false`,
    `template_of=NULL`.
-2. One-off data step marks plans `5,7,8,9,10,11,12,13,14,15,16,17,18,
-   19,20,21,22,23,24,25,26` as `is_template=true`, plus their linked
+2. Seed-library publish step creates/updates the deterministic 20-lesson
+   B2/B2+ catalog under the internal seed-library user and marks only plans
+   tagged `curriculum:b2-b2plus` as `is_template=true`, plus their linked
    materials and items.
 3. `/library` returns a paginated list of templates with topic, title,
    and template id. Empty case shows a "no templates yet" message.
@@ -75,31 +80,28 @@ Out (explicit non-goals for this epic):
    records; no read or write ever touches another user's records.
 6. Owner running `/publish <plan_id>` on a non-template plan they own
    sets `is_template=true` and cascades to materials/items. Idempotent.
-7. Cloning the same template twice produces two independent
-   subscriptions (no dedupe). UI should warn but not block.
-8. Existing queries in `src/fluentloop/lesson_plans.py` need no
-   modification — verify by running `pytest -q` after the migration
-   and confirming all existing tests still pass.
+7. Cloning the same template twice produces two independent lesson-plan
+   subscriptions, while already cloned per-user source materials and learning
+   items are reused safely under the existing uniqueness constraints.
+8. Existing personal lesson queries exclude template rows so `/topics`,
+   `/lessons`, `/lesson`, and `/today` operate on user-owned active plans.
 
 ## Open questions
 
-- `/library` filtering — by topic / cluster / level? V1: flat list,
-  ordered by `created_at DESC`. Revisit after first multi-user
+- `/library` filtering — by topic / cluster / level? V1: flat list with optional
+  text query over title/topic/goal/focus/tags, ordered by title. Revisit after first multi-user
   feedback.
-- Should `practice_session_cached` be cleared on subscribe? Yes — the
-  user gets a fresh slate; do this in the clone path.
+- Should `practice_session_cached` be cleared on subscribe? Done — the
+  user gets a fresh slate in the clone path.
 - Notification when a new template appears? Probably yes, but only
   after ADR-0009 admission policy lands.
 
 ## Verification plan
 
-- Local: seed a fresh DB with two users (`user_id=2` owner, `user_id=3`
-  subscriber). Mark a plan as template under `user_id=2`. Run
-  `/subscribe` as `user_id=3`. Verify the clone appears in
-  `available_lesson_plan(user_3)`, completes a session via existing
-  `/today`, and `practice_attempts` / `review_states` rows for
-  `user_id=3` reference cloned items, not the original templates.
-- Re-run `scripts/seed_b2_curriculum.py` and `scripts/seed_demo_data.py`
-  to confirm seed paths still work.
-- On VPS: run the migration in dry-run mode (script + `--no-commit`)
-  against a copy of production SQLite before applying.
+- Local: `pytest -q` covers seed publish, `/library`, details callbacks,
+  `/subscribe`, duplicate subscribe reuse, private visibility, owner-only
+  `/publish`, and migration roundtrip.
+- VPS: production SQLite was backed up, migration was verified on a copied DB,
+  deploy applied `0002_epic23`, seed library publish created 20 template plans,
+  20 template sources, and 80 template learning items, and handler smoke passed
+  through `/library -> details -> subscribe -> /lessons -> /lesson start`.

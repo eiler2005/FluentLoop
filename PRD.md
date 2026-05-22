@@ -227,7 +227,7 @@ Telegram remains the primary interface for daily practice.
 8. More advanced weekly report.
 9. Breakthrough roadmap: two-layer feedback, sub-day SRS, Russian L1 hit list,
    evaluation probe, reflection, and named lesson formats (EPIC-22).
-10. Shared lesson library: owner-curated templates discoverable and subscribable by other admitted users, with cloned per-user progress (ADR-0008, EPIC-23).
+10. Shared lesson library: owner-curated templates discoverable and subscribable by other admitted users, with cloned per-user progress (ADR-0008, EPIC-23; v1 implemented with deterministic B2/B2+ seed catalog only).
 11. Admission policy: allow-list vs invite-code vs open signup (ADR-0009 to write).
 ```
 
@@ -1855,16 +1855,16 @@ A lightweight web interface may be added later or as an optional MVP extension.
 ```text
 Build a personal text-first Telegram bot for English learning.
 
-The bot helps a B2+/C1- user practice business and IT English using the user's own lesson materials.
+The bot helps a B2+/C1- user practice business and IT English using the user's own lesson materials and subscribed owner-curated seed lessons.
 
 Do not implement voice features in MVP.
 
 Core MVP flow:
-1. User uploads lesson notes or word/expression lists.
+1. User uploads lesson notes or word/expression lists, or subscribes to a shared seed lesson with `/library` and `/subscribe`.
 2. Bot extracts a lesson overview, knowledge areas, words, expressions, grammar rules, and mistake risks.
 3. Extracted items are shown as candidates with the lesson title, theme, focus, and why the items were selected.
 4. User approves what should become active learning items.
-5. Bot stores approved items and links them to reusable lesson plans.
+5. Bot stores approved items and links them to reusable lesson plans; subscribed templates are cloned into the user's own lesson base with isolated progress.
 6. Bot indexes material chunks for lightweight local context search.
 7. Bot schedules items for spaced repetition.
 8. Bot automatically generates a daily 15-minute practice session based on user level, progress, weak points, due items, active lesson plans, material context, favorite items, and mistake patterns.

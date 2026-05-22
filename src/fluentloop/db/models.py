@@ -69,6 +69,10 @@ class SourceMaterial(Base, TimestampMixin):
     type: Mapped[str] = mapped_column(String(32), default="other")
     raw_text: Mapped[str] = mapped_column(Text)
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_template: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    template_of: Mapped[int | None] = mapped_column(
+        ForeignKey("source_materials.id"), nullable=True, index=True
+    )
 
 
 class MaterialChunk(Base, TimestampMixin):
@@ -134,6 +138,10 @@ class LearningItem(Base, TimestampMixin):
     level: Mapped[str] = mapped_column(String(16), default="B2+/C1-")
     source_material_id: Mapped[int | None] = mapped_column(
         ForeignKey("source_materials.id"), nullable=True
+    )
+    is_template: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    template_of: Mapped[int | None] = mapped_column(
+        ForeignKey("learning_items.id"), nullable=True, index=True
     )
     linked_grammar_concept_id: Mapped[int | None] = mapped_column(
         ForeignKey("grammar_concepts.id"), nullable=True
@@ -228,6 +236,10 @@ class LessonPlan(Base, TimestampMixin):
     language_focus_json: Mapped[list[str]] = mapped_column(JSON, default=list)
     tags_json: Mapped[list[str]] = mapped_column(JSON, default=list)
     format: Mapped[str] = mapped_column(String(64), default="lesson", index=True)
+    is_template: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    template_of: Mapped[int | None] = mapped_column(
+        ForeignKey("lesson_plans.id"), nullable=True, index=True
+    )
     status: Mapped[str] = mapped_column(String(16), default="active", index=True)
 
 

@@ -1,7 +1,8 @@
 # Architecture
 
-> **Status:** v0.2 — MVP foundation (EPIC-01..14) and learning-engine roadmap
-> (EPIC-16..21) are shipped. ADRs 0002–0007 are Accepted. Schema specifics
+> **Status:** v0.2 — MVP foundation (EPIC-01..14), learning-engine roadmap
+> (EPIC-16..21), and EPIC-22/23 extensions are shipped. ADRs 0002-0008 are
+> Accepted. Schema specifics
 > for individual epics live in those epic files.
 
 The PRD deliberately keeps tech choices out of itself. This document is the
@@ -31,8 +32,8 @@ container:
 
 ```
               ┌─────────────────────────────────────────────────────┐
-              │ Telegram (forum + DM, single allowed user)          │
-              │   /today  /upload  /lessons  /skip  ...             │
+              │ Telegram (forum + DM, admitted users)               │
+              │   /today  /upload  /library  /lessons  /skip  ...    │
               └─────────────────────────┬───────────────────────────┘
                                         │ MTProto long-poll + Bot API
                                         ▼
@@ -132,8 +133,9 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
 - File: `data/fluentloop.sqlite`, mounted from host into the container
   at `/app/data/fluentloop.sqlite`.
 - Migrations: Alembic from day 1.
-- Concurrency: single user, single writer, no contention. `journal_mode
-  = WAL` to allow the backup job to read while the bot writes.
+- Concurrency: one bot process writes to SQLite. Per-user rows are isolated in
+  the schema, and `journal_mode = WAL` lets the backup job read while the bot
+  writes.
 
 ## 3. AI provider — OpenAI two-tier plus DeepSeek gateway
 
@@ -257,10 +259,11 @@ Current learning-engine runtime behavior:
   `python:3.11-slim` base.
 - `docker-compose.yml` mounts `./data:/app/data` (DB, sessions,
   backups, dispute logs).
-- Deploy via SSH + ansible — pattern lifted from
-  `aiprojects/vps_management`. Playbooks land in a future epic.
-- `verify.sh` confirms the container is up and the bot answers
-  `/start`.
+- Deploy via `scripts/deploy.sh`: rsync code and `.env`, build the Docker image,
+  run `alembic upgrade head`, start the container, and tail logs. Future Ansible
+  playbooks may replace this, but they are not the active deploy path.
+- `scripts/smoke_telegram.py` confirms the bot token is reachable and sends a
+  Telegram smoke message after deploy.
 - `scripts/telegram_workspace_maintenance.py` is the post-deploy workspace
   refresh path: it calls Bot API `setMyCommands`, clears Help-topic pins,
   optionally deletes only bot-authored stale help/smoke messages, and pins the
@@ -295,10 +298,9 @@ No public ports — Telethon long-polls the Telegram MTProto layer.
 
 ## Data model overview
 
-PRD §24 is the source of truth. Key entities for MVP (EPIC-05 through
-EPIC-13):
+PRD §24 is the product-level source of truth. Key runtime entities:
 
-- `User` — single row.
+- `User` — one row per admitted Telegram user/profile.
 - `SourceMaterial` + `ExtractedCandidate` — upload-and-approve pipeline.
 - `MaterialChunk` — bounded local chunks for keyword context search over
   uploaded materials.
@@ -311,14 +313,16 @@ EPIC-13):
   newer active lesson plan replaces an older in-progress daily session.
 - `practice_session_cached` — overnight pre-gen output (ADR-0004).
 - `LessonPlan` + `LessonStep` + `LessonPlanItem` — reusable staged lesson
-  plans linked to source materials and existing learning items.
+  plans linked to source materials and existing learning items. EPIC-23 adds
+  `is_template` / `template_of` on lesson plans, source materials, and learning
+  items so shared seed lessons can be cloned into per-user progress.
 - `usage_log` — per-AI-call token counts (cost telemetry).
 
 ## TODOs
 
 - [ ] Add a redact-list mechanism for sending lesson notes to the configured
       AI provider (P1 — see [`../SECURITY.md`](../SECURITY.md)).
-- [ ] Wire up `verify.sh` once the container exists (EPIC-01 deliverable).
 - [ ] Off-VPS backup strategy (P1).
-- [ ] Decide ADR-0005 if/when we add a redact list (worth its own ADR
-      because of the privacy-policy implications).
+- [ ] Write a dedicated ADR if/when we add a redact-list mechanism; privacy
+      policy and provider behavior make this architectural, not just prompt
+      tuning.

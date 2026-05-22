@@ -150,6 +150,48 @@ Use this when you want FluentLoop to learn from your real lessons or work.
 Important: uploaded material does not automatically become active training
 content. Approval is the quality gate.
 
+For concrete upload templates, good/bad examples, and an LLM prompt that turns
+raw notes into upload-ready material, read
+[`material-upload-guide.md`](material-upload-guide.md).
+
+### Your lesson base vs shared library
+
+- **Your lesson base** is everything you uploaded or subscribed to. Commands
+  `/topics`, `/lessons`, `/lesson`, and `/today` use this personal base.
+- **Shared seed library** is the built-in B2/B2+ business/IT catalog. Browse it
+  with `/library [query]`.
+- Use `/subscribe <template_id>` to copy a shared lesson into your own base.
+  After that it behaves like a normal lesson: `/lesson <id>` starts or shows it,
+  and `/today` can rotate it in.
+
+### Current shared seed catalog
+
+The first library release contains 20 deterministic B2/B2+ business/IT lessons.
+They are meant as a clean starting base, not as private owner-uploaded content.
+
+| Lesson | Goal |
+|---|---|
+| Diplomatic Stakeholder Pushback | Push back on a risky plan without sounding defensive. |
+| Incident Updates and ETA Caveats | Write production issue updates with uncertainty. |
+| Architecture Trade-offs and Recommendations | Compare options and recommend one without overselling it. |
+| Reporting Verbs for Workplace Opinions | Report claims, doubts, suggestions, and disagreements accurately. |
+| Risk Mitigation and Conditionals | Explain risks and mitigations with precise conditional language. |
+| Sprint Planning and Priority Negotiation | Align on priorities and negotiate sprint scope. |
+| Scope Clarification and Requirements | Ask precise questions about ambiguous requirements. |
+| Technical Debt and Refactoring Rationale | Explain why refactoring is worth doing now. |
+| Data Trends and Business Reports | Summarise trends and business impact. |
+| Customer Feedback and Feature Prioritisation | Prioritise product work from customer feedback. |
+| Cross-team Dependencies and Ownership | Discuss dependencies, blockers, and ownership clearly. |
+| Performance, Latency, and Reliability | Explain performance issues and reliability trade-offs. |
+| Security and Privacy Risk Communication | Explain security/privacy risks without creating panic. |
+| Performance Feedback Diplomacy | Give direct but respectful feedback to a colleague. |
+| Roadmap Updates Under Uncertainty | Explain roadmap changes and uncertainty clearly. |
+| Postmortems and Lessons Learned | Summarise causes and lessons without blame. |
+| Async Slack and Email Updates | Write concise async updates with context and next steps. |
+| Deadline Negotiation and Pushback | Negotiate a deadline while protecting quality. |
+| Executive Summaries and Concise Recommendations | Write short summaries for decision-makers. |
+| Disagreeing, Proposing Alternatives, and Aligning Next Steps | Disagree clearly, propose an alternative, and align on next steps. |
+
 ---
 
 ## 5. Practice Modes / Режимы практики
@@ -185,9 +227,10 @@ Operational drills are just-in-time tools:
 
 ## 6. First Week Onboarding / Первая неделя
 
-**Day 1 - material.**
-Upload one real source with `/upload`, review candidates, approve only useful
-targets.
+**Day 1 - material or seed lesson.**
+Upload one real source with `/upload`, or browse `/library` and subscribe to one
+seed lesson with `/subscribe <template_id>`. Review/approve uploaded candidates
+when you use your own material.
 
 **Day 2 - baseline.**
 Run `/today`, answer honestly, use confidence ratings, and do not over-polish.
