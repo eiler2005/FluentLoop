@@ -9,6 +9,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY pyproject.toml ./
+COPY alembic.ini ./
 COPY src ./src
 COPY scripts ./scripts
 COPY migrations ./migrations

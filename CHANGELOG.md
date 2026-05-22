@@ -18,6 +18,8 @@ All notable changes to FluentLoop are recorded here. Format follows
   Pimsleur-style sub-day SRS intervals, confidence ratings, reflection logging,
   evaluation probe scaffolding, chunk JSONL import, and named breakthrough
   practice mode entrypoints.
+- Docker image packaging now includes `alembic.ini` so deploy-time migrations
+  can run inside the container.
 
 ### Changed
 - `AGENTS.md` updated to reflect 21 epic files (15 PRD-backlog + 6
