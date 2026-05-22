@@ -36,8 +36,9 @@ All notable changes to FluentLoop are recorded here. Format follows
   can run inside the container.
 
 ### Changed
-- EPIC-22 status moved through a Phase 2 validation gate to close review
-  findings before restoring final Done status.
+- EPIC-22 Phase 2 validation is closed: in-session GIR re-fire, negative-path
+  tests, migration roundtrip verification, deploy runbook coverage, VPS schema
+  verification, and live smoke are now part of the Done evidence.
 - `AGENTS.md` updated to reflect 21 epic files (15 PRD-backlog + 6
   learning-engine roadmap) and the current docs tree.
 - `docs/architecture.md` upgraded from v0.1 stub framing to v0.2 with all

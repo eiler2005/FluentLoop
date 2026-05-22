@@ -1657,8 +1657,8 @@ Operational utility commands provide structured just-in-time practice cards for
 meeting prep, article analysis, debate, RU→EN transfer, and 4-3-2 fluency.
 Polish behavior includes a 30-day Article Lab text pipeline, `/practice sprint`,
 Rolling Native Comparison in the Coach Journal, and a richer Why layer.
-EPIC-22 final Done requires Phase 2 validation: in-session GIR, negative-path
-tests, schema verification, deploy runbook coverage, and live command smoke.
+EPIC-22 final Done includes Phase 2 validation: in-session GIR, negative-path
+tests, schema verification, deploy runbook coverage, and live smoke on the VPS.
 
 ---
 

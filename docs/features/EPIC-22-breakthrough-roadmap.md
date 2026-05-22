@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** In progress — Phase 2 validation: in-session GIR, negative-path tests, schema verification, and live command smoke
+**Status:** Done — Phase 1-2 implemented, deployed, and validated
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -759,7 +759,7 @@ Sprint 1 implementation v1 включает: layered feedback schema/buttons, de
 
 ## Phase 2 validation gate
 
-EPIC-22 возвращается в `Done` только после закрытия review findings:
+EPIC-22 возвращён в `Done` после закрытия review findings:
 
 - in-session GIR re-fire inside a single active practice session;
 - negative-path tests for L1 false positives, native-rewrite fallback,
@@ -769,6 +769,16 @@ EPIC-22 возвращается в `Done` только после закрыт�
 - deploy runbook smoke for `/scene`, `/brief`, `/mentor`, `/article`,
   `/debate`, `/translate_lab`, `/fluency432`, `/practice sprint`, confidence
   rating, feedback layers, and `/reflect`.
+
+Validation evidence:
+
+- Local gate: `pytest -q` → 113 passed; `ruff check src tests scripts` clean;
+  `secret_scan` ok; `git diff --check` clean.
+- Migration verification: copied SQLite roundtrip test covers
+  upgrade → inspect columns/index → downgrade → upgrade.
+- VPS deployment: batched runtime deploy completed with backup/migration,
+  container `healthy`, bot connected, scheduler started, and Telegram outbound
+  smoke delivered.
 
 ---
 

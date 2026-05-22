@@ -31,7 +31,7 @@ search.
 | 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Done | Selective AI-generated high-value exercise prompts. |
 | 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts and knowledge areas in practice. |
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Done | Local material chunks and keyword retrieval. |
-| 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | In progress | Phase 2 validation after Sprint 1-6 scaffold: in-session GIR, negative-path tests, schema verification, and live command smoke. |
+| 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | Done | Phase 1-2 implemented, deployed, and validated: in-session GIR, negative-path tests, schema verification, and live smoke. |
 | 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Planned | Owner-curated lesson plans discoverable by other admitted users; clone-on-subscribe with isolated per-user progress (ADR-0008). |
 
 ## Dependency graph
