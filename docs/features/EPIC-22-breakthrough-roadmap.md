@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** In progress — Sprint 1-5 landed, Sprint 6 polish in execution
+**Status:** Done — Sprint 1-6 implemented, tested, committed, deployed, and smoke-tested
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -700,11 +700,11 @@ Foundation для всех остальных.
 - F6 Debate, F10 Translation Lab, F13 4-3-2 — landed as structured `/debate`, `/translate_lab`, `/fluency432` cards.
 
 ### Sprint 6+ — Полировка
-- F1 Article Lab full 30-day pipeline
-- #12 Sprint Mode
-- Rolling Native Comparison
-- "Why" Layer
-- Voice-mode (TTS) — переоцениваем стоит ли
+- F1 Article Lab full 30-day pipeline — landed as 6-checkpoint text pipeline in Article Lab v1.
+- #12 Sprint Mode — landed as `/practice sprint` 14-day consistency contract.
+- Rolling Native Comparison — landed in Coach Journal.
+- "Why" Layer — enriched with rule pressure, L1 mechanism, and transfer context.
+- Voice-mode (TTS) — still deferred; re-evaluate after text-first telemetry.
 
 ---
 

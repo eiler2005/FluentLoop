@@ -28,6 +28,8 @@ All notable changes to FluentLoop are recorded here. Format follows
   high-confidence mistake patterns.
 - EPIC-22 Sprint 5 operational utility: structured Pre-Meeting Brief,
   Article Lab v1, Debate, Translation Lab, and 4-3-2 Fluency drill cards.
+- EPIC-22 Sprint 6 polish: 30-day Article Lab pipeline, `/practice sprint`,
+  Rolling Native Comparison in Coach Journal, and richer Why layer context.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 

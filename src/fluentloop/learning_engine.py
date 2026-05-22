@@ -340,6 +340,7 @@ def _filter_scored_items_for_mode(
             "mistake_pattern",
             "chunk",
         },
+        "sprint": {"word", "expression", "grammar_rule", "mistake_pattern", "chunk"},
     }.get(mode)
     if allowed is None:
         return scored_items
@@ -794,7 +795,7 @@ def _preferred_cycle_for_mode(mode: str) -> tuple[str, ...]:
             "follow_up",
             "active_recall",
         )
-    if mode in {"genre", "writing_workshop"}:
+    if mode in {"genre", "writing_workshop", "sprint"}:
         return (
             "mini_writing",
             "sentence_transform",

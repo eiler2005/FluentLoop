@@ -22,6 +22,7 @@ from fluentloop.format_analysis import (
     score_discourse,
 )
 from fluentloop.mistakes import ingest_mistake_event
+from fluentloop.polish import enrich_why_layer
 from fluentloop.russian_l1_filter import detect_l1_interference
 from fluentloop.srs import record_result
 
@@ -92,7 +93,12 @@ def build_teacher_feedback(
     native_reason = feedback.native_rewrite_reason
     if native_rewrite is not None and native_rewrite.reason:
         native_reason = native_rewrite.reason
-    why_layer = feedback.why_layer or why_wrong or rule
+    why_layer = enrich_why_layer(
+        feedback.why_layer or why_wrong or rule,
+        rule=rule,
+        l1_hits=l1_hits,
+        exercise_type=str(exercise.get("exercise_type") or ""),
+    )
     micro_drill = feedback.micro_drill
     if not micro_drill and feedback.status != "correct" and corrected:
         micro_drill = f"Write one new sentence using: {corrected}"

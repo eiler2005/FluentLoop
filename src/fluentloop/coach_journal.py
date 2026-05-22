@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.db.models import PracticeAttempt, PracticeSession, User
+from fluentloop.polish import rolling_native_comparison
 
 
 def write_coach_journal(
@@ -50,6 +51,7 @@ def _render_journal(
         for attempt in attempts
         for key in (attempt.feedback.get("format_feedback") or {})
     ]
+    native_comparisons = rolling_native_comparison(attempts)
     incorrect = len(statuses) - statuses.count("correct") - statuses.count("partial")
     lines = [
         f"# Coach Journal - {current.date().isoformat()}",
@@ -63,6 +65,13 @@ def _render_journal(
         "## Focus",
         f"- L1 hits: {', '.join(l1_hits[:5]) if l1_hits else 'none'}",
         f"- Format notes: {', '.join(format_notes[:5]) if format_notes else 'none'}",
+        "",
+        "## Rolling Native Comparison",
+        *(
+            [f"- {item}" for item in native_comparisons]
+            if native_comparisons
+            else ["- none yet"]
+        ),
         "",
         "## Next Teacher Move",
         "- Pick one review target and one stretch target; end with cold recall.",

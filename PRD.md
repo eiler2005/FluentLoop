@@ -1101,7 +1101,7 @@ Start today’s practice session.
 /review
 Review due items.
 
-/practice vocab|grammar|mistakes|writing|review|mixed|diplomatic|notebook|discourse|reading|genre|writing_workshop
+/practice vocab|grammar|mistakes|writing|review|mixed|diplomatic|notebook|discourse|reading|genre|writing_workshop|sprint
 Start standalone practice by mode.
 
 /topics
@@ -1655,6 +1655,8 @@ Director decision, write a private markdown Coach Journal, and show a Hint
 Ladder for confirmed recurring mistake patterns.
 Operational utility commands provide structured just-in-time practice cards for
 meeting prep, article analysis, debate, RU→EN transfer, and 4-3-2 fluency.
+Polish behavior includes a 30-day Article Lab text pipeline, `/practice sprint`,
+Rolling Native Comparison in the Coach Journal, and a richer Why layer.
 
 ---
 

@@ -38,6 +38,7 @@ from fluentloop.operational_drills import (
     pre_meeting_brief_card,
     translation_lab_pack,
 )
+from fluentloop.polish import article_lab_30_day_plan, sprint_mode_plan
 from fluentloop.practice import start_or_resume_session
 from fluentloop.reflections import record_reflection
 from fluentloop.russian_l1_filter import detect_l1_interference
@@ -57,6 +58,7 @@ def test_layered_feedback_l1_hit_and_confidence_callbacks(db_session, settings) 
     assert attempt is not None
     assert attempt.feedback["confidence_rating"] == 5
     assert attempt.feedback["l1_hits"][0]["rule_id"] == "l1_depend_from"
+    assert "L1 mechanism" in attempt.feedback["why_layer"]
     assert "L1 trap" in reply.text
     assert "feedback:layer:1:errors" in {
         button.data for row in (reply.buttons or []) for button in row
@@ -297,3 +299,24 @@ def test_sprint5_operational_drill_cards_are_structured() -> None:
     assert "counter-argument" in debate["score_axes"]
     assert len(translation["sentences_ru"]) == 5
     assert [round_["minutes"] for round_ in fluency["rounds"]] == [4, 3, 2]
+
+
+def test_sprint6_polish_article_sprint_and_native_comparison(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="expression", text="align on")
+    start_or_resume_session(db_session, user)
+    handle_answer(db_session, user, StubProvider(), "align")
+
+    article = handle_article("AI adoption might reshape engineering teams.")
+    sprint = handle_practice(db_session, user, "sprint")
+    journal = handle_mentor(db_session, user, base_dir=tmp_path)
+    journal_text = next(tmp_path.glob("*.md")).read_text(encoding="utf-8")
+
+    assert len(article_lab_30_day_plan("AI adoption")) == 6
+    assert sprint_mode_plan()["duration_days"] == 14
+    assert "30-day pipeline" in article.text
+    assert "Sprint Mode" in sprint.text
+    assert "Rolling Native Comparison" in journal_text
+    assert "Coach journal" in journal.text

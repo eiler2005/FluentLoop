@@ -12,6 +12,7 @@ from fluentloop.operational_drills import (
     pre_meeting_brief_card,
     translation_lab_pack,
 )
+from fluentloop.polish import article_lab_30_day_plan, sprint_mode_plan
 
 
 @dataclass(frozen=True)
@@ -53,6 +54,7 @@ LESSON_FORMATS: tuple[LessonFormat, ...] = (
         "outline-draft-revision",
         "/practice writing_workshop",
     ),
+    LessonFormat("sprint", "Sprint Mode", "14-day consistency", "/practice sprint"),
 )
 
 PRACTICE_MODE_ALIASES: dict[str, str] = {
@@ -298,6 +300,18 @@ def apply_lesson_format(
             "Revise for reader impact: shorter opening, clearer trade-off, softer ask.",
             "Cut one vague sentence and add one concrete owner/date.",
         )
+    elif lesson_format.mode == "sprint":
+        card = sprint_mode_plan()
+        _set_prompt(
+            exercises,
+            0,
+            "Sprint Mode: daily contract.",
+            (
+                f"Focus: {card['focus']}. Do one review block, one stretch "
+                "production, and one reflection line."
+            ),
+            str(card["success_metric"]),
+        )
     elif lesson_format.mode == "mistakes" and patterns:
         first = patterns[0]
         _set_prompt(
@@ -390,10 +404,16 @@ def article_lab_prompt(text: str) -> str:
         f"- {module['name']}: {module['task']}"
         for module in article_lab_modules(source)
     )
+    pipeline = "\n".join(
+        f"- Day {item['day']}: {item['task']}"
+        for item in article_lab_30_day_plan(source)
+    )
     return (
         "Article Lab v1\n"
         "Modules:\n"
         f"{modules}\n"
+        "30-day pipeline:\n"
+        f"{pipeline}\n"
         "Critical reading tasks:\n"
         f"{tasks}\n"
         f"Source: {source[:500]}"

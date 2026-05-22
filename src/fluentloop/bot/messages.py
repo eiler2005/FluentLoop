@@ -21,7 +21,7 @@ Lessons and topics:
 - /lesson random starts a random active lesson.
 - /lesson topic <query> starts the best matching active lesson.
 - /practice supports vocab, grammar, mistakes, writing, review, mixed,
-  diplomatic, notebook, discourse, reading, genre, and writing_workshop.
+  diplomatic, notebook, discourse, reading, genre, writing_workshop, and sprint.
 
 Adding material:
 - In #materials_upload / Materials Upload, send /upload, choose the material type,
