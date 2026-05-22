@@ -43,6 +43,9 @@ All notable changes to FluentLoop are recorded here. Format follows
   writing/L1 metrics, mistake extinction, and Article Lab probe tracking.
 - Learner-facing `docs/learning-plans.md` with first-week, 30-day, and 12-week
   plans built around the measurable FluentLoop loops.
+- Unified lesson type registry and generated public catalog export:
+  lesson types, B2/B2+ seed lessons, English for Tech, and 40 scenario cards
+  now render to Markdown/HTML under `docs/lesson-catalog/`.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 
@@ -59,6 +62,8 @@ All notable changes to FluentLoop are recorded here. Format follows
   loop measurement-aware after the user has run an outcome report.
 - EPIC-24 is now marked deployed and smoke validated in the feature index and
   roadmap docs.
+- `/lesson` and `/library` now show lesson type and target-mix context so users
+  understand what each lesson trains before starting.
 - `AGENTS.md` updated to reflect the current epic set and docs tree.
 - `docs/architecture.md` upgraded from v0.1 stub framing to v0.2 with all
   ADRs (0002-0008) Accepted referenced.

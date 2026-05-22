@@ -62,6 +62,7 @@ from fluentloop.lesson_plans import (
     lesson_topic_groups,
     random_lesson_plan,
 )
+from fluentloop.lesson_types import format_target_mix, lesson_type_for_plan
 from fluentloop.materials import (
     MATERIAL_TYPES,
     approve_all,
@@ -739,10 +740,13 @@ def handle_library(session: Session, user: User, query: str = "") -> BotReply:
     lines = [bold(title)]
     buttons: list[list[InlineButton]] = []
     for template in templates:
+        items = lesson_items(session, template)
+        lesson_type = lesson_type_for_plan(template, items)
         pool_size = lesson_pool_size(session, template)
         lines.append(
             f"#{template.id} {html_escape(template.title)} - "
-            f"{html_escape(template.topic)} - pool {pool_size}"
+            f"{html_escape(template.topic)} - "
+            f"{html_escape(lesson_type.title)} - pool {pool_size}"
         )
         buttons.append(
             [
@@ -863,10 +867,13 @@ def handle_lessons(session: Session, user: User, query: str = "") -> BotReply:
     lines = [bold(title)]
     buttons: list[list[InlineButton]] = []
     for plan in plans:
+        items = lesson_items(session, plan)
+        lesson_type = lesson_type_for_plan(plan, items)
         pool_size = lesson_pool_size(session, plan)
         lines.append(
             f"#{plan.id} {html_escape(plan.title)} - "
-            f"{html_escape(plan.topic)} - pool {pool_size}"
+            f"{html_escape(plan.topic)} - "
+            f"{html_escape(lesson_type.title)} - pool {pool_size}"
         )
         buttons.append(
             [
@@ -1033,7 +1040,10 @@ def _practice_session_reply(
 
 def _lesson_details_reply(session: Session, plan) -> BotReply:
     items = lesson_items(session, plan)
-    chunks = [item.text for item in items if item.type in {"word", "expression"}][:8]
+    lesson_type = lesson_type_for_plan(plan, items)
+    chunks = [
+        item.text for item in items if item.type in {"word", "expression", "chunk"}
+    ][:8]
     grammar = [item.text for item in items if item.type == "grammar_rule"][:6]
     mistakes = [item.text for item in items if item.type == "mistake_pattern"][:5]
     lines = [
@@ -1041,6 +1051,9 @@ def _lesson_details_reply(session: Session, plan) -> BotReply:
         labeled("Title", plan.title),
         labeled("Topic", plan.topic),
         labeled("Goal", plan.goal),
+        labeled("Lesson type", lesson_type.title),
+        labeled("What you train", lesson_type.goal),
+        labeled("Target mix", format_target_mix(items)),
         labeled("Format", getattr(plan, "format", "lesson")),
     ]
     if plan.language_focus_json:
@@ -1064,7 +1077,10 @@ def _lesson_details_reply(session: Session, plan) -> BotReply:
 
 def _template_details_reply(session: Session, template) -> BotReply:
     items = lesson_items(session, template)
-    chunks = [item.text for item in items if item.type in {"word", "expression"}][:8]
+    lesson_type = lesson_type_for_plan(template, items)
+    chunks = [
+        item.text for item in items if item.type in {"word", "expression", "chunk"}
+    ][:8]
     grammar = [item.text for item in items if item.type == "grammar_rule"][:6]
     mistakes = [item.text for item in items if item.type == "mistake_pattern"][:5]
     lines = [
@@ -1072,6 +1088,9 @@ def _template_details_reply(session: Session, template) -> BotReply:
         labeled("Title", template.title),
         labeled("Topic", template.topic),
         labeled("Goal", template.goal),
+        labeled("Lesson type", lesson_type.title),
+        labeled("What you train", lesson_type.goal),
+        labeled("Target mix", format_target_mix(items)),
     ]
     if template.language_focus_json:
         lines.append(

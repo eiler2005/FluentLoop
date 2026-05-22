@@ -16,6 +16,8 @@ EPIC-23 can also publish the same catalog as shared templates for `/library`.
 The review/export source is:
 
 - [`../curriculum/b2_b2plus_lesson_catalog.md`](../curriculum/b2_b2plus_lesson_catalog.md)
+- Generated public catalog views:
+  [`../lesson-catalog/index.md`](../lesson-catalog/index.md)
 
 ## Local Seed
 
@@ -39,6 +41,31 @@ uv run python scripts/publish_seed_library.py --apply
 
 Expected dry-run/apply output includes `templates=20` on a fresh DB. Re-running
 is idempotent; existing template rows are reused.
+
+## Public Catalog Export
+
+The runtime source of truth is SQLite/code. Markdown/HTML files under
+`docs/lesson-catalog/` are browsing/export views only.
+
+Generate the public catalog from the configured DB:
+
+```bash
+uv run python scripts/export_lesson_catalog.py --public-only --html
+```
+
+Optional DB override:
+
+```bash
+uv run python scripts/export_lesson_catalog.py \
+  --public-only \
+  --html \
+  --db-url sqlite:///data/fluentloop.sqlite \
+  --out docs/lesson-catalog
+```
+
+The export includes only shared template lesson plans and code-defined scenario
+cards. It must not include private uploads, raw source text, PDF text, user
+answers, reflections, or runtime journals.
 
 Optional DB override for a dry run:
 

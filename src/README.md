@@ -13,6 +13,8 @@ src/fluentloop/
 ├── learning_engine.py   Daily and lesson-mode exercise composition.
 ├── lesson_plans.py      User-owned lesson plan pools and lesson browser logic.
 ├── lesson_library.py    EPIC-23 shared seed templates and subscription clones.
+├── lesson_types.py      Learner-facing type registry for lessons/modes/metrics.
+├── catalog_export.py    Public lesson catalog Markdown/HTML export.
 ├── curriculum_b2.py     Deterministic B2/B2+ seed catalog.
 ├── curriculum_chunks.py Owner-generated chunk JSONL validation/import.
 ├── lesson_formats.py    EPIC-22 lesson formats and operational drills.

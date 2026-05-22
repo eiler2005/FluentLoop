@@ -4,8 +4,10 @@
 |---|---|
 | [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |
 | [`user-guide.md`](user-guide.md) | Bilingual learner guide: methodology, daily process, practice modes, outcome measurement, and visual process maps. |
+| [`learning-methodology.md`](learning-methodology.md) | Learner-facing method: input -> lesson type -> practice mode -> exercise -> feedback -> SRS/mistakes -> outcomes. |
 | [`learning-plans.md`](learning-plans.md) | Practical first-week, 30-day, and 12-week learner plans using `/baseline`, `/today`, focused practice modes, and `/outcomes`. |
 | [`material-upload-guide.md`](material-upload-guide.md) | User-facing cookbook for preparing lesson notes, feedback, articles, transcripts, and LLM-assisted upload material. |
+| [`lesson-catalog/`](lesson-catalog/) | Generated public catalog: lesson types, B2/B2+ seed lessons, English for Tech, and 40 business/IT scenarios. |
 | [`adr/`](adr/) | Architecture decision records. Each captures one significant choice. |
 | [`adr/0001-template.md`](adr/0001-template.md) | Reusable ADR template. |
 | [`adr/0002-telegram-library-choice.md`](adr/0002-telegram-library-choice.md) | Accepted Telegram library choice. |
@@ -32,4 +34,6 @@
   the PRD onto a concrete unit of work with its own acceptance criteria
   and verification plan.
 - [`user-guide.md`](user-guide.md) is the learner-facing "how to use the bot"
-  guide and the best place to understand the training methodology.
+  guide. [`learning-methodology.md`](learning-methodology.md) is the clean
+  method map. [`lesson-catalog/`](lesson-catalog/) is generated from DB/code
+  and shows the current public lessons and lesson types.

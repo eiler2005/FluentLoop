@@ -4,6 +4,10 @@ FluentLoop - это Telegram-бот для английского B2+/C1- в bus
 Он помогает не просто "решать упражнения", а превращать реальные материалы,
 ошибки и рабочие ситуации в измеримый цикл обучения.
 
+Коротко: этот guide отвечает "как пользоваться". Методологию отдельно смотри в
+[learning-methodology.md](learning-methodology.md), а текущие публичные уроки и
+типы уроков - в [lesson-catalog/index.md](lesson-catalog/index.md).
+
 ## 1. FluentLoop за 2 минуты
 
 Что умеет система:
@@ -209,7 +213,8 @@ FluentLoop использует три разные сущности. Их ва�
 1. **Материалы для `/upload`** - то, что ты приносишь сам: lesson notes, phrase
    list, Slack draft, article, meeting notes. В upload guide есть 5 простых
    типов материалов для старта, но это не ограничение продукта.
-2. **20 shared seed lessons** - готовая B2/B2+ библиотека в `/library`.
+2. **Shared seed lessons** - готовая публичная библиотека в `/library`: B2/B2+
+   seed lessons и owner-curated English for Tech.
 3. **40 business/IT scenario cards** - roleplay-ситуации для `/scene` и
    diplomatic practice.
 
@@ -225,9 +230,14 @@ FluentLoop использует три разные сущности. Их ва�
 
 ### Общая seed library
 
-`/library` показывает owner-curated B2/B2+ seed lessons. `/subscribe` копирует
+`/library` показывает owner-curated shared lessons. `/subscribe` копирует
 lesson в твою личную базу. Shared template остается отдельно; твой прогресс
-приватный.
+приватный. Полный generated catalog: [lesson-catalog/index.md](lesson-catalog/index.md).
+
+Каждый урок теперь отображается с **Lesson type**: Vocabulary, Chunks, Grammar,
+Mistake Repair, Diplomatic, Notebook, Reading, Writing, Genre, Scenario, Review,
+Mixed или Outcomes. `/lesson <id>` показывает lesson type, what you train и
+target mix: сколько vocabulary/chunks/grammar/mistakes/writing targets внутри.
 
 Категории 20 seed lessons:
 

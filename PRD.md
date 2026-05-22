@@ -227,7 +227,7 @@ Telegram remains the primary interface for daily practice.
 8. More advanced weekly report.
 9. Breakthrough roadmap: two-layer feedback, sub-day SRS, Russian L1 hit list,
    evaluation probe, reflection, and named lesson formats (EPIC-22).
-10. Shared lesson library: owner-curated templates discoverable and subscribable by other admitted users, with cloned per-user progress (ADR-0008, EPIC-23; v1 implemented with deterministic B2/B2+ seed catalog only).
+10. Shared lesson library: owner-curated templates discoverable and subscribable by other admitted users, with cloned per-user progress (ADR-0008, EPIC-23; v1 includes the deterministic B2/B2+ seed catalog, English for Tech, lesson-type labels, and generated public catalog views).
 11. Admission policy: allow-list vs invite-code vs open signup (ADR-0009 to write).
 12. Learning outcomes loop: monthly `/baseline`, 30-day `/outcomes`, held-out
     retention, productive chunk usage, writing metrics, L1 density, mistake
@@ -1663,6 +1663,14 @@ Rolling Native Comparison in the Coach Journal, and a richer Why layer.
 EPIC-22 final Done includes Phase 2 validation: in-session GIR, negative-path
 tests, schema verification, deploy runbook coverage, and live smoke on the VPS.
 
+A learner-facing Lesson Type layer sits above lesson plans, practice modes, and
+exercise renderers. V1 types are vocabulary, chunks, grammar, mistakes,
+diplomatic, notebook, reading, writing, genre, scenario, review, mixed, and
+outcomes. `/lesson <id>` and `/library` show the type, what it trains, and the
+target mix so users can understand the goal before starting. Generated
+Markdown/HTML catalog views expose public templates and scenario cards only;
+private uploads, raw PDFs, user answers, and reflections are not exported.
+
 EPIC-24 shifts the next learning phase from "more lesson formats" to measurable
 learning outcomes. `/baseline` shows or records the monthly writing/probe
 baseline and persists a held-out learning-item set for later retention checks.
@@ -1828,7 +1836,7 @@ EPIC 19: AI Exercise Generation
 EPIC 20: Grammar Brain
 EPIC 21: Light Material Context Search
 EPIC 22: Breakthrough Roadmap (done; pedagogy foundation, see docs/features/EPIC-22-breakthrough-roadmap.md)
-EPIC 23: Shared Lesson Library (done; owner-curated seed library, see ADR-0008)
+EPIC 23: Shared Lesson Library (done; owner-curated seed library, lesson types, generated public catalog, see ADR-0008)
 EPIC 24: Learning Outcomes Loop (done; measurable learning proof via `/baseline` and `/outcomes`, see docs/features/EPIC-24-learning-outcomes-loop.md)
 ```
 

@@ -1,6 +1,6 @@
 # EPIC-23 — Shared Lesson Library
 
-- **Status:** Done — seed catalog templates, subscribe clones, learner docs, deploy, and smoke validated
+- **Status:** Done — seed catalog templates, English for Tech, subscribe clones, lesson types, public catalog export, learner docs, deploy, and smoke validated
 - **Owner:** Denis Ermilov
 - **Depends on:** EPIC-17 (persistent lesson plans), ADR-0008
 - **Blocks:** ADR-0009 (admission policy), public discovery of bot
@@ -15,9 +15,15 @@ feedback, async communication, deadline negotiation, exec summaries,
 etc.). Other admitted users currently see none of them — every user is
 expected to upload their own material from scratch.
 
-Implementation note: v1 publishes only the deterministic B2/B2+ seed catalog
-(`curriculum:b2-b2plus`) into the shared library. Private owner uploads remain
-private unless explicitly published later by the owner.
+Implementation note: the first rollout published the deterministic B2/B2+ seed
+catalog (`curriculum:b2-b2plus`) before adding the owner-curated English for
+Tech public series. Private owner uploads remain private unless explicitly
+published later by the owner.
+
+Current public catalog v1 contains the deterministic B2/B2+ seed catalog, the
+owner-curated English for Tech series, and 40 code-defined business/IT scenario
+cards. Markdown/HTML exports live in `docs/lesson-catalog/` and are generated
+from SQLite/code, not edited by hand.
 
 The owner wants this content to function as a **shared library**:
 discoverable by any admitted user, subscribable on demand, with a clean
@@ -42,6 +48,14 @@ In:
   user-uploaded plans from their point of view.
 - Publish only deterministic B2/B2+ seed catalog plans tagged
   `curriculum:b2-b2plus` into the first public library.
+- Display a learner-facing Lesson Type and target mix in `/library` and
+  `/lesson <id>` so users can see whether a lesson trains vocabulary, chunks,
+  grammar, mistakes, diplomatic tone, reading, writing, scenario rehearsal, or
+  mixed recall.
+- Export public catalog views with
+  `scripts/export_lesson_catalog.py --public-only --html --out docs/lesson-catalog`.
+  Public exports include shared templates and scenario cards only; private
+  uploads, raw source text/PDFs, user answers, and reflections are excluded.
 - Owner-only path to author new templates: existing upload flow
   produces a `user_id=2` plan; an admin command (`/publish <plan_id>`)
   flips it to `is_template=true`.
@@ -68,7 +82,8 @@ Out (explicit non-goals for this epic):
 2. Seed-library publish step creates/updates the deterministic 20-lesson
    B2/B2+ catalog under the internal seed-library user and marks only plans
    tagged `curriculum:b2-b2plus` as `is_template=true`, plus their linked
-   materials and items.
+   materials and items. Owner-curated public series such as English for Tech
+   use explicit `series:*` tags.
 3. `/library` returns a paginated list of templates with topic, title,
    and template id. Empty case shows a "no templates yet" message.
 4. `/subscribe <template_id>` creates a new `LessonPlan` row with the
@@ -85,6 +100,11 @@ Out (explicit non-goals for this epic):
    items are reused safely under the existing uniqueness constraints.
 8. Existing personal lesson queries exclude template rows so `/topics`,
    `/lessons`, `/lesson`, and `/today` operate on user-owned active plans.
+9. `/library`, template details, and `/lesson <id>` show lesson type and target
+   mix.
+10. `docs/lesson-catalog/` can be regenerated from DB/code and contains public
+    Markdown/HTML pages for lesson types, B2/B2+ seed lessons, English for
+    Tech, and exactly 40 scenario cards.
 
 ## Open questions
 
@@ -100,7 +120,8 @@ Out (explicit non-goals for this epic):
 
 - Local: `pytest -q` covers seed publish, `/library`, details callbacks,
   `/subscribe`, duplicate subscribe reuse, private visibility, owner-only
-  `/publish`, and migration roundtrip.
+  `/publish`, lesson-type display, catalog export privacy, scenario count, and
+  migration roundtrip.
 - VPS: production SQLite was backed up, migration was verified on a copied DB,
   deploy applied `0002_epic23`, seed library publish created 20 template plans,
   20 template sources, and 80 template learning items, and handler smoke passed

@@ -51,6 +51,9 @@ the quality gate; uploaded text does not automatically become active practice.
   переговоров, pushback, incidents, reviews, deadlines и других рабочих
   ситуаций.
 
+Текущий public catalog с lesson types, seed lessons, English for Tech и
+scenario cards: [lesson-catalog/index.md](lesson-catalog/index.md).
+
 ![What FluentLoop Can Train](assets/fluentloop-training-scope.png)
 
 ### 1. Lesson notes from teacher

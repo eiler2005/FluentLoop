@@ -3,6 +3,10 @@
 Этот документ отвечает на практический вопрос: что делать каждый день, чтобы
 FluentLoop реально помогал в рабочем английском.
 
+Методология целиком описана в [learning-methodology.md](learning-methodology.md).
+Текущие lesson types и публичные уроки лежат в
+[lesson-catalog/index.md](lesson-catalog/index.md).
+
 Основная логика:
 
 ```text

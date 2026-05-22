@@ -20,6 +20,7 @@ Start here:
 
 What happens in practice:
 - Your lesson base lives in /topics, /lessons, and /lesson.
+- /lesson shows lesson type, what you train, and target mix.
 - /today chooses practice from your personal base.
 - Feedback has layers: Errors, Native, Why.
 - SRS, confidence, L1 traps, and mistake patterns decide what comes back.
@@ -40,9 +41,9 @@ If you upload material:
   Mistakes/teacher feedback, My examples.
 - New learning items become active only after approval.
 
-Seed library topics: pushback, incidents, trade-offs, risks, tech debt, reports,
-dependencies, reliability, security, postmortems, async updates, exec summaries,
-alignment.
+Seed library topics: B2/B2+ business/IT, English for Tech, pushback, incidents,
+trade-offs, risks, tech debt, reports, reliability, postmortems, async updates,
+exec summaries, alignment.
 
 Useful commands:
 /today - start daily practice
@@ -66,6 +67,8 @@ Useful commands:
 
 Full docs:
 - docs/user-guide.md: what the system can do and how lessons work
+- docs/learning-methodology.md: learning loop and lesson types
+- docs/lesson-catalog/index.md: public lesson catalog
 - docs/learning-plans.md: first week, 30-day, and 12-week plans
 - docs/material-upload-guide.md: simple upload examples"""
 

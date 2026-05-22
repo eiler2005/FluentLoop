@@ -3,8 +3,9 @@
 Each epic file maps a chunk of [`../../PRD.md`](../../PRD.md) onto a concrete
 unit of work. EPIC-01 through EPIC-15 are the original PRD backlog; EPIC-16
 through EPIC-21 extend the learning engine; EPIC-22 adds the breakthrough
-learning loop; EPIC-23 adds the shared seed lesson library; EPIC-24 adds the
-measurable learning-outcomes layer.
+learning loop; EPIC-23 adds the shared seed lesson library, lesson-type layer,
+and generated public catalog; EPIC-24 adds the measurable learning-outcomes
+layer.
 
 ## Epic index
 
@@ -32,7 +33,7 @@ measurable learning-outcomes layer.
 | 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts and knowledge areas in practice. |
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Done | Local material chunks and keyword retrieval. |
 | 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | Done | Phase 1-2 implemented, deployed, and validated: in-session GIR, negative-path tests, schema verification, and live smoke. |
-| 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Done | Shared seed lesson library via `/library` and `/subscribe`; cloned per-user progress, deployed and smoke validated (ADR-0008). |
+| 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Done | Shared seed lesson library via `/library` and `/subscribe`, English for Tech public series, lesson-type labels, generated catalog, cloned per-user progress (ADR-0008). |
 | 24 | [learning-outcomes-loop](EPIC-24-learning-outcomes-loop.md) | Done | Measurement-first layer: `/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article/Critical Reading probes; deployed and smoke validated. |
 
 ## Dependency graph

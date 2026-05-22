@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FluentLoop Lesson Types</title>
+  <style>
+    :root { color-scheme: light; --blue:#1559c7; --green:#187533; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0; color: #121826; background: #fff; line-height: 1.55; }
+    main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 20px;
+      border-bottom: 1px solid #d7e1ef; background: #f7fbff; }
+    nav a { color: var(--blue); text-decoration: none; font-weight: 650; }
+    h1 { font-size: clamp(2rem, 4vw, 3.4rem); margin: 18px 0 12px; }
+    h2 { margin-top: 36px; color: var(--blue); }
+    h3 { margin-top: 24px; color: var(--green); }
+    blockquote { border-left: 4px solid var(--blue); margin: 18px 0;
+      padding: 8px 14px; background: #f7fbff; }
+    code { background: #eef4ff; padding: 2px 6px; border-radius: 5px; }
+    li { margin: 7px 0; }
+    pre { white-space: pre-wrap; overflow-x: auto; background: #f7fbff;
+      border: 1px solid #d7e1ef; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
+<main>
+<h1>FluentLoop Lesson Types</h1>
+<blockquote>Generated from FluentLoop DB/code. Do not hand-edit; regenerate with <code>scripts/export_lesson_catalog.py</code>.</blockquote>
+<p>Lesson Type is the learner-facing layer that connects material, practice mode, exercises, feedback, SRS, and outcomes.</p>
+<pre>| Type | Goal | When to use | Commands | Metrics | Next modes |</pre>
+<pre>|---|---|---|---|---|---|</pre>
+<pre>| Vocabulary | Learn useful terms and convert them into recallable language. | Use when you meet new standalone words or tech terms. | `/practice vocab`, `/review` | active vocabulary, review accuracy | `/practice vocab`, `/today` |</pre>
+<pre>| Chunks and Collocations | Turn phrases, collocations, and reusable workplace language into active production. | Use when you want to sound less translated and reuse ready-made English. | `/practice vocab`, `/practice notebook`, `/today` | productive chunks, reuse count | `/practice notebook`, `/practice vocab` |</pre>
+<pre>| Grammar | Repair grammar patterns that block clear business/IT communication. | Use when the issue is form, tense, articles, prepositions, or sentence shape. | `/practice grammar`, `/practice mistakes` | grammar accuracy, repeat errors | `/practice grammar`, `/review` |</pre>
+<pre>| Mistake Repair | Extinguish recurring mistakes and Russian-transfer traps. | Use when the same error keeps coming back or confidence is low. | `/practice mistakes`, `/review` | mistake extinction, L1 density | `/practice mistakes`, `/translate_lab` |</pre>
+<pre>| Diplomatic Workplace English | Make pushback, disagreement, feedback, and risk language firm but natural. | Use for stakeholder communication, negotiation, feedback, and workplace tone. | `/practice diplomatic`, `/translate_lab`, `/scene` | hedging density, L1 density | `/practice diplomatic`, `/scene` |</pre>
+<pre>| Notebook | Generate real free writing for native-diff, chunk mining, and L1 checks. | Use when the system needs fresh production data from you. | `/practice notebook`, `/reflect` | word count, lexical diversity, mined chunks | `/practice notebook`, `/outcomes full` |</pre>
+<pre>| Critical Reading | Read articles or arguments and produce claim, assumption, and summary outputs. | Use for articles, blog posts, product docs, and executive summaries. | `/article &lt;text&gt;`, `/practice reading` | reading events, summary quality | `/article &lt;text&gt;`, `/practice reading` |</pre>
+<pre>| Writing | Draft workplace artifacts with clear structure, tone, and reusable chunks. | Use for updates, emails, reports, reviews, resumes, and written answers. | `/practice writing`, `/practice discourse`, `/practice writing_workshop`, `/baseline` | writing metrics, hedging density | `/practice writing`, `/practice notebook` |</pre>
+<pre>| Genre Curriculum | Practice the structure of recurring work artifacts. | Use when the hard part is not one phrase, but the whole document shape. | `/practice genre` | genre coverage, artifact completion | `/practice genre`, `/practice writing_workshop` |</pre>
+<pre>| Scenario / Roleplay | Rehearse a realistic business/IT situation with tasks, roles, and target chunks. | Use before meetings, interviews, negotiation, or difficult conversations. | `/scene &lt;topic or number&gt;`, `/brief &lt;agenda&gt;` | scenario coverage, tone/L1 repair | `/scene`, `/practice diplomatic` |</pre>
+<pre>| Review / SRS | Bring due and weak items back until they are easy to recall. | Use when retention is low or `/outcomes` says sample size is thin. | `/review`, `/today`, `/practice review` | held-out retention, review accuracy | `/today`, `/review` |</pre>
+<pre>| Mixed Lesson | Combine vocabulary, chunks, grammar, writing, and recall in one lesson. | Use for textbook lessons, seed lessons, and broad workplace topics. | `/today`, `/lesson &lt;id&gt;`, `/practice mixed` | attempts, retention, productive chunks | `/today`, `/outcomes full` |</pre>
+<pre>| Outcomes | Measure learning quality and choose the next training loop. | Use weekly or monthly to decide what to train next. | `/baseline`, `/outcomes`, `/outcomes full`, `/mentor` | retention, productive chunks, L1 density, mistake extinction | `/today`, `/practice notebook`, `/practice diplomatic` |</pre>
+</main>
+</body>
+</html>
