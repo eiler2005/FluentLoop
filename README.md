@@ -1,7 +1,7 @@
 # FluentLoop
 
 > Telegram bot for English learning. B2+/C1- focus, business and IT context,
-> text-only MVP, shared seed lesson library, single Docker container on a VPS.
+> text-only MVP, shared seed lesson library, measurable outcomes loop, single Docker container on a VPS.
 
 [![CI](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml/badge.svg)](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -17,20 +17,23 @@ drop in your own lesson notes or subscribe to an owner-curated B2/B2+ seed
 lesson, then the bot turns approved targets into spaced repetition and a daily
 ~15-minute, 15-20-drill practice session in a Telegram forum workspace.
 Mistakes feed a pattern detector; recurring patterns shape future practice.
+`/baseline` and `/outcomes` show whether the learning loop is producing
+measurable progress.
 The runtime is intentionally small: Telethon, SQLite, APScheduler, a
 DeepSeek-backed LLM gateway with deterministic fallback, all in one
 `python:3.11-slim` container.
 
-The whole MVP (14 epics) plus a learning-engine roadmap (6 more epics) were
-shipped in a single autonomous overnight build session — see
-[`docs/build-log/`](docs/build-log/) for the verbatim record.
+The original MVP (14 epics) plus a learning-engine roadmap (6 more epics) were
+shipped in a single autonomous overnight build session; EPIC-22..24 now add the
+breakthrough pedagogy, shared lesson library, and outcome-measurement layer.
+See [`docs/build-log/`](docs/build-log/) for the frozen build record.
 
 ## Architecture at a glance
 
 ```
               ┌─────────────────────────────────────────────────────┐
               │ Telegram (forum + DM, admitted users)               │
-              │   /today  /upload  /library  /lessons  /skip  ...    │
+              │ /today /baseline /outcomes /upload /library /skip ... │
               └─────────────────────────┬───────────────────────────┘
                                         │ MTProto long-poll + Bot API
                                         ▼
@@ -125,6 +128,7 @@ Bot          Session done — 15/15 in 14 min.
 | **Learning-engine roadmap** — EPIC-16..21 (staged engine, persistent lesson plans, DeepSeek gateway, AI exercise generator, grammar brain, light material context search) | ✅ Done |
 | **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, lesson formats, curriculum, teacher layer, operational drills, polish) | ✅ Done |
 | **Shared lesson library** — EPIC-23 (`/library`, `/subscribe`, seed catalog templates, per-user clones) | ✅ Done |
+| **Learning outcomes loop** — EPIC-24 (`/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article probes) | 🚧 In progress |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
@@ -207,7 +211,7 @@ FluentLoop/
 
 ```bash
 uv run --extra dev pytest -q
-# 19 modules, 117+ tests, < 30 s locally.
+# 20 modules, 121+ tests, < 30 s locally.
 ```
 
 The CI gate (`.github/workflows/ci.yml`) runs `secret_scan` →

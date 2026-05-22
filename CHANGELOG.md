@@ -37,6 +37,9 @@ All notable changes to FluentLoop are recorded here. Format follows
   clones with isolated progress.
 - Learner-facing material upload guide with upload-ready templates, good/bad
   examples, and an external LLM prompt for preparing raw notes.
+- EPIC-24 learning outcomes loop: `/baseline`, `/outcomes`, `evaluation_runs`,
+  `learning_metric_snapshots`, held-out retention, productive chunk usage,
+  writing/L1 metrics, mistake extinction, and Article Lab probe tracking.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 
@@ -47,8 +50,10 @@ All notable changes to FluentLoop are recorded here. Format follows
 - Telegram `/help` and workspace help now distinguish the user's personal
   lesson base from the shared B2/B2+ seed library.
 - Documentation index, testing guide, runbooks, source map, and agent rules now
-  reflect EPIC-23, ADR-0008, 19 test modules, and the current shared-library
+  reflect EPIC-24, ADR-0008, 20 test modules, and the current shared-library
   deployment model.
+- Coach Journal can include the latest `/outcomes` summary, making the teacher
+  loop measurement-aware after the user has run an outcome report.
 - `AGENTS.md` updated to reflect the current epic set and docs tree.
 - `docs/architecture.md` upgraded from v0.1 stub framing to v0.2 with all
   ADRs (0002-0008) Accepted referenced.

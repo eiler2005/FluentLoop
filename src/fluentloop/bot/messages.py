@@ -13,58 +13,44 @@ Learning process in 6 steps:
 3. Train daily with /today or a focused /practice mode.
 4. Read layered feedback: Errors, Native, Why.
 5. Let SRS, weak items, L1 traps, and mistake patterns rotate back.
-6. Reflect with /reflect and use /mentor for the teacher loop.
+6. Measure progress with /baseline and /outcomes, then reflect with /reflect.
 
 Daily loop:
 - /today starts the automatic 15-minute lesson.
 - Answer in text; optionally tap confidence 1-5 first.
 - Use Skip / show answer or /skip when you want the model answer.
 - Use /feedback explain <attempt_id> for the full teacher breakdown.
+- Use /baseline once a month; /outcomes shows learning-quality progress.
 
-Lessons and topics:
+Lessons:
 - /library [query] shows shared B2/B2+ seed lessons you can copy.
 - /subscribe <template_id> copies a shared lesson into your own lesson base.
-- /topics shows the knowledge areas in the active lesson base.
-- /lessons [query] lists lesson pools by title, topic, focus, or tags.
-- /lesson <id> shows one lesson card.
-- /lesson random starts a random active lesson.
-- /lesson topic <query> starts the best matching active lesson.
+- /topics, /lessons, and /lesson show your personal active lesson base.
 - /practice supports vocab, grammar, mistakes, writing, review, mixed,
   diplomatic, notebook, discourse, reading, genre, writing_workshop, and sprint.
-- Seed library topics include pushback, incidents, trade-offs, reporting verbs,
-  risks, sprint scope, requirements, tech debt, reports, prioritisation,
-  dependencies, reliability, security, feedback, roadmap updates, postmortems,
-  async updates, deadlines, exec summaries, and alignment.
+- Seed library topics include pushback, incidents, trade-offs, risks, tech debt,
+  reports, dependencies, reliability, security, postmortems, async updates,
+  exec summaries, and alignment.
 
 Adding material:
 - In #materials_upload / Materials Upload, send /upload, choose the material type,
   then paste text or attach a UTF-8 .md/.txt lesson file.
 - Best format: Context, Vocabulary/chunks, Grammar/patterns,
   Mistakes/teacher feedback, and My examples.
-- FluentLoop extracts a lesson title, theme, knowledge areas, expressions, grammar
-  rules, and mistake risks.
 - New learning items become active only after approval with /approve <material_id>
   or the Approve all button.
 
 Full methodology:
-- Read docs/user-guide.md in the repo for the bilingual learner guide, process
-  map, practice-mode map, and GPT Image prompt for a visual learning loop.
-- Read docs/material-upload-guide.md for upload-ready examples and an LLM prompt
-  that turns raw notes into FluentLoop lesson material.
-
-Telegram workspace:
-- Practice Flow: current lesson and answers.
-- Materials Upload: lesson notes, word lists, homework, exercises, feedback.
-- Feedback: answer checks and teacher explanations.
-- Next Prompts: follow-up prompts when split from feedback.
-- Mistakes, Summaries, and Stats: weak points and progress.
-- Bot DM: private commands and text entry when Telegram needs a direct chat.
+- docs/user-guide.md: bilingual learner guide, process map, outcomes map.
+- docs/material-upload-guide.md: upload-ready examples and an LLM prep prompt.
 
 Commands:
 /start - create or load profile and post workspace hubs
 /today - start today's practice
 /review - review due items
 /practice <mode> - start a focused or EPIC-22 breakthrough mode
+/baseline [answer] - show or record the monthly writing/probe baseline
+/outcomes [full] - show 30-day learning outcome metrics
 /library [query] - browse shared B2/B2+ seed lessons
 /subscribe <template_id> - copy a shared lesson into your lesson base
 /topics - browse lesson topics and knowledge areas
@@ -82,16 +68,12 @@ Commands:
 /fluency432 <topic> - 4-3-2 fluency practice
 /upload - upload lesson material
 /add expression | push back on | мягко возражать | meetings,stakeholders
-/candidates <material_id> - review extracted candidates
-/candidate add|edit|skip <candidate_id> - manage one candidate
-/approve <material_id> - approve all pending candidates for a material
-/dispute <attempt_id> <reason> - dispute feedback
+/approve <material_id> - approve pending candidates
 /mistakes - show mistake patterns
 /rules - show grammar concepts
-/stats - show progress
+/stats - show operational progress
 /favorites - show favorite items
 /items [active|archived|suspended]
-/item archive|suspend|restore <item_id>
 /settings - change settings
 /help or /howto - show this guide"""
 

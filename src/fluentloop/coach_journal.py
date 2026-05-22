@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.db.models import PracticeAttempt, PracticeSession, User
+from fluentloop.outcomes import latest_outcome_summary
 from fluentloop.polish import rolling_native_comparison
 
 
@@ -32,12 +33,18 @@ def write_coach_journal(
     )
     current = datetime.now(UTC)
     path = base_dir / f"{current.date().isoformat()}-{user.id}.md"
-    path.write_text(_render_journal(user, attempts, current), encoding="utf-8")
+    path.write_text(
+        _render_journal(user, attempts, current, latest_outcome_summary(session, user)),
+        encoding="utf-8",
+    )
     return path
 
 
 def _render_journal(
-    user: User, attempts: list[PracticeAttempt], current: datetime
+    user: User,
+    attempts: list[PracticeAttempt],
+    current: datetime,
+    outcome_summary: str | None = None,
 ) -> str:
     statuses = [str(attempt.status) for attempt in attempts]
     l1_hits = [
@@ -65,6 +72,13 @@ def _render_journal(
         "## Focus",
         f"- L1 hits: {', '.join(l1_hits[:5]) if l1_hits else 'none'}",
         f"- Format notes: {', '.join(format_notes[:5]) if format_notes else 'none'}",
+        "",
+        "## Latest Outcomes",
+        *(
+            outcome_summary.splitlines()
+            if outcome_summary
+            else ["- run /outcomes first"]
+        ),
         "",
         "## Rolling Native Comparison",
         *(

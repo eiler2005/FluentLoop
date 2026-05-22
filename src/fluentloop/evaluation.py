@@ -23,7 +23,11 @@ def select_held_out_items(
     items = list(
         session.scalars(
             select(LearningItem)
-            .where(LearningItem.user_id == user.id, LearningItem.status == "active")
+            .where(
+                LearningItem.user_id == user.id,
+                LearningItem.status == "active",
+                LearningItem.is_template.is_(False),
+            )
             .order_by(LearningItem.id.asc())
             .limit(limit * 10)
         )

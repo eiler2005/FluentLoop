@@ -24,9 +24,12 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     assert "/start" in command_catalog()
     assert "/library" in command_catalog()
     assert "/subscribe" in command_catalog()
+    assert "/baseline" in command_catalog()
+    assert "/outcomes" in command_catalog()
     assert "/howto" in command_catalog()
     assert "/help" in handle_help().text
     assert "/howto" in handle_help().text
+    assert "/outcomes" in handle_help().text
     assert "Seed library topics" in handle_help().text
     assert "#materials_upload" in handle_help().text
     assert exercise_type_count() == 14
@@ -44,7 +47,7 @@ def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
     } <= help_actions
     assert "library:list" in help_actions
     commands = {entry["command"] for entry in bot_commands_payload()}
-    assert {"library", "subscribe"} <= commands
+    assert {"baseline", "outcomes", "library", "subscribe"} <= commands
     channel = handle_channel_hub("-100123")
     assert channel.target_chat_id == "-100123"
     assert "#practice_flow" in channel.text
@@ -102,5 +105,7 @@ def test_telegram_command_menu_payload_uses_bare_commands() -> None:
     names = {entry["command"] for entry in commands}
     assert "howto" in names
     assert "feedback" in names
+    assert "baseline" in names
+    assert "outcomes" in names
     assert all(not entry["command"].startswith("/") for entry in commands)
     assert all(entry["description"] for entry in commands)

@@ -316,6 +316,9 @@ PRD §24 is the product-level source of truth. Key runtime entities:
   plans linked to source materials and existing learning items. EPIC-23 adds
   `is_template` / `template_of` on lesson plans, source materials, and learning
   items so shared seed lessons can be cloned into per-user progress.
+- `EvaluationRun` + `LearningMetricSnapshot` — EPIC-24 learning-outcome data:
+  monthly baselines, held-out item sets, Article Lab probes, and 30-day metric
+  snapshots for `/outcomes` and Coach Journal context.
 - `usage_log` — per-AI-call token counts (cost telemetry).
 
 ## TODOs

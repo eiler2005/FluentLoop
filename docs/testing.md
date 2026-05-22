@@ -25,6 +25,9 @@ git diff --check
 - Curriculum and library: deterministic B2/B2+ seed idempotency, lesson-browser
   commands, shared template publishing, subscription clones, duplicate subscribe
   reuse, and migration roundtrip checks.
+- Learning outcomes: monthly baseline runs, held-out retention, productive
+  chunk usage, writing/L1 metrics, mistake extinction, Article Lab probe events,
+  outcome snapshots, and template-row isolation.
 - Operations: smoke message formatting with build/time/plan notes and safe
   Telegram workspace maintenance helpers.
 
@@ -39,5 +42,7 @@ After deploy, run a real Telegram smoke:
 4. Confirm the subscribed clone appears in `/lessons` and `/lesson <id>`.
 5. Run `/topics`, `/lesson random`, and `/today`.
 6. Answer at least two prompts.
-7. Use `/skip` once and confirm the answer/explanation appears.
-8. Check that the smoke message includes build, time, and plan notes.
+7. Run `/baseline`, submit one short `/baseline <answer>`, then run
+   `/outcomes` and `/outcomes full`.
+8. Use `/skip` once and confirm the answer/explanation appears.
+9. Check that the smoke message includes build, time, and plan notes.

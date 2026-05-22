@@ -206,6 +206,32 @@ class PracticeAttempt(Base, TimestampMixin):
     feedback: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
+class EvaluationRun(Base, TimestampMixin):
+    __tablename__ = "evaluation_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(32), index=True)
+    prompt: Mapped[str] = mapped_column(Text, default="")
+    answer_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_reference: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    metrics_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    held_out_item_ids: Mapped[list[int]] = mapped_column(JSON, default=list)
+    period_start: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+    period_end: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+
+
+class LearningMetricSnapshot(Base, TimestampMixin):
+    __tablename__ = "learning_metric_snapshots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    period_start: Mapped[date] = mapped_column(Date, index=True)
+    period_end: Mapped[date] = mapped_column(Date, index=True)
+    metrics_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    summary_text: Mapped[str] = mapped_column(Text, default="")
+
+
 class PracticeSessionCached(Base, TimestampMixin):
     __tablename__ = "practice_session_cached"
     __table_args__ = (

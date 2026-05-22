@@ -14,6 +14,8 @@ BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("today", "Start today's 15-minute practice"),
     ("review", "Review due items"),
     ("practice", "Start focused and EPIC-22 breakthrough practice modes"),
+    ("baseline", "Show or record monthly learning baseline"),
+    ("outcomes", "Show 30-day learning outcome metrics"),
     ("library", "Browse shared seed lessons"),
     ("subscribe", "Copy a shared lesson into your lesson base"),
     ("topics", "Browse lesson topics and knowledge areas"),

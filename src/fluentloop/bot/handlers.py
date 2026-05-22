@@ -73,6 +73,12 @@ from fluentloop.materials import (
     store_material,
 )
 from fluentloop.mistakes import active_patterns, archive_pattern, promote_pattern
+from fluentloop.outcomes import (
+    build_outcome_report,
+    current_baseline_prompt,
+    record_article_probe,
+    record_baseline,
+)
 from fluentloop.practice import (
     get_in_progress_session,
     next_exercise,
@@ -311,16 +317,18 @@ def handle_channel_help(
         "4. Read compact teacher feedback. Use /feedback explain <attempt_id> "
         "for the full breakdown.\n"
         "5. Upload lesson notes in Materials Upload with /upload; approve "
-        "candidates before they become active learning items.\n\n"
+        "candidates before they become active learning items.\n"
+        "6. Record /baseline monthly and check /outcomes for learning-quality "
+        "progress.\n\n"
         "Workspace map:\n"
         "- Practice Flow: current lesson and answers\n"
         "- Materials Upload: lesson notes, word lists, homework, feedback\n"
         "- Feedback: corrections and explanations\n"
         "- Next Prompts: follow-up prompts\n"
         "- Mistakes, Summaries, Stats: weak points and progress\n\n"
-        "Useful commands: /today, /library, /subscribe, /practice, /topics, "
-        "/lessons, /lesson random, /lesson topic <query>, /upload, /skip, "
-        "/help, /howto.",
+        "Useful commands: /today, /baseline, /outcomes, /library, /subscribe, "
+        "/practice, /topics, /lessons, /lesson random, /lesson topic <query>, "
+        "/upload, /skip, /help, /howto.",
         channel_id,
         buttons=[
             [_button("Today", "today:start"), _button("Lessons", "lessons:list")],
@@ -1484,7 +1492,36 @@ def handle_mentor(
     return BotReply(f"{mentor_question()}\n\nCoach journal: {path.name}")
 
 
-def handle_article(payload: str) -> BotReply:
+def handle_baseline(session: Session, user: User, payload: str = "") -> BotReply:
+    if not payload.strip():
+        return BotReply(current_baseline_prompt(session, user))
+    try:
+        run = record_baseline(session, user, payload)
+    except ValueError as exc:
+        return BotReply(str(exc))
+    metrics = run.metrics_json or {}
+    return BotReply(
+        "Baseline saved.\n"
+        f"Words: {int(metrics.get('word_count') or 0)}\n"
+        f"Lexical diversity: {float(metrics.get('lexical_diversity') or 0):.2f}\n"
+        f"Hedging: {float(metrics.get('hedging_density') or 0) * 100:.1f}/100 words\n"
+        f"Avg sentence: {float(metrics.get('mean_sentence_length') or 0):.1f} words\n"
+        f"Held-out items: {len(run.held_out_item_ids or [])}\n\n"
+        "Now use /today and /practice notebook; check /outcomes after a few sessions."
+    )
+
+
+def handle_outcomes(session: Session, user: User, payload: str = "") -> BotReply:
+    full = payload.strip().lower() == "full"
+    report = build_outcome_report(session, user, full=full)
+    return BotReply(report.summary_text)
+
+
+def handle_article(
+    payload: str, *, session: Session | None = None, user: User | None = None
+) -> BotReply:
+    if session is not None and user is not None and payload.strip():
+        record_article_probe(session, user, payload)
     return BotReply(article_lab_prompt(payload))
 
 
@@ -1710,6 +1747,8 @@ def command_catalog() -> list[str]:
         "/today",
         "/review",
         "/practice",
+        "/baseline",
+        "/outcomes",
         "/library",
         "/subscribe",
         "/topics",

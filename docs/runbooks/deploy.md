@@ -36,12 +36,15 @@ learning_columns = [c["name"] for c in inspector.get_columns("learning_items")]
 lesson_columns = [c["name"] for c in inspector.get_columns("lesson_plans")]
 source_columns = [c["name"] for c in inspector.get_columns("source_materials")]
 lesson_indexes = [idx["name"] for idx in inspector.get_indexes("lesson_plans")]
+tables = set(inspector.get_table_names())
 print("learning_items.metadata_json:", "metadata_json" in learning_columns)
 print("learning_items.is_template:", "is_template" in learning_columns)
 print("lesson_plans.format:", "format" in lesson_columns)
 print("lesson_plans.is_template:", "is_template" in lesson_columns)
 print("source_materials.is_template:", "is_template" in source_columns)
 print("ix_lesson_plans_format:", "ix_lesson_plans_format" in lesson_indexes)
+print("evaluation_runs:", "evaluation_runs" in tables)
+print("learning_metric_snapshots:", "learning_metric_snapshots" in tables)
 PY
 ```
 
@@ -123,4 +126,8 @@ uv run python scripts/smoke_telegram.py \
     and `/fluency432 incident update`.
 16. Smoke `/practice sprint` and one lesson-format mode such as
     `/practice notebook` or `/practice genre`.
+17. For EPIC-24 changes, run `/baseline`, submit a short
+    `/baseline <answer>`, then run `/outcomes` and `/outcomes full`; confirm
+    the report shows sample sizes instead of fake progress when data is thin.
+18. Confirm `/mentor` includes the latest outcome summary after `/outcomes`.
 ```

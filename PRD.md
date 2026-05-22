@@ -229,6 +229,9 @@ Telegram remains the primary interface for daily practice.
    evaluation probe, reflection, and named lesson formats (EPIC-22).
 10. Shared lesson library: owner-curated templates discoverable and subscribable by other admitted users, with cloned per-user progress (ADR-0008, EPIC-23; v1 implemented with deterministic B2/B2+ seed catalog only).
 11. Admission policy: allow-list vs invite-code vs open signup (ADR-0009 to write).
+12. Learning outcomes loop: monthly `/baseline`, 30-day `/outcomes`, held-out
+    retention, productive chunk usage, writing metrics, L1 density, mistake
+    extinction, and Article/Critical Reading probes (EPIC-24).
 ```
 
 ### P2 — future
@@ -1660,6 +1663,17 @@ Rolling Native Comparison in the Coach Journal, and a richer Why layer.
 EPIC-22 final Done includes Phase 2 validation: in-session GIR, negative-path
 tests, schema verification, deploy runbook coverage, and live smoke on the VPS.
 
+EPIC-24 shifts the next learning phase from "more lesson formats" to measurable
+learning outcomes. `/baseline` shows or records the monthly writing/probe
+baseline and persists a held-out learning-item set for later retention checks.
+`/outcomes` reports the last 30 days of learning-quality evidence: held-out
+retention, productive chunk use, Notebook/writing metrics, hedging density,
+Russian L1 trap density per 100 words, low-confidence mistake extinction, and
+Article/Critical Reading probe events. Reports must show sample sizes and say
+"insufficient data" when evidence is too thin. `/stats` remains the operational
+progress view; `/outcomes` is the learning-progress view. Article Lab v1 records
+probe metadata without storing pasted source article text.
+
 ---
 
 ## 26. MVP success criteria
@@ -1813,8 +1827,9 @@ EPIC 18: Structured LLM Gateway
 EPIC 19: AI Exercise Generation
 EPIC 20: Grammar Brain
 EPIC 21: Light Material Context Search
-EPIC 22: Breakthrough Roadmap (in progress; pedagogy upgrades, see docs/features/EPIC-22-breakthrough-roadmap.md)
-EPIC 23: Shared Lesson Library (planned; content access for multiple users, see ADR-0008)
+EPIC 22: Breakthrough Roadmap (done; pedagogy foundation, see docs/features/EPIC-22-breakthrough-roadmap.md)
+EPIC 23: Shared Lesson Library (done; owner-curated seed library, see ADR-0008)
+EPIC 24: Learning Outcomes Loop (in progress; measurable learning proof, see docs/features/EPIC-24-learning-outcomes-loop.md)
 ```
 
 ---

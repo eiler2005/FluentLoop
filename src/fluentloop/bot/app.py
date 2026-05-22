@@ -14,6 +14,7 @@ from fluentloop.bot.handlers import (
     handle_article,
     handle_attempt_ack,
     handle_attempt_hard,
+    handle_baseline,
     handle_brief,
     handle_candidate_action,
     handle_candidate_edit_menu,
@@ -42,6 +43,7 @@ from fluentloop.bot.handlers import (
     handle_mentor,
     handle_mistake_action,
     handle_mistakes,
+    handle_outcomes,
     handle_practice,
     handle_publish,
     handle_reflect,
@@ -345,6 +347,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     ),
                     message_thread_id=practice_target.message_thread_id,
                 )
+            elif command == "/baseline":
+                reply = handle_baseline(
+                    session, user, event.raw_text.removeprefix("/baseline").strip()
+                )
+            elif command == "/outcomes":
+                reply = handle_outcomes(
+                    session, user, event.raw_text.removeprefix("/outcomes").strip()
+                )
             elif command == "/topics":
                 reply = handle_topics(session, user)
             elif command == "/library":
@@ -399,7 +409,11 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif command == "/mentor":
                 reply = handle_mentor(session, user)
             elif command == "/article":
-                reply = handle_article(event.raw_text.removeprefix("/article").strip())
+                reply = handle_article(
+                    event.raw_text.removeprefix("/article").strip(),
+                    session=session,
+                    user=user,
+                )
             elif command == "/debate":
                 reply = handle_debate(event.raw_text.removeprefix("/debate").strip())
             elif command == "/translate_lab":

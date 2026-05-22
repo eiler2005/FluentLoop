@@ -16,6 +16,7 @@ src/fluentloop/
 ├── curriculum_b2.py     Deterministic B2/B2+ seed catalog.
 ├── curriculum_chunks.py Owner-generated chunk JSONL validation/import.
 ├── lesson_formats.py    EPIC-22 lesson formats and operational drills.
+├── outcomes.py          EPIC-24 baseline runs and learning-outcome metrics.
 ├── feedback.py          Answer feedback, native rewrite, layered details.
 ├── srs.py               Review intervals, including sub-day GIR.
 ├── mistakes.py          Mistake events and pattern detection.

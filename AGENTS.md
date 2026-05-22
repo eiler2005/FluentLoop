@@ -16,11 +16,12 @@ notes.
   the current environment gate is still a separate ADR-0009 concern.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 23
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 24
   numbered epics plus the EPIC-16..21 roadmap overview. EPIC-01 through
   EPIC-15 mirror the PRD §28 backlog (EPIC-15 is Deferred); EPIC-16 through
-  EPIC-23 cover the post-MVP learning engine, breakthrough roadmap, and shared
-  lesson library. See [`docs/features/README.md`](docs/features/README.md).
+  EPIC-24 cover the post-MVP learning engine, breakthrough roadmap, shared
+  lesson library, and outcomes loop. See
+  [`docs/features/README.md`](docs/features/README.md).
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
   + ADRs in [`docs/adr/`](docs/adr/) (0002-0008 all Accepted).
 - **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
@@ -116,7 +117,7 @@ FluentLoop/
 │   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
 │   ├── testing.md                Standard test gate and what tests cover.
 │   ├── adr/                      Architecture decision records (0002-0008 Accepted).
-│   ├── features/                 23 numbered epics + EPIC-16..21 overview.
+│   ├── features/                 24 numbered epics + EPIC-16..21 overview.
 │   ├── user-guide.md             Learner guide and learning-loop map.
 │   ├── material-upload-guide.md  Upload formats and LLM prep prompt.
 │   ├── runbooks/                 Operational procedures.
@@ -128,7 +129,7 @@ FluentLoop/
 ├── data/                         Runtime artifacts: SQLite, sessions, backups (gitignored).
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (19 modules, 117+ tests).
+└── tests/                        Pytest suite (20 modules, 121+ tests).
 ```
 
 ## Verification commands
@@ -138,7 +139,7 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # 23 numbered epics + EPIC-16..21 overview
+ls docs/features/EPIC-*.md | wc -l    # 24 numbered epics + EPIC-16..21 overview
 
 # No secrets staged
 python scripts/secret_scan.py

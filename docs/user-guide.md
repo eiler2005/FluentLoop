@@ -53,6 +53,23 @@ The English version:
 6. **Reflect and steer.** Use `/reflect`, `/mentor`, and focused practice modes
    to turn the loop into a personal training plan.
 
+### What changed in the outcome phase
+
+The next phase is not "more and more lesson formats". FluentLoop now focuses on
+5-6 high-ROI loops and measures whether they work:
+
+- **Baseline and held-out retention:** `/baseline` once a month, then
+  `/outcomes` to see retention from real practice.
+- **Productive chunks:** which chunks you actively use at least 3 times in
+  recent free production.
+- **Notebook writing:** lexical diversity, hedging, sentence length, and mined
+  chunks from `/practice notebook`.
+- **Diplomatic/L1:** hedging density and Russian L1 trap density per 100 words.
+- **Mistake extinction:** whether low-confidence mistake patterns are becoming
+  nearly extinct or extinct.
+- **Article/Critical Reading:** main claim, hedge marker, assumption challenge,
+  and executive summary from `/practice reading` and `/article`.
+
 ---
 
 ## 2. Карта процесса / Process Map
@@ -72,9 +89,10 @@ flowchart TD
     F --> G[Sub-day SRS + recall<br/>Повторение и recall]
     F --> H[Mistake patterns + L1 traps<br/>Паттерны ошибок]
     F --> I[Reflection + Coach Journal<br/>Рефлексия и журнал]
+    I --> L[Baseline + Outcomes<br/>/baseline + /outcomes]
     G --> D
     H --> D
-    I --> D
+    L --> D
 
     D -. lesson formats .-> J[Diplomatic<br/>Notebook<br/>Discourse<br/>Reading<br/>Vocabulary<br/>Genre<br/>Writing Workshop<br/>Sprint]
     D -. operational drills .-> K[Brief<br/>Scene<br/>Article<br/>Debate<br/>Translation Lab<br/>4-3-2 Fluency]
@@ -120,6 +138,7 @@ Make it feel like a practical learner guide, not a marketing poster. Use simple 
    `Errors` for accuracy, `Native` for natural phrasing, `Why` for the rule and
    transfer logic.
 7. At the end, save one line with `/reflect <what was hardest today?>`.
+8. Once a month, run `/baseline`, submit the answer, and check `/outcomes`.
 
 ### How to read feedback
 
@@ -211,6 +230,18 @@ know what you want to train.
 | `/practice genre` | You want a work artifact schema: RFC, post-mortem, review, proposal, etc. |
 | `/practice writing_workshop` | You want outline -> draft -> revision. |
 | `/practice sprint` | You want a 14-day consistency contract. |
+
+### Outcome commands
+
+| Command | Use when... |
+|---|---|
+| `/baseline` | You want the current monthly writing/probe prompt. |
+| `/baseline <answer>` | You want to save the monthly writing baseline and held-out item set. |
+| `/outcomes` | You want the short 30-day learning-quality report. |
+| `/outcomes full` | You want sample sizes, top chunks, unused chunks, L1 hits, and data notes. |
+
+`/stats` answers "how much did I practice?" `/outcomes` answers "what evidence
+do we have that my English is improving?"
 
 Operational drills are just-in-time tools:
 
