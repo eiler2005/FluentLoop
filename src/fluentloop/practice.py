@@ -20,6 +20,7 @@ from fluentloop.db.models import (
 )
 from fluentloop.exercises import EXERCISE_TYPES, Exercise, render_for_item
 from fluentloop.grammar import parents_of
+from fluentloop.hint_ladder import render_hint_ladder
 from fluentloop.learning import active_items
 from fluentloop.lesson_plans import available_lesson_plan
 from fluentloop.srs import get_due_items
@@ -132,7 +133,7 @@ def _high_confidence_pattern_exercises(session: Session, user: User) -> list[Exe
                 "error_correction",
                 prompt,
                 expected,
-                "Use the recurring mistake pattern as your clue.",
+                render_hint_ladder(pattern),
                 pattern.description,
                 target_ids,
             )

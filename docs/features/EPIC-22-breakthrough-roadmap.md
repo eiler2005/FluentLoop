@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** In progress — Sprint 1-3 landed, Sprint 4+ in execution
+**Status:** In progress — Sprint 1-4 landed, Sprint 5+ in execution
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -688,10 +688,10 @@ Foundation для всех остальных.
 - F4 Writing Workshop — landed as outline → draft → revision staged prompts.
 
 ### Sprint 4 (3 недели) — "The Teacher"
-- #8 Lesson Director (agentic multi-agent)
-- #9 Coach's Journal
-- F5 Roleplay (40-scenario library + Scene Builder + split agent)
-- #13 Hint Ladder
+- #8 Lesson Director — landed as structured `LessonDirectorDecision` with deterministic fallback and provider route.
+- #9 Coach's Journal — landed as markdown output under `data/coach_journal/` via `/mentor`.
+- F5 Roleplay — landed over the 40-scenario library with numeric Scene Builder selection.
+- #13 Hint Ladder — landed for `confidence=high` mistake patterns.
 
 ### Sprint 5 (2 недели) — "Operational utility"
 - F14 Pre-Meeting Brief

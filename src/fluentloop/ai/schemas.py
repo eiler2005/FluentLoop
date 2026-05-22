@@ -96,10 +96,19 @@ class NativeRewriteFeedback(BaseModel):
     has_upgrade: bool = False
 
 
+class LessonDirectorDecision(BaseModel):
+    mode: str = "mixed"
+    reason: str = ""
+    review_focus: str = ""
+    stretch_focus: str = ""
+    target_item_ids: list[int] = Field(default_factory=list)
+
+
 Validated = (
     ExtractionResult
     | GenerationResult
     | AnswerFeedback
     | NativeRewriteFeedback
+    | LessonDirectorDecision
     | LessonPlanDraft
 )

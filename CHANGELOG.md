@@ -23,6 +23,9 @@ All notable changes to FluentLoop are recorded here. Format follows
   Writing Workshop stages, and Mistake Drill extinction-state metadata.
 - EPIC-22 Sprint 3 curriculum: static 10-genre seed catalog and
   `scripts/seed_genre_curriculum.py` for owner-curated genre lessons.
+- EPIC-22 Sprint 4 teacher layer: structured Lesson Director decision,
+  Coach Journal markdown output, scenario-card selection, and Hint Ladder for
+  high-confidence mistake patterns.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 

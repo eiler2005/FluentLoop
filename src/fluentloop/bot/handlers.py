@@ -15,6 +15,7 @@ from fluentloop.bot.messages import (
     start_message,
 )
 from fluentloop.bot.state import StateStore
+from fluentloop.coach_journal import write_coach_journal
 from fluentloop.config import Settings
 from fluentloop.db.models import User
 from fluentloop.exercises import EXERCISE_TYPES
@@ -1322,8 +1323,11 @@ def handle_scene(payload: str) -> BotReply:
     return BotReply(scene_builder(payload))
 
 
-def handle_mentor() -> BotReply:
-    return BotReply(mentor_question())
+def handle_mentor(
+    session: Session, user: User, *, base_dir: Path = Path("data/coach_journal")
+) -> BotReply:
+    path = write_coach_journal(session, user, base_dir=base_dir)
+    return BotReply(f"{mentor_question()}\n\nCoach journal: {path.name}")
 
 
 def handle_article(payload: str) -> BotReply:

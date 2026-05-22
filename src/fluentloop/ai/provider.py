@@ -12,6 +12,7 @@ from fluentloop.ai.schemas import (
     ExtractedItem,
     ExtractionResult,
     GenerationResult,
+    LessonDirectorDecision,
     LessonPlanDraft,
     LessonPlanItemDraft,
     LessonStepDraft,
@@ -496,6 +497,29 @@ class StubProvider(AIProvider):
                 ),
                 has_upgrade=bool(rewrite and rewrite != answer),
             )
+        if task == "epic_22_lesson_director":
+            high_patterns = payload.get("high_confidence_patterns") or []
+            due_count = int(payload.get("due_count") or 0)
+            types = payload.get("types") or []
+            if due_count >= 5:
+                mode = "review"
+                reason = "Due queue is heavy."
+            elif high_patterns:
+                mode = "mistakes"
+                reason = "High-confidence mistake pattern needs extinction."
+            elif list(types).count("chunk") >= 3:
+                mode = "vocab"
+                reason = "Chunk bank is ready for activation."
+            else:
+                mode = "mixed"
+                reason = "Balanced teacher rotation."
+            return LessonDirectorDecision(
+                mode=mode,
+                reason=reason,
+                review_focus="review the weakest current target",
+                stretch_focus="one no-hint production task",
+                target_item_ids=list(payload.get("target_item_ids") or []),
+            )
         return self.heavy_call(task, payload)
 
     def heavy_call(self, task: str, payload: dict[str, Any]) -> Validated:
@@ -658,6 +682,10 @@ class OpenAIProvider(AIProvider):
             return NativeRewriteFeedback.model_validate_json(
                 response.choices[0].message.content or "{}"
             )
+        if task == "epic_22_lesson_director":
+            return LessonDirectorDecision.model_validate_json(
+                response.choices[0].message.content or "{}"
+            )
         if task == "epic_07_generate_exercise":
             return GenerationResult.model_validate_json(
                 response.choices[0].message.content or "{}"
@@ -798,6 +826,23 @@ class DeepSeekProvider(AIProvider):
                 LLMTask.TONE_FEEDBACK,
                 payload,
                 NativeRewriteFeedback,
+                model=profile.model,
+                fallback=lambda: self.stub.light_call(task, payload),
+            )
+        if task == "epic_22_lesson_director":
+            profile = task_profile(
+                LLMTask.SEED_LESSON_PLAN,
+                _settings_for_models(
+                    self.fast_model,
+                    self.planner_model,
+                    self.extractor_model,
+                    self.planner_reasoning_effort,
+                ),
+            )
+            return self.gateway.run_json(
+                LLMTask.SEED_LESSON_PLAN,
+                payload,
+                LessonDirectorDecision,
                 model=profile.model,
                 fallback=lambda: self.stub.light_call(task, payload),
             )

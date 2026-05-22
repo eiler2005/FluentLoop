@@ -365,7 +365,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif command == "/brief":
                 reply = handle_brief(event.raw_text.removeprefix("/brief").strip())
             elif command == "/mentor":
-                reply = handle_mentor()
+                reply = handle_mentor(session, user)
             elif command == "/article":
                 reply = handle_article(event.raw_text.removeprefix("/article").strip())
             elif command == "/debate":

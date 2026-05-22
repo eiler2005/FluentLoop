@@ -1650,6 +1650,9 @@ attempt: Notebook native-diff mined chunks, Discourse Builder cohesion metadata,
 Critical Reading task metadata, and Mistake Drill extinction-state metadata.
 The owner can also seed a static 10-genre business/IT writing curriculum; each
 seeded plan uses `LessonPlan.format="genre"` and normal per-user progress.
+The teacher layer may choose the next lesson mode through a structured Lesson
+Director decision, write a private markdown Coach Journal, and show a Hint
+Ladder for confirmed recurring mistake patterns.
 
 ---
 

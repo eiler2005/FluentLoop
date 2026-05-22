@@ -18,6 +18,7 @@ from fluentloop.db.models import (
 from fluentloop.exercises import Exercise, render_for_item
 from fluentloop.grammar import select_focus_concept
 from fluentloop.learning import active_items
+from fluentloop.lesson_director import decide_lesson_format
 from fluentloop.lesson_formats import apply_lesson_format, normalize_practice_mode
 from fluentloop.lesson_plans import (
     available_lesson_plan,
@@ -113,10 +114,17 @@ def choose_session_mode(
     if available_lesson_plan(session, user) is not None:
         return "lesson"
     due_items = get_due_items(session, user.id, limit=20, now=_current(now))
-    if len(due_items) >= 5:
-        return "review"
-    if _active_patterns(session, user.id, limit=1):
+    patterns = _active_patterns(session, user.id, limit=3)
+    scored_items = [row.item for row in score_learning_items(session, user, now=now)]
+    director = decide_lesson_format(
+        due_items=due_items,
+        scored_items=scored_items,
+        patterns=patterns,
+    )
+    if director.mode == "mistakes":
         return "mistake_focus"
+    if director.mode in {"review", "vocab", "genre"}:
+        return director.mode
 
     clustered_source = session.execute(
         select(LearningItem.source_material_id, func.count())

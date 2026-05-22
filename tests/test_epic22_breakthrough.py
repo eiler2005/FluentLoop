@@ -8,7 +8,9 @@ from fluentloop.bot.handlers import (
     handle_article,
     handle_confidence_rating,
     handle_feedback_layer,
+    handle_mentor,
     handle_practice,
+    handle_scene,
 )
 from fluentloop.curriculum_chunks import ChunkRecord, import_chunk_records
 from fluentloop.db.models import (
@@ -25,7 +27,9 @@ from fluentloop.genre_curriculum import (
     render_genre_curriculum_markdown,
     seed_genre_curriculum,
 )
+from fluentloop.hint_ladder import hint_ladder_for_pattern
 from fluentloop.learning import create_learning_item
+from fluentloop.lesson_director import decide_lesson_format
 from fluentloop.lesson_formats import GENRE_SPECS, scenario_cards
 from fluentloop.practice import start_or_resume_session
 from fluentloop.reflections import record_reflection
@@ -234,3 +238,41 @@ def test_sprint3_genre_curriculum_seed(db_session, settings) -> None:
     assert chunk_items
     assert len(genre_plans) == 10
     assert "Genre Curriculum" in markdown
+
+
+def test_sprint4_teacher_layer_director_journal_scene_and_hints(
+    tmp_path, db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    chunk = create_learning_item(
+        db_session,
+        user,
+        type_="chunk",
+        text="one constraint we should account for",
+    )
+    pattern = MistakePattern(
+        user_id=user.id,
+        description="Recurring article issue",
+        mistake_type="articles",
+        confidence="high",
+        status="active",
+        wrong_examples=["before sprint"],
+        correct_examples=["before the sprint"],
+        event_count=4,
+    )
+    db_session.add(pattern)
+    db_session.flush()
+
+    decision = decide_lesson_format(
+        due_items=[],
+        scored_items=[chunk],
+        patterns=[pattern],
+    )
+    scene = handle_scene("2")
+    journal = handle_mentor(db_session, user, base_dir=tmp_path)
+    ladder = hint_ladder_for_pattern(pattern)
+
+    assert decision.mode == "mistakes"
+    assert "Code review feedback" in scene.text
+    assert "Coach journal" in journal.text
+    assert ladder[-1].startswith("4. Rewrite")

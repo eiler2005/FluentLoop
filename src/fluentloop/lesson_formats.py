@@ -343,7 +343,21 @@ def mentor_question() -> str:
 def scene_builder(payload: str) -> str:
     cards = scenario_cards()
     selected = cards[0]
-    if payload:
+    query = payload.strip()
+    if query:
+        normalized = query.lower().replace("#", "").replace("scenario_", "")
+        if normalized.isdigit():
+            index = int(normalized) - 1
+            if 0 <= index < len(cards):
+                selected = cards[index]
+        elif any(card["id"] == query for card in cards):
+            selected = next(card for card in cards if card["id"] == query)
+        else:
+            selected = {
+                **selected,
+                "setting": payload,
+            }
+    if query and selected is cards[0] and query not in {"1", "01", "scenario_01"}:
         selected = {
             **selected,
             "setting": payload,
