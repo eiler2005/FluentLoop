@@ -31,7 +31,8 @@ All notable changes to FluentLoop are recorded here. Format follows
 - EPIC-22 Sprint 6 polish: 30-day Article Lab pipeline, `/practice sprint`,
   Rolling Native Comparison in Coach Journal, and richer Why layer context.
 - Bilingual learner guide with the FluentLoop learning methodology, visual
-  lesson-flow map, first-week onboarding, and real learner examples.
+  lesson-flow map, method map, training-scope map, first-week onboarding, and
+  real learner examples.
 - EPIC-23 shared lesson library: `/library`, `/subscribe`, owner-only
   `/publish`, seed catalog template publishing, and per-user subscription
   clones with isolated progress.

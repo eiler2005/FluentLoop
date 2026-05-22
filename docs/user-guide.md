@@ -115,6 +115,8 @@ Input:
 
 ## 3. Методика обучения
 
+![FluentLoop Learning Method](assets/fluentloop-learning-method.png)
+
 ### 1. Approved input
 
 Новые learning items не становятся активными автоматически. Ты загружаешь
@@ -201,6 +203,8 @@ learning-quality report. `/stats` говорит "сколько практик�
 ## 6. Какие уроки есть
 
 FluentLoop использует три разные сущности. Их важно не смешивать:
+
+![What FluentLoop Can Train](assets/fluentloop-training-scope.png)
 
 1. **Материалы для `/upload`** - то, что ты приносишь сам: lesson notes, phrase
    list, Slack draft, article, meeting notes. В upload guide есть 5 простых

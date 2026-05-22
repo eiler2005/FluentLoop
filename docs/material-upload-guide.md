@@ -51,6 +51,8 @@ the quality gate; uploaded text does not automatically become active practice.
   переговоров, pushback, incidents, reviews, deadlines и других рабочих
   ситуаций.
 
+![What FluentLoop Can Train](assets/fluentloop-training-scope.png)
+
 ### 1. Lesson notes from teacher
 
 Bad paste:
