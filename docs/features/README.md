@@ -31,7 +31,7 @@ search.
 | 19 | [ai-exercise-generator](EPIC-19-ai-exercise-generator.md) | Done | Selective AI-generated high-value exercise prompts. |
 | 20 | [grammar-brain-v1](EPIC-20-grammar-brain-v1.md) | Done | Practical business/IT grammar concepts and knowledge areas in practice. |
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Done | Local material chunks and keyword retrieval. |
-| 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | In progress | Pedagogy upgrades — Sprint 1 foundation and Sprint 2 lesson-format core landed; Sprint 3+ is moving through the repeatable gate. |
+| 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | In progress | Pedagogy upgrades — Sprint 1-3 landed: foundation, lesson-format core, chunk import, Vocabulary Lab, 10-genre curriculum, and Writing Workshop stages. |
 | 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Planned | Owner-curated lesson plans discoverable by other admitted users; clone-on-subscribe with isolated per-user progress (ADR-0008). |
 
 ## Dependency graph

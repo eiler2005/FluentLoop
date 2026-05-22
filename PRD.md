@@ -1648,6 +1648,8 @@ without requiring another AI call.
 Named EPIC-22 lesson formats may add structured `format_feedback` to the stored
 attempt: Notebook native-diff mined chunks, Discourse Builder cohesion metadata,
 Critical Reading task metadata, and Mistake Drill extinction-state metadata.
+The owner can also seed a static 10-genre business/IT writing curriculum; each
+seeded plan uses `LessonPlan.format="genre"` and normal per-user progress.
 
 ---
 

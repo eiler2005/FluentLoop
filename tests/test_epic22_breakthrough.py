@@ -14,11 +14,17 @@ from fluentloop.curriculum_chunks import ChunkRecord, import_chunk_records
 from fluentloop.db.models import (
     ExtractedCandidate,
     LearningItem,
+    LessonPlan,
     MistakeEvent,
     MistakePattern,
     PracticeAttempt,
 )
 from fluentloop.evaluation import build_monthly_probe, writing_metrics
+from fluentloop.genre_curriculum import (
+    genre_lesson_seeds,
+    render_genre_curriculum_markdown,
+    seed_genre_curriculum,
+)
 from fluentloop.learning import create_learning_item
 from fluentloop.lesson_formats import GENRE_SPECS, scenario_cards
 from fluentloop.practice import start_or_resume_session
@@ -208,3 +214,23 @@ def test_sprint2_mistake_extinction_metadata(db_session, settings) -> None:
     extinction = attempt.feedback["format_feedback"]["mistake_extinction"]
     assert extinction["state"] in {"active", "building"}
     assert extinction["target_streak"] == 5
+
+
+def test_sprint3_genre_curriculum_seed(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+
+    result = seed_genre_curriculum(db_session, user)
+    chunk_items = list(
+        db_session.scalars(select(LearningItem).where(LearningItem.type == "chunk"))
+    )
+    genre_plans = list(
+        db_session.scalars(select(LessonPlan).where(LessonPlan.format == "genre"))
+    )
+    markdown = render_genre_curriculum_markdown()
+
+    assert result["lessons"] == 10
+    assert result["items"] >= 40
+    assert len(genre_lesson_seeds()) == 10
+    assert chunk_items
+    assert len(genre_plans) == 10
+    assert "Genre Curriculum" in markdown

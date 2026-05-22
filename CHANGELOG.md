@@ -21,6 +21,8 @@ All notable changes to FluentLoop are recorded here. Format follows
 - EPIC-22 Sprint 2 lesson-format core: Notebook native-diff mining, Discourse
   scoring metadata, Critical Reading tasks, Vocabulary Lab metadata grouping,
   Writing Workshop stages, and Mistake Drill extinction-state metadata.
+- EPIC-22 Sprint 3 curriculum: static 10-genre seed catalog and
+  `scripts/seed_genre_curriculum.py` for owner-curated genre lessons.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 

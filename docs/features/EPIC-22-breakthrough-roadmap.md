@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** In progress — Sprint 1 foundation landed, Sprint 2 core landed, Sprint 3+ in execution
+**Status:** In progress — Sprint 1-3 landed, Sprint 4+ in execution
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -682,10 +682,10 @@ Foundation для всех остальных.
 - F12 Mistake Drill 2.0 — landed with causal prompt and extinction-state metadata.
 
 ### Sprint 3 (3 недели) — "Curriculum"
-- Импорт пользовательского `data/curriculum/chunks_v1.jsonl` (~3000 chunks) → `scripts/import_chunks.py` + `LearningItem(kind="chunk")` + alembic migration
-- F8 Vocabulary Lab format (поверх импортированного bank)
-- #11 Genre Curriculum (первые 10 жанров со схемами)
-- F4 Writing Workshop (Khanmigo-style outline→draft→revision)
+- Импорт пользовательского `data/curriculum/chunks_v1.jsonl` (~3000 chunks) → landed via `scripts/import_chunks.py`, Pydantic validation/dedupe, `LearningItem(type="chunk")`, and alembic migration.
+- F8 Vocabulary Lab format — landed over chunk `field/register/function` metadata.
+- #11 Genre Curriculum — landed as static 10-genre seed via `scripts/seed_genre_curriculum.py`.
+- F4 Writing Workshop — landed as outline → draft → revision staged prompts.
 
 ### Sprint 4 (3 недели) — "The Teacher"
 - #8 Lesson Director (agentic multi-agent)

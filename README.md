@@ -121,7 +121,7 @@ Bot          Session done — 15/15 in 14 min.
 |---|---|
 | **MVP foundation** — EPIC-01..14 (bot, profile, upload, AI extract+approve, items CRUD, SRS, daily session, exercise types, answer feedback, mistake patterns, grammar graph, stats, favorites) | ✅ Done |
 | **Learning-engine roadmap** — EPIC-16..21 (staged engine, persistent lesson plans, DeepSeek gateway, AI exercise generator, grammar brain, light material context search) | ✅ Done |
-| **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, Russian L1 detector, named lesson formats, evaluation/reflection, chunk import) | 🚧 In progress |
+| **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, Russian L1 detector, named lesson formats, chunk/genre curriculum, evaluation/reflection) | 🚧 In progress |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
