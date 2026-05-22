@@ -31,6 +31,13 @@ from fluentloop.hint_ladder import hint_ladder_for_pattern
 from fluentloop.learning import create_learning_item
 from fluentloop.lesson_director import decide_lesson_format
 from fluentloop.lesson_formats import GENRE_SPECS, scenario_cards
+from fluentloop.operational_drills import (
+    article_lab_modules,
+    debate_card,
+    fluency432_card,
+    pre_meeting_brief_card,
+    translation_lab_pack,
+)
 from fluentloop.practice import start_or_resume_session
 from fluentloop.reflections import record_reflection
 from fluentloop.russian_l1_filter import detect_l1_interference
@@ -276,3 +283,17 @@ def test_sprint4_teacher_layer_director_journal_scene_and_hints(
     assert "Code review feedback" in scene.text
     assert "Coach journal" in journal.text
     assert ladder[-1].startswith("4. Rewrite")
+
+
+def test_sprint5_operational_drill_cards_are_structured() -> None:
+    brief = pre_meeting_brief_card("Q3 roadmap review")
+    article = article_lab_modules("The author might be wrong about AI adoption.")
+    debate = debate_card("remote work improves focus")
+    translation = translation_lab_pack("planning")
+    fluency = fluency432_card("incident update")
+
+    assert brief["topic"] == "Q3 roadmap review"
+    assert len(article) == 5
+    assert "counter-argument" in debate["score_axes"]
+    assert len(translation["sentences_ru"]) == 5
+    assert [round_["minutes"] for round_ in fluency["rounds"]] == [4, 3, 2]

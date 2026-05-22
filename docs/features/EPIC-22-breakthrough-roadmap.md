@@ -1,6 +1,6 @@
 # EPIC-22 — Breakthrough Roadmap (idea catalog)
 
-**Status:** In progress — Sprint 1-4 landed, Sprint 5+ in execution
+**Status:** In progress — Sprint 1-5 landed, Sprint 6 polish in execution
 **Owner:** FluentLoop owner
 **Created:** 2026-05-16
 **Purpose:** каталог прорывных идей по урокам и продукту плюс execution roadmap. После фиксации решений этот файл стал рабочей спецификацией EPIC-22: Sprint 1 foundation реализуется первым, следующие lesson formats идут по sequencing ниже.
@@ -694,10 +694,10 @@ Foundation для всех остальных.
 - #13 Hint Ladder — landed for `confidence=high` mistake patterns.
 
 ### Sprint 5 (2 недели) — "Operational utility"
-- F14 Pre-Meeting Brief
-- F15 Mentor's Question (weekly)
-- F1 Article Lab (стартуем с 5-модульной версии)
-- F6 Debate, F10 Translation Lab, F13 4-3-2
+- F14 Pre-Meeting Brief — landed as structured `/brief` card.
+- F15 Mentor's Question (weekly) — landed via `/mentor` with Coach Journal output.
+- F1 Article Lab — landed as 5-module text-first `/article` v1.
+- F6 Debate, F10 Translation Lab, F13 4-3-2 — landed as structured `/debate`, `/translate_lab`, `/fluency432` cards.
 
 ### Sprint 6+ — Полировка
 - F1 Article Lab full 30-day pipeline

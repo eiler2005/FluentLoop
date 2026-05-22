@@ -26,6 +26,8 @@ All notable changes to FluentLoop are recorded here. Format follows
 - EPIC-22 Sprint 4 teacher layer: structured Lesson Director decision,
   Coach Journal markdown output, scenario-card selection, and Hint Ladder for
   high-confidence mistake patterns.
+- EPIC-22 Sprint 5 operational utility: structured Pre-Meeting Brief,
+  Article Lab v1, Debate, Translation Lab, and 4-3-2 Fluency drill cards.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 

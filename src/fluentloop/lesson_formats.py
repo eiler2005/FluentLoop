@@ -5,6 +5,13 @@ from typing import Any
 
 from fluentloop.db.models import LearningItem, MistakePattern
 from fluentloop.format_analysis import critical_reading_card, vocabulary_lab_card
+from fluentloop.operational_drills import (
+    article_lab_modules,
+    debate_card,
+    fluency432_card,
+    pre_meeting_brief_card,
+    translation_lab_pack,
+)
 
 
 @dataclass(frozen=True)
@@ -321,13 +328,15 @@ def _set_prompt(
 
 
 def pre_meeting_brief(agenda: str) -> str:
-    topic = agenda.strip() or "the meeting"
+    card = pre_meeting_brief_card(agenda)
+    chunks = "; ".join(card["chunks"])
+    moves = "; ".join(card["moves"])
+    traps = "; ".join(card["l1_traps"])
     return (
-        f"Pre-meeting brief: {topic}\n"
-        "Chunks: align on scope; one constraint is; the trade-off is; "
-        "it might be worth; can we close on.\n"
-        "Moves: open with context, clarify risk, push back softly, close with owner.\n"
-        "L1 trap: avoid bare imperatives; use Could we / It may be worth.\n"
+        f"Pre-meeting brief: {card['topic']}\n"
+        f"Chunks: {chunks}\n"
+        f"Moves: {moves}\n"
+        f"L1 traps: {traps}\n"
         "Hedging: I might be missing something; my read is; one concern is."
     )
 
@@ -377,10 +386,14 @@ def article_lab_prompt(text: str) -> str:
     source = text.strip() or "paste an article after /article"
     reading = critical_reading_card(source)
     tasks = "\n".join(f"- {task}" for task in reading["tasks"])
+    modules = "\n".join(
+        f"- {module['name']}: {module['task']}"
+        for module in article_lab_modules(source)
+    )
     return (
         "Article Lab v1\n"
-        "Modules: pre-read, vocab pre-teach, 1T cloze, critical question, "
-        "cold recall.\n"
+        "Modules:\n"
+        f"{modules}\n"
         "Critical reading tasks:\n"
         f"{tasks}\n"
         f"Source: {source[:500]}"
@@ -388,27 +401,35 @@ def article_lab_prompt(text: str) -> str:
 
 
 def debate_prompt(topic: str) -> str:
-    subject = topic.strip() or "the current engineering trade-off"
+    card = debate_card(topic)
+    axes = "; ".join(card["score_axes"])
     return (
-        f"Debate Mode: {subject}\n"
-        "State your position in 2-3 sentences. FluentLoop will argue the opposite "
-        "and score concession, counter-argument, and hedging language."
+        f"Debate Mode: {card['topic']}\n"
+        f"Your task: {card['learner_task']}\n"
+        f"Bot role: {card['bot_role']}.\n"
+        f"Score axes: {axes}."
     )
 
 
 def translation_lab_prompt(topic: str) -> str:
-    subject = topic.strip() or "stakeholder communication"
+    pack = translation_lab_pack(topic)
+    sentences = "\n".join(f"- {sentence}" for sentence in pack["sentences_ru"])
+    focus = "; ".join(pack["l1_focus"])
     return (
-        f"Translation Lab: {subject}\n"
-        "Translate 5 Russian business sentences into idiomatic English. "
-        "Feedback will flag L1 transfer and provide one native alternative."
+        f"Translation Lab: {pack['topic']}\n"
+        f"{sentences}\n"
+        f"L1 focus: {focus}."
     )
 
 
 def fluency432_prompt(topic: str) -> str:
-    subject = topic.strip() or "a recent project risk"
+    card = fluency432_card(topic)
+    rounds = "\n".join(
+        f"- {round_['minutes']} min: {round_['goal']}"
+        for round_ in card["rounds"]
+    )
     return (
-        f"4-3-2 Fluency: {subject}\n"
-        "Write the same message three times: first normally, then shorter, then "
-        "as a crisp one-minute version. Preserve meaning while reducing friction."
+        f"4-3-2 Fluency: {card['topic']}\n"
+        f"{rounds}\n"
+        f"Success: {card['success']}."
     )

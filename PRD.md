@@ -1653,6 +1653,8 @@ seeded plan uses `LessonPlan.format="genre"` and normal per-user progress.
 The teacher layer may choose the next lesson mode through a structured Lesson
 Director decision, write a private markdown Coach Journal, and show a Hint
 Ladder for confirmed recurring mistake patterns.
+Operational utility commands provide structured just-in-time practice cards for
+meeting prep, article analysis, debate, RU→EN transfer, and 4-3-2 fluency.
 
 ---
 
