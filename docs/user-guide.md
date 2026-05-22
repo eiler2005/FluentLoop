@@ -1,296 +1,316 @@
 # FluentLoop User Guide / Руководство пользователя
 
-FluentLoop is a Telegram learning loop for B2+/C1- business and IT English.
-It is designed for short daily practice over your real materials, not for
-random generic exercises.
+FluentLoop - это Telegram-бот для английского B2+/C1- в business/IT контексте.
+Он помогает не просто "решать упражнения", а превращать реальные материалы,
+ошибки и рабочие ситуации в измеримый цикл обучения.
 
-FluentLoop - это Telegram-бот для английского B2+/C1- с фокусом на business
-and IT English. Главная идея: тренироваться каждый день на своих реальных
-материалах, получать точный фидбэк, возвращать слабые места в повторение и
-постепенно превращать пассивный английский в активный.
+## 1. FluentLoop за 2 минуты
 
----
+Что умеет система:
 
-## 1. Методология / Methodology
+- **Учится на твоих материалах.** Можно загрузить lesson notes, список фраз,
+  Slack/email draft, статью, meeting notes или homework через `/upload`.
+- **Дает готовую базу уроков.** Можно открыть `/library`, выбрать seed lesson и
+  скопировать его в личную базу через `/subscribe <template_id>`.
+- **Тренирует каждый день.** `/today` собирает короткую сессию из твоей личной
+  базы: recall, cloze, rewrite, translation, free production, cold recall.
+- **Проверяет ответ слоями.** `Errors` чинит ошибки, `Native` показывает, как
+  звучит естественнее, `Why` объясняет правило и transfer logic.
+- **Возвращает слабые места.** SRS, confidence, L1 traps и mistake patterns
+  решают, что должно вернуться позже.
+- **Мерит прогресс.** `/baseline` создает стартовую точку, `/outcomes` показывает
+  30-day evidence: retention, chunks, L1 density, writing metrics, mistakes.
 
-FluentLoop построен как повторяемая петля:
-
-```text
-approved input -> daily retrieval -> layered feedback -> SRS ->
-mistakes/L1 traps -> reflection -> teacher/curriculum loops
-```
-
-По-русски:
-
-1. **Approved input.** Ты загружаешь реальные материалы: lesson notes,
-   рабочие фразы, статью, homework, teacher feedback. Бот извлекает цели, но
-   новые активные элементы появляются только после approval.
-2. **Daily retrieval.** Каждый день `/today` дает короткую 15-minute сессию:
-   recall, cloze, rewrite, translation, free production, cold recall.
-3. **Layered feedback.** Ответ проверяется не одним серым verdict, а слоями:
-   `Errors` - что неверно, `Native` - как сказал бы носитель, `Why` - почему
-   это важно.
-4. **Sub-day SRS.** Правильные и слабые элементы возвращаются через интервалы
-   от секунд/минут до дней, чтобы закрепить не только узнавание, но и
-   продуктивный recall.
-5. **Mistakes + L1 traps.** Повторяющиеся ошибки и Russian L1 interference
-   становятся отдельными training targets.
-6. **Reflection + teacher loop.** `/reflect` и `/mentor` помогают увидеть,
-   где ты упрощаешь мысль из-за нехватки языка, а Lesson Director выбирает
-   следующий режим тренировки.
-
-The English version:
-
-1. **Approve real input.** Upload your real learning/work material and approve
-   the targets you want to train.
-2. **Retrieve daily.** `/today` gives you a short staged session with active
-   recall and realistic production.
-3. **Read layered feedback.** Use Errors, Native, and Why as separate channels.
-4. **Let SRS recycle targets.** Good, Hard, Again, confidence, and skips affect
-   what returns later.
-5. **Train mistake patterns.** Repeated mistakes and Russian L1 traps become
-   focused drills.
-6. **Reflect and steer.** Use `/reflect`, `/mentor`, and focused practice modes
-   to turn the loop into a personal training plan.
-
-### What changed in the outcome phase
-
-The next phase is not "more and more lesson formats". FluentLoop now focuses on
-5-6 high-ROI loops and measures whether they work:
-
-- **Baseline and held-out retention:** `/baseline` once a month, then
-  `/outcomes` to see retention from real practice.
-- **Productive chunks:** which chunks you actively use at least 3 times in
-  recent free production.
-- **Notebook writing:** lexical diversity, hedging, sentence length, and mined
-  chunks from `/practice notebook`.
-- **Diplomatic/L1:** hedging density and Russian L1 trap density per 100 words.
-- **Mistake extinction:** whether low-confidence mistake patterns are becoming
-  nearly extinct or extinct.
-- **Article/Critical Reading:** main claim, hedge marker, assumption challenge,
-  and executive summary from `/practice reading` and `/article`.
-
----
-
-## 2. Карта процесса / Process Map
-
-![FluentLoop Learning Loop](assets/fluentloop-learning-loop.png)
-
-The PNG above is the polished learner-facing map. The Mermaid source below is
-kept as the editable version of the same process.
-
-```mermaid
-flowchart TD
-    A[Upload real materials<br/>Загрузка материалов] --> B[Approve learning items<br/>Подтверждение целей]
-    B --> C[LearningItem bank<br/>Слова, chunks, grammar, mistakes]
-    C --> D[Lesson Director<br/>Выбор режима тренировки]
-    D --> E[Practice session<br/>/today or /practice]
-    E --> F[Layered feedback<br/>Errors / Native / Why]
-    F --> G[Sub-day SRS + recall<br/>Повторение и recall]
-    F --> H[Mistake patterns + L1 traps<br/>Паттерны ошибок]
-    F --> I[Reflection + Coach Journal<br/>Рефлексия и журнал]
-    I --> L[Baseline + Outcomes<br/>/baseline + /outcomes]
-    G --> D
-    H --> D
-    L --> D
-
-    D -. lesson formats .-> J[Diplomatic<br/>Notebook<br/>Discourse<br/>Reading<br/>Vocabulary<br/>Genre<br/>Writing Workshop<br/>Sprint]
-    D -. operational drills .-> K[Brief<br/>Scene<br/>Article<br/>Debate<br/>Translation Lab<br/>4-3-2 Fluency]
-```
-
-### GPT Image prompt
-
-Use this prompt if you want a polished visual map:
+Главный принцип: FluentLoop полезен, когда видит полный loop:
 
 ```text
-Create a clean bilingual RU/EN process map for "FluentLoop Learning Loop", a Telegram-based English learning bot for B2+/C1 business and IT English.
-
-Style: modern product education diagram, white background, dark text, subtle blue/green accents, clear arrows, no clutter, no mascots.
-
-Show 7 connected stages in a loop:
-1. Upload real materials / Загрузка материалов
-2. Approve learning items / Подтверждение целей
-3. Daily practice / Ежедневная практика
-4. Layered feedback: Errors, Native, Why / Слои фидбэка
-5. Sub-day SRS + recall / Повторение и recall
-6. Mistake patterns + L1 traps / Паттерны ошибок
-7. Reflection + Coach Journal / Рефлексия и журнал тренера
-
-Add side branches for:
-- Lesson formats: Diplomatic, Notebook, Discourse, Reading, Vocabulary, Genre, Writing Workshop, Sprint
-- Operational drills: Brief, Scene, Article, Debate, Translation Lab, 4-3-2 Fluency
-
-Make it feel like a practical learner guide, not a marketing poster. Use simple icons: document, checklist, chat bubble, layered cards, clock, warning marker, notebook.
+real material -> approved targets -> daily practice -> feedback ->
+SRS/mistakes -> reflection -> outcomes -> next focus
 ```
 
----
+![How FluentLoop Lessons Work](assets/fluentloop-lesson-flow.png)
 
-## 3. Daily Use / Ежедневное использование
+## 2. Что система делает на простых материалах
 
-### Standard daily loop
+### Пример 1: список фраз с урока
 
-1. Send `/today`.
-2. Read the current step and answer in text.
-3. Before answering, optionally tap confidence `1-5`.
-4. If stuck, use Skip / show answer or `/skip`.
-5. Read the compact feedback.
-6. Use the feedback buttons:
-   `Errors` for accuracy, `Native` for natural phrasing, `Why` for the rule and
-   transfer logic.
-7. At the end, save one line with `/reflect <what was hardest today?>`.
-8. Once a month, run `/baseline`, submit the answer, and check `/outcomes`.
+Input:
 
-### How to read feedback
+```text
+Lesson: Stakeholder pushback
+Chunks:
+- push back on
+- align on priorities
+- it might be worth considering
+Mistake: I said "depend from"; correct is "depend on".
+Example: We need to align on the scope before Friday.
+```
 
-- **Correct** means the answer works for the exercise.
-- **Partial** often means the meaning is clear, but grammar, register, or L1
-  transfer needs repair.
-- **Again** means the target should come back soon.
-- **Native rewrite** is not always "the only correct answer"; it is a stronger
-  workplace version to imitate.
-- **L1 trap** flags a likely Russian-to-English transfer issue, such as a wrong
-  preposition, missing article, or too-direct workplace tone.
+Что сделает FluentLoop:
 
----
+- извлечет chunks и mistake risk;
+- попросит approve перед добавлением в практику;
+- даст cloze/rewrite/recall в `/today`;
+- поймает L1 trap вроде `depend from`;
+- покажет в `/outcomes`, используешь ли ты chunks активно.
 
-## 4. Adding Material / Добавление материалов
+Следующие команды: `/upload` -> `/approve <material_id>` -> `/today`.
 
-Use this when you want FluentLoop to learn from your real lessons or work.
+### Пример 2: Slack/email draft
 
-1. Send `/upload`.
-2. Choose the material type if the bot asks.
-3. Paste lesson notes, homework, article text, useful phrases, or teacher
-   feedback.
-4. Review extracted candidates with `/candidates <material_id>`.
-5. Approve useful targets with `/approve <material_id>` or candidate buttons.
-6. Start practice with `/today`, `/lesson random`, or a focused `/practice`
-   mode.
+Input:
 
-Important: uploaded material does not automatically become active training
-content. Approval is the quality gate.
+```text
+Context: I need to tell a product manager that the deadline is risky.
+My draft:
+Your plan is unrealistic. We will break production.
 
-For concrete upload templates, good/bad examples, and an LLM prompt that turns
-raw notes into upload-ready material, read
-[`material-upload-guide.md`](material-upload-guide.md).
+Better goal:
+Sound firm but not aggressive.
+```
 
-### Your lesson base vs shared library
+Что сделает FluentLoop:
 
-- **Your lesson base** is everything you uploaded or subscribed to. Commands
-  `/topics`, `/lessons`, `/lesson`, and `/today` use this personal base.
-- **Shared seed library** is the built-in B2/B2+ business/IT catalog. Browse it
-  with `/library [query]`.
-- Use `/subscribe <template_id>` to copy a shared lesson into your own base.
-  After that it behaves like a normal lesson: `/lesson <id>` starts or shows it,
-  and `/today` can rotate it in.
+- превратит слишком прямой draft в diplomatic rewrite target;
+- предложит softer variants через `Native`;
+- объяснит pragmatics в `Why`;
+- отправит тебя в `/practice diplomatic` или `/translate_lab`.
 
-### Current shared seed catalog
+Следующие команды: `/upload` или сразу `/practice diplomatic`.
 
-The first library release contains 20 deterministic B2/B2+ business/IT lessons.
-They are meant as a clean starting base, not as private owner-uploaded content.
+### Пример 3: seed lesson из `/library`
 
-| Lesson | Goal |
+Input:
+
+```text
+/library risk
+/subscribe 12
+```
+
+Что сделает FluentLoop:
+
+- скопирует shared seed lesson в твою личную базу;
+- прогресс останется твоим, template rows не используются для practice;
+- урок появится в `/lessons`, `/lesson <id>`, `/topics`;
+- `/today` сможет брать цели из этого урока.
+
+Следующие команды: `/library` -> `/subscribe <template_id>` -> `/lessons`.
+
+### Пример 4: статья или blog post
+
+Input:
+
+```text
+/article Platform teams often fail when ownership is unclear...
+```
+
+Что сделает FluentLoop:
+
+- даст Article Lab v1: claim, hedge marker, assumption challenge, summary;
+- запишет lightweight reading probe без сохранения текста статьи;
+- учтет reading event в `/outcomes`;
+- поможет тренировать executive summary и critical reading.
+
+Следующие команды: `/article <text>` или `/practice reading`.
+
+## 3. Методика обучения
+
+### 1. Approved input
+
+Новые learning items не становятся активными автоматически. Ты загружаешь
+материал, бот извлекает candidates, а ты подтверждаешь полезное через
+`/approve`. Это защищает практику от мусора.
+
+### 2. Daily retrieval
+
+Каждый день `/today` заставляет доставать язык из памяти. Это важнее, чем
+просто читать списки слов. Хороший ответ, skip, confidence и ошибки влияют на
+то, что вернется дальше.
+
+### 3. Layered feedback
+
+После ответа смотри не только verdict:
+
+- `Errors` - что неверно или рискованно.
+- `Native` - как звучит естественнее в рабочем английском.
+- `Why` - какое правило, register или L1-transfer стоит понять.
+
+### 4. Sub-day SRS
+
+Некоторые цели возвращаются в той же сессии или позже в течение дня. Это нужно
+для productive recall: не "узнал фразу", а смог использовать ее снова.
+
+### 5. Mistake/L1 loop
+
+Повторяющиеся ошибки и русские transfer patterns становятся отдельными targets.
+Примеры: wrong preposition, missing article, too-direct workplace tone,
+literal translation.
+
+### 6. Reflection + Coach Journal
+
+`/reflect <text>` сохраняет короткую заметку: что было трудно, где не хватило
+языка, что попробовать завтра. `/mentor` пишет Coach Journal и подтягивает
+последний `/outcomes`, если он уже был.
+
+### 7. Outcomes measurement
+
+`/baseline` - monthly writing/probe стартовая точка. `/outcomes` - 30-day
+learning-quality report. `/stats` говорит "сколько практиковался";
+`/outcomes` говорит "есть ли признаки реального прогресса".
+
+## 4. Как начать сегодня
+
+### Вариант A: у тебя нет материалов
+
+1. `/library`
+2. Выбери тему: risk, incident, pushback, async update, executive summary.
+3. `/subscribe <template_id>`
+4. `/baseline`
+5. `/today`
+
+### Вариант B: у тебя есть урок или список фраз
+
+1. `/upload`
+2. Paste lesson notes или phrase list.
+3. `/approve <material_id>`
+4. `/baseline`
+5. `/today`
+
+### Вариант C: у тебя есть рабочий текст
+
+1. Paste draft через `/upload`, если хочешь добавить его в базу.
+2. Или используй focused command:
+   - `/practice diplomatic` для softer workplace tone;
+   - `/translate_lab <topic>` для RU->EN transfer;
+   - `/article <text>` для reading/summary.
+3. Потом `/outcomes full`, когда появится несколько попыток.
+
+## 5. Первая неделя
+
+| День | Что сделать | Зачем |
+|---|---|---|
+| Day 1 | `/library` + `/subscribe`, или `/upload` + `/approve` | Создать личную базу уроков |
+| Day 2 | `/baseline <answer>` | Зафиксировать стартовую точку |
+| Day 3 | `/today` | Запустить daily retrieval |
+| Day 4 | `/practice notebook` | Дать системе free production |
+| Day 5 | `/practice diplomatic` или `/translate_lab` | Починить tone/L1 transfer |
+| Weekend | `/outcomes full`, `/review`, `/mistakes` | Выбрать следующий фокус |
+
+Для подробного маршрута открой [learning-plans.md](learning-plans.md).
+
+## 6. Какие уроки есть
+
+FluentLoop использует три разные сущности. Их важно не смешивать:
+
+1. **Материалы для `/upload`** - то, что ты приносишь сам: lesson notes, phrase
+   list, Slack draft, article, meeting notes. В upload guide есть 5 простых
+   типов материалов для старта, но это не ограничение продукта.
+2. **20 shared seed lessons** - готовая B2/B2+ библиотека в `/library`.
+3. **40 business/IT scenario cards** - roleplay-ситуации для `/scene` и
+   diplomatic practice.
+
+### Твоя база уроков
+
+Это все, что ты загрузил или на что подписался. Команды:
+
+- `/topics` - темы и knowledge areas.
+- `/lessons [query]` - список lesson plans.
+- `/lesson <id>` - карточка урока.
+- `/lesson random` - случайный активный урок.
+- `/today` - ежедневная сессия из твоей базы.
+
+### Общая seed library
+
+`/library` показывает owner-curated B2/B2+ seed lessons. `/subscribe` копирует
+lesson в твою личную базу. Shared template остается отдельно; твой прогресс
+приватный.
+
+Категории 20 seed lessons:
+
+| Категория | Для чего |
 |---|---|
-| Diplomatic Stakeholder Pushback | Push back on a risky plan without sounding defensive. |
-| Incident Updates and ETA Caveats | Write production issue updates with uncertainty. |
-| Architecture Trade-offs and Recommendations | Compare options and recommend one without overselling it. |
-| Reporting Verbs for Workplace Opinions | Report claims, doubts, suggestions, and disagreements accurately. |
-| Risk Mitigation and Conditionals | Explain risks and mitigations with precise conditional language. |
-| Sprint Planning and Priority Negotiation | Align on priorities and negotiate sprint scope. |
-| Scope Clarification and Requirements | Ask precise questions about ambiguous requirements. |
-| Technical Debt and Refactoring Rationale | Explain why refactoring is worth doing now. |
-| Data Trends and Business Reports | Summarise trends and business impact. |
-| Customer Feedback and Feature Prioritisation | Prioritise product work from customer feedback. |
-| Cross-team Dependencies and Ownership | Discuss dependencies, blockers, and ownership clearly. |
-| Performance, Latency, and Reliability | Explain performance issues and reliability trade-offs. |
-| Security and Privacy Risk Communication | Explain security/privacy risks without creating panic. |
-| Performance Feedback Diplomacy | Give direct but respectful feedback to a colleague. |
-| Roadmap Updates Under Uncertainty | Explain roadmap changes and uncertainty clearly. |
-| Postmortems and Lessons Learned | Summarise causes and lessons without blame. |
-| Async Slack and Email Updates | Write concise async updates with context and next steps. |
-| Deadline Negotiation and Pushback | Negotiate a deadline while protecting quality. |
-| Executive Summaries and Concise Recommendations | Write short summaries for decision-makers. |
-| Disagreeing, Proposing Alternatives, and Aligning Next Steps | Disagree clearly, propose an alternative, and align on next steps. |
+| Pushback and disagreement | Возражать без агрессии |
+| Incidents and ETA | Писать updates с uncertainty |
+| Trade-offs and recommendations | Сравнивать варианты и рекомендовать |
+| Reporting verbs | Передавать claims, doubts, suggestions |
+| Risks and conditionals | Объяснять риски и mitigations |
+| Sprint scope and priorities | Договариваться о scope и priority |
+| Requirements and clarification | Задавать точные вопросы |
+| Tech debt and refactoring | Объяснять refactoring rationale |
+| Reports and trends | Суммировать data/business impact |
+| Dependencies and ownership | Говорить о blockers и responsibility |
+| Reliability/security/privacy | Объяснять риски без panic |
+| Feedback diplomacy | Давать direct but respectful feedback |
+| Roadmap/postmortems | Объяснять changes, causes, lessons learned |
+| Async updates/deadlines | Писать Slack/email updates и negotiate deadlines |
+| Executive summaries/alignment | Коротко формулировать recommendation and next steps |
 
----
+### 40 business/IT scenario cards
 
-## 5. Practice Modes / Режимы практики
+`/scene <topic or number>` дает roleplay card. Это не upload material и не
+shared lesson; это быстрый сценарий для speaking/thinking rehearsal или
+pre-meeting practice.
 
-Use `/today` when you want the bot to choose. Use `/practice <mode>` when you
-know what you want to train.
+Примеры из 40 сценариев:
 
-| Command | Use when... |
+- design review: defend choice A vs B;
+- code review: give or receive criticism diplomatically;
+- incident post-mortem facilitation;
+- architecture migration proposal;
+- tech-debt prioritization debate;
+- scope renegotiation with PM;
+- customer escalation and de-escalation;
+- vendor SLA negotiation;
+- performance review;
+- salary/promotion conversation;
+- hiring interview;
+- board update on engineering velocity;
+- conference Q&A;
+- public disagreement with a senior architect;
+- impossible deadline refusal;
+- admitting "I do not know" without losing face.
+
+Команды:
+
+```text
+/scene 1
+/scene 12
+/scene deadline
+/scene design review
+```
+
+## 7. Режимы практики
+
+| Команда | Когда использовать |
 |---|---|
-| `/practice vocab` | You want active chunks, collocations, field/register/function grouping. |
-| `/practice grammar` | You want grammar repair and sentence transformation. |
-| `/practice mistakes` | You want recurring mistakes and confirmed weak points. |
-| `/practice diplomatic` | Your message is correct but too blunt for C1 workplace English. |
-| `/practice notebook` | You want free writing plus native-diff mining. |
-| `/practice discourse` | You want paragraph logic: claim, support, counterpoint, recommendation. |
-| `/practice reading` | You want critical reading: claim, hedge, assumption, summary. |
-| `/practice genre` | You want a work artifact schema: RFC, post-mortem, review, proposal, etc. |
-| `/practice writing_workshop` | You want outline -> draft -> revision. |
-| `/practice sprint` | You want a 14-day consistency contract. |
+| `/today` | Не хочешь выбирать, пусть бот соберет session |
+| `/practice notebook` | Нужна free writing + native diff |
+| `/practice diplomatic` | Текст правильный, но звучит слишком резко |
+| `/translate_lab <topic>` | Мысль рождается по-русски, нужен natural English |
+| `/practice vocab` | Нужно активировать chunks/collocations |
+| `/practice mistakes` | Повторяются одни и те же ошибки |
+| `/practice reading` | Нужно читать критически, не только понимать |
+| `/article <text>` | Быстро разобрать статью и summary |
+| `/brief <agenda>` | Подготовиться к встрече |
+| `/scene <topic>` | Получить roleplay card |
+| `/mentor` | Получить weekly teacher question + journal |
 
-### Outcome commands
+## 8. Что смотреть в `/outcomes`
 
-| Command | Use when... |
-|---|---|
-| `/baseline` | You want the current monthly writing/probe prompt. |
-| `/baseline <answer>` | You want to save the monthly writing baseline and held-out item set. |
-| `/outcomes` | You want the short 30-day learning-quality report. |
-| `/outcomes full` | You want sample sizes, top chunks, unused chunks, L1 hits, and data notes. |
+Если видишь **insufficient data**, это нормально в начале. Система не притворяется,
+что есть прогресс без sample size.
 
-`/stats` answers "how much did I practice?" `/outcomes` answers "what evidence
-do we have that my English is improving?"
+- Held-out retention низкий -> больше `/today` и `/review`.
+- Productive chunks низкие -> `/practice notebook` и deliberate reuse 3-5 chunks.
+- L1 density высокий -> `/practice diplomatic`, `/translate_lab`.
+- Mistake extinction низкий -> `/practice mistakes`, `/review`.
+- Reading events missing -> `/article <text>` или `/practice reading`.
 
-Operational drills are just-in-time tools:
+![FluentLoop 30-Day Starter Plan](assets/fluentloop-30-day-plan.png)
 
-| Command | Use when... |
-|---|---|
-| `/brief <agenda>` | You need meeting language before a call. |
-| `/scene <topic or number>` | You want a roleplay scene card. |
-| `/article <text>` | You want a 5-module Article Lab plus 30-day pipeline. |
-| `/debate <topic>` | You want to defend a position against opposition. |
-| `/translate_lab <topic>` | You want RU-to-EN transfer practice and L1 trap repair. |
-| `/fluency432 <topic>` | You want to compress the same message in 4, 3, then 2 minutes. |
+## Compact EN version
 
----
-
-## 6. First Week Onboarding / Первая неделя
-
-**Day 1 - material or seed lesson.**
-Upload one real source with `/upload`, or browse `/library` and subscribe to one
-seed lesson with `/subscribe <template_id>`. Review/approve uploaded candidates
-when you use your own material.
-
-**Day 2 - baseline.**
-Run `/today`, answer honestly, use confidence ratings, and do not over-polish.
-
-**Day 3 - free writing.**
-Run `/practice notebook`. Write about a real technical conversation. Read the
-native rewrite and mined chunks.
-
-**Day 4 - operational English.**
-Use `/brief <your next meeting>` or `/scene 2` before a real work situation.
-
-**Day 5 - reflection.**
-Run `/today`, then send `/reflect <what was hardest?>` and `/mentor`.
-
-**Weekend - review.**
-Use `/review`, `/mistakes`, and `/stats`. Pick one mode for the next week:
-`diplomatic`, `vocab`, `genre`, or `sprint`.
-
----
-
-## 7. Practical Rules / Практические правила
-
-- Train from real material more often than from invented examples.
-- Approve fewer, better targets. Bad input creates bad practice.
-- Answer before looking at the model answer when possible.
-- Treat native rewrites as imitation material, not as criticism.
-- Use `/reflect` when the problem is not grammar but "I could not express what
-  I actually meant."
-- Use `/practice sprint` only when you are ready to keep a 14-day streak.
-
-The bot is most useful when you let it see the loop: what you tried, what failed,
-what came back, and what still feels hard.
+Start with `/library` + `/subscribe` if you have no material, or `/upload` +
+`/approve` if you do. Record `/baseline`, train with `/today`, produce real
+English through `/practice notebook`, repair tone/L1 issues with
+`/practice diplomatic` and `/translate_lab`, and check `/outcomes full` weekly.

@@ -30,8 +30,8 @@ All notable changes to FluentLoop are recorded here. Format follows
   Article Lab v1, Debate, Translation Lab, and 4-3-2 Fluency drill cards.
 - EPIC-22 Sprint 6 polish: 30-day Article Lab pipeline, `/practice sprint`,
   Rolling Native Comparison in Coach Journal, and richer Why layer context.
-- Bilingual learner guide with the FluentLoop learning methodology, process
-  map, first-week onboarding, and GPT Image prompt for a visual map.
+- Bilingual learner guide with the FluentLoop learning methodology, visual
+  lesson-flow map, first-week onboarding, and real learner examples.
 - EPIC-23 shared lesson library: `/library`, `/subscribe`, owner-only
   `/publish`, seed catalog template publishing, and per-user subscription
   clones with isolated progress.
@@ -40,6 +40,8 @@ All notable changes to FluentLoop are recorded here. Format follows
 - EPIC-24 learning outcomes loop: `/baseline`, `/outcomes`, `evaluation_runs`,
   `learning_metric_snapshots`, held-out retention, productive chunk usage,
   writing/L1 metrics, mistake extinction, and Article Lab probe tracking.
+- Learner-facing `docs/learning-plans.md` with first-week, 30-day, and 12-week
+  plans built around the measurable FluentLoop loops.
 - Docker image packaging now includes `alembic.ini` so deploy-time migrations
   can run inside the container.
 
@@ -54,6 +56,8 @@ All notable changes to FluentLoop are recorded here. Format follows
   deployment model.
 - Coach Journal can include the latest `/outcomes` summary, making the teacher
   loop measurement-aware after the user has run an outcome report.
+- EPIC-24 is now marked deployed and smoke validated in the feature index and
+  roadmap docs.
 - `AGENTS.md` updated to reflect the current epic set and docs tree.
 - `docs/architecture.md` upgraded from v0.1 stub framing to v0.2 with all
   ADRs (0002-0008) Accepted referenced.

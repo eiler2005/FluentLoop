@@ -38,6 +38,183 @@ My examples:
 After upload, review the candidates and approve only useful targets. Approval is
 the quality gate; uploaded text does not automatically become active practice.
 
+## 5 простых материалов для старта
+
+Это не весь каталог уроков FluentLoop. Это 5 простых **типов входных
+материалов** для `/upload`: то, что пользователь может принести сегодня из
+урока или работы.
+
+Отдельно в продукте есть:
+
+- **20 shared seed lessons** в `/library` - готовые B2/B2+ business/IT lessons.
+- **40 business/IT scenario cards** в `/scene` - roleplay/scene situations для
+  переговоров, pushback, incidents, reviews, deadlines и других рабочих
+  ситуаций.
+
+### 1. Lesson notes from teacher
+
+Bad paste:
+
+```text
+lesson about meetings
+push back
+align
+articles
+```
+
+Good paste:
+
+```text
+Lesson: Diplomatic meeting language
+Context: I need to disagree with product managers without sounding aggressive.
+
+Chunks:
+- push back on a risky deadline
+- align on the scope
+- it might be worth considering
+
+Teacher feedback:
+- I said: We must change this.
+- Better: We might need to reconsider this.
+- Mistake: depend on, not depend from.
+
+My example:
+- We need to align on the scope before Friday.
+```
+
+What FluentLoop does: extracts chunks, L1 risks, teacher corrections, and
+examples. Then it trains them in `/today`, `/practice diplomatic`, and SRS.
+
+Next command: `/upload` -> `/approve <material_id>` -> `/today`.
+
+### 2. Word/expression list
+
+Bad paste:
+
+```text
+risk
+scope
+deadline
+incident
+```
+
+Good paste:
+
+```text
+Topic: Incident updates
+Use case: Slack updates during production issues.
+
+Expressions:
+- root cause - the underlying reason for the incident
+- impact window - the time period affected
+- current ETA - the best estimate we can give now
+- mitigation plan - what we are doing to reduce the damage
+
+Examples:
+- We are still investigating the root cause.
+- The current ETA is around 30 minutes, but that may change.
+```
+
+What FluentLoop does: turns isolated words into trainable chunks and realistic
+workplace prompts.
+
+Next command: `/upload` -> `/approve <material_id>` -> `/practice vocab`.
+
+### 3. Slack/email draft
+
+Bad paste:
+
+```text
+Your plan is unrealistic. We will break production.
+```
+
+Good paste:
+
+```text
+Context: I need to answer a product manager about an unrealistic deadline.
+
+My draft:
+Your plan is unrealistic. We will break production.
+
+Goal:
+Sound firm, clear, and professional. I want to push back without sounding rude.
+
+Better direction:
+- hedge the risk
+- explain the trade-off
+- propose a safer next step
+```
+
+What FluentLoop does: creates pragmatic rewrite practice, native alternatives,
+and L1/directness checks.
+
+Next command: `/upload` or `/practice diplomatic`.
+
+### 4. Article or blog post
+
+Bad paste:
+
+```text
+interesting article about platform teams
+```
+
+Good paste:
+
+```text
+Article: Platform ownership and reliability
+Why I care: I need to summarize this for my team.
+
+Text:
+<paste the article or the useful excerpt>
+
+Questions:
+- What is the main claim?
+- What assumption should I challenge?
+- What would be a 3-sentence executive summary?
+```
+
+What FluentLoop does: creates critical-reading tasks: main claim, hedge marker,
+assumption challenge, executive summary. `/article` also records a reading
+probe for `/outcomes` without storing the pasted article text.
+
+Next command: `/article <text>` for a quick lab, or `/upload` if you want it in
+your lesson base.
+
+### 5. Meeting transcript / meeting notes
+
+Bad paste:
+
+```text
+meeting about roadmap
+I need better English
+```
+
+Good paste:
+
+```text
+Meeting: Roadmap review
+Goal: Explain why the team should reduce scope.
+
+Useful phrases I heard:
+- reduce the blast radius
+- align on the riskiest assumption
+- defer the non-critical work
+
+Things I wanted to say:
+- Нам нужно срезать объем, иначе релиз будет рискованным.
+- Давайте сначала проверим самое рискованное предположение.
+
+Weak spots:
+- I sound too direct when I disagree.
+- I forget articles in "a risk", "an incident", "the scope".
+```
+
+What FluentLoop does: extracts real chunks, L1 transfer risks, articles issues,
+and diplomatic rewrite targets.
+
+Next command: `/upload` -> `/approve <material_id>` -> `/practice notebook` or
+`/practice diplomatic`.
+
 ## Шаблоны
 
 ### Lesson Notes

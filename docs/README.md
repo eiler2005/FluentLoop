@@ -3,7 +3,8 @@
 | File | Purpose |
 |---|---|
 | [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |
-| [`user-guide.md`](user-guide.md) | Bilingual learner guide: methodology, daily process, practice modes, outcome measurement, process map, and image prompt. |
+| [`user-guide.md`](user-guide.md) | Bilingual learner guide: methodology, daily process, practice modes, outcome measurement, and visual process maps. |
+| [`learning-plans.md`](learning-plans.md) | Practical first-week, 30-day, and 12-week learner plans using `/baseline`, `/today`, focused practice modes, and `/outcomes`. |
 | [`material-upload-guide.md`](material-upload-guide.md) | User-facing cookbook for preparing lesson notes, feedback, articles, transcripts, and LLM-assisted upload material. |
 | [`adr/`](adr/) | Architecture decision records. Each captures one significant choice. |
 | [`adr/0001-template.md`](adr/0001-template.md) | Reusable ADR template. |

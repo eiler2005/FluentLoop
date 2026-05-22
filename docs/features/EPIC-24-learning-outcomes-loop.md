@@ -1,6 +1,6 @@
 # EPIC-24 - Learning Outcomes Loop
 
-Status: In progress - local implementation ready, deploy pending
+Status: Done - implemented, deployed, and smoke validated
 
 ## Summary
 
@@ -15,6 +15,21 @@ development -> documentation -> tests -> commit -> deploy -> post-deploy smoke -
 ```
 
 Commit and deploy are still explicit user-approved gates.
+
+## Validation Evidence
+
+- Local gate: `pytest -q` -> `121 passed`; `ruff`, `secret_scan`,
+  `python -m fluentloop --check`, and `git diff --check` were clean.
+- Commit: `892188a EPIC-24: add learning outcomes loop`.
+- Deploy date: May 22, 2026.
+- Alembic on VPS: `0003_epic24 (head)`.
+- Container: `fluentloop-bot` healthy after recreation.
+- Schema verified on VPS: `evaluation_runs` and `learning_metric_snapshots`
+  exist.
+- Telegram smoke: Bot API reachable, outbound smoke message sent.
+- Telegram workspace: command menu synced; fresh Help-topic guide pinned.
+- Server handler smoke: `/baseline` prompt and `/outcomes full` render against
+  the live schema inside a rollback transaction.
 
 ## Scope
 

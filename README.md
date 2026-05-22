@@ -64,6 +64,8 @@ See [`docs/build-log/`](docs/build-log/) for the frozen build record.
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
 Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0008 Accepted).
 Learner-facing methodology and daily workflow: [`docs/user-guide.md`](docs/user-guide.md).
+Practical first-week, 30-day, and 12-week plans:
+[`docs/learning-plans.md`](docs/learning-plans.md).
 Upload-ready material examples: [`docs/material-upload-guide.md`](docs/material-upload-guide.md).
 
 ## Sample session
@@ -128,7 +130,7 @@ Bot          Session done — 15/15 in 14 min.
 | **Learning-engine roadmap** — EPIC-16..21 (staged engine, persistent lesson plans, DeepSeek gateway, AI exercise generator, grammar brain, light material context search) | ✅ Done |
 | **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, lesson formats, curriculum, teacher layer, operational drills, polish) | ✅ Done |
 | **Shared lesson library** — EPIC-23 (`/library`, `/subscribe`, seed catalog templates, per-user clones) | ✅ Done |
-| **Learning outcomes loop** — EPIC-24 (`/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article probes) | 🚧 In progress |
+| **Learning outcomes loop** — EPIC-24 (`/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article probes) | ✅ Done |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
@@ -199,6 +201,7 @@ FluentLoop/
 | [`docs/adr/`](docs/adr/) | One ADR per significant decision (Telethon, AI tiering, pre-gen, forum routing, secret hygiene, DeepSeek, shared library). |
 | [`docs/features/README.md`](docs/features/README.md) | Epic index with dependency graph and statuses. |
 | [`docs/user-guide.md`](docs/user-guide.md) | Learner-facing methodology, process map, daily workflow, and modes. |
+| [`docs/learning-plans.md`](docs/learning-plans.md) | Practical first-week, 30-day, and 12-week learning plans. |
 | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) | Upload-ready material formats and LLM prep prompt. |
 | [`docs/runbooks/`](docs/runbooks/) | Operational procedures — deploy, demo data, secrets, telegram workspace, curriculum seed. |
 | [`docs/testing.md`](docs/testing.md) | Standard pre-commit / pre-deploy gate. |

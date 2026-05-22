@@ -1829,7 +1829,7 @@ EPIC 20: Grammar Brain
 EPIC 21: Light Material Context Search
 EPIC 22: Breakthrough Roadmap (done; pedagogy foundation, see docs/features/EPIC-22-breakthrough-roadmap.md)
 EPIC 23: Shared Lesson Library (done; owner-curated seed library, see ADR-0008)
-EPIC 24: Learning Outcomes Loop (in progress; measurable learning proof, see docs/features/EPIC-24-learning-outcomes-loop.md)
+EPIC 24: Learning Outcomes Loop (done; measurable learning proof via `/baseline` and `/outcomes`, see docs/features/EPIC-24-learning-outcomes-loop.md)
 ```
 
 ---

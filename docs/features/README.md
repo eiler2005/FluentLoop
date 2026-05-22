@@ -33,7 +33,7 @@ measurable learning-outcomes layer.
 | 21 | [light-material-context-search](EPIC-21-light-material-context-search.md) | Done | Local material chunks and keyword retrieval. |
 | 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | Done | Phase 1-2 implemented, deployed, and validated: in-session GIR, negative-path tests, schema verification, and live smoke. |
 | 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Done | Shared seed lesson library via `/library` and `/subscribe`; cloned per-user progress, deployed and smoke validated (ADR-0008). |
-| 24 | [learning-outcomes-loop](EPIC-24-learning-outcomes-loop.md) | In progress | Measurement-first layer: `/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, and Article/Critical Reading probes. |
+| 24 | [learning-outcomes-loop](EPIC-24-learning-outcomes-loop.md) | Done | Measurement-first layer: `/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article/Critical Reading probes; deployed and smoke validated. |
 
 ## Dependency graph
 
