@@ -390,6 +390,30 @@ def record_attempt(
     return attempt
 
 
+def record_confidence_rating(
+    session: Session,
+    practice_session: PracticeSession,
+    exercise_index: int,
+    rating: int,
+) -> None:
+    if rating < 1 or rating > 5:
+        raise ValueError("Confidence must be between 1 and 5.")
+    if exercise_index < 0 or exercise_index >= len(practice_session.exercises):
+        raise ValueError("Exercise not found.")
+    exercises = list(practice_session.exercises)
+    exercise = dict(exercises[exercise_index])
+    metadata = exercise.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+    metadata["confidence_rating"] = rating
+    exercise["metadata"] = metadata
+    exercise["confidence_rating"] = rating
+    exercises[exercise_index] = exercise
+    practice_session.exercises = exercises
+    session.add(practice_session)
+    session.flush()
+
+
 def summarize_session(session: Session, practice_session: PracticeSession) -> str:
     attempts = list(
         session.scalars(
@@ -408,7 +432,8 @@ def summarize_session(session: Session, practice_session: PracticeSession) -> st
         f"Partial: {counts['partial']}\n"
         f"Incorrect: {counts['incorrect']}\n"
         f"Skipped: {counts['skipped']}\n"
-        f"Answered: {len(attempts)}/{len(practice_session.exercises)}"
+        f"Answered: {len(attempts)}/{len(practice_session.exercises)}\n"
+        "Reflect: /reflect <what was hardest today?>"
     )
 
 

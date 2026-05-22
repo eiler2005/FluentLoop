@@ -14,7 +14,9 @@ Architecture, deployment, Docker, VPS setup, database choice, framework choice, 
 
 **English Learning Companion**
 
-A personal Telegram bot that helps a B2+/C1- English learner consolidate school materials through short daily practice, active vocabulary usage, grammar/rules drills, immediate feedback, and mistake-based training.
+A Telegram bot that helps a B2+/C1- English learner consolidate school materials through short daily practice, active vocabulary usage, grammar/rules drills, immediate feedback, and mistake-based training.
+
+Started as a personal single-user tool. The owner now curates a shared library of lesson plans so that other admitted Telegram users can subscribe to and practise the same content with fully isolated progress (see ADR-0008).
 
 ---
 
@@ -172,7 +174,7 @@ MVP is a text-first Telegram bot.
 
 ```text
 1. Telegram bot basics.
-2. Single-user profile.
+2. User profile per admitted Telegram user (admission policy is a separate concern; see ADR-0009 once written).
 3. Settings: level, focus areas, reminder time, practice duration.
 4. Upload text lesson materials.
 5. AI extraction of words, expressions, grammar rules, and mistake patterns.
@@ -223,6 +225,10 @@ Telegram remains the primary interface for daily practice.
 6. Lesson recap templates.
 7. Text role-play scenarios.
 8. More advanced weekly report.
+9. Breakthrough roadmap: two-layer feedback, sub-day SRS, Russian L1 hit list,
+   evaluation probe, reflection, and named lesson formats (EPIC-22).
+10. Shared lesson library: owner-curated templates discoverable and subscribable by other admitted users, with cloned per-user progress (ADR-0008, EPIC-23).
+11. Admission policy: allow-list vs invite-code vs open signup (ADR-0009 to write).
 ```
 
 ### P2 — future
@@ -233,7 +239,7 @@ Telegram remains the primary interface for daily practice.
 3. Pronunciation feedback.
 4. Real-time voice dialogue.
 5. Full AI tutor with voice.
-6. Multi-user mode.
+6. Operational multi-tenancy (multiple bots, multiple owners, isolated tenants beyond shared content — content-level multi-user is P1, see ADR-0008).
 7. Teacher/admin mode.
 8. LMS or school integrations.
 ```
@@ -702,6 +708,14 @@ Given the user does not know an answer
 When they choose Skip / show answer or send /skip
 Then the bot records the skipped attempt and shows the correct answer with a short explanation
 
+Given the user wants metacognitive tracking
+When they tap a 1-5 confidence rating before answering
+Then the rating is stored with the exercise/attempt and overconfident mistakes receive higher priority
+
+Given a session completes
+When the summary is shown
+Then the user is prompted to save a short reflection with /reflect
+
 Given the user completes the session
 When all exercises are finished
 Then the bot shows a short summary and updates progress
@@ -1087,7 +1101,7 @@ Start today’s practice session.
 /review
 Review due items.
 
-/practice vocab|grammar|mistakes|writing|review|mixed
+/practice vocab|grammar|mistakes|writing|review|mixed|diplomatic|notebook|discourse|reading|genre|writing_workshop
 Start standalone practice by mode.
 
 /topics
@@ -1110,6 +1124,30 @@ Skip the current exercise and reveal the correct answer with a short explanation
 
 /feedback explain <attempt_id>
 Show the stored detailed teacher breakdown for an answer.
+
+/reflect <text>
+Save a short reflective practice note for weekly review.
+
+/scene <topic>
+Build a business/IT roleplay scene card.
+
+/brief <agenda>
+Prepare just-in-time meeting language.
+
+/mentor
+Show the weekly Socratic English prompt.
+
+/article <text>
+Start text-first Article Lab v1.
+
+/debate <topic>
+Start Debate Mode.
+
+/translate_lab <topic>
+Practice RU-to-EN transfer and L1 traps.
+
+/fluency432 <topic>
+Practice 4-3-2 fluency compression.
 
 /add
 Manually add a word, expression, grammar rule, or mistake.
@@ -1140,7 +1178,8 @@ Alias for /help.
 The Help guide should also be pinned in the Telegram Help topic. The Telegram
 command menu should list the current core commands so the user can discover
 `/today`, `/topics`, `/lessons`, `/lesson`, `/practice`, `/upload`, `/skip`,
-`/feedback`, `/help`, and `/howto` without reading repository docs.
+`/feedback`, `/reflect`, `/brief`, `/scene`, `/help`, and `/howto` without
+reading repository docs.
 
 ---
 
@@ -1325,12 +1364,13 @@ updated_at
 ```text
 id
 user_id
-type: word | expression | grammar_rule | mistake_pattern
+type: word | expression | grammar_rule | mistake_pattern | chunk
 text
 meaning_ru
 explanation
 examples
 tags
+metadata_json
 level
 source_material_id
 is_favorite
@@ -1348,6 +1388,7 @@ source_material_id
 title
 topic
 goal
+format
 status: active | archived
 created_at
 updated_at
@@ -1582,6 +1623,12 @@ Expected output:
   "mistake_summary": "",
   "why_wrong": "",
   "rule": "",
+  "error_layer": "",
+  "native_rewrite": "",
+  "native_rewrite_reason": "",
+  "why_layer": "",
+  "l1_hits": [],
+  "confidence_rating": 5,
   "better_variants": [],
   "micro_drill": "",
   "teacher_note": "",
@@ -1591,7 +1638,11 @@ Expected output:
 }
 ```
 
-Immediate feedback should be compact: verdict, correction, what was wrong, why, one practical rule, and one better variant. A detailed explanation can be shown later from stored feedback using `/feedback explain <attempt_id>` without requiring another AI call.
+Immediate feedback should be compact: verdict, correction, what was wrong, why,
+one practical rule, one better variant, and Russian L1 hits when deterministic
+rules apply. Detailed layers are stored with the attempt and can be shown later
+using `/feedback explain <attempt_id>` or the Errors / Native / Why buttons
+without requiring another AI call.
 
 ---
 
@@ -1746,6 +1797,8 @@ EPIC 18: Structured LLM Gateway
 EPIC 19: AI Exercise Generation
 EPIC 20: Grammar Brain
 EPIC 21: Light Material Context Search
+EPIC 22: Breakthrough Roadmap (in progress; pedagogy upgrades, see docs/features/EPIC-22-breakthrough-roadmap.md)
+EPIC 23: Shared Lesson Library (planned; content access for multiple users, see ADR-0008)
 ```
 
 ---

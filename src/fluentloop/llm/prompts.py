@@ -78,6 +78,12 @@ def _task_instruction(task: LLMTask, payload: dict[str, Any]) -> str:
             "answer, what was wrong, why, one practical rule, better variants, "
             "and a tiny micro-drill if useful."
         )
+    if task == LLMTask.TONE_FEEDBACK:
+        return (
+            "Return only a C1-level native rewrite of the learner answer when it "
+            "would materially improve idiom, register, or workplace pragmatics. "
+            "Do not repeat grammar-error analysis."
+        )
     if task == LLMTask.EXERCISE_GENERATION:
         return (
             "Generate concise business/IT English micro-drills that fit the "

@@ -37,6 +37,8 @@ def task_profile(
         return LLMProfile(fast)
     if task == LLMTask.EXERCISE_GENERATION:
         return LLMProfile(fast)
+    if task == LLMTask.TONE_FEEDBACK:
+        return LLMProfile(fast)
     return LLMProfile(fast)
 
 

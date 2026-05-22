@@ -15,6 +15,7 @@ from fluentloop.ai.schemas import (
     LessonPlanDraft,
     LessonPlanItemDraft,
     LessonStepDraft,
+    NativeRewriteFeedback,
     Validated,
 )
 from fluentloop.lesson_overview import infer_lesson_overview
@@ -483,6 +484,18 @@ class StubProvider(AIProvider):
                 should_create_mistake_event=not correct,
                 should_create_or_update_mistake_pattern=not correct,
             )
+        if task == "epic_22_native_rewrite":
+            answer = str(payload.get("answer", "")).strip()
+            expected = str(payload.get("expected_answer", "")).strip()
+            rewrite = expected or answer
+            return NativeRewriteFeedback(
+                native_rewrite=rewrite,
+                reason=(
+                    "Native layer keeps the intended meaning in a tighter "
+                    "workplace register."
+                ),
+                has_upgrade=bool(rewrite and rewrite != answer),
+            )
         return self.heavy_call(task, payload)
 
     def heavy_call(self, task: str, payload: dict[str, Any]) -> Validated:
@@ -587,6 +600,8 @@ class StubProvider(AIProvider):
             return GenerationResult(exercises=[])
         if task == "epic_10_check_answer":
             return self.light_call(task, payload)
+        if task == "epic_22_native_rewrite":
+            return self.light_call(task, payload)
         return ExtractionResult(candidates=[])
 
 
@@ -637,6 +652,10 @@ class OpenAIProvider(AIProvider):
         # Real parsing is intentionally conservative for tomorrow's provider flip.
         if task == "epic_10_check_answer":
             return AnswerFeedback.model_validate_json(
+                response.choices[0].message.content or "{}"
+            )
+        if task == "epic_22_native_rewrite":
+            return NativeRewriteFeedback.model_validate_json(
                 response.choices[0].message.content or "{}"
             )
         if task == "epic_07_generate_exercise":
@@ -762,6 +781,23 @@ class DeepSeekProvider(AIProvider):
                 LLMTask.ANSWER_CHECK,
                 payload,
                 AnswerFeedback,
+                model=profile.model,
+                fallback=lambda: self.stub.light_call(task, payload),
+            )
+        if task == "epic_22_native_rewrite":
+            profile = task_profile(
+                LLMTask.TONE_FEEDBACK,
+                _settings_for_models(
+                    self.fast_model,
+                    self.planner_model,
+                    self.extractor_model,
+                    self.planner_reasoning_effort,
+                ),
+            )
+            return self.gateway.run_json(
+                LLMTask.TONE_FEEDBACK,
+                payload,
+                NativeRewriteFeedback,
                 model=profile.model,
                 fallback=lambda: self.stub.light_call(task, payload),
             )

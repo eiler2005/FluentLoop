@@ -121,6 +121,7 @@ Bot          Session done — 15/15 in 14 min.
 |---|---|
 | **MVP foundation** — EPIC-01..14 (bot, profile, upload, AI extract+approve, items CRUD, SRS, daily session, exercise types, answer feedback, mistake patterns, grammar graph, stats, favorites) | ✅ Done |
 | **Learning-engine roadmap** — EPIC-16..21 (staged engine, persistent lesson plans, DeepSeek gateway, AI exercise generator, grammar brain, light material context search) | ✅ Done |
+| **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, Russian L1 detector, evaluation/reflection scaffolds, chunk import, named practice modes) | 🚧 In progress |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
@@ -168,12 +169,12 @@ FluentLoop/
 │   ├── architecture.md     Tech architecture (the *how*).
 │   ├── testing.md          Standard test gate.
 │   ├── adr/                7 architecture decision records.
-│   ├── features/           21 epic files.
+│   ├── features/           Epic files and roadmap index.
 │   ├── runbooks/           deploy, demo data, secrets, telegram workspace.
 │   ├── curriculum/         Generated B2/B2+ lesson catalog.
 │   └── build-log/          Autonomous-build journal (frozen).
 ├── src/fluentloop/         Python package.
-├── tests/                  Pytest suite (16 modules, ~36 tests).
+├── tests/                  Pytest suite.
 ├── scripts/                Deploy, smoke, seed, secret-scan helpers.
 ├── migrations/             Alembic migrations.
 ├── ansible/                Deploy playbooks (placeholder).

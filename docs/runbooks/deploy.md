@@ -18,6 +18,7 @@ uv run --extra dev pytest -q
 uv run --extra dev ruff check src tests
 uv run python -m fluentloop --check
 uv run python scripts/secret_scan.py
+uv run alembic upgrade head
 git diff --check
 ```
 
@@ -35,7 +36,9 @@ bash scripts/deploy.sh
 ```
 
 The deployment keeps the same lightweight shape: one Docker container, SQLite
-mounted in `data/`, Telegram bot, scheduler, and local file storage.
+mounted in `data/`, Telegram bot, scheduler, and local file storage. The deploy
+script now creates a pre-migration SQLite backup when the DB exists, builds the
+image, runs `alembic upgrade head`, and only then starts the bot container.
 
 ## Telegram Smoke Message
 
@@ -71,4 +74,6 @@ uv run python scripts/smoke_telegram.py \
 9. Use /skip once and confirm the correct answer/explanation is shown.
 10. Run `/help` and `/howto`; confirm the Help topic has one fresh pinned guide.
 11. Check logs for provider, callback, and database errors.
+12. For EPIC-22 changes, confirm layered feedback buttons, confidence rating,
+    `/reflect`, and one named practice mode such as `/practice diplomatic`.
 ```

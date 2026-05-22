@@ -34,6 +34,18 @@ from fluentloop.learning import (
     set_item_status,
     toggle_favorite,
 )
+from fluentloop.lesson_formats import (
+    article_lab_prompt,
+    debate_prompt,
+    fluency432_prompt,
+    format_for_mode,
+    mentor_question,
+    normalize_practice_mode,
+    practice_modes_help,
+    pre_meeting_brief,
+    scene_builder,
+    translation_lab_prompt,
+)
 from fluentloop.lesson_plans import (
     active_lesson_plans,
     find_lesson_plan,
@@ -58,10 +70,12 @@ from fluentloop.practice import (
     get_in_progress_session,
     next_exercise,
     record_attempt,
+    record_confidence_rating,
     start_explicit_session,
     start_or_resume_session,
     summarize_session,
 )
+from fluentloop.reflections import record_reflection, reflection_prompt
 from fluentloop.srs import convert_last_good_to_hard
 from fluentloop.stats import collect_stats, render_stats
 from fluentloop.users import ensure_user, format_settings, update_setting
@@ -178,18 +192,36 @@ def _attempt_buttons(
     attempt_id: int, *, allow_hard: bool = False
 ) -> list[list[InlineButton]]:
     buttons = _dispute_buttons(attempt_id, allow_hard=allow_hard)
+    buttons.append(
+        [
+            _button("Errors", f"feedback:layer:{attempt_id}:errors"),
+            _button("Native", f"feedback:layer:{attempt_id}:native"),
+            _button("Why", f"feedback:layer:{attempt_id}:why"),
+        ]
+    )
     buttons.append([_button("Teacher details", f"feedback:explain:{attempt_id}")])
     return buttons
 
 
-def _practice_buttons() -> list[list[InlineButton]]:
-    return [[_button("Skip / show answer", "practice:skip")]]
+def _practice_buttons(exercise_index: int | None = None) -> list[list[InlineButton]]:
+    buttons = [[_button("Skip / show answer", "practice:skip")]]
+    if exercise_index is not None:
+        buttons.append(
+            [
+                _button(str(rating), f"practice:confidence:{exercise_index}:{rating}")
+                for rating in range(1, 6)
+            ]
+        )
+    return buttons
 
 
 def _attempt_and_practice_buttons(
-    attempt_id: int, *, allow_hard: bool = False
+    attempt_id: int, *, allow_hard: bool = False, exercise_index: int | None = None
 ) -> list[list[InlineButton]]:
-    return [*_attempt_buttons(attempt_id, allow_hard=allow_hard), *_practice_buttons()]
+    return [
+        *_attempt_buttons(attempt_id, allow_hard=allow_hard),
+        *_practice_buttons(exercise_index),
+    ]
 
 
 def handle_upload_prompt() -> BotReply:
@@ -659,13 +691,10 @@ def handle_practice(
     channel_id: str | None = None,
     message_thread_id: int | None = None,
 ) -> BotReply:
-    allowed = {"vocab", "grammar", "mistakes", "writing", "review", "mixed"}
-    if mode not in allowed:
-        return BotReply(
-            "Use /practice vocab, /practice grammar, /practice mistakes, "
-            "/practice writing, /practice review, or /practice mixed."
-        )
-    engine_mode = "mistake_focus" if mode == "mistakes" else mode
+    normalized = normalize_practice_mode(mode)
+    if format_for_mode(normalized) is None:
+        return BotReply(practice_modes_help())
+    engine_mode = "mistake_focus" if normalized == "mistakes" else normalized
     practice_session = start_explicit_session(session, user, mode=engine_mode)
     return _practice_session_reply(
         session,
@@ -863,7 +892,7 @@ def _practice_session_reply(
     return BotReply(
         text,
         channel_id or user.telegram_user_id,
-        buttons=_practice_buttons(),
+        buttons=_practice_buttons(index),
         message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,
     )
@@ -879,6 +908,7 @@ def _lesson_details_reply(session: Session, plan) -> BotReply:
         labeled("Title", plan.title),
         labeled("Topic", plan.topic),
         labeled("Goal", plan.goal),
+        labeled("Format", getattr(plan, "format", "lesson")),
     ]
     if plan.language_focus_json:
         lines.append(labeled("Language focus", ", ".join(plan.language_focus_json[:8])))
@@ -927,6 +957,14 @@ def handle_answer(
         return BotReply("No active exercise. Send /today.")
     index, exercise = current
     feedback = check_answer(provider, exercise, answer)
+    metadata = exercise.get("metadata")
+    confidence_rating = None
+    if isinstance(metadata, dict):
+        confidence_rating = metadata.get("confidence_rating")
+    if isinstance(confidence_rating, int):
+        feedback = feedback.model_copy(update={"confidence_rating": confidence_rating})
+        if confidence_rating >= 4 and feedback.status != "correct":
+            feedback = feedback.model_copy(update={"should_create_mistake_event": True})
     pattern = apply_feedback(session, user, exercise, answer, feedback)
     suggestion_queue = queue_feedback_suggestions(session, user, exercise, feedback)
     attempt = record_attempt(
@@ -976,7 +1014,7 @@ def handle_answer(
                 BotReply(
                     next_text,
                     next_channel_id,
-                    buttons=_practice_buttons(),
+                    buttons=_practice_buttons(next_index),
                     message_thread_id=next_message_thread_id,
                     parse_mode=HTML_PARSE_MODE,
                 )
@@ -999,6 +1037,7 @@ def handle_answer(
         _attempt_and_practice_buttons(
             attempt.id,
             allow_hard=feedback.status == "correct",
+            exercise_index=next_index if follow_up is not None else None,
         )
         if follow_up is not None
         else _attempt_buttons(attempt.id, allow_hard=feedback.status == "correct")
@@ -1055,13 +1094,13 @@ def handle_skip_current(
                 BotReply(
                     next_text,
                     next_channel_id,
-                    buttons=_practice_buttons(),
+                    buttons=_practice_buttons(next_index),
                     message_thread_id=next_message_thread_id,
                     parse_mode=HTML_PARSE_MODE,
                 )
             )
         message += "\n\n" + next_text
-        buttons = _practice_buttons()
+        buttons = _practice_buttons(next_index)
     else:
         summary_heading = "#summary\n" if channel_id else ""
         summary_text = summary_heading + summarize_session(session, practice_session)
@@ -1129,6 +1168,7 @@ def _render_skip_feedback(attempt_id: int, exercise: dict, feedback: dict) -> st
 def _practice_header(exercises: list[dict]) -> str:
     metadata = _exercise_metadata(exercises[0] if exercises else {})
     mode = str(metadata.get("mode", "mixed")).replace("_", " ")
+    format_title = str(metadata.get("format_title") or "").strip()
     lesson_title = str(metadata.get("lesson_plan_title") or "").strip()
     topic = metadata.get("topic", "Business/IT communication")
     goal = metadata.get("lesson_goal", "Practice useful workplace English.")
@@ -1140,6 +1180,8 @@ def _practice_header(exercises: list[dict]) -> str:
     lines = [bold("Today's English practice - 15 min")]
     if lesson_title:
         lines.append(labeled("Lesson", lesson_title))
+    if format_title:
+        lines.append(labeled("Format", format_title))
     lines.extend(
         [
             labeled("Mode", mode),
@@ -1216,6 +1258,88 @@ def handle_feedback_explain(session: Session, user: User, attempt_id: int) -> Bo
         render_detailed_teacher_feedback(attempt.feedback),
         parse_mode=HTML_PARSE_MODE,
     )
+
+
+def handle_feedback_layer(
+    session: Session, user: User, attempt_id: int, layer: str
+) -> BotReply:
+    from fluentloop.db.models import PracticeAttempt, PracticeSession
+
+    attempt = session.get(PracticeAttempt, attempt_id)
+    if attempt is None:
+        return BotReply("Attempt not found.")
+    practice_session = session.get(PracticeSession, attempt.practice_session_id)
+    if practice_session is None or practice_session.user_id != user.id:
+        return BotReply("Attempt not found.")
+    feedback = attempt.feedback
+    if layer == "errors":
+        text = feedback.get("error_layer") or feedback.get("mistake_summary")
+        title = "Error layer"
+    elif layer == "native":
+        text = feedback.get("native_rewrite") or feedback.get("natural_answer")
+        reason = feedback.get("native_rewrite_reason")
+        if reason:
+            text = f"{text}\n\n{reason}" if text else str(reason)
+        title = "Native rewrite"
+    elif layer == "why":
+        text = feedback.get("why_layer") or feedback.get("why_wrong")
+        title = "Why layer"
+    else:
+        return BotReply("Unknown feedback layer.")
+    if not text:
+        text = "No extra detail was stored for this layer."
+    return BotReply(
+        f"{bold(title)}\n{html_escape(str(text))}",
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_confidence_rating(
+    session: Session, user: User, exercise_index: int, rating: int
+) -> BotReply:
+    practice_session = get_in_progress_session(session, user)
+    if practice_session is None:
+        return BotReply("No active exercise. Send /today.")
+    try:
+        record_confidence_rating(session, practice_session, exercise_index, rating)
+    except ValueError as exc:
+        return BotReply(str(exc))
+    return BotReply(f"Confidence recorded: {rating}/5.")
+
+
+def handle_reflect(session: Session, user: User, text: str) -> BotReply:
+    if not text.strip():
+        return BotReply(reflection_prompt())
+    path = record_reflection(user, text)
+    return BotReply(f"Reflection saved for weekly review: {path.name}.")
+
+
+def handle_brief(payload: str) -> BotReply:
+    return BotReply(pre_meeting_brief(payload))
+
+
+def handle_scene(payload: str) -> BotReply:
+    return BotReply(scene_builder(payload))
+
+
+def handle_mentor() -> BotReply:
+    return BotReply(mentor_question())
+
+
+def handle_article(payload: str) -> BotReply:
+    return BotReply(article_lab_prompt(payload))
+
+
+def handle_debate(payload: str) -> BotReply:
+    return BotReply(debate_prompt(payload))
+
+
+def handle_translate_lab(payload: str) -> BotReply:
+    return BotReply(translation_lab_prompt(payload))
+
+
+def handle_fluency432(payload: str) -> BotReply:
+    return BotReply(fluency432_prompt(payload))
 
 
 def handle_attempt_hard(session: Session, user: User, attempt_id: int) -> BotReply:

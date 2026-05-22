@@ -130,6 +130,7 @@ class LearningItem(Base, TimestampMixin):
     explanation: Mapped[str] = mapped_column(Text, default="")
     examples: Mapped[list[str]] = mapped_column(JSON, default=list)
     tags: Mapped[list[str]] = mapped_column(JSON, default=list)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     level: Mapped[str] = mapped_column(String(16), default="B2+/C1-")
     source_material_id: Mapped[int | None] = mapped_column(
         ForeignKey("source_materials.id"), nullable=True
@@ -226,6 +227,7 @@ class LessonPlan(Base, TimestampMixin):
     level: Mapped[str] = mapped_column(String(16), default="B2+/C1-")
     language_focus_json: Mapped[list[str]] = mapped_column(JSON, default=list)
     tags_json: Mapped[list[str]] = mapped_column(JSON, default=list)
+    format: Mapped[str] = mapped_column(String(64), default="lesson", index=True)
     status: Mapped[str] = mapped_column(String(16), default="active", index=True)
 
 

@@ -5,7 +5,7 @@
 # Steps:
 #   1. Rsync the repo (excluding .git, .env, data, caches) to /opt/fluentloop-bot/.
 #   2. Rsync the local .env separately with mode 600.
-#   3. SSH and run `docker compose up -d --build`.
+#   3. Build image, run Alembic migrations, then run `docker compose up -d`.
 #   4. Tail logs for 15s to confirm startup.
 #
 # Codex may modify this script if a missing piece is discovered (e.g. needs to
@@ -85,8 +85,22 @@ rsync -az \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/.env"
 "${ssh_cmd[@]}" "chmod 600 ${REMOTE_DIR}/.env"
 
-echo "==> Build + (re)start container"
-"${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 600 docker compose up -d --build"
+echo "==> Backup SQLite before migrations when present"
+"${ssh_cmd[@]}" "
+  cd ${REMOTE_DIR}
+  if [ -f data/fluentloop.sqlite ]; then
+    cp data/fluentloop.sqlite data/backups/pre-migration-\$(date +%Y%m%d-%H%M%S).sqlite
+  fi
+"
+
+echo "==> Build image"
+"${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 600 docker compose build fluentloop"
+
+echo "==> Run Alembic migrations"
+"${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 120 docker compose run --rm fluentloop alembic upgrade head"
+
+echo "==> Start container"
+"${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 300 docker compose up -d"
 
 echo "==> Tail logs (15s)"
 "${ssh_cmd[@]}" "cd ${REMOTE_DIR} && timeout 15 docker compose logs --tail=50 --follow || true"

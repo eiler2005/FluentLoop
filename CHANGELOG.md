@@ -14,6 +14,10 @@ All notable changes to FluentLoop are recorded here. Format follows
 - Expanded `tests/README.md` with coverage map, patterns, and CI gate.
 - Build-log archive at `docs/build-log/` preserving the autonomous overnight
   session brief, morning report, and deferred questions.
+- EPIC-22 foundation: layered feedback buttons, Russian L1 hit detection,
+  Pimsleur-style sub-day SRS intervals, confidence ratings, reflection logging,
+  evaluation probe scaffolding, chunk JSONL import, and named breakthrough
+  practice mode entrypoints.
 
 ### Changed
 - `AGENTS.md` updated to reflect 21 epic files (15 PRD-backlog + 6

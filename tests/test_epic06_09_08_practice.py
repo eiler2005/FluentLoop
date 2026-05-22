@@ -66,13 +66,23 @@ def test_srs_intervals_and_due_order(db_session, settings) -> None:
     item = create_learning_item(db_session, user, type_="expression", text="align on")
     now = datetime.now(UTC)
     state = record_result(db_session, item.id, "Good", now=now)
-    assert timedelta(days=1, hours=23) < state.due_at - now < timedelta(days=3)
+    assert timedelta(seconds=4) < state.due_at - now < timedelta(seconds=6)
     state = record_result(db_session, item.id, "Again", now=now)
-    assert state.due_at == now
+    assert timedelta(seconds=4) < state.due_at - now < timedelta(seconds=6)
     assert get_due_items(db_session, user.id, now=now)[0].id == item.id
-    for _ in range(3):
+    for expected in (
+        timedelta(seconds=25),
+        timedelta(minutes=2),
+        timedelta(minutes=10),
+        timedelta(hours=1),
+        timedelta(hours=5),
+        timedelta(days=1),
+        timedelta(days=5),
+    ):
         state = record_result(db_session, item.id, "Good", now=now)
-    assert state.due_at - now >= timedelta(days=7)
+        assert expected - timedelta(seconds=1) <= state.due_at - now <= (
+            expected + timedelta(seconds=1)
+        )
 
 
 def test_exercise_registry_and_session_resume(db_session, settings) -> None:
@@ -438,7 +448,7 @@ def test_hard_override_converts_correct_srs_result(db_session, settings) -> None
     assert state.success_count == 0
     assert state.fail_count == 1
     assert state.review_count == 1
-    assert state.last_interval_days == 1.0
+    assert state.last_interval_days < 1 / 1_000
     assert attempt.feedback["srs_override"] == "Hard"
 
 

@@ -20,7 +20,8 @@ Lessons and topics:
 - /lesson <id> shows one lesson card.
 - /lesson random starts a random active lesson.
 - /lesson topic <query> starts the best matching active lesson.
-- /practice vocab|grammar|mistakes|writing|review|mixed starts a focused mode.
+- /practice supports vocab, grammar, mistakes, writing, review, mixed,
+  diplomatic, notebook, discourse, reading, genre, and writing_workshop.
 
 Adding material:
 - In #materials_upload / Materials Upload, send /upload, choose the material type,
@@ -42,12 +43,20 @@ Commands:
 /start - create or load profile and post workspace hubs
 /today - start today's practice
 /review - review due items
-/practice vocab|grammar|mistakes|writing|review|mixed - start a mode
+/practice <mode> - start a focused or EPIC-22 breakthrough mode
 /topics - browse lesson topics and knowledge areas
 /lessons [query] - list active lesson plans
 /lesson <id>|random|topic <query> - inspect or start lessons
 /skip - skip current exercise and show the answer
 /feedback explain <attempt_id> - show detailed teacher feedback
+/reflect <text> - save a short reflective practice note
+/scene <topic> - build a business/IT roleplay card
+/brief <agenda> - prepare just-in-time meeting language
+/mentor - weekly Socratic prompt
+/article <text> - text-first Article Lab v1
+/debate <topic> - start Debate Mode
+/translate_lab <topic> - RU->EN transfer practice
+/fluency432 <topic> - 4-3-2 fluency practice
 /upload - upload lesson material
 /add expression | push back on | мягко возражать | meetings,stakeholders
 /candidates <material_id> - review extracted candidates

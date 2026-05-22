@@ -11,8 +11,10 @@ from fluentloop.bot.handlers import (
     handle_add_text,
     handle_answer,
     handle_approve_all,
+    handle_article,
     handle_attempt_ack,
     handle_attempt_hard,
+    handle_brief,
     handle_candidate_action,
     handle_candidate_edit_menu,
     handle_candidate_edit_prompt,
@@ -20,10 +22,14 @@ from fluentloop.bot.handlers import (
     handle_candidates,
     handle_channel_help,
     handle_channel_hub,
+    handle_confidence_rating,
+    handle_debate,
     handle_dispute,
     handle_favorite_toggle,
     handle_favorites,
     handle_feedback_explain,
+    handle_feedback_layer,
+    handle_fluency432,
     handle_help,
     handle_item_status,
     handle_items,
@@ -31,10 +37,13 @@ from fluentloop.bot.handlers import (
     handle_lesson_callback,
     handle_lessons,
     handle_materials_channel_hub,
+    handle_mentor,
     handle_mistake_action,
     handle_mistakes,
     handle_practice,
+    handle_reflect,
     handle_rules,
+    handle_scene,
     handle_setting_update,
     handle_settings,
     handle_skip_all,
@@ -43,6 +52,7 @@ from fluentloop.bot.handlers import (
     handle_stats,
     handle_today,
     handle_topics,
+    handle_translate_lab,
     handle_upload,
     handle_upload_prompt,
     handle_upload_start,
@@ -350,6 +360,30 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     ),
                     message_thread_id=practice_target.message_thread_id,
                 )
+            elif command == "/scene":
+                reply = handle_scene(event.raw_text.removeprefix("/scene").strip())
+            elif command == "/brief":
+                reply = handle_brief(event.raw_text.removeprefix("/brief").strip())
+            elif command == "/mentor":
+                reply = handle_mentor()
+            elif command == "/article":
+                reply = handle_article(event.raw_text.removeprefix("/article").strip())
+            elif command == "/debate":
+                reply = handle_debate(event.raw_text.removeprefix("/debate").strip())
+            elif command == "/translate_lab":
+                reply = handle_translate_lab(
+                    event.raw_text.removeprefix("/translate_lab").strip()
+                )
+            elif command == "/fluency432":
+                reply = handle_fluency432(
+                    event.raw_text.removeprefix("/fluency432").strip()
+                )
+            elif command == "/reflect":
+                reply = handle_reflect(
+                    session,
+                    user,
+                    event.raw_text.removeprefix("/reflect").strip(),
+                )
             elif command == "/settings":
                 if len(parts) == 3 and parts[1] == "set":
                     field, _, value = parts[2].partition(" ")
@@ -557,15 +591,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_lessons(session, user, "")
                 await answer_callback(event, "Lessons")
             elif raw_data == "practice:modes":
-                reply = BotReply(
-                    "Practice modes\n"
-                    "/practice vocab - words and expressions\n"
-                    "/practice grammar - grammar micro-drills\n"
-                    "/practice mistakes - active weak points\n"
-                    "/practice writing - mini-writing prompts\n"
-                    "/practice review - due SRS items\n"
-                    "/practice mixed - balanced practice"
-                )
+                reply = handle_practice(session, user, "")
                 await answer_callback(event, "Practice modes")
             elif len(parts) == 3 and parts[0] == "lesson":
                 practice_target = workspace_destination(settings, "practice_flow")
@@ -746,6 +772,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 else:
                     reply = handle_attempt_hard(session, user, attempt_id)
                 await answer_callback(event, "Marked Hard")
+            elif raw_data.startswith("feedback:layer:"):
+                layer_parts = raw_data.split(":", 3)
+                try:
+                    attempt_id = int(layer_parts[2])
+                    layer = layer_parts[3]
+                except (IndexError, ValueError):
+                    reply = BotReply("Attempt not found.")
+                else:
+                    reply = handle_feedback_layer(session, user, attempt_id, layer)
+                await answer_callback(event, "Feedback layer")
             elif len(parts) == 3 and parts[0] == "feedback" and parts[1] == "explain":
                 try:
                     attempt_id = int(parts[2])
@@ -754,6 +790,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 else:
                     reply = handle_feedback_explain(session, user, attempt_id)
                 await answer_callback(event, "Teacher details")
+            elif raw_data.startswith("practice:confidence:"):
+                confidence_parts = raw_data.split(":", 3)
+                try:
+                    exercise_index = int(confidence_parts[2])
+                    rating = int(confidence_parts[3])
+                except (IndexError, ValueError):
+                    reply = BotReply("Use confidence 1-5.")
+                else:
+                    reply = handle_confidence_rating(
+                        session, user, exercise_index, rating
+                    )
+                await answer_callback(event, "Confidence recorded")
             elif raw_data == "practice:skip":
                 next_target = workspace_destination(settings, "next_prompt")
                 summary_target = workspace_destination(settings, "summary")

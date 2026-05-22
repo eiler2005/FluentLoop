@@ -18,6 +18,7 @@ from fluentloop.db.models import (
 from fluentloop.exercises import Exercise, render_for_item
 from fluentloop.grammar import select_focus_concept
 from fluentloop.learning import active_items
+from fluentloop.lesson_formats import apply_lesson_format, normalize_practice_mode
 from fluentloop.lesson_plans import (
     available_lesson_plan,
     lesson_items,
@@ -260,6 +261,7 @@ def compose_learning_session(
     mode = mode_override or (
         "lesson" if plan is not None else choose_session_mode(session, user, now=now)
     )
+    mode = normalize_practice_mode(mode)
     scored_items = _scored_items_for_lesson_plan(session, plan)
     if not scored_items:
         scored_items = score_learning_items(session, user, now=now)
@@ -288,6 +290,12 @@ def compose_learning_session(
     )
     if plan is not None:
         exercises = _apply_lesson_plan_steps(session, plan, exercises)
+    exercises = apply_lesson_format(
+        mode,
+        exercises,
+        [row.item for row in scored_items],
+        patterns,
+    )
     if material_context:
         exercises = _apply_material_context(exercises, material_context)
     if ai_gateway is not None:
@@ -301,11 +309,29 @@ def _filter_scored_items_for_mode(
     if mode in {"lesson", "mixed", "review"}:
         return scored_items
     allowed = {
-        "vocab": {"word", "expression"},
+        "vocab": {"word", "expression", "chunk"},
         "grammar": {"grammar_rule"},
         "mistakes": {"mistake_pattern"},
-        "writing": {"word", "expression", "grammar_rule", "mistake_pattern"},
+        "writing": {"word", "expression", "grammar_rule", "mistake_pattern", "chunk"},
         "mistake_focus": {"mistake_pattern"},
+        "diplomatic": {
+            "word",
+            "expression",
+            "mistake_pattern",
+            "grammar_rule",
+            "chunk",
+        },
+        "notebook": {"word", "expression", "mistake_pattern", "grammar_rule", "chunk"},
+        "discourse": {"word", "expression", "grammar_rule", "chunk"},
+        "reading": {"word", "expression", "grammar_rule", "chunk"},
+        "genre": {"word", "expression", "grammar_rule", "mistake_pattern", "chunk"},
+        "writing_workshop": {
+            "word",
+            "expression",
+            "grammar_rule",
+            "mistake_pattern",
+            "chunk",
+        },
     }.get(mode)
     if allowed is None:
         return scored_items
@@ -396,7 +422,7 @@ def build_staged_exercises(
         ),
         build_recap_step(selected, mode=mode, topic=topic, lesson_goal=lesson_goal),
         build_recap_step(
-            selected[4:], mode=mode, topic=topic, lesson_goal=lesson_goal
+            selected[4:], mode=mode, topic=topic, lesson_goal=lesson_goal, cold=True
         ),
     ]
     return _dedupe_target_ids(steps[: len(SESSION_STAGES)])
@@ -632,7 +658,7 @@ def build_free_production_step(
     targets = items[:3]
     target_text = ", ".join(item.text for item in targets) or "I would lean towards"
     exercise = Exercise(
-            "mini_writing",
+        "mini_writing",
         (
             f"Free production: write 3-4 sentences about {topic.lower()}.\n"
             f"Use at least two of these: {target_text}."
@@ -653,16 +679,27 @@ def build_free_production_step(
 
 
 def build_recap_step(
-    items: list[LearningItem], *, mode: str, topic: str, lesson_goal: str
+    items: list[LearningItem],
+    *,
+    mode: str,
+    topic: str,
+    lesson_goal: str,
+    cold: bool = False,
 ) -> dict[str, Any]:
     targets = items[:4]
     target_text = ", ".join(item.text for item in targets) or "today's key phrases"
-    exercise = Exercise(
-            "active_recall",
-        (
+    prompt = (
+        "Cold recall closer: without looking back, write one new workplace "
+        f"sentence that uses the most useful language from {topic.lower()}."
+        if cold
+        else (
             "Recap: without looking back, write three things you want to remember "
             f"from today's practice. Include: {target_text}."
-        ),
+        )
+    )
+    exercise = Exercise(
+        "active_recall",
+        prompt,
         target_text,
         "Use active recall; do not just copy a previous answer.",
         "Recap asks for active recall to strengthen retention.",
@@ -717,6 +754,46 @@ def _preferred_cycle_for_mode(mode: str) -> tuple[str, ...]:
             "grammar_rewrite",
             "active_recall",
         )
+    if mode == "diplomatic":
+        return (
+            "register_choice",
+            "grammar_rewrite",
+            "sentence_transform",
+            "follow_up",
+            "active_recall",
+        )
+    if mode == "notebook":
+        return (
+            "mini_writing",
+            "sentence_transform",
+            "collocation_drill",
+            "grammar_rewrite",
+            "active_recall",
+        )
+    if mode == "discourse":
+        return (
+            "sentence_transform",
+            "chunk_builder",
+            "register_choice",
+            "mini_writing",
+            "active_recall",
+        )
+    if mode == "reading":
+        return (
+            "noticing",
+            "cloze",
+            "collocation_drill",
+            "follow_up",
+            "active_recall",
+        )
+    if mode in {"genre", "writing_workshop"}:
+        return (
+            "mini_writing",
+            "sentence_transform",
+            "register_choice",
+            "grammar_rewrite",
+            "active_recall",
+        )
     return (
         "cloze",
         "translate",
@@ -752,11 +829,11 @@ def _mistake_focus_prompt(
     pattern: MistakePattern, wrong: str, concept: GrammarConcept | None
 ) -> str:
     if concept is None:
-        return f"Fix this recurring {pattern.mistake_type} issue:\n\"{wrong}\""
+        return f'Fix this recurring {pattern.mistake_type} issue:\n"{wrong}"'
     return (
         f"Grammar focus: {concept.title}.\n"
         f"{concept.description}\n"
-        f"Fix this recurring {pattern.mistake_type} issue:\n\"{wrong}\""
+        f'Fix this recurring {pattern.mistake_type} issue:\n"{wrong}"'
     )
 
 
@@ -837,9 +914,7 @@ def _apply_lesson_plan_steps(
             metadata["lesson_plan_id"] = step.lesson_plan_id
             metadata["lesson_step_id"] = step.id
             metadata["lesson_plan_title"] = getattr(plan, "title", "")
-            metadata["lesson_language_focus"] = getattr(
-                plan, "language_focus_json", []
-            )
+            metadata["lesson_language_focus"] = getattr(plan, "language_focus_json", [])
             metadata["lesson_tags"] = getattr(plan, "tags_json", [])
         exercise["lesson_plan_title"] = getattr(plan, "title", "")
         exercise["lesson_language_focus"] = getattr(plan, "language_focus_json", [])
@@ -871,7 +946,5 @@ def _apply_material_context(
         None,
     )
     if input_step is not None:
-        input_step["prompt"] = (
-            f"Material context: {snippet}\n\n{input_step['prompt']}"
-        )
+        input_step["prompt"] = f"Material context: {snippet}\n\n{input_step['prompt']}"
     return exercises

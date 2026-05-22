@@ -74,6 +74,12 @@ class AnswerFeedback(BaseModel):
     mistake_summary: str = ""
     why_wrong: str = ""
     rule: str = ""
+    error_layer: str = ""
+    native_rewrite: str = ""
+    native_rewrite_reason: str = ""
+    why_layer: str = ""
+    l1_hits: list[dict[str, str]] = Field(default_factory=list)
+    confidence_rating: int | None = None
     better_variants: list[str] = Field(default_factory=list)
     micro_drill: str = ""
     teacher_note: str = ""
@@ -83,4 +89,16 @@ class AnswerFeedback(BaseModel):
     suggested_candidates: list[ExtractedItem] = Field(default_factory=list)
 
 
-Validated = ExtractionResult | GenerationResult | AnswerFeedback | LessonPlanDraft
+class NativeRewriteFeedback(BaseModel):
+    native_rewrite: str = ""
+    reason: str = ""
+    has_upgrade: bool = False
+
+
+Validated = (
+    ExtractionResult
+    | GenerationResult
+    | AnswerFeedback
+    | NativeRewriteFeedback
+    | LessonPlanDraft
+)

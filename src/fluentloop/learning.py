@@ -13,7 +13,7 @@ from fluentloop.db.models import (
     utc_now,
 )
 
-ITEM_TYPES = {"word", "expression", "grammar_rule", "mistake_pattern"}
+ITEM_TYPES = {"word", "expression", "grammar_rule", "mistake_pattern", "chunk"}
 ITEM_STATUSES = {"active", "archived", "suspended"}
 
 
@@ -29,6 +29,7 @@ def create_learning_item(
     tags: list[str] | None = None,
     source_material_id: int | None = None,
     is_favorite: bool = False,
+    metadata: dict | None = None,
 ) -> LearningItem:
     if type_ not in ITEM_TYPES:
         raise ValueError(f"Unsupported item type: {type_}")
@@ -52,6 +53,7 @@ def create_learning_item(
         explanation=explanation.strip(),
         examples=examples or [],
         tags=tags or [],
+        metadata_json=metadata or {},
         level=user.level,
         source_material_id=source_material_id,
         is_favorite=is_favorite,

@@ -7,7 +7,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
-from fluentloop.ai.schemas import AnswerFeedback
+from fluentloop.ai.schemas import AnswerFeedback, NativeRewriteFeedback
 from fluentloop.bot.formatting import bold, code, labeled
 from fluentloop.db.models import (
     ExtractedCandidate,
@@ -17,6 +17,7 @@ from fluentloop.db.models import (
     User,
 )
 from fluentloop.mistakes import ingest_mistake_event
+from fluentloop.russian_l1_filter import detect_l1_interference
 from fluentloop.srs import record_result
 
 
@@ -33,6 +34,7 @@ def build_answer_check_payload(exercise: dict, answer: str) -> dict:
         "explanation": exercise.get("explanation", ""),
         "topic": exercise.get("topic") or metadata.get("topic", ""),
         "lesson_goal": exercise.get("lesson_goal") or metadata.get("lesson_goal", ""),
+        "confidence_rating": metadata.get("confidence_rating"),
         "answer": answer,
     }
 
@@ -46,20 +48,46 @@ def check_answer(provider: AIProvider, exercise: dict, answer: str) -> AnswerFee
         result = provider.light_call("epic_10_check_answer", payload)
     if not isinstance(result, AnswerFeedback):
         raise TypeError("AI provider returned the wrong feedback schema")
-    return build_teacher_feedback(result, exercise, answer)
+    native_rewrite = None
+    try:
+        rewrite_result = provider.light_call("epic_22_native_rewrite", payload)
+    except Exception:
+        rewrite_result = None
+    if isinstance(rewrite_result, NativeRewriteFeedback):
+        native_rewrite = rewrite_result
+    return build_teacher_feedback(result, exercise, answer, native_rewrite)
 
 
 def build_teacher_feedback(
-    feedback: AnswerFeedback, exercise: dict, answer: str
+    feedback: AnswerFeedback,
+    exercise: dict,
+    answer: str,
+    native_rewrite: NativeRewriteFeedback | None = None,
 ) -> AnswerFeedback:
     corrected = feedback.corrected_answer or exercise.get("expected_answer", "")
     natural = feedback.natural_answer or corrected
+    if native_rewrite is not None and native_rewrite.native_rewrite:
+        natural = native_rewrite.native_rewrite
     mistake_summary = feedback.mistake_summary
     if not mistake_summary and feedback.status != "correct":
         mistake_summary = "The meaning is close, but the form needs adjustment."
     why_wrong = feedback.why_wrong or feedback.explanation
     rule = feedback.rule or feedback.related_rule
     better_variants = feedback.better_variants or ([natural] if natural else [])
+    l1_hits = [hit.as_feedback_dict() for hit in detect_l1_interference(answer)]
+    if l1_hits and feedback.status == "correct":
+        feedback = feedback.model_copy(update={"status": "partial"})
+    if l1_hits and not mistake_summary:
+        first_hit = l1_hits[0]
+        mistake_summary = (
+            f"Likely Russian L1 transfer: {first_hit['matched_text']} -> "
+            f"{first_hit['suggestion']}."
+        )
+    error_layer = feedback.error_layer or mistake_summary or feedback.explanation
+    native_reason = feedback.native_rewrite_reason
+    if native_rewrite is not None and native_rewrite.reason:
+        native_reason = native_rewrite.reason
+    why_layer = feedback.why_layer or why_wrong or rule
     micro_drill = feedback.micro_drill
     if not micro_drill and feedback.status != "correct" and corrected:
         micro_drill = f"Write one new sentence using: {corrected}"
@@ -74,9 +102,20 @@ def build_teacher_feedback(
         update={
             "corrected_answer": corrected,
             "natural_answer": natural,
+            "native_rewrite": natural,
+            "native_rewrite_reason": native_reason,
             "mistake_summary": mistake_summary,
             "why_wrong": why_wrong,
             "rule": rule,
+            "error_layer": error_layer,
+            "why_layer": why_layer,
+            "l1_hits": l1_hits,
+            "should_create_mistake_event": (
+                feedback.should_create_mistake_event or bool(l1_hits)
+            ),
+            "should_create_or_update_mistake_pattern": (
+                feedback.should_create_or_update_mistake_pattern or bool(l1_hits)
+            ),
             "better_variants": better_variants,
             "micro_drill": micro_drill,
             "teacher_note": teacher_note,
@@ -94,6 +133,8 @@ def render_compact_teacher_feedback(attempt_id: int, feedback: AnswerFeedback) -
         lines.append(f"{bold('Better:')} {code(better)}")
     if feedback.mistake_summary:
         lines.append(labeled("Mistake", feedback.mistake_summary))
+    if feedback.error_layer and feedback.error_layer != feedback.mistake_summary:
+        lines.append(labeled("Errors", feedback.error_layer))
     why = feedback.why_wrong or feedback.explanation
     if why:
         lines.append(labeled("Why", why))
@@ -102,6 +143,16 @@ def render_compact_teacher_feedback(attempt_id: int, feedback: AnswerFeedback) -
         lines.append(labeled("Rule", rule))
     if feedback.better_variants:
         lines.append(f"{bold('Try:')} {code(feedback.better_variants[0])}")
+    if feedback.native_rewrite_reason:
+        lines.append(labeled("Native layer", feedback.native_rewrite_reason))
+    if feedback.l1_hits:
+        first_hit = feedback.l1_hits[0]
+        lines.append(
+            labeled(
+                "L1 trap",
+                f"{first_hit['matched_text']} -> {first_hit['suggestion']}",
+            )
+        )
     if feedback.micro_drill:
         lines.append(labeled("Micro-drill", feedback.micro_drill))
     return "\n".join(lines)
@@ -125,6 +176,23 @@ def render_detailed_teacher_feedback(feedback: dict) -> str:
     rule = feedback.get("rule") or feedback.get("related_rule")
     if rule:
         lines.append(labeled("Teacher rule", rule))
+    error_layer = feedback.get("error_layer")
+    if error_layer:
+        lines.append(labeled("Error layer", str(error_layer)))
+    native_rewrite = feedback.get("native_rewrite") or feedback.get("natural_answer")
+    if native_rewrite:
+        lines.append(f"{bold('Native rewrite:')} {code(native_rewrite)}")
+    native_reason = feedback.get("native_rewrite_reason")
+    if native_reason:
+        lines.append(labeled("Native reason", str(native_reason)))
+    why_layer = feedback.get("why_layer")
+    if why_layer:
+        lines.append(labeled("Why layer", str(why_layer)))
+    l1_hits = feedback.get("l1_hits") or []
+    if l1_hits:
+        lines.append(bold("Russian L1 hits:"))
+        for hit in l1_hits[:3]:
+            lines.append(f"- {code(hit['matched_text'])} -> {code(hit['suggestion'])}")
     if better_variants:
         lines.append(bold("Better variants:"))
         lines.extend(f"- {code(variant)}" for variant in better_variants[:3])
@@ -166,12 +234,21 @@ def apply_feedback(
         return None
     should_log = result == "Again" or feedback.should_create_mistake_event
     if should_log:
+        first_l1_hit = feedback.l1_hits[0] if feedback.l1_hits else None
         event = MistakeEvent(
             user_id=user.id,
             wrong_answer=answer,
             corrected_answer=feedback.corrected_answer,
-            explanation=feedback.explanation,
-            mistake_type=feedback.detected_mistake_type or "general",
+            explanation=(
+                str(first_l1_hit.get("explanation"))
+                if first_l1_hit
+                else feedback.explanation
+            ),
+            mistake_type=(
+                str(first_l1_hit.get("mistake_type"))
+                if first_l1_hit
+                else feedback.detected_mistake_type or "general"
+            ),
             linked_learning_item_id=(
                 exercise.get("target_learning_item_ids") or [None]
             )[0],

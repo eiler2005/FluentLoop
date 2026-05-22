@@ -6,10 +6,14 @@ notes.
 
 ## Project at a glance
 
-- **Product:** FluentLoop — personal Telegram bot for English learning (B2+/C1-,
-  business and IT focus).
+- **Product:** FluentLoop — Telegram bot for English learning (B2+/C1-,
+  business and IT focus). Started as a personal tool; now also serves
+  an owner-curated shared lesson library for additional admitted users.
 - **Interface:** Telegram, text-only. No voice in MVP.
-- **Audience:** Single user. No multi-tenancy in MVP.
+- **Audience:** Multiple admitted Telegram users may exist. Lesson plans
+  are owner-curated templates; each subscriber gets cloned per-user
+  copies with isolated progress (ADR-0008, EPIC-23). Operationally still
+  single-tenant: one bot, one container, one set of secrets.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
 - **Source of implementation truth:** [`docs/features/`](docs/features/) — 21
@@ -79,9 +83,13 @@ destructive action is high.
 - **Mistake patterns are auto-created with `confidence=low` only** after ≥3
   similar mistake events within 14 days. User confirmation promotes them to
   `confidence=high`. See `docs/features/EPIC-11-mistake-events-and-patterns.md`.
-- **Single-user.** No auth layer beyond `TELEGRAM_ALLOWED_USER_ID`. The data
-  model carries `user_id` for forward-compat only — do not build multi-tenant
-  infrastructure.
+- **Single tenancy, shared content.** One bot, one container, one set of
+  secrets. Multiple admitted Telegram users may exist; each has fully
+  isolated progress (SRS, mistakes, sessions). Lesson plans flagged as
+  templates can be discovered via `/library` and cloned per-user on
+  subscribe (ADR-0008, EPIC-23). `TELEGRAM_ALLOWED_USER_ID` is no longer
+  the sole admission gate — admission policy is a separate concern
+  (ADR-0009, to be written).
 - **Architectural decisions become ADRs before implementation.** If a task
   forces a decision that will affect future work, write the ADR first.
 

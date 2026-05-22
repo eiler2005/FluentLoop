@@ -8,17 +8,42 @@ from sqlalchemy.orm import Session
 from fluentloop.db.models import LearningItem, ReviewState
 
 RESULTS = {"Again", "Hard", "Good", "Easy"}
+SECOND = 1.0 / 86_400.0
+GIR_INTERVAL_DAYS = (
+    5 * SECOND,
+    25 * SECOND,
+    2 / 1_440,
+    10 / 1_440,
+    1 / 24,
+    5 / 24,
+    1.0,
+    5.0,
+    25.0,
+    120.0,
+    730.0,
+)
+
+
+def _next_gir_interval(last_interval_days: float, *, skip: int = 0) -> float:
+    if last_interval_days <= 0:
+        return GIR_INTERVAL_DAYS[min(skip, len(GIR_INTERVAL_DAYS) - 1)]
+    for index, interval in enumerate(GIR_INTERVAL_DAYS):
+        if interval > last_interval_days + SECOND:
+            return GIR_INTERVAL_DAYS[min(index + skip, len(GIR_INTERVAL_DAYS) - 1)]
+    return min(730.0, last_interval_days * (3.0 if skip else 2.0))
 
 
 def next_interval_days(result: str, last_interval_days: float) -> float:
     if result == "Again":
-        return 0.0
+        return GIR_INTERVAL_DAYS[0]
     if result == "Hard":
-        return 1.0
+        if last_interval_days < 1.0:
+            return _next_gir_interval(last_interval_days)
+        return max(1.0, min(25.0, last_interval_days * 1.2))
     if result == "Good":
-        return min(7.0, max(2.0, last_interval_days * 2.0))
+        return _next_gir_interval(last_interval_days)
     if result == "Easy":
-        return max(7.0, last_interval_days * 3.0)
+        return _next_gir_interval(last_interval_days, skip=1)
     raise ValueError(f"Unsupported review result: {result}")
 
 
@@ -69,8 +94,8 @@ def convert_last_good_to_hard(session: Session, item_id: int) -> ReviewState:
     state.fail_count += 1
     state.difficulty += 0.5
     state.last_result = "Hard"
-    state.last_interval_days = 1.0
-    state.due_at = reviewed_at + timedelta(days=1)
+    state.last_interval_days = next_interval_days("Hard", 0.0)
+    state.due_at = reviewed_at + timedelta(days=state.last_interval_days)
     session.add(state)
     session.flush()
     return state
