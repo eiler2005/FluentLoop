@@ -5,45 +5,458 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FluentLoop Lesson Types</title>
   <style>
-    :root { color-scheme: light; --blue:#1559c7; --green:#187533; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0; color: #121826; background: #fff; line-height: 1.55; }
-    main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
-    nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 20px;
-      border-bottom: 1px solid #d7e1ef; background: #f7fbff; }
-    nav a { color: var(--blue); text-decoration: none; font-weight: 650; }
-    h1 { font-size: clamp(2rem, 4vw, 3.4rem); margin: 18px 0 12px; }
-    h2 { margin-top: 36px; color: var(--blue); }
-    h3 { margin-top: 24px; color: var(--green); }
-    blockquote { border-left: 4px solid var(--blue); margin: 18px 0;
-      padding: 8px 14px; background: #f7fbff; }
-    code { background: #eef4ff; padding: 2px 6px; border-radius: 5px; }
-    li { margin: 7px 0; }
-    pre { white-space: pre-wrap; overflow-x: auto; background: #f7fbff;
-      border: 1px solid #d7e1ef; padding: 10px; border-radius: 8px; }
+    :root {
+      color-scheme: light;
+      --ink: #10131a;
+      --muted: #606977;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --accent: #184b8f;
+      --warm: #b45309;
+      --good: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f6f7f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.52;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: var(--ink);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      border-color: var(--line);
+      background: var(--soft);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 24px 72px;
+    }
+    .hero-panel {
+      align-items: end;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--ink);
+      display: grid;
+      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      margin-bottom: 18px;
+      padding: 34px;
+    }
+    .hero-copy {
+      max-width: 850px;
+    }
+    .hero-aside {
+      border-left: 3px solid var(--warm);
+      color: var(--muted);
+      padding-left: 16px;
+    }
+    .hero-aside strong {
+      color: var(--ink);
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .hero-aside span {
+      display: block;
+      font-size: 0.95rem;
+    }
+    .hero {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0 28px;
+      max-width: 920px;
+    }
+    .kicker, .eyebrow, .section-kicker {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 3.4rem;
+      line-height: 1.04;
+      margin: 0 0 16px;
+      max-width: 780px;
+    }
+    h2 {
+      font-size: 1.75rem;
+      line-height: 1.16;
+      margin: 0 0 8px;
+    }
+    h3 {
+      font-size: 1.06rem;
+      line-height: 1.25;
+      margin: 10px 0 10px;
+    }
+    h4 {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 18px 0 8px;
+      text-transform: uppercase;
+    }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); }
+    code {
+      background: #eef2f7;
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .answer-block {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent);
+      color: var(--ink);
+      font-size: 0.97rem;
+      line-height: 1.58;
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      white-space: pre-line;
+    }
+    .muted { color: var(--muted); }
+    .metric-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 18px 0 32px;
+    }
+    .metric-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 118px;
+      padding: 16px;
+    }
+    .metric-card span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 1.95rem;
+      line-height: 1.05;
+      margin: 12px 0 8px;
+    }
+    .metric-card em {
+      color: var(--muted);
+      font-style: normal;
+    }
+    .section-block {
+      margin-top: 34px;
+    }
+    .section-header {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 270px minmax(0, 1fr);
+      padding: 28px 0 16px;
+    }
+    .section-header p:not(.kicker) {
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .link-grid, .series-overview, .type-grid, .lesson-grid, .example-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .link-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .series-overview {
+      grid-template-columns: 1fr;
+    }
+    .type-grid {
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    }
+    .lesson-grid, .example-grid {
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    }
+    .nav-tile, .overview-card, .type-card, .lesson-card, .example-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .nav-tile {
+      color: var(--ink);
+      min-height: 116px;
+      padding: 18px;
+      text-decoration: none;
+    }
+    .nav-tile strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .nav-tile span {
+      color: var(--muted);
+      display: block;
+    }
+    .overview-card, .type-card, .lesson-card, .example-card {
+      padding: 18px;
+    }
+    .card-heading-row {
+      align-items: start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .card-heading-row h3 {
+      margin-top: 0;
+    }
+    .card-heading-row span {
+      color: var(--muted);
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .compact-list {
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+    }
+    .compact-row {
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 11px 0;
+    }
+    .compact-row a {
+      display: inline-block;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .compact-row span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+    .card-index {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts, .case-notes {
+      margin: 14px 0 0;
+    }
+    .mini-facts dt, .case-notes dt, .detail-grid dt {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts dd, .case-notes dd, .detail-grid dd {
+      margin: 3px 0 12px;
+    }
+    .detail-grid {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 16px 0 0;
+      padding-top: 14px;
+    }
+    .chip-section {
+      margin-top: 16px;
+    }
+    .command-line, .telegram {
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .table-wrap {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      min-width: 900px;
+      width: 100%;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 13px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    .matrix {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin: 0;
+    }
+    .matrix-item {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      display: flex;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 14px;
+      text-decoration: none;
+    }
+    .matrix-item strong { color: var(--muted); font-size: 0.82rem; }
+    .type-section {
+      border-top: 1px solid var(--line);
+      padding: 32px 0 4px;
+    }
+    .card-topline {
+      align-items: center;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      gap: 8px;
+    }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-weight: 800;
+      padding: 2px 8px;
+      text-transform: uppercase;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .pill-list li {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+    }
+    ol { margin: 0; padding-left: 20px; }
+    ol li { margin: 6px 0; }
+    .empty-state {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    @media (max-width: 700px) {
+      nav { padding: 12px 14px; }
+      main { padding: 24px 14px 48px; }
+      h1 { font-size: 2.35rem; }
+      .hero-panel, .section-header {
+        grid-template-columns: 1fr;
+      }
+      .hero-panel {
+        padding: 22px;
+      }
+      .hero-aside {
+        border-left: 0;
+        border-top: 3px solid var(--warm);
+        padding: 14px 0 0;
+      }
+      .metric-row, .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .lesson-grid, .example-grid, .type-grid {
+        grid-template-columns: 1fr;
+      }
+      .compact-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+      }
+      .matrix-item { min-height: 48px; }
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
+<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="examples-by-type.html">Examples by type</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
 <main>
-<h1>FluentLoop Lesson Types</h1>
-<blockquote>Generated from FluentLoop DB/code. Do not hand-edit; regenerate with <code>scripts/export_lesson_catalog.py</code>.</blockquote>
-<p>Lesson Type is the learner-facing layer that connects material, practice mode, exercises, feedback, SRS, and outcomes.</p>
-<pre>| Type | Goal | When to use | Commands | Metrics | Next modes |</pre>
-<pre>|---|---|---|---|---|---|</pre>
-<pre>| Vocabulary | Learn useful terms and convert them into recallable language. | Use when you meet new standalone words or tech terms. | `/practice vocab`, `/review` | active vocabulary, review accuracy | `/practice vocab`, `/today` |</pre>
-<pre>| Chunks and Collocations | Turn phrases, collocations, and reusable workplace language into active production. | Use when you want to sound less translated and reuse ready-made English. | `/practice vocab`, `/practice notebook`, `/today` | productive chunks, reuse count | `/practice notebook`, `/practice vocab` |</pre>
-<pre>| Grammar | Repair grammar patterns that block clear business/IT communication. | Use when the issue is form, tense, articles, prepositions, or sentence shape. | `/practice grammar`, `/practice mistakes` | grammar accuracy, repeat errors | `/practice grammar`, `/review` |</pre>
-<pre>| Mistake Repair | Extinguish recurring mistakes and Russian-transfer traps. | Use when the same error keeps coming back or confidence is low. | `/practice mistakes`, `/review` | mistake extinction, L1 density | `/practice mistakes`, `/translate_lab` |</pre>
-<pre>| Diplomatic Workplace English | Make pushback, disagreement, feedback, and risk language firm but natural. | Use for stakeholder communication, negotiation, feedback, and workplace tone. | `/practice diplomatic`, `/translate_lab`, `/scene` | hedging density, L1 density | `/practice diplomatic`, `/scene` |</pre>
-<pre>| Notebook | Generate real free writing for native-diff, chunk mining, and L1 checks. | Use when the system needs fresh production data from you. | `/practice notebook`, `/reflect` | word count, lexical diversity, mined chunks | `/practice notebook`, `/outcomes full` |</pre>
-<pre>| Critical Reading | Read articles or arguments and produce claim, assumption, and summary outputs. | Use for articles, blog posts, product docs, and executive summaries. | `/article &lt;text&gt;`, `/practice reading` | reading events, summary quality | `/article &lt;text&gt;`, `/practice reading` |</pre>
-<pre>| Writing | Draft workplace artifacts with clear structure, tone, and reusable chunks. | Use for updates, emails, reports, reviews, resumes, and written answers. | `/practice writing`, `/practice discourse`, `/practice writing_workshop`, `/baseline` | writing metrics, hedging density | `/practice writing`, `/practice notebook` |</pre>
-<pre>| Genre Curriculum | Practice the structure of recurring work artifacts. | Use when the hard part is not one phrase, but the whole document shape. | `/practice genre` | genre coverage, artifact completion | `/practice genre`, `/practice writing_workshop` |</pre>
-<pre>| Scenario / Roleplay | Rehearse a realistic business/IT situation with tasks, roles, and target chunks. | Use before meetings, interviews, negotiation, or difficult conversations. | `/scene &lt;topic or number&gt;`, `/brief &lt;agenda&gt;` | scenario coverage, tone/L1 repair | `/scene`, `/practice diplomatic` |</pre>
-<pre>| Review / SRS | Bring due and weak items back until they are easy to recall. | Use when retention is low or `/outcomes` says sample size is thin. | `/review`, `/today`, `/practice review` | held-out retention, review accuracy | `/today`, `/review` |</pre>
-<pre>| Mixed Lesson | Combine vocabulary, chunks, grammar, writing, and recall in one lesson. | Use for textbook lessons, seed lessons, and broad workplace topics. | `/today`, `/lesson &lt;id&gt;`, `/practice mixed` | attempts, retention, productive chunks | `/today`, `/outcomes full` |</pre>
-<pre>| Outcomes | Measure learning quality and choose the next training loop. | Use weekly or monthly to decide what to train next. | `/baseline`, `/outcomes`, `/outcomes full`, `/mentor` | retention, productive chunks, L1 density, mistake extinction | `/today`, `/practice notebook`, `/practice diplomatic` |</pre>
+<section class="hero-panel">
+<div class="hero-copy">
+<p class="kicker">Learning architecture</p>
+<h1>FluentLoop lesson types</h1>
+<p>
+A lesson type is the user-facing contract for what a session trains, which command starts it, what evidence proves progress, and where the learner should go next.
+</p>
+</div>
+<div class="hero-aside">
+<strong>How to read this</strong>
+<span>Think of each type as a training lane: input, practice mode, exercise shape, feedback, and metric.</span>
+</div>
+</section>
+<section class="metric-row">
+<div class="metric-card"><span>Types</span><strong>13</strong><em>Learner-facing lanes</em></div>
+<div class="metric-card"><span>Practice modes</span><strong>13</strong><em>Mapped from command registry</em></div>
+<div class="metric-card"><span>Evidence</span><strong>Metrics</strong><em>Retention, production, L1, outcomes</em></div>
+<div class="metric-card"><span>Next step</span><strong>Guided</strong><em>Every type points to a follow-up loop</em></div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Portfolio view</p>
+<h2>Training taxonomy</h2>
+<p>Each card answers four questions: what it trains, when it matters, how to start, and how progress shows up.</p>
+</div>
+<div class="type-grid">
+<article class="type-card"><div class="card-index">vocabulary</div><h3>Vocabulary</h3><p>Learn useful terms and convert them into recallable language.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when you meet new standalone words or tech terms.</dd><dt>Commands</dt><dd><code>/practice vocab</code>, <code>/review</code></dd><dt>Evidence</dt><dd>active vocabulary, review accuracy</dd><dt>Next loop</dt><dd><code>/practice vocab</code>, <code>/today</code></dd></dl></article>
+<article class="type-card"><div class="card-index">chunks</div><h3>Chunks and Collocations</h3><p>Turn phrases, collocations, and reusable workplace language into active production.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when you want to sound less translated and reuse ready-made English.</dd><dt>Commands</dt><dd><code>/practice vocab</code>, <code>/practice notebook</code>, <code>/today</code></dd><dt>Evidence</dt><dd>productive chunks, reuse count</dd><dt>Next loop</dt><dd><code>/practice notebook</code>, <code>/practice vocab</code></dd></dl></article>
+<article class="type-card"><div class="card-index">grammar</div><h3>Grammar</h3><p>Repair grammar patterns that block clear business/IT communication.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when the issue is form, tense, articles, prepositions, or sentence shape.</dd><dt>Commands</dt><dd><code>/practice grammar</code>, <code>/practice mistakes</code></dd><dt>Evidence</dt><dd>grammar accuracy, repeat errors</dd><dt>Next loop</dt><dd><code>/practice grammar</code>, <code>/review</code></dd></dl></article>
+<article class="type-card"><div class="card-index">mistakes</div><h3>Mistake Repair</h3><p>Extinguish recurring mistakes and Russian-transfer traps.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when the same error keeps coming back or confidence is low.</dd><dt>Commands</dt><dd><code>/practice mistakes</code>, <code>/review</code></dd><dt>Evidence</dt><dd>mistake extinction, L1 density</dd><dt>Next loop</dt><dd><code>/practice mistakes</code>, <code>/translate_lab</code></dd></dl></article>
+<article class="type-card"><div class="card-index">diplomatic</div><h3>Diplomatic Workplace English</h3><p>Make pushback, disagreement, feedback, and risk language firm but natural.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use for stakeholder communication, negotiation, feedback, and workplace tone.</dd><dt>Commands</dt><dd><code>/practice diplomatic</code>, <code>/translate_lab</code>, <code>/scene</code></dd><dt>Evidence</dt><dd>hedging density, L1 density</dd><dt>Next loop</dt><dd><code>/practice diplomatic</code>, <code>/scene</code></dd></dl></article>
+<article class="type-card"><div class="card-index">notebook</div><h3>Notebook</h3><p>Generate real free writing for native-diff, chunk mining, and L1 checks.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when the system needs fresh production data from you.</dd><dt>Commands</dt><dd><code>/practice notebook</code>, <code>/reflect</code></dd><dt>Evidence</dt><dd>word count, lexical diversity, mined chunks</dd><dt>Next loop</dt><dd><code>/practice notebook</code>, <code>/outcomes full</code></dd></dl></article>
+<article class="type-card"><div class="card-index">reading</div><h3>Critical Reading</h3><p>Read articles or arguments and produce claim, assumption, and summary outputs.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use for articles, blog posts, product docs, and executive summaries.</dd><dt>Commands</dt><dd><code>/article &lt;text&gt;</code>, <code>/practice reading</code></dd><dt>Evidence</dt><dd>reading events, summary quality</dd><dt>Next loop</dt><dd><code>/article &lt;text&gt;</code>, <code>/practice reading</code></dd></dl></article>
+<article class="type-card"><div class="card-index">writing</div><h3>Writing</h3><p>Draft workplace artifacts with clear structure, tone, and reusable chunks.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use for updates, emails, reports, reviews, resumes, and written answers.</dd><dt>Commands</dt><dd><code>/practice writing</code>, <code>/practice discourse</code>, <code>/practice writing_workshop</code>, <code>/baseline</code></dd><dt>Evidence</dt><dd>writing metrics, hedging density</dd><dt>Next loop</dt><dd><code>/practice writing</code>, <code>/practice notebook</code></dd></dl></article>
+<article class="type-card"><div class="card-index">genre</div><h3>Genre Curriculum</h3><p>Practice the structure of recurring work artifacts.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when the hard part is not one phrase, but the whole document shape.</dd><dt>Commands</dt><dd><code>/practice genre</code></dd><dt>Evidence</dt><dd>genre coverage, artifact completion</dd><dt>Next loop</dt><dd><code>/practice genre</code>, <code>/practice writing_workshop</code></dd></dl></article>
+<article class="type-card"><div class="card-index">scenario</div><h3>Scenario / Roleplay</h3><p>Rehearse a realistic business/IT situation with tasks, roles, and target chunks.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use before meetings, interviews, negotiation, or difficult conversations.</dd><dt>Commands</dt><dd><code>/scene &lt;topic or number&gt;</code>, <code>/brief &lt;agenda&gt;</code></dd><dt>Evidence</dt><dd>scenario coverage, tone/L1 repair</dd><dt>Next loop</dt><dd><code>/scene</code>, <code>/practice diplomatic</code></dd></dl></article>
+<article class="type-card"><div class="card-index">review</div><h3>Review / SRS</h3><p>Bring due and weak items back until they are easy to recall.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use when retention is low or `/outcomes` says sample size is thin.</dd><dt>Commands</dt><dd><code>/review</code>, <code>/today</code>, <code>/practice review</code></dd><dt>Evidence</dt><dd>held-out retention, review accuracy</dd><dt>Next loop</dt><dd><code>/today</code>, <code>/review</code></dd></dl></article>
+<article class="type-card"><div class="card-index">mixed</div><h3>Mixed Lesson</h3><p>Combine vocabulary, chunks, grammar, writing, and recall in one lesson.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use for textbook lessons, seed lessons, and broad workplace topics.</dd><dt>Commands</dt><dd><code>/today</code>, <code>/lesson &lt;id&gt;</code>, <code>/practice mixed</code></dd><dt>Evidence</dt><dd>attempts, retention, productive chunks</dd><dt>Next loop</dt><dd><code>/today</code>, <code>/outcomes full</code></dd></dl></article>
+<article class="type-card"><div class="card-index">outcomes</div><h3>Outcomes</h3><p>Measure learning quality and choose the next training loop.</p><dl class="mini-facts"><dt>When to use</dt><dd>Use weekly or monthly to decide what to train next.</dd><dt>Commands</dt><dd><code>/baseline</code>, <code>/outcomes</code>, <code>/outcomes full</code>, <code>/mentor</code></dd><dt>Evidence</dt><dd>retention, productive chunks, L1 density, mistake extinction</dd><dt>Next loop</dt><dd><code>/today</code>, <code>/practice notebook</code>, <code>/practice diplomatic</code></dd></dl></article>
+</div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Dense reference</p>
+<h2>Command and evidence matrix</h2>
+<p>A compact table for scanning commands and metrics after the portfolio view.</p>
+</div>
+<div class="table-wrap"><table><tr><th>Type</th><th>Training job</th><th>Commands</th><th>Evidence</th><th>Next modes</th></tr><tr><td><strong>Vocabulary</strong></td><td>Learn useful terms and convert them into recallable language.</td><td><code>/practice vocab</code>, <code>/review</code></td><td>active vocabulary, review accuracy</td><td><code>/practice vocab</code>, <code>/today</code></td></tr><tr><td><strong>Chunks and Collocations</strong></td><td>Turn phrases, collocations, and reusable workplace language into active production.</td><td><code>/practice vocab</code>, <code>/practice notebook</code>, <code>/today</code></td><td>productive chunks, reuse count</td><td><code>/practice notebook</code>, <code>/practice vocab</code></td></tr><tr><td><strong>Grammar</strong></td><td>Repair grammar patterns that block clear business/IT communication.</td><td><code>/practice grammar</code>, <code>/practice mistakes</code></td><td>grammar accuracy, repeat errors</td><td><code>/practice grammar</code>, <code>/review</code></td></tr><tr><td><strong>Mistake Repair</strong></td><td>Extinguish recurring mistakes and Russian-transfer traps.</td><td><code>/practice mistakes</code>, <code>/review</code></td><td>mistake extinction, L1 density</td><td><code>/practice mistakes</code>, <code>/translate_lab</code></td></tr><tr><td><strong>Diplomatic Workplace English</strong></td><td>Make pushback, disagreement, feedback, and risk language firm but natural.</td><td><code>/practice diplomatic</code>, <code>/translate_lab</code>, <code>/scene</code></td><td>hedging density, L1 density</td><td><code>/practice diplomatic</code>, <code>/scene</code></td></tr><tr><td><strong>Notebook</strong></td><td>Generate real free writing for native-diff, chunk mining, and L1 checks.</td><td><code>/practice notebook</code>, <code>/reflect</code></td><td>word count, lexical diversity, mined chunks</td><td><code>/practice notebook</code>, <code>/outcomes full</code></td></tr><tr><td><strong>Critical Reading</strong></td><td>Read articles or arguments and produce claim, assumption, and summary outputs.</td><td><code>/article &lt;text&gt;</code>, <code>/practice reading</code></td><td>reading events, summary quality</td><td><code>/article &lt;text&gt;</code>, <code>/practice reading</code></td></tr><tr><td><strong>Writing</strong></td><td>Draft workplace artifacts with clear structure, tone, and reusable chunks.</td><td><code>/practice writing</code>, <code>/practice discourse</code>, <code>/practice writing_workshop</code>, <code>/baseline</code></td><td>writing metrics, hedging density</td><td><code>/practice writing</code>, <code>/practice notebook</code></td></tr><tr><td><strong>Genre Curriculum</strong></td><td>Practice the structure of recurring work artifacts.</td><td><code>/practice genre</code></td><td>genre coverage, artifact completion</td><td><code>/practice genre</code>, <code>/practice writing_workshop</code></td></tr><tr><td><strong>Scenario / Roleplay</strong></td><td>Rehearse a realistic business/IT situation with tasks, roles, and target chunks.</td><td><code>/scene &lt;topic or number&gt;</code>, <code>/brief &lt;agenda&gt;</code></td><td>scenario coverage, tone/L1 repair</td><td><code>/scene</code>, <code>/practice diplomatic</code></td></tr><tr><td><strong>Review / SRS</strong></td><td>Bring due and weak items back until they are easy to recall.</td><td><code>/review</code>, <code>/today</code>, <code>/practice review</code></td><td>held-out retention, review accuracy</td><td><code>/today</code>, <code>/review</code></td></tr><tr><td><strong>Mixed Lesson</strong></td><td>Combine vocabulary, chunks, grammar, writing, and recall in one lesson.</td><td><code>/today</code>, <code>/lesson &lt;id&gt;</code>, <code>/practice mixed</code></td><td>attempts, retention, productive chunks</td><td><code>/today</code>, <code>/outcomes full</code></td></tr><tr><td><strong>Outcomes</strong></td><td>Measure learning quality and choose the next training loop.</td><td><code>/baseline</code>, <code>/outcomes</code>, <code>/outcomes full</code>, <code>/mentor</code></td><td>retention, productive chunks, L1 density, mistake extinction</td><td><code>/today</code>, <code>/practice notebook</code>, <code>/practice diplomatic</code></td></tr></table></div>
+</section>
 </main>
 </body>
 </html>

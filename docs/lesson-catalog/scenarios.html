@@ -5,510 +5,477 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Business/IT Scenarios</title>
   <style>
-    :root { color-scheme: light; --blue:#1559c7; --green:#187533; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0; color: #121826; background: #fff; line-height: 1.55; }
-    main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
-    nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 20px;
-      border-bottom: 1px solid #d7e1ef; background: #f7fbff; }
-    nav a { color: var(--blue); text-decoration: none; font-weight: 650; }
-    h1 { font-size: clamp(2rem, 4vw, 3.4rem); margin: 18px 0 12px; }
-    h2 { margin-top: 36px; color: var(--blue); }
-    h3 { margin-top: 24px; color: var(--green); }
-    blockquote { border-left: 4px solid var(--blue); margin: 18px 0;
-      padding: 8px 14px; background: #f7fbff; }
-    code { background: #eef4ff; padding: 2px 6px; border-radius: 5px; }
-    li { margin: 7px 0; }
-    pre { white-space: pre-wrap; overflow-x: auto; background: #f7fbff;
-      border: 1px solid #d7e1ef; padding: 10px; border-radius: 8px; }
+    :root {
+      color-scheme: light;
+      --ink: #10131a;
+      --muted: #606977;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --accent: #184b8f;
+      --warm: #b45309;
+      --good: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f6f7f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.52;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: var(--ink);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      border-color: var(--line);
+      background: var(--soft);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 24px 72px;
+    }
+    .hero-panel {
+      align-items: end;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--ink);
+      display: grid;
+      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      margin-bottom: 18px;
+      padding: 34px;
+    }
+    .hero-copy {
+      max-width: 850px;
+    }
+    .hero-aside {
+      border-left: 3px solid var(--warm);
+      color: var(--muted);
+      padding-left: 16px;
+    }
+    .hero-aside strong {
+      color: var(--ink);
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .hero-aside span {
+      display: block;
+      font-size: 0.95rem;
+    }
+    .hero {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0 28px;
+      max-width: 920px;
+    }
+    .kicker, .eyebrow, .section-kicker {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 3.4rem;
+      line-height: 1.04;
+      margin: 0 0 16px;
+      max-width: 780px;
+    }
+    h2 {
+      font-size: 1.75rem;
+      line-height: 1.16;
+      margin: 0 0 8px;
+    }
+    h3 {
+      font-size: 1.06rem;
+      line-height: 1.25;
+      margin: 10px 0 10px;
+    }
+    h4 {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 18px 0 8px;
+      text-transform: uppercase;
+    }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); }
+    code {
+      background: #eef2f7;
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .answer-block {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent);
+      color: var(--ink);
+      font-size: 0.97rem;
+      line-height: 1.58;
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      white-space: pre-line;
+    }
+    .muted { color: var(--muted); }
+    .metric-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 18px 0 32px;
+    }
+    .metric-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 118px;
+      padding: 16px;
+    }
+    .metric-card span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 1.95rem;
+      line-height: 1.05;
+      margin: 12px 0 8px;
+    }
+    .metric-card em {
+      color: var(--muted);
+      font-style: normal;
+    }
+    .section-block {
+      margin-top: 34px;
+    }
+    .section-header {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 270px minmax(0, 1fr);
+      padding: 28px 0 16px;
+    }
+    .section-header p:not(.kicker) {
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .link-grid, .series-overview, .type-grid, .lesson-grid, .example-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .link-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .series-overview {
+      grid-template-columns: 1fr;
+    }
+    .type-grid {
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    }
+    .lesson-grid, .example-grid {
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    }
+    .nav-tile, .overview-card, .type-card, .lesson-card, .example-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .nav-tile {
+      color: var(--ink);
+      min-height: 116px;
+      padding: 18px;
+      text-decoration: none;
+    }
+    .nav-tile strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .nav-tile span {
+      color: var(--muted);
+      display: block;
+    }
+    .overview-card, .type-card, .lesson-card, .example-card {
+      padding: 18px;
+    }
+    .card-heading-row {
+      align-items: start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .card-heading-row h3 {
+      margin-top: 0;
+    }
+    .card-heading-row span {
+      color: var(--muted);
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .compact-list {
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+    }
+    .compact-row {
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 11px 0;
+    }
+    .compact-row a {
+      display: inline-block;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .compact-row span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+    .card-index {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts, .case-notes {
+      margin: 14px 0 0;
+    }
+    .mini-facts dt, .case-notes dt, .detail-grid dt {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts dd, .case-notes dd, .detail-grid dd {
+      margin: 3px 0 12px;
+    }
+    .detail-grid {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 16px 0 0;
+      padding-top: 14px;
+    }
+    .chip-section {
+      margin-top: 16px;
+    }
+    .command-line, .telegram {
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .table-wrap {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      min-width: 900px;
+      width: 100%;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 13px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    .matrix {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin: 0;
+    }
+    .matrix-item {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      display: flex;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 14px;
+      text-decoration: none;
+    }
+    .matrix-item strong { color: var(--muted); font-size: 0.82rem; }
+    .type-section {
+      border-top: 1px solid var(--line);
+      padding: 32px 0 4px;
+    }
+    .card-topline {
+      align-items: center;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      gap: 8px;
+    }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-weight: 800;
+      padding: 2px 8px;
+      text-transform: uppercase;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .pill-list li {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+    }
+    ol { margin: 0; padding-left: 20px; }
+    ol li { margin: 6px 0; }
+    .empty-state {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    @media (max-width: 700px) {
+      nav { padding: 12px 14px; }
+      main { padding: 24px 14px 48px; }
+      h1 { font-size: 2.35rem; }
+      .hero-panel, .section-header {
+        grid-template-columns: 1fr;
+      }
+      .hero-panel {
+        padding: 22px;
+      }
+      .hero-aside {
+        border-left: 0;
+        border-top: 3px solid var(--warm);
+        padding: 14px 0 0;
+      }
+      .metric-row, .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .lesson-grid, .example-grid, .type-grid {
+        grid-template-columns: 1fr;
+      }
+      .compact-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+      }
+      .matrix-item { min-height: 48px; }
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
+<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="examples-by-type.html">Examples by type</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
 <main>
+<section class="hero-panel">
+<div class="hero-copy">
+<p class="kicker">Public series</p>
 <h1>Business/IT Scenarios</h1>
-<blockquote>Generated from FluentLoop DB/code. Do not hand-edit; regenerate with <code>scripts/export_lesson_catalog.py</code>.</blockquote>
+<p>
+Business/IT roleplay cards for meetings, escalations, interviews, architecture decisions, and difficult workplace conversations.
+</p>
+</div>
+<div class="hero-aside">
+<strong>How to use</strong>
+<span>Open a card to inspect targets, then use the Telegram command to subscribe or start a scenario.</span>
+</div>
+</section>
+<section class="metric-row">
+<div class="metric-card"><span>Items</span><strong>40</strong><em>Public entries</em></div>
+<div class="metric-card"><span>Lesson types</span><strong>1</strong><em>Training categories</em></div>
+<div class="metric-card"><span>Templates</span><strong>0</strong><em>Clone-on-subscribe</em></div>
+<div class="metric-card"><span>Scenarios</span><strong>40</strong><em>Roleplay cards</em></div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Lesson group</p>
 <h2>Scenario / Roleplay</h2>
-<h3>1:1 mentoring conversation</h3>
-<ul>
-<li>Public id: <code>scenario_19</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 19</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Admit I do not know without losing face</h3>
-<ul>
-<li>Public id: <code>scenario_40</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 40</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Apologize for production outage</h3>
-<ul>
-<li>Public id: <code>scenario_37</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 37</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Architecture migration proposal</h3>
-<ul>
-<li>Public id: <code>scenario_06</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 6</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Ask for help when you should know</h3>
-<ul>
-<li>Public id: <code>scenario_39</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 39</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Bad news to customer</h3>
-<ul>
-<li>Public id: <code>scenario_16</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 16</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Board update on engineering velocity</h3>
-<ul>
-<li>Public id: <code>scenario_29</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 29</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Code review feedback - give criticism diplomatically</h3>
-<ul>
-<li>Public id: <code>scenario_03</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 3</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Code review feedback - receive criticism gracefully</h3>
-<ul>
-<li>Public id: <code>scenario_02</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 2</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Conference talk Q&amp;A handling</h3>
-<ul>
-<li>Public id: <code>scenario_32</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 32</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Cross-team dependency negotiation</h3>
-<ul>
-<li>Public id: <code>scenario_10</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 10</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Customer demo opening and Q&amp;A</h3>
-<ul>
-<li>Public id: <code>scenario_11</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 11</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Customer escalation absorb and de-escalate</h3>
-<ul>
-<li>Public id: <code>scenario_12</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 12</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Decline scope creep</h3>
-<ul>
-<li>Public id: <code>scenario_36</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 36</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Design review - defend choice A vs B</h3>
-<ul>
-<li>Public id: <code>scenario_01</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 1</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Diplomatic refusal of impossible deadline</h3>
-<ul>
-<li>Public id: <code>scenario_38</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 38</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Disagree with senior architect publicly</h3>
-<ul>
-<li>Public id: <code>scenario_33</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 33</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Discovery call</h3>
-<ul>
-<li>Public id: <code>scenario_15</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 15</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Estimation pushback</h3>
-<ul>
-<li>Public id: <code>scenario_09</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 9</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Hiring interview - candidate</h3>
-<ul>
-<li>Public id: <code>scenario_26</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 26</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Hiring interview - interviewer</h3>
-<ul>
-<li>Public id: <code>scenario_25</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 25</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Incident post-mortem facilitation</h3>
-<ul>
-<li>Public id: <code>scenario_05</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 5</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Investor demo</h3>
-<ul>
-<li>Public id: <code>scenario_31</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 31</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Performance review - giving</h3>
-<ul>
-<li>Public id: <code>scenario_20</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 20</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Performance review - receiving</h3>
-<ul>
-<li>Public id: <code>scenario_21</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 21</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Promotion case presentation</h3>
-<ul>
-<li>Public id: <code>scenario_23</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 23</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Push back on micromanagement gently</h3>
-<ul>
-<li>Public id: <code>scenario_35</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 35</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Quarterly all-hands speech</h3>
-<ul>
-<li>Public id: <code>scenario_28</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 28</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Reference call</h3>
-<ul>
-<li>Public id: <code>scenario_18</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 18</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Resignation conversation</h3>
-<ul>
-<li>Public id: <code>scenario_24</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 24</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>RFC discussion in Slack threading</h3>
-<ul>
-<li>Public id: <code>scenario_04</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 4</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Salary negotiation</h3>
-<ul>
-<li>Public id: <code>scenario_22</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 22</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Sales hand-off conversation</h3>
-<ul>
-<li>Public id: <code>scenario_17</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 17</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Scope renegotiation with PM</h3>
-<ul>
-<li>Public id: <code>scenario_08</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 8</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Standup update</h3>
-<ul>
-<li>Public id: <code>scenario_27</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 27</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Tech blog post draft</h3>
-<ul>
-<li>Public id: <code>scenario_30</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 30</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Tech-debt prioritization debate</h3>
-<ul>
-<li>Public id: <code>scenario_07</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 7</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Tell teammate they are underperforming</h3>
-<ul>
-<li>Public id: <code>scenario_34</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 34</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Vendor pricing pushback</h3>
-<ul>
-<li>Public id: <code>scenario_13</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 13</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
-<h3>Vendor SLA negotiation</h3>
-<ul>
-<li>Public id: <code>scenario_14</code></li>
-<li>Lesson type: Scenario / Roleplay</li>
-<li>Topic: Scenario rehearsal</li>
-<li>Goal: Rehearse a high-stakes workplace conversation.</li>
-<li>Target mix: scenario card</li>
-<li>Commands: <code>/scene 14</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></li>
-<li>Focus: acknowledge the other side, state the constraint clearly, land on a concrete next step</li>
-<li>Typical steps: set roles, state constraints, land next step</li>
-<li>Sample targets: I might be missing something, but..., One constraint we should account for is..., Could we align on the next step?</li>
-</ul>
+<p>40 public entries in this group.</p>
+</div>
+<div class="lesson-grid">
+<article class="lesson-card" id="11-mentoring-conversation"><div class="card-heading-row"><h3>1:1 mentoring conversation</h3><span>/scene 19</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_19</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 19</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="admit-i-do-not-know-without-losing-face"><div class="card-heading-row"><h3>Admit I do not know without losing face</h3><span>/scene 40</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_40</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 40</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="apologize-for-production-outage"><div class="card-heading-row"><h3>Apologize for production outage</h3><span>/scene 37</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_37</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 37</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="architecture-migration-proposal"><div class="card-heading-row"><h3>Architecture migration proposal</h3><span>/scene 6</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_06</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 6</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="ask-for-help-when-you-should-know"><div class="card-heading-row"><h3>Ask for help when you should know</h3><span>/scene 39</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_39</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 39</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="bad-news-to-customer"><div class="card-heading-row"><h3>Bad news to customer</h3><span>/scene 16</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_16</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 16</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="board-update-on-engineering-velocity"><div class="card-heading-row"><h3>Board update on engineering velocity</h3><span>/scene 29</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_29</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 29</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="code-review-feedback-give-criticism-diplomatically"><div class="card-heading-row"><h3>Code review feedback - give criticism diplomatically</h3><span>/scene 3</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_03</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 3</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="code-review-feedback-receive-criticism-gracefully"><div class="card-heading-row"><h3>Code review feedback - receive criticism gracefully</h3><span>/scene 2</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_02</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 2</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="conference-talk-qa-handling"><div class="card-heading-row"><h3>Conference talk Q&amp;A handling</h3><span>/scene 32</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_32</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 32</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="cross-team-dependency-negotiation"><div class="card-heading-row"><h3>Cross-team dependency negotiation</h3><span>/scene 10</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_10</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 10</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="customer-demo-opening-and-qa"><div class="card-heading-row"><h3>Customer demo opening and Q&amp;A</h3><span>/scene 11</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_11</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 11</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="customer-escalation-absorb-and-de-escalate"><div class="card-heading-row"><h3>Customer escalation absorb and de-escalate</h3><span>/scene 12</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_12</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 12</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="decline-scope-creep"><div class="card-heading-row"><h3>Decline scope creep</h3><span>/scene 36</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_36</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 36</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="design-review-defend-choice-a-vs-b"><div class="card-heading-row"><h3>Design review - defend choice A vs B</h3><span>/scene 1</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_01</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 1</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="diplomatic-refusal-of-impossible-deadline"><div class="card-heading-row"><h3>Diplomatic refusal of impossible deadline</h3><span>/scene 38</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_38</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 38</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="disagree-with-senior-architect-publicly"><div class="card-heading-row"><h3>Disagree with senior architect publicly</h3><span>/scene 33</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_33</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 33</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="discovery-call"><div class="card-heading-row"><h3>Discovery call</h3><span>/scene 15</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_15</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 15</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="estimation-pushback"><div class="card-heading-row"><h3>Estimation pushback</h3><span>/scene 9</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_09</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 9</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="hiring-interview-candidate"><div class="card-heading-row"><h3>Hiring interview - candidate</h3><span>/scene 26</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_26</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 26</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="hiring-interview-interviewer"><div class="card-heading-row"><h3>Hiring interview - interviewer</h3><span>/scene 25</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_25</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 25</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="incident-post-mortem-facilitation"><div class="card-heading-row"><h3>Incident post-mortem facilitation</h3><span>/scene 5</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_05</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 5</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="investor-demo"><div class="card-heading-row"><h3>Investor demo</h3><span>/scene 31</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_31</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 31</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="performance-review-giving"><div class="card-heading-row"><h3>Performance review - giving</h3><span>/scene 20</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_20</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 20</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="performance-review-receiving"><div class="card-heading-row"><h3>Performance review - receiving</h3><span>/scene 21</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_21</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 21</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="promotion-case-presentation"><div class="card-heading-row"><h3>Promotion case presentation</h3><span>/scene 23</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_23</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 23</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="push-back-on-micromanagement-gently"><div class="card-heading-row"><h3>Push back on micromanagement gently</h3><span>/scene 35</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_35</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 35</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="quarterly-all-hands-speech"><div class="card-heading-row"><h3>Quarterly all-hands speech</h3><span>/scene 28</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_28</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 28</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="reference-call"><div class="card-heading-row"><h3>Reference call</h3><span>/scene 18</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_18</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 18</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="resignation-conversation"><div class="card-heading-row"><h3>Resignation conversation</h3><span>/scene 24</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_24</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 24</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="rfc-discussion-in-slack-threading"><div class="card-heading-row"><h3>RFC discussion in Slack threading</h3><span>/scene 4</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_04</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 4</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="salary-negotiation"><div class="card-heading-row"><h3>Salary negotiation</h3><span>/scene 22</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_22</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 22</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="sales-hand-off-conversation"><div class="card-heading-row"><h3>Sales hand-off conversation</h3><span>/scene 17</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_17</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 17</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="scope-renegotiation-with-pm"><div class="card-heading-row"><h3>Scope renegotiation with PM</h3><span>/scene 8</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_08</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 8</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="standup-update"><div class="card-heading-row"><h3>Standup update</h3><span>/scene 27</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_27</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 27</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="tech-blog-post-draft"><div class="card-heading-row"><h3>Tech blog post draft</h3><span>/scene 30</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_30</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 30</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="tech-debt-prioritization-debate"><div class="card-heading-row"><h3>Tech-debt prioritization debate</h3><span>/scene 7</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_07</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 7</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="tell-teammate-they-are-underperforming"><div class="card-heading-row"><h3>Tell teammate they are underperforming</h3><span>/scene 34</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_34</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 34</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="vendor-pricing-pushback"><div class="card-heading-row"><h3>Vendor pricing pushback</h3><span>/scene 13</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_13</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 13</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+<article class="lesson-card" id="vendor-sla-negotiation"><div class="card-heading-row"><h3>Vendor SLA negotiation</h3><span>/scene 14</span></div><p>Rehearse a high-stakes workplace conversation.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>scenario_14</dd></div><div><dt>Type</dt><dd>Scenario / Roleplay</dd></div><div><dt>Topic</dt><dd>Scenario rehearsal</dd></div><div><dt>Target mix</dt><dd>scenario card</dd></div><div><dt>Focus</dt><dd>acknowledge the other side, state the constraint clearly, land on a concrete next step</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>set roles</li><li>state constraints</li><li>land next step</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>I might be missing something, but...</li><li>One constraint we should account for is...</li><li>Could we align on the next step?</li></ul></div><p class="command-line">Telegram path: <code>/scene 14</code>, <code>/practice diplomatic</code>, <code>/brief &lt;agenda&gt;</code></p></article>
+</div>
+</section>
 </main>
 </body>
 </html>

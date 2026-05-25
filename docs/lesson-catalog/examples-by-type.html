@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FluentLoop Examples by Lesson Type</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #10131a;
+      --muted: #606977;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --accent: #184b8f;
+      --warm: #b45309;
+      --good: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f6f7f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.52;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: var(--ink);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      border-color: var(--line);
+      background: var(--soft);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 24px 72px;
+    }
+    .hero-panel {
+      align-items: end;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--ink);
+      display: grid;
+      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      margin-bottom: 18px;
+      padding: 34px;
+    }
+    .hero-copy {
+      max-width: 850px;
+    }
+    .hero-aside {
+      border-left: 3px solid var(--warm);
+      color: var(--muted);
+      padding-left: 16px;
+    }
+    .hero-aside strong {
+      color: var(--ink);
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .hero-aside span {
+      display: block;
+      font-size: 0.95rem;
+    }
+    .hero {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0 28px;
+      max-width: 920px;
+    }
+    .kicker, .eyebrow, .section-kicker {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 3.4rem;
+      line-height: 1.04;
+      margin: 0 0 16px;
+      max-width: 780px;
+    }
+    h2 {
+      font-size: 1.75rem;
+      line-height: 1.16;
+      margin: 0 0 8px;
+    }
+    h3 {
+      font-size: 1.06rem;
+      line-height: 1.25;
+      margin: 10px 0 10px;
+    }
+    h4 {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 18px 0 8px;
+      text-transform: uppercase;
+    }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); }
+    code {
+      background: #eef2f7;
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .answer-block {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent);
+      color: var(--ink);
+      font-size: 0.97rem;
+      line-height: 1.58;
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      white-space: pre-line;
+    }
+    .muted { color: var(--muted); }
+    .metric-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 18px 0 32px;
+    }
+    .metric-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 118px;
+      padding: 16px;
+    }
+    .metric-card span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 1.95rem;
+      line-height: 1.05;
+      margin: 12px 0 8px;
+    }
+    .metric-card em {
+      color: var(--muted);
+      font-style: normal;
+    }
+    .section-block {
+      margin-top: 34px;
+    }
+    .section-header {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 270px minmax(0, 1fr);
+      padding: 28px 0 16px;
+    }
+    .section-header p:not(.kicker) {
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .link-grid, .series-overview, .type-grid, .lesson-grid, .example-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .link-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .series-overview {
+      grid-template-columns: 1fr;
+    }
+    .type-grid {
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    }
+    .lesson-grid, .example-grid {
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    }
+    .nav-tile, .overview-card, .type-card, .lesson-card, .example-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .nav-tile {
+      color: var(--ink);
+      min-height: 116px;
+      padding: 18px;
+      text-decoration: none;
+    }
+    .nav-tile strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .nav-tile span {
+      color: var(--muted);
+      display: block;
+    }
+    .overview-card, .type-card, .lesson-card, .example-card {
+      padding: 18px;
+    }
+    .card-heading-row {
+      align-items: start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .card-heading-row h3 {
+      margin-top: 0;
+    }
+    .card-heading-row span {
+      color: var(--muted);
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .compact-list {
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+    }
+    .compact-row {
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 11px 0;
+    }
+    .compact-row a {
+      display: inline-block;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .compact-row span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+    .card-index {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts, .case-notes {
+      margin: 14px 0 0;
+    }
+    .mini-facts dt, .case-notes dt, .detail-grid dt {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts dd, .case-notes dd, .detail-grid dd {
+      margin: 3px 0 12px;
+    }
+    .detail-grid {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 16px 0 0;
+      padding-top: 14px;
+    }
+    .chip-section {
+      margin-top: 16px;
+    }
+    .command-line, .telegram {
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .table-wrap {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      min-width: 900px;
+      width: 100%;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 13px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    .matrix {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin: 0;
+    }
+    .matrix-item {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      display: flex;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 14px;
+      text-decoration: none;
+    }
+    .matrix-item strong { color: var(--muted); font-size: 0.82rem; }
+    .type-section {
+      border-top: 1px solid var(--line);
+      padding: 32px 0 4px;
+    }
+    .card-topline {
+      align-items: center;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      gap: 8px;
+    }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-weight: 800;
+      padding: 2px 8px;
+      text-transform: uppercase;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .pill-list li {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+    }
+    ol { margin: 0; padding-left: 20px; }
+    ol li { margin: 6px 0; }
+    .empty-state {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    @media (max-width: 700px) {
+      nav { padding: 12px 14px; }
+      main { padding: 24px 14px 48px; }
+      h1 { font-size: 2.35rem; }
+      .hero-panel, .section-header {
+        grid-template-columns: 1fr;
+      }
+      .hero-panel {
+        padding: 22px;
+      }
+      .hero-aside {
+        border-left: 0;
+        border-top: 3px solid var(--warm);
+        padding: 14px 0 0;
+      }
+      .metric-row, .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .lesson-grid, .example-grid, .type-grid {
+        grid-template-columns: 1fr;
+      }
+      .compact-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+      }
+      .matrix-item { min-height: 48px; }
+    }
+  </style>
+</head>
+<body>
+<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="examples-by-type.html">Examples by type</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
+<main>
+<section class="hero-panel">
+<div class="hero-copy">
+<p class="eyebrow">Public learning guide</p>
+<h1>Examples by lesson type</h1>
+<p>
+Короткая карта того, как FluentLoop превращает материал в тренировку: от цели и targets до задания, сильного ответа и следующей команды.
+</p>
+</div>
+<div class="hero-aside">
+<strong>Reading order</strong>
+<span>Start with the matrix, open a type, then inspect the compact cases and Telegram path.</span>
+</div>
+</section>
+<section class="metric-row">
+<div class="metric-card"><span>Lesson types</span><strong>13</strong><em>Every type covered</em></div>
+<div class="metric-card"><span>Examples</span><strong>26</strong><em>Two compact cases per type</em></div>
+<div class="metric-card"><span>Public sources</span><strong>15</strong><em>Templates and scenarios</em></div>
+<div class="metric-card"><span>Demo cards</span><strong>11</strong><em>No private data, no DB clone</em></div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Executive map</p>
+<h2>Choose a training lane</h2>
+<p>Each tile jumps to a pair of examples with rationale, targets, practice sample, and strong answer.</p>
+</div>
+<section class="matrix" aria-label="Lesson type map">
+<a class="matrix-item" href="#vocabulary">
+<span>Vocabulary</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#chunks-and-collocations">
+<span>Chunks and Collocations</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#grammar">
+<span>Grammar</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#mistake-repair">
+<span>Mistake Repair</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#diplomatic-workplace-english">
+<span>Diplomatic Workplace English</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#notebook">
+<span>Notebook</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#critical-reading">
+<span>Critical Reading</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#writing">
+<span>Writing</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#genre-curriculum">
+<span>Genre Curriculum</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#scenario-roleplay">
+<span>Scenario / Roleplay</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#review-srs">
+<span>Review / SRS</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#mixed-lesson">
+<span>Mixed Lesson</span>
+<strong>2 examples</strong>
+</a>
+<a class="matrix-item" href="#outcomes">
+<span>Outcomes</span>
+<strong>2 examples</strong>
+</a>
+</section>
+</section>
+<section class="type-section" id="vocabulary">
+<div class="section-kicker">Lesson type</div>
+<h2>Vocabulary</h2>
+<p>Learn useful terms and convert them into recallable language.</p>
+<p class="muted">Use when you meet new standalone words or tech terms.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#data-trends-and-business-reports">public template: B2/B2+ Seed Lessons: Data Trends and Business Reports</a></span>
+</div>
+<h3>Data Trends and Business Reports</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Пользователь часто знает слово trend пассивно, но не умеет быстро сказать, что именно изменилось и почему это важно для бизнеса.</dd>
+<dt>Core idea</dt>
+<dd>Превратить data vocabulary в короткое business impact statement.</dd>
+<dt>When to use</dt>
+<dd>Когда нужно объяснить метрики, отчет или dashboard без длинного технического описания.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>a slight increase</li><li>a downward trend</li><li>compared with</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Name the direction of the metric.</li><li>Add one comparison point.</li><li>Finish with the business impact.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Revenue showed a slight increase compared with last quarter, but activation is still on a downward trend. The main risk is that growth looks healthy while the onboarding funnel is getting weaker.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 33</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#performance-latency-and-reliability">public template: B2/B2+ Seed Lessons: Performance, Latency, and Reliability</a></span>
+</div>
+<h3>Performance, Latency, and Reliability</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Tech terms вроде latency и reliability легко узнавать, но сложнее использовать в спокойном объяснении trade-off.</dd>
+<dt>Core idea</dt>
+<dd>Связать performance word с причиной, эффектом и next step.</dd>
+<dt>When to use</dt>
+<dd>Когда надо объяснить проблему сервиса менеджеру, команде или клиенту.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>latency spike</li><li>reliability concern</li><li>under load</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Describe the symptom in one sentence.</li><li>Explain the likely cause.</li><li>Add one mitigation.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">We saw a latency spike under load after the release. It is a reliability concern because retries can amplify the issue. I suggest we roll back the cache change first and then test the queue separately.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 36</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="chunks-and-collocations">
+<div class="section-kicker">Lesson type</div>
+<h2>Chunks and Collocations</h2>
+<p>Turn phrases, collocations, and reusable workplace language into active production.</p>
+<p class="muted">Use when you want to sound less translated and reuse ready-made English.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="english-for-tech.html#english-for-tech-02-how-to-build-a-startup">public template: English for Tech: English for Tech 02: How to Build a Startup</a></span>
+</div>
+<h3>English for Tech 02: How to Build a Startup</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Startup vocabulary часто звучит как набор buzzwords. Урок делает его производительным: идея, problem, market, pitch.</dd>
+<dt>Core idea</dt>
+<dd>Собрать reusable chunks в короткий startup pitch.</dd>
+<dt>When to use</dt>
+<dd>Когда нужно объяснить продуктовую идею, MVP или customer pain point.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>customer pain point</li><li>gap in the market</li><li>scalable solution</li></ul>
+<h4>Practice sample</h4>
+<ol><li>State the customer pain point.</li><li>Name the market gap.</li><li>Pitch the solution in one sentence.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">The main customer pain point is that small teams cannot track compliance work without extra admin. We see a gap in the market for a lightweight tool, so our MVP is a scalable solution for recurring checks.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 14</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="english-for-tech.html#english-for-tech-03-trending-technology">public template: English for Tech: English for Tech 03: Trending Technology</a></span>
+</div>
+<h3>English for Tech 03: Trending Technology</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Пользователь может читать про trends, но не всегда умеет описать, что компания планирует делать с новой технологией.</dd>
+<dt>Core idea</dt>
+<dd>Тренировать chunks для trend explanation and future plans.</dd>
+<dt>When to use</dt>
+<dd>Когда обсуждаешь AI, cloud, automation или новую tooling strategy.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>gain traction</li><li>adopt a tool</li><li>roll it out gradually</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Name the technology trend.</li><li>Explain why it matters now.</li><li>Say how the team should adopt it.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">The new testing tool is gaining traction because it reduces manual QA work. I would not roll it out to every team yet; we should adopt it in one pilot project and expand gradually if the signal is strong.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 15</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="grammar">
+<div class="section-kicker">Lesson type</div>
+<h2>Grammar</h2>
+<p>Repair grammar patterns that block clear business/IT communication.</p>
+<p class="muted">Use when the issue is form, tense, articles, prepositions, or sentence shape.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#architecture-trade-offs-and-recommendations">public template: B2/B2+ Seed Lessons: Architecture Trade-offs and Recommendations</a></span>
+</div>
+<h3>Architecture Trade-offs and Recommendations</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Без точной grammar recommendation легко звучит слишком уверенно или слишком расплывчато.</dd>
+<dt>Core idea</dt>
+<dd>Использовать conditionals и comparatives, чтобы честно сравнить options.</dd>
+<dt>When to use</dt>
+<dd>Когда надо рекомендовать архитектурное решение без overselling.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>trade-off</li><li>from a reliability perspective</li><li>I would lean towards</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Compare two options.</li><li>State the main trade-off.</li><li>Recommend one option with a hedge.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">From a reliability perspective, I would lean towards the async workflow. The main trade-off is higher operational complexity, but if traffic spikes again, this option gives us a safer failure mode.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 27</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#risk-mitigation-and-conditionals">public template: B2/B2+ Seed Lessons: Risk Mitigation and Conditionals</a></span>
+</div>
+<h3>Risk Mitigation and Conditionals</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Risk language needs precise conditions: what happens if we do X, unless Y, provided that Z.</dd>
+<dt>Core idea</dt>
+<dd>Make mitigation sound specific instead of vague.</dd>
+<dt>When to use</dt>
+<dd>When writing risk updates, launch plans, or technical recommendations.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>mitigate the risk</li><li>provided that</li><li>unless we</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Name one risk.</li><li>Add a condition with provided that or unless.</li><li>Close with a mitigation.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">We can mitigate the rollout risk provided that we keep the old endpoint available for one release. Unless we do that, rollback will be slower and customer support will have fewer options.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 29</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="mistake-repair">
+<div class="section-kicker">Lesson type</div>
+<h2>Mistake Repair</h2>
+<p>Extinguish recurring mistakes and Russian-transfer traps.</p>
+<p class="muted">Use when the same error keeps coming back or confidence is low.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#cross-team-dependencies-and-ownership">public template: B2/B2+ Seed Lessons: Cross-team Dependencies and Ownership</a></span>
+</div>
+<h3>Cross-team Dependencies and Ownership</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Repeated preposition errors make dependency updates sound translated even when the message is understandable.</dd>
+<dt>Core idea</dt>
+<dd>Repair dependency + preposition patterns in realistic status language.</dd>
+<dt>When to use</dt>
+<dd>When blockers, ownership, and follow-ups are spread across teams.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>depend on</li><li>dependency on</li><li>own the follow-up</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Find the wrong preposition.</li><li>Rewrite the dependency sentence.</li><li>Add who owns the next step.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">The release depends on the data team finishing the migration. We have a dependency on their validation script, and I will own the follow-up with their tech lead today.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 35</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Article/preposition cleanup</span>
+</div>
+<h3>Article/preposition cleanup</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Некоторые ошибки не заслуживают отдельного урока, но возвращаются каждую неделю: missing articles, wrong prepositions, RU transfer.</dd>
+<dt>Core idea</dt>
+<dd>Показать пользователю один repeat pattern и сразу закрепить correct form.</dd>
+<dt>When to use</dt>
+<dd>Когда `/outcomes` или feedback показывает повторяющуюся low-confidence ошибку.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>in production</li><li>the rollout</li><li>responsible for</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Correct: We found issue on production.</li><li>Explain why the article/preposition changes.</li><li>Use the corrected pattern in a new sentence.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">We found the issue in production during the rollout. The platform team is responsible for the fix, and support will update customers after validation.</blockquote>
+<p class="telegram">Telegram: <code>/practice mistakes</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="diplomatic-workplace-english">
+<div class="section-kicker">Lesson type</div>
+<h2>Diplomatic Workplace English</h2>
+<p>Make pushback, disagreement, feedback, and risk language firm but natural.</p>
+<p class="muted">Use for stakeholder communication, negotiation, feedback, and workplace tone.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#deadline-negotiation-and-pushback">public template: B2/B2+ Seed Lessons: Deadline Negotiation and Pushback</a></span>
+</div>
+<h3>Deadline Negotiation and Pushback</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Deadline pushback часто звучит либо резко, либо слишком извиняюще.</dd>
+<dt>Core idea</dt>
+<dd>Дать firm but calm structure: risk, option A, option B.</dd>
+<dt>When to use</dt>
+<dd>When a deadline is risky and you need to protect quality.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>move the deadline</li><li>protect quality</li><li>reduce scope</li></ul>
+<h4>Practice sample</h4>
+<ol><li>State the delivery risk calmly.</li><li>Offer to move the deadline.</li><li>Offer to reduce scope if the date is fixed.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">I am concerned that Friday may be too tight because the API schema is still changing. If the date is fixed, we can reduce scope and ship the core flow only. Otherwise, I would suggest moving the deadline to Wednesday so we can protect quality.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 42</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#customer-feedback-and-feature-prioritisation">public template: B2/B2+ Seed Lessons: Customer Feedback and Feature Prioritisation</a></span>
+</div>
+<h3>Customer Feedback and Feature Prioritisation</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Feature discussions need diplomatic prioritisation, not just louder opinions.</dd>
+<dt>Core idea</dt>
+<dd>Turn customer feedback into a ranked recommendation with evidence.</dd>
+<dt>When to use</dt>
+<dd>When product, support, and engineering disagree about what to build next.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>recurring feedback</li><li>prioritise</li><li>high-impact</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Summarise the feedback pattern.</li><li>Rank one feature as high-impact.</li><li>Acknowledge one trade-off.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">The recurring feedback is about onboarding friction, so I would prioritise the checklist flow. It looks high-impact because it affects new accounts early, although it means delaying lower-volume reporting requests.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 34</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="notebook">
+<div class="section-kicker">Lesson type</div>
+<h2>Notebook</h2>
+<p>Generate real free writing for native-diff, chunk mining, and L1 checks.</p>
+<p class="muted">Use when the system needs fresh production data from you.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Technical conversation native diff</span>
+</div>
+<h3>Technical conversation native diff</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Notebook нужен, чтобы получить живой текст пользователя, а не только ответы на закрытые drills.</dd>
+<dt>Core idea</dt>
+<dd>Free writing -&gt; native rewrite -&gt; mined chunks -&gt; next practice.</dd>
+<dt>When to use</dt>
+<dd>When the system needs fresh production data from a real work situation.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>real stakeholder</li><li>constraint</li><li>native rewrite</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Write 4-5 sentences about a technical conversation.</li><li>Mention one stakeholder and one constraint.</li><li>Compare your answer with a native rewrite.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Yesterday I explained the migration risk to our product manager. The main constraint is that the billing service still depends on the old schema. I suggested a smaller release first, so we can validate the flow before moving all customers.</blockquote>
+<p class="telegram">Telegram: <code>/practice notebook</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Weekly work reflection</span>
+</div>
+<h3>Weekly work reflection</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Reflection превращает рабочие события в language data: что было трудно сказать, где не хватило chunks, где появился L1 transfer.</dd>
+<dt>Core idea</dt>
+<dd>Use a short weekly note to feed future lessons.</dd>
+<dt>When to use</dt>
+<dd>When you want FluentLoop to learn from your actual work week.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>reflection</li><li>missing chunk</li><li>next focus</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Describe one moment where English slowed you down.</li><li>Name the phrase you wished you had.</li><li>Pick the next practice focus.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">This week I struggled to push back on a vague request. I wanted to say that the scope was unclear without sounding negative. Next week I want to practise diplomatic clarification and requirement questions.</blockquote>
+<p class="telegram">Telegram: <code>/reflect</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="critical-reading">
+<div class="section-kicker">Lesson type</div>
+<h2>Critical Reading</h2>
+<p>Read articles or arguments and produce claim, assumption, and summary outputs.</p>
+<p class="muted">Use for articles, blog posts, product docs, and executive summaries.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#executive-summaries-and-concise-recommendations">public template: B2/B2+ Seed Lessons: Executive Summaries and Concise Recommendations</a></span>
+</div>
+<h3>Executive Summaries and Concise Recommendations</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Reading practice should end in a decision-ready output, not only comprehension.</dd>
+<dt>Core idea</dt>
+<dd>Extract the bottom line, key risk, and recommended option.</dd>
+<dt>When to use</dt>
+<dd>When you need to brief a manager after reading a long article or memo.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>bottom line</li><li>recommended option</li><li>key risk</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Find the main claim.</li><li>Name one assumption or risk.</li><li>Write a three-sentence executive summary.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Bottom line: the async option is safer for reliability. The key risk is additional operational complexity during rollout. My recommended option is to pilot it with one workflow before expanding.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 43</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#incident-updates-and-eta-caveats">public template: B2/B2+ Seed Lessons: Incident Updates and ETA Caveats</a></span>
+</div>
+<h3>Incident Updates and ETA Caveats</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Incident reading/writing needs uncertainty: what we know, what we do not know, and what happens next.</dd>
+<dt>Core idea</dt>
+<dd>Train concise updates with caveats instead of overpromising.</dd>
+<dt>When to use</dt>
+<dd>When summarising production issues for stakeholders.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>root cause</li><li>impact window</li><li>ETA caveat</li></ul>
+<h4>Practice sample</h4>
+<ol><li>State the current known impact.</li><li>Add one caveat about ETA.</li><li>Close with the next update time.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Current impact is limited to checkout retries between 09:10 and 09:24 UTC. We have narrowed the root cause down to cache invalidation, but the ETA has a caveat around validation. We will send the next update in 30 minutes.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 26</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="writing">
+<div class="section-kicker">Lesson type</div>
+<h2>Writing</h2>
+<p>Draft workplace artifacts with clear structure, tone, and reusable chunks.</p>
+<p class="muted">Use for updates, emails, reports, reviews, resumes, and written answers.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="b2-b2plus-seed.html#async-slack-and-email-updates">public template: B2/B2+ Seed Lessons: Async Slack and Email Updates</a></span>
+</div>
+<h3>Async Slack and Email Updates</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Async updates fail when context, status, and next step are mixed together.</dd>
+<dt>Core idea</dt>
+<dd>Use a compact structure: context, current status, next step.</dd>
+<dt>When to use</dt>
+<dd>When writing Slack/email updates for distributed teams.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>for context</li><li>current status</li><li>next step</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Write one sentence of context.</li><li>Add current status.</li><li>Finish with the owner and next step.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">For context, the migration is blocked by one failing validation check. Current status: backend has a fix ready, but QA needs one more run. Next step: I will post the result by 16:00 and confirm whether we can ship today.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 41</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public template</span>
+<span><a href="english-for-tech.html#english-for-tech-12-job-interview">public template: English for Tech: English for Tech 12: Job Interview</a></span>
+</div>
+<h3>English for Tech 12: Job Interview</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Interview answers need structure and evidence, not memorised phrases.</dd>
+<dt>Core idea</dt>
+<dd>Turn experience into a concise STAR-style workplace answer.</dd>
+<dt>When to use</dt>
+<dd>When preparing for recruiter screens or technical interviews.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>responsible for</li><li>worked on</li><li>resulted in</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Choose one project.</li><li>Explain your responsibility.</li><li>End with a measurable result.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">I was responsible for improving the billing retry flow. I worked on the API changes and coordinated testing with QA. The change resulted in fewer failed renewals and a clearer support playbook.</blockquote>
+<p class="telegram">Telegram: <code>/subscribe 24</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="genre-curriculum">
+<div class="section-kicker">Lesson type</div>
+<h2>Genre Curriculum</h2>
+<p>Practice the structure of recurring work artifacts.</p>
+<p class="muted">Use when the hard part is not one phrase, but the whole document shape.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Incident post-mortem</span>
+</div>
+<h3>Incident post-mortem</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Genre lessons train the shape of a work artifact, not only individual phrases.</dd>
+<dt>Core idea</dt>
+<dd>Use the expected sections: timeline, impact, root cause, remediation, prevention.</dd>
+<dt>When to use</dt>
+<dd>When you need to write a post-mortem that is clear and blameless.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>timeline</li><li>root cause</li><li>prevention</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Place each note into the correct section.</li><li>Rewrite one blame-heavy sentence neutrally.</li><li>Draft the prevention section.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Prevention: we will add a pre-release cache validation check and a rollback owner for checkout changes. This should reduce detection time and make the response path clearer during future incidents.</blockquote>
+<p class="telegram">Telegram: <code>/practice genre</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: RFC decision memo</span>
+</div>
+<h3>RFC decision memo</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>RFCs become easier to review when the structure separates problem, constraints, options, trade-offs, and recommendation.</dd>
+<dt>Core idea</dt>
+<dd>Practice the document schema before writing the full proposal.</dd>
+<dt>When to use</dt>
+<dd>When proposing an architecture or process decision.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>problem</li><li>trade-offs</li><li>recommendation</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Draft the five RFC section headings.</li><li>Put one note under each heading.</li><li>Write the recommendation with a hedge.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Recommendation: I would lean towards the async option because it gives us better failure isolation. The trade-off is extra operational complexity, so I suggest piloting it with one workflow first.</blockquote>
+<p class="telegram">Telegram: <code>/practice genre</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="scenario-roleplay">
+<div class="section-kicker">Lesson type</div>
+<h2>Scenario / Roleplay</h2>
+<p>Rehearse a realistic business/IT situation with tasks, roles, and target chunks.</p>
+<p class="muted">Use before meetings, interviews, negotiation, or difficult conversations.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public scenario card</span>
+<span><a href="scenarios.html#design-review-defend-choice-a-vs-b">public scenario card: Business/IT Scenarios: Design review - defend choice A vs B</a></span>
+</div>
+<h3>Design review - defend choice A vs B</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Roleplay is for pressure: you need language while another person is challenging the decision.</dd>
+<dt>Core idea</dt>
+<dd>Rehearse defending a design with constraints and trade-offs.</dd>
+<dt>When to use</dt>
+<dd>Before architecture reviews, design reviews, or senior stakeholder Q&amp;A.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>constraint</li><li>trade-off</li><li>recommendation</li></ul>
+<h4>Practice sample</h4>
+<ol><li>State your recommendation.</li><li>Acknowledge one downside.</li><li>Ask for alignment on the next step.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">I recommend option A because it gives us better failure isolation. The trade-off is a slightly longer migration, but it lowers rollback risk. If we agree on that priority, I can draft the migration plan today.</blockquote>
+<p class="telegram">Telegram: <code>/scene 1</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">public scenario card</span>
+<span><a href="scenarios.html#customer-escalation-absorb-and-de-escalate">public scenario card: Business/IT Scenarios: Customer escalation absorb and de-escalate</a></span>
+</div>
+<h3>Customer escalation absorb and de-escalate</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Escalations require tone control: acknowledge, clarify, and move toward a concrete next step.</dd>
+<dt>Core idea</dt>
+<dd>Practise calm customer language under stress.</dd>
+<dt>When to use</dt>
+<dd>Before customer calls, incident follow-ups, or support escalations.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>I understand the concern</li><li>what I can confirm</li><li>next update</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Acknowledge the customer&#x27;s frustration.</li><li>Separate confirmed facts from investigation.</li><li>Promise a specific next update.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">I understand the concern, and I agree the delay is frustrating. What I can confirm is that the fix is deployed and validation is running now. I will send the next update by 15:30 with either confirmation or a new ETA.</blockquote>
+<p class="telegram">Telegram: <code>/scene 12</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="review-srs">
+<div class="section-kicker">Lesson type</div>
+<h2>Review / SRS</h2>
+<p>Bring due and weak items back until they are easy to recall.</p>
+<p class="muted">Use when retention is low or `/outcomes` says sample size is thin.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Due chunk recall</span>
+</div>
+<h3>Due chunk recall</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Review lessons protect memory: useful chunks return before they become passive again.</dd>
+<dt>Core idea</dt>
+<dd>Cold recall first, explanation second.</dd>
+<dt>When to use</dt>
+<dd>When `/today` or `/review` brings back due items.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>active recall</li><li>cloze</li><li>confidence</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Fill the missing chunk without looking.</li><li>Rate confidence.</li><li>Use the chunk in a new work sentence.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Could we move the deadline to Wednesday? This would help us protect quality and still keep the core release on track.</blockquote>
+<p class="telegram">Telegram: <code>/review</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Weak mistake return</span>
+</div>
+<h3>Weak mistake return</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Weak items need to reappear in a different form, otherwise the user only memorises one answer.</dd>
+<dt>Core idea</dt>
+<dd>Return the same mistake pattern as rewrite, cloze, and production.</dd>
+<dt>When to use</dt>
+<dd>When confidence is low or the same error repeats.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>error correction</li><li>same pattern</li><li>new sentence</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Correct the old mistake.</li><li>Explain the pattern in one line.</li><li>Write a new sentence with the corrected form.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">The system depends on the billing service, not depends from it. We also have a dependency on the data export before we can finish validation.</blockquote>
+<p class="telegram">Telegram: <code>/practice review</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="mixed-lesson">
+<div class="section-kicker">Lesson type</div>
+<h2>Mixed Lesson</h2>
+<p>Combine vocabulary, chunks, grammar, writing, and recall in one lesson.</p>
+<p class="muted">Use for textbook lessons, seed lessons, and broad workplace topics.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Balanced daily lesson</span>
+</div>
+<h3>Balanced daily lesson</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>A daily lesson should not overfit one skill; it should mix recall, accuracy, production, and feedback.</dd>
+<dt>Core idea</dt>
+<dd>Combine vocabulary, grammar, writing, and SRS in one short loop.</dd>
+<dt>When to use</dt>
+<dd>When the user opens `/today` and needs the next best training mix.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>recall</li><li>grammar repair</li><li>mini writing</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Recall one due chunk.</li><li>Repair one sentence.</li><li>Write a short realistic update.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">For context, the rollout is delayed because validation found one edge case. If the date is fixed, we can reduce scope; otherwise I recommend moving the deadline to protect quality.</blockquote>
+<p class="telegram">Telegram: <code>/today</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Tech textbook mixed loop</span>
+</div>
+<h3>Tech textbook mixed loop</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Textbook-like lessons usually contain vocabulary, grammar, speaking, and writing together.</dd>
+<dt>Core idea</dt>
+<dd>Turn broad material into a sequence of small production tasks.</dd>
+<dt>When to use</dt>
+<dd>When a public or uploaded lesson covers a whole topic, not one pattern.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>topic vocabulary</li><li>grammar focus</li><li>free production</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Notice the topic vocabulary.</li><li>Practise the grammar focus.</li><li>Produce a short workplace answer.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">I usually work on backend APIs, but this week I am helping the DevOps team with deployment checks. It is a good chance to keep up with our cloud tooling and understand the release process better.</blockquote>
+<p class="telegram">Telegram: <code>/lesson &lt;id&gt;</code></p>
+</article>
+</div>
+</section>
+<section class="type-section" id="outcomes">
+<div class="section-kicker">Lesson type</div>
+<h2>Outcomes</h2>
+<p>Measure learning quality and choose the next training loop.</p>
+<p class="muted">Use weekly or monthly to decide what to train next.</p>
+<div class="example-grid">
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: Monthly baseline</span>
+</div>
+<h3>Monthly baseline</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>Outcomes need a stable starting point; otherwise progress is just a feeling.</dd>
+<dt>Core idea</dt>
+<dd>Capture a monthly writing sample and reserve held-out items.</dd>
+<dt>When to use</dt>
+<dd>When starting a new month or checking whether practice transfers to production.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>baseline</li><li>held-out items</li><li>writing metrics</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Write 120-180 words about a real work situation.</li><li>Include one risk, one trade-off, and one recommendation.</li><li>Use the result as the comparison point for the month.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">The main trade-off is speed versus reliability. I recommend delaying the full rollout by two days, because the current validation gap could create support load if we ship to all customers at once.</blockquote>
+<p class="telegram">Telegram: <code>/baseline</code></p>
+</article>
+<article class="example-card">
+<div class="card-topline">
+<span class="badge">demo card</span>
+<span>demo card: Demo: 30-day outcomes report</span>
+</div>
+<h3>30-day outcomes report</h3>
+<dl class="case-notes">
+<dt>Why this lesson exists</dt>
+<dd>The user needs evidence: retention, productive chunks, L1 density, and mistake extinction, not just number of exercises.</dd>
+<dt>Core idea</dt>
+<dd>Summarise learning quality and choose the next loop.</dd>
+<dt>When to use</dt>
+<dd>Weekly or monthly, after enough practice attempts.</dd>
+</dl>
+<h4>Targets</h4>
+<ul class="pill-list"><li>retention</li><li>productive chunks</li><li>L1 density</li></ul>
+<h4>Practice sample</h4>
+<ol><li>Read the sample size first.</li><li>Find the weakest metric.</li><li>Choose the next practice loop.</li></ol>
+<h4>Good answer</h4>
+<blockquote class="answer-block">Next best loop: use `/practice notebook` for production volume and `/practice diplomatic` for L1 transfer. Retention is acceptable, but productive chunk use is still thin, so the next week should generate more free writing.</blockquote>
+<p class="telegram">Telegram: <code>/outcomes full</code></p>
+</article>
+</div>
+</section>
+</main>
+</body>
+</html>

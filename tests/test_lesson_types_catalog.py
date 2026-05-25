@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+from collections import Counter
+
 from fluentloop.bot.handlers import (
     handle_lesson,
     handle_library,
     handle_library_callback,
     handle_subscribe,
 )
-from fluentloop.catalog_export import build_public_catalog, render_catalog_files
+from fluentloop.catalog_export import (
+    build_lesson_type_examples,
+    build_public_catalog,
+    render_catalog_files,
+)
 from fluentloop.curriculum_b2 import CURRICULUM_TAG
 from fluentloop.exercises import EXERCISE_TYPES
 from fluentloop.learning import create_learning_item
@@ -18,6 +24,7 @@ from fluentloop.lesson_library import (
 )
 from fluentloop.lesson_plans import create_lesson_plan_from_source
 from fluentloop.lesson_types import (
+    LESSON_TYPES,
     lesson_type_for_exercise_type,
     lesson_type_for_format,
     lesson_type_for_plan,
@@ -121,11 +128,48 @@ def test_public_catalog_export_excludes_private_and_raw_source_text(
     catalog = build_public_catalog(db_session)
     files = render_catalog_files(catalog, html=True)
     joined = "\n".join(files.values())
+    examples = build_lesson_type_examples(catalog)
+    example_counts = Counter(example.lesson_type_key for example in examples)
 
     assert len([lesson for lesson in catalog if lesson.series_key == "scenarios"]) == 40
     assert any(CURRICULUM_TAG in lesson.tags for lesson in catalog)
     assert "English for Tech 01: Release Planning" in joined
+    assert "examples-by-type.md" in files
+    assert "examples-by-type.html" in files
+    assert "<pre>| Type |" not in files["lesson-types.html"]
+    assert 'class="type-card"' in files["lesson-types.html"]
+    assert "<table>" in files["lesson-types.html"]
+    assert 'class="metric-card"' in files["index.html"]
+    assert 'class="lesson-card"' in files["b2-b2plus-seed.html"]
+    assert 'class="example-card"' in files["examples-by-type.html"]
+    assert 'class="answer-block"' in files["examples-by-type.html"]
+    assert "<pre>" not in files["examples-by-type.html"]
     assert "/subscribe" in files["english-for-tech.html"]
+    assert 'href="english-for-tech.html"' in files["index.html"]
+    assert 'href="english-for-tech.md"' not in files["index.html"]
+    assert 'href="examples-by-type.html"' in files["index.html"]
+    assert (
+        'href="english-for-tech.html#english-for-tech-01-release-planning"'
+        in files["index.html"]
+    )
+    for lesson_type in LESSON_TYPES:
+        assert lesson_type.title in files["examples-by-type.md"]
+        assert lesson_type.title in files["examples-by-type.html"]
+        assert 1 <= example_counts[lesson_type.key] <= 2
+    assert set(example_counts) == {lesson_type.key for lesson_type in LESSON_TYPES}
+    demo_examples = [
+        example for example in examples if example.source_kind == "demo card"
+    ]
+    assert demo_examples
+    assert "Source: demo card" in files["examples-by-type.md"]
+    assert all(
+        not example.telegram_path.startswith("/subscribe")
+        for example in demo_examples
+    )
+    for name, content in files.items():
+        if name.endswith(".html"):
+            assert '.md"' not in content
+            assert ".md#" not in content
     assert "SECRET_PRIVATE_RAW_SOURCE" not in joined
     assert "SECRET_PRIVATE_ITEM" not in joined
     assert "RAW_PUBLIC_SOURCE_SHOULD_NOT_APPEAR" not in joined

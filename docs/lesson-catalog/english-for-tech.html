@@ -5,178 +5,485 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>English for Tech</title>
   <style>
-    :root { color-scheme: light; --blue:#1559c7; --green:#187533; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0; color: #121826; background: #fff; line-height: 1.55; }
-    main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
-    nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 20px;
-      border-bottom: 1px solid #d7e1ef; background: #f7fbff; }
-    nav a { color: var(--blue); text-decoration: none; font-weight: 650; }
-    h1 { font-size: clamp(2rem, 4vw, 3.4rem); margin: 18px 0 12px; }
-    h2 { margin-top: 36px; color: var(--blue); }
-    h3 { margin-top: 24px; color: var(--green); }
-    blockquote { border-left: 4px solid var(--blue); margin: 18px 0;
-      padding: 8px 14px; background: #f7fbff; }
-    code { background: #eef4ff; padding: 2px 6px; border-radius: 5px; }
-    li { margin: 7px 0; }
-    pre { white-space: pre-wrap; overflow-x: auto; background: #f7fbff;
-      border: 1px solid #d7e1ef; padding: 10px; border-radius: 8px; }
+    :root {
+      color-scheme: light;
+      --ink: #10131a;
+      --muted: #606977;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --accent: #184b8f;
+      --warm: #b45309;
+      --good: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f6f7f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.52;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: var(--ink);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      border-color: var(--line);
+      background: var(--soft);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 24px 72px;
+    }
+    .hero-panel {
+      align-items: end;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--ink);
+      display: grid;
+      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      margin-bottom: 18px;
+      padding: 34px;
+    }
+    .hero-copy {
+      max-width: 850px;
+    }
+    .hero-aside {
+      border-left: 3px solid var(--warm);
+      color: var(--muted);
+      padding-left: 16px;
+    }
+    .hero-aside strong {
+      color: var(--ink);
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .hero-aside span {
+      display: block;
+      font-size: 0.95rem;
+    }
+    .hero {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0 28px;
+      max-width: 920px;
+    }
+    .kicker, .eyebrow, .section-kicker {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 3.4rem;
+      line-height: 1.04;
+      margin: 0 0 16px;
+      max-width: 780px;
+    }
+    h2 {
+      font-size: 1.75rem;
+      line-height: 1.16;
+      margin: 0 0 8px;
+    }
+    h3 {
+      font-size: 1.06rem;
+      line-height: 1.25;
+      margin: 10px 0 10px;
+    }
+    h4 {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 18px 0 8px;
+      text-transform: uppercase;
+    }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); }
+    code {
+      background: #eef2f7;
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .answer-block {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent);
+      color: var(--ink);
+      font-size: 0.97rem;
+      line-height: 1.58;
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      white-space: pre-line;
+    }
+    .muted { color: var(--muted); }
+    .metric-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 18px 0 32px;
+    }
+    .metric-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 118px;
+      padding: 16px;
+    }
+    .metric-card span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 1.95rem;
+      line-height: 1.05;
+      margin: 12px 0 8px;
+    }
+    .metric-card em {
+      color: var(--muted);
+      font-style: normal;
+    }
+    .section-block {
+      margin-top: 34px;
+    }
+    .section-header {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 270px minmax(0, 1fr);
+      padding: 28px 0 16px;
+    }
+    .section-header p:not(.kicker) {
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .link-grid, .series-overview, .type-grid, .lesson-grid, .example-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .link-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .series-overview {
+      grid-template-columns: 1fr;
+    }
+    .type-grid {
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    }
+    .lesson-grid, .example-grid {
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    }
+    .nav-tile, .overview-card, .type-card, .lesson-card, .example-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .nav-tile {
+      color: var(--ink);
+      min-height: 116px;
+      padding: 18px;
+      text-decoration: none;
+    }
+    .nav-tile strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .nav-tile span {
+      color: var(--muted);
+      display: block;
+    }
+    .overview-card, .type-card, .lesson-card, .example-card {
+      padding: 18px;
+    }
+    .card-heading-row {
+      align-items: start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .card-heading-row h3 {
+      margin-top: 0;
+    }
+    .card-heading-row span {
+      color: var(--muted);
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .compact-list {
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+    }
+    .compact-row {
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 11px 0;
+    }
+    .compact-row a {
+      display: inline-block;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .compact-row span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+    .card-index {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts, .case-notes {
+      margin: 14px 0 0;
+    }
+    .mini-facts dt, .case-notes dt, .detail-grid dt {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts dd, .case-notes dd, .detail-grid dd {
+      margin: 3px 0 12px;
+    }
+    .detail-grid {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 16px 0 0;
+      padding-top: 14px;
+    }
+    .chip-section {
+      margin-top: 16px;
+    }
+    .command-line, .telegram {
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .table-wrap {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      min-width: 900px;
+      width: 100%;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 13px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    .matrix {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin: 0;
+    }
+    .matrix-item {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      display: flex;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 14px;
+      text-decoration: none;
+    }
+    .matrix-item strong { color: var(--muted); font-size: 0.82rem; }
+    .type-section {
+      border-top: 1px solid var(--line);
+      padding: 32px 0 4px;
+    }
+    .card-topline {
+      align-items: center;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      gap: 8px;
+    }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-weight: 800;
+      padding: 2px 8px;
+      text-transform: uppercase;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .pill-list li {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+    }
+    ol { margin: 0; padding-left: 20px; }
+    ol li { margin: 6px 0; }
+    .empty-state {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    @media (max-width: 700px) {
+      nav { padding: 12px 14px; }
+      main { padding: 24px 14px 48px; }
+      h1 { font-size: 2.35rem; }
+      .hero-panel, .section-header {
+        grid-template-columns: 1fr;
+      }
+      .hero-panel {
+        padding: 22px;
+      }
+      .hero-aside {
+        border-left: 0;
+        border-top: 3px solid var(--warm);
+        padding: 14px 0 0;
+      }
+      .metric-row, .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .lesson-grid, .example-grid, .type-grid {
+        grid-template-columns: 1fr;
+      }
+      .compact-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+      }
+      .matrix-item { min-height: 48px; }
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
+<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="examples-by-type.html">Examples by type</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
 <main>
+<section class="hero-panel">
+<div class="hero-copy">
+<p class="kicker">Public series</p>
 <h1>English for Tech</h1>
-<blockquote>Generated from FluentLoop DB/code. Do not hand-edit; regenerate with <code>scripts/export_lesson_catalog.py</code>.</blockquote>
+<p>
+Owner-curated English for Tech lessons covering roles, workflows, tools, interviews, and practical communication in software teams.
+</p>
+</div>
+<div class="hero-aside">
+<strong>How to use</strong>
+<span>Open a card to inspect targets, then use the Telegram command to subscribe or start a scenario.</span>
+</div>
+</section>
+<section class="metric-row">
+<div class="metric-card"><span>Items</span><strong>12</strong><em>Public entries</em></div>
+<div class="metric-card"><span>Lesson types</span><strong>5</strong><em>Training categories</em></div>
+<div class="metric-card"><span>Templates</span><strong>12</strong><em>Clone-on-subscribe</em></div>
+<div class="metric-card"><span>Scenarios</span><strong>0</strong><em>Roleplay cards</em></div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Lesson group</p>
 <h2>Chunks and Collocations</h2>
-<h3>English for Tech 02: How to Build a Startup</h3>
-<ul>
-<li>Public id: <code>14</code></li>
-<li>Lesson type: Chunks and Collocations</li>
-<li>Topic: Startup culture and sales pitch</li>
-<li>Goal: Explain a startup idea and pitch it with clear past/present experience contrast.</li>
-<li>Target mix: 8 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 14</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: startup culture, Past Simple vs Present Perfect, sales pitch</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: startup mentality, customer pain point, gap in the market, scalable solution, pivot if we have to, bring people on board, share the same mindset, Past Simple vs Present Perfect for startup experience, craft a sales pitch</li>
-</ul>
-<h3>English for Tech 03: Trending Technology</h3>
-<ul>
-<li>Public id: <code>15</code></li>
-<li>Lesson type: Chunks and Collocations</li>
-<li>Topic: Emerging technology and future plans</li>
-<li>Goal: Describe technology trends and future plans using future forms naturally.</li>
-<li>Target mix: 5 expressions, 3 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 15</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: trending technology, Future Simple vs be going to, LinkedIn profile</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: cutting-edge technology, artificial intelligence, machine learning, augmented reality, virtual reality, Internet of Things, Future Simple vs be going to, rule of three whys, professional LinkedIn profile</li>
-</ul>
-<h3>English for Tech 04: Programming Languages</h3>
-<ul>
-<li>Public id: <code>16</code></li>
-<li>Lesson type: Chunks and Collocations</li>
-<li>Topic: Programming languages and bug-report replies</li>
-<li>Goal: Compare technologies and reply to bug reports with clear comparative language.</li>
-<li>Target mix: 3 expressions, 5 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 16</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: programming languages, comparatives/superlatives, bug reports</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: programming language, advantages and disadvantages, more efficient than, less verbose than, the most effective way to learn, front-end development, back-end development, Comparative and superlative adjectives, reply to a bug report</li>
-</ul>
-<h3>English for Tech 06: QA Testing</h3>
-<ul>
-<li>Public id: <code>18</code></li>
-<li>Lesson type: Chunks and Collocations</li>
-<li>Topic: QA testing and bug reports</li>
-<li>Goal: Write bug reports and describe testing work with passive voice and STAR structure.</li>
-<li>Target mix: 4 expressions, 4 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 18</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: QA testing, passive voice, STAR technique</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: QA testing, test case, steps to reproduce, expected result, actual result, bug severity, Passive voice for bug reports, write a bug report, STAR technique</li>
-</ul>
-<h3>English for Tech 09: Famous People in Tech</h3>
-<ul>
-<li>Public id: <code>21</code></li>
-<li>Lesson type: Chunks and Collocations</li>
-<li>Topic: Leadership language, phrasal verbs, and peer review</li>
-<li>Goal: Use fixed expressions and possibility modals when discussing leadership and reviews.</li>
-<li>Target mix: 7 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 21</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: fixed expressions, modal verbs of possibility, peer review</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: stand out, take off, turn out, come up with an idea, put out a product, Modal verbs of possibility, motivate your team, write a peer review</li>
-</ul>
+<p>5 public entries in this group.</p>
+</div>
+<div class="lesson-grid">
+<article class="lesson-card" id="english-for-tech-02-how-to-build-a-startup"><div class="card-heading-row"><h3>English for Tech 02: How to Build a Startup</h3><span>/subscribe 14</span></div><p>Explain a startup idea and pitch it with clear past/present experience contrast.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>14</dd></div><div><dt>Type</dt><dd>Chunks and Collocations</dd></div><div><dt>Topic</dt><dd>Startup culture and sales pitch</dd></div><div><dt>Target mix</dt><dd>8 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>startup culture, Past Simple vs Present Perfect, sales pitch</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>startup mentality</li><li>customer pain point</li><li>gap in the market</li><li>scalable solution</li><li>pivot if we have to</li><li>bring people on board</li><li>share the same mindset</li><li>Past Simple vs Present Perfect for startup experience</li><li>craft a sales pitch</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 14</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-03-trending-technology"><div class="card-heading-row"><h3>English for Tech 03: Trending Technology</h3><span>/subscribe 15</span></div><p>Describe technology trends and future plans using future forms naturally.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>15</dd></div><div><dt>Type</dt><dd>Chunks and Collocations</dd></div><div><dt>Topic</dt><dd>Emerging technology and future plans</dd></div><div><dt>Target mix</dt><dd>5 expressions, 3 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>trending technology, Future Simple vs be going to, LinkedIn profile</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>cutting-edge technology</li><li>artificial intelligence</li><li>machine learning</li><li>augmented reality</li><li>virtual reality</li><li>Internet of Things</li><li>Future Simple vs be going to</li><li>rule of three whys</li><li>professional LinkedIn profile</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 15</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-04-programming-languages"><div class="card-heading-row"><h3>English for Tech 04: Programming Languages</h3><span>/subscribe 16</span></div><p>Compare technologies and reply to bug reports with clear comparative language.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>16</dd></div><div><dt>Type</dt><dd>Chunks and Collocations</dd></div><div><dt>Topic</dt><dd>Programming languages and bug-report replies</dd></div><div><dt>Target mix</dt><dd>3 expressions, 5 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>programming languages, comparatives/superlatives, bug reports</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>programming language</li><li>advantages and disadvantages</li><li>more efficient than</li><li>less verbose than</li><li>the most effective way to learn</li><li>front-end development</li><li>back-end development</li><li>Comparative and superlative adjectives</li><li>reply to a bug report</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 16</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-06-qa-testing"><div class="card-heading-row"><h3>English for Tech 06: QA Testing</h3><span>/subscribe 18</span></div><p>Write bug reports and describe testing work with passive voice and STAR structure.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>18</dd></div><div><dt>Type</dt><dd>Chunks and Collocations</dd></div><div><dt>Topic</dt><dd>QA testing and bug reports</dd></div><div><dt>Target mix</dt><dd>4 expressions, 4 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>QA testing, passive voice, STAR technique</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>QA testing</li><li>test case</li><li>steps to reproduce</li><li>expected result</li><li>actual result</li><li>bug severity</li><li>Passive voice for bug reports</li><li>write a bug report</li><li>STAR technique</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 18</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-09-famous-people-in-tech"><div class="card-heading-row"><h3>English for Tech 09: Famous People in Tech</h3><span>/subscribe 21</span></div><p>Use fixed expressions and possibility modals when discussing leadership and reviews.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>21</dd></div><div><dt>Type</dt><dd>Chunks and Collocations</dd></div><div><dt>Topic</dt><dd>Leadership language, phrasal verbs, and peer review</dd></div><div><dt>Target mix</dt><dd>7 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>fixed expressions, modal verbs of possibility, peer review</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>stand out</li><li>take off</li><li>turn out</li><li>come up with an idea</li><li>put out a product</li><li>Modal verbs of possibility</li><li>motivate your team</li><li>write a peer review</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 21</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+</div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Lesson group</p>
 <h2>Critical Reading</h2>
-<h3>English for Tech 11: Top-Notch Resume</h3>
-<ul>
-<li>Public id: <code>23</code></li>
-<li>Lesson type: Critical Reading</li>
-<li>Topic: Resume and phone interview language</li>
-<li>Goal: Improve resume language and phone-interview readiness using accurate articles.</li>
-<li>Target mix: 2 expressions, 5 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 23</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: resume, articles, phone interview</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: resume, cover letter, hear back from someone, sit in your drafts, top-notch resume, describe achievements, phone interview, Articles in resumes and role descriptions</li>
-</ul>
+<p>1 public entries in this group.</p>
+</div>
+<div class="lesson-grid">
+<article class="lesson-card" id="english-for-tech-11-top-notch-resume"><div class="card-heading-row"><h3>English for Tech 11: Top-Notch Resume</h3><span>/subscribe 23</span></div><p>Improve resume language and phone-interview readiness using accurate articles.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>23</dd></div><div><dt>Type</dt><dd>Critical Reading</dd></div><div><dt>Topic</dt><dd>Resume and phone interview language</dd></div><div><dt>Target mix</dt><dd>2 expressions, 5 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>resume, articles, phone interview</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>resume</li><li>cover letter</li><li>hear back from someone</li><li>sit in your drafts</li><li>top-notch resume</li><li>describe achievements</li><li>phone interview</li><li>Articles in resumes and role descriptions</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 23</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+</div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Lesson group</p>
 <h2>Diplomatic Workplace English</h2>
-<h3>English for Tech 05: Version Control and Hosting Platforms</h3>
-<ul>
-<li>Public id: <code>17</code></li>
-<li>Lesson type: Diplomatic Workplace English</li>
-<li>Topic: Version control, open source, and negotiation</li>
-<li>Goal: Talk about Git workflows and negotiate workplace issues precisely.</li>
-<li>Target mix: 6 expressions, 2 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 17</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: Git/GitHub/GitLab/Bitbucket, quantifiers, negotiation</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: version control system, repository, commit, branch, merge, pull request, contribute to an open source project, Quantifiers for technical scope, handle negotiations at work</li>
-</ul>
+<p>1 public entries in this group.</p>
+</div>
+<div class="lesson-grid">
+<article class="lesson-card" id="english-for-tech-05-version-control-and-hosting-platforms"><div class="card-heading-row"><h3>English for Tech 05: Version Control and Hosting Platforms</h3><span>/subscribe 17</span></div><p>Talk about Git workflows and negotiate workplace issues precisely.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>17</dd></div><div><dt>Type</dt><dd>Diplomatic Workplace English</dd></div><div><dt>Topic</dt><dd>Version control, open source, and negotiation</dd></div><div><dt>Target mix</dt><dd>6 expressions, 2 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>Git/GitHub/GitLab/Bitbucket, quantifiers, negotiation</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>version control system</li><li>repository</li><li>commit</li><li>branch</li><li>merge</li><li>pull request</li><li>contribute to an open source project</li><li>Quantifiers for technical scope</li><li>handle negotiations at work</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 17</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+</div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Lesson group</p>
 <h2>Grammar</h2>
-<h3>English for Tech 01: Jobs in Tech</h3>
-<ul>
-<li>Public id: <code>13</code></li>
-<li>Lesson type: Grammar</li>
-<li>Topic: Tech roles and self-introduction</li>
-<li>Goal: Introduce your role and explain popular tech jobs using accurate present tenses.</li>
-<li>Target mix: 2 expressions, 6 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 13</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: tech job titles, Present Simple vs Present Continuous, elevator pitch</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: from scratch, keep up with, qualify for a role, take on a difficult task, handle customer requests, UX writer, DevOps engineer, Present Simple vs Present Continuous for job descriptions, write an elevator pitch</li>
-</ul>
-<h3>English for Tech 08: Chatting in Tech</h3>
-<ul>
-<li>Public id: <code>20</code></li>
-<li>Lesson type: Grammar</li>
-<li>Topic: Chat messages, small talk, and rapport</li>
-<li>Goal: Write chat messages and build rapport using conditionals and natural tone.</li>
-<li>Target mix: 6 chunks, 2 grammar</li>
-<li>Commands: <code>/subscribe 20</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: chatting in tech, 1st and 2nd conditionals, small talk</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: build rapport, small talk, on call, casual tone, respond asynchronously, First conditional for realistic outcomes, Second conditional for hypothetical situations, write chat messages</li>
-</ul>
-<h3>English for Tech 10: Mentorship</h3>
-<ul>
-<li>Public id: <code>22</code></li>
-<li>Lesson type: Grammar</li>
-<li>Topic: Mentorship and career goals</li>
-<li>Goal: Discuss mentorship, goals, and outreach using business conditionals.</li>
-<li>Target mix: 3 expressions, 4 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 22</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: mentorship, conditionals for business communication, reach-out message</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: mentorship, mentor, mentee, leverage a skill, point someone in the right direction, verbalize your goals, write a reach-out message, Conditionals for business communication</li>
-</ul>
+<p>3 public entries in this group.</p>
+</div>
+<div class="lesson-grid">
+<article class="lesson-card" id="english-for-tech-01-jobs-in-tech"><div class="card-heading-row"><h3>English for Tech 01: Jobs in Tech</h3><span>/subscribe 13</span></div><p>Introduce your role and explain popular tech jobs using accurate present tenses.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>13</dd></div><div><dt>Type</dt><dd>Grammar</dd></div><div><dt>Topic</dt><dd>Tech roles and self-introduction</dd></div><div><dt>Target mix</dt><dd>2 expressions, 6 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>tech job titles, Present Simple vs Present Continuous, elevator pitch</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>from scratch</li><li>keep up with</li><li>qualify for a role</li><li>take on a difficult task</li><li>handle customer requests</li><li>UX writer</li><li>DevOps engineer</li><li>Present Simple vs Present Continuous for job descriptions</li><li>write an elevator pitch</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 13</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-08-chatting-in-tech"><div class="card-heading-row"><h3>English for Tech 08: Chatting in Tech</h3><span>/subscribe 20</span></div><p>Write chat messages and build rapport using conditionals and natural tone.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>20</dd></div><div><dt>Type</dt><dd>Grammar</dd></div><div><dt>Topic</dt><dd>Chat messages, small talk, and rapport</dd></div><div><dt>Target mix</dt><dd>6 chunks, 2 grammar</dd></div><div><dt>Focus</dt><dd>chatting in tech, 1st and 2nd conditionals, small talk</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>build rapport</li><li>small talk</li><li>on call</li><li>casual tone</li><li>respond asynchronously</li><li>First conditional for realistic outcomes</li><li>Second conditional for hypothetical situations</li><li>write chat messages</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 20</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-10-mentorship"><div class="card-heading-row"><h3>English for Tech 10: Mentorship</h3><span>/subscribe 22</span></div><p>Discuss mentorship, goals, and outreach using business conditionals.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>22</dd></div><div><dt>Type</dt><dd>Grammar</dd></div><div><dt>Topic</dt><dd>Mentorship and career goals</dd></div><div><dt>Target mix</dt><dd>3 expressions, 4 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>mentorship, conditionals for business communication, reach-out message</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>mentorship</li><li>mentor</li><li>mentee</li><li>leverage a skill</li><li>point someone in the right direction</li><li>verbalize your goals</li><li>write a reach-out message</li><li>Conditionals for business communication</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 22</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+</div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Lesson group</p>
 <h2>Writing</h2>
-<h3>English for Tech 07: Frameworks for Software Development</h3>
-<ul>
-<li>Public id: <code>19</code></li>
-<li>Lesson type: Writing</li>
-<li>Topic: Software development frameworks and scrum communication</li>
-<li>Goal: Explain your workflow, obligations, and follow-ups in software projects.</li>
-<li>Target mix: 5 expressions, 2 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 19</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: Scrum/Agile/Kanban, modal verbs of obligation, follow-up email</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: software development framework, Scrum, Kanban, sprint backlog, daily scrum, go about completing a project, Modal verbs of obligation, send a follow-up email</li>
-</ul>
-<h3>English for Tech 12: Job Interview</h3>
-<ul>
-<li>Public id: <code>24</code></li>
-<li>Lesson type: Writing</li>
-<li>Topic: Interview preparation and recruiter communication</li>
-<li>Goal: Answer interview questions and talk to recruiters with precise prepositions and resume grammar.</li>
-<li>Target mix: 2 expressions, 6 chunks, 1 grammar</li>
-<li>Commands: <code>/subscribe 24</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></li>
-<li>Focus: job interview, recruiter communication, useful resume grammar</li>
-<li>Typical steps: Warm-up, Vocabulary, Controlled practice, Grammar focus, Speaking / soft skills, Writing, Recap</li>
-<li>Sample targets: job interview, recruiter, initial phone screen, technical phone screen, bomb an interview, learn the ropes, on the spot, answer job interview questions, Prepositions in interview stories</li>
-</ul>
+<p>2 public entries in this group.</p>
+</div>
+<div class="lesson-grid">
+<article class="lesson-card" id="english-for-tech-07-frameworks-for-software-development"><div class="card-heading-row"><h3>English for Tech 07: Frameworks for Software Development</h3><span>/subscribe 19</span></div><p>Explain your workflow, obligations, and follow-ups in software projects.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>19</dd></div><div><dt>Type</dt><dd>Writing</dd></div><div><dt>Topic</dt><dd>Software development frameworks and scrum communication</dd></div><div><dt>Target mix</dt><dd>5 expressions, 2 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>Scrum/Agile/Kanban, modal verbs of obligation, follow-up email</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>software development framework</li><li>Scrum</li><li>Kanban</li><li>sprint backlog</li><li>daily scrum</li><li>go about completing a project</li><li>Modal verbs of obligation</li><li>send a follow-up email</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 19</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+<article class="lesson-card" id="english-for-tech-12-job-interview"><div class="card-heading-row"><h3>English for Tech 12: Job Interview</h3><span>/subscribe 24</span></div><p>Answer interview questions and talk to recruiters with precise prepositions and resume grammar.</p><dl class="detail-grid"><div><dt>Public id</dt><dd>24</dd></div><div><dt>Type</dt><dd>Writing</dd></div><div><dt>Topic</dt><dd>Interview preparation and recruiter communication</dd></div><div><dt>Target mix</dt><dd>2 expressions, 6 chunks, 1 grammar</dd></div><div><dt>Focus</dt><dd>job interview, recruiter communication, useful resume grammar</dd></div></dl><div class="chip-section"><h4>Practice steps</h4><ul class="pill-list"><li>Warm-up</li><li>Vocabulary</li><li>Controlled practice</li><li>Grammar focus</li><li>Speaking / soft skills</li><li>Writing</li><li>Recap</li></ul></div><div class="chip-section"><h4>Sample targets</h4><ul class="pill-list"><li>job interview</li><li>recruiter</li><li>initial phone screen</li><li>technical phone screen</li><li>bomb an interview</li><li>learn the ropes</li><li>on the spot</li><li>answer job interview questions</li><li>Prepositions in interview stories</li></ul></div><p class="command-line">Telegram path: <code>/subscribe 24</code>, <code>/lesson &lt;id&gt;</code>, <code>/today</code></p></article>
+</div>
+</section>
 </main>
 </body>
 </html>

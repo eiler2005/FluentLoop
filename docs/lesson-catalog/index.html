@@ -5,119 +5,547 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FluentLoop Public Lesson Catalog</title>
   <style>
-    :root { color-scheme: light; --blue:#1559c7; --green:#187533; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0; color: #121826; background: #fff; line-height: 1.55; }
-    main { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
-    nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 20px;
-      border-bottom: 1px solid #d7e1ef; background: #f7fbff; }
-    nav a { color: var(--blue); text-decoration: none; font-weight: 650; }
-    h1 { font-size: clamp(2rem, 4vw, 3.4rem); margin: 18px 0 12px; }
-    h2 { margin-top: 36px; color: var(--blue); }
-    h3 { margin-top: 24px; color: var(--green); }
-    blockquote { border-left: 4px solid var(--blue); margin: 18px 0;
-      padding: 8px 14px; background: #f7fbff; }
-    code { background: #eef4ff; padding: 2px 6px; border-radius: 5px; }
-    li { margin: 7px 0; }
-    pre { white-space: pre-wrap; overflow-x: auto; background: #f7fbff;
-      border: 1px solid #d7e1ef; padding: 10px; border-radius: 8px; }
+    :root {
+      color-scheme: light;
+      --ink: #10131a;
+      --muted: #606977;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --accent: #184b8f;
+      --warm: #b45309;
+      --good: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f6f7f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.52;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: var(--ink);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      text-decoration: none;
+    }
+    nav a:hover {
+      border-color: var(--line);
+      background: var(--soft);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 24px 72px;
+    }
+    .hero-panel {
+      align-items: end;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 6px solid var(--ink);
+      display: grid;
+      gap: 32px;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      margin-bottom: 18px;
+      padding: 34px;
+    }
+    .hero-copy {
+      max-width: 850px;
+    }
+    .hero-aside {
+      border-left: 3px solid var(--warm);
+      color: var(--muted);
+      padding-left: 16px;
+    }
+    .hero-aside strong {
+      color: var(--ink);
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .hero-aside span {
+      display: block;
+      font-size: 0.95rem;
+    }
+    .hero {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0 28px;
+      max-width: 920px;
+    }
+    .kicker, .eyebrow, .section-kicker {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 3.4rem;
+      line-height: 1.04;
+      margin: 0 0 16px;
+      max-width: 780px;
+    }
+    h2 {
+      font-size: 1.75rem;
+      line-height: 1.16;
+      margin: 0 0 8px;
+    }
+    h3 {
+      font-size: 1.06rem;
+      line-height: 1.25;
+      margin: 10px 0 10px;
+    }
+    h4 {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 18px 0 8px;
+      text-transform: uppercase;
+    }
+    p { margin: 0 0 10px; }
+    a { color: var(--accent); }
+    code {
+      background: #eef2f7;
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+    .answer-block {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent);
+      color: var(--ink);
+      font-size: 0.97rem;
+      line-height: 1.58;
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      white-space: pre-line;
+    }
+    .muted { color: var(--muted); }
+    .metric-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 18px 0 32px;
+    }
+    .metric-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 118px;
+      padding: 16px;
+    }
+    .metric-card span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 1.95rem;
+      line-height: 1.05;
+      margin: 12px 0 8px;
+    }
+    .metric-card em {
+      color: var(--muted);
+      font-style: normal;
+    }
+    .section-block {
+      margin-top: 34px;
+    }
+    .section-header {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 270px minmax(0, 1fr);
+      padding: 28px 0 16px;
+    }
+    .section-header p:not(.kicker) {
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .link-grid, .series-overview, .type-grid, .lesson-grid, .example-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .link-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .series-overview {
+      grid-template-columns: 1fr;
+    }
+    .type-grid {
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    }
+    .lesson-grid, .example-grid {
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    }
+    .nav-tile, .overview-card, .type-card, .lesson-card, .example-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .nav-tile {
+      color: var(--ink);
+      min-height: 116px;
+      padding: 18px;
+      text-decoration: none;
+    }
+    .nav-tile strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .nav-tile span {
+      color: var(--muted);
+      display: block;
+    }
+    .overview-card, .type-card, .lesson-card, .example-card {
+      padding: 18px;
+    }
+    .card-heading-row {
+      align-items: start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .card-heading-row h3 {
+      margin-top: 0;
+    }
+    .card-heading-row span {
+      color: var(--muted);
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .compact-list {
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+    }
+    .compact-row {
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 11px 0;
+    }
+    .compact-row a {
+      display: inline-block;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .compact-row span {
+      color: var(--muted);
+      display: block;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+    .card-index {
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts, .case-notes {
+      margin: 14px 0 0;
+    }
+    .mini-facts dt, .case-notes dt, .detail-grid dt {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .mini-facts dd, .case-notes dd, .detail-grid dd {
+      margin: 3px 0 12px;
+    }
+    .detail-grid {
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 16px 0 0;
+      padding-top: 14px;
+    }
+    .chip-section {
+      margin-top: 16px;
+    }
+    .command-line, .telegram {
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .table-wrap {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      min-width: 900px;
+      width: 100%;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 13px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    .matrix {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin: 0;
+    }
+    .matrix-item {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      display: flex;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 14px;
+      text-decoration: none;
+    }
+    .matrix-item strong { color: var(--muted); font-size: 0.82rem; }
+    .type-section {
+      border-top: 1px solid var(--line);
+      padding: 32px 0 4px;
+    }
+    .card-topline {
+      align-items: center;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      gap: 8px;
+    }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-weight: 800;
+      padding: 2px 8px;
+      text-transform: uppercase;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .pill-list li {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+    }
+    ol { margin: 0; padding-left: 20px; }
+    ol li { margin: 6px 0; }
+    .empty-state {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    @media (max-width: 700px) {
+      nav { padding: 12px 14px; }
+      main { padding: 24px 14px 48px; }
+      h1 { font-size: 2.35rem; }
+      .hero-panel, .section-header {
+        grid-template-columns: 1fr;
+      }
+      .hero-panel {
+        padding: 22px;
+      }
+      .hero-aside {
+        border-left: 0;
+        border-top: 3px solid var(--warm);
+        padding: 14px 0 0;
+      }
+      .metric-row, .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .lesson-grid, .example-grid, .type-grid {
+        grid-template-columns: 1fr;
+      }
+      .compact-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+      }
+      .matrix-item { min-height: 48px; }
+    }
   </style>
 </head>
 <body>
-<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
+<nav><a href="index.html">Catalog</a><a href="lesson-types.html">Lesson types</a><a href="examples-by-type.html">Examples by type</a><a href="b2-b2plus-seed.html">B2/B2+</a><a href="english-for-tech.html">English for Tech</a><a href="scenarios.html">Scenarios</a></nav>
 <main>
-<h1>FluentLoop Public Lesson Catalog</h1>
-<blockquote>Generated from FluentLoop DB/code. Do not hand-edit; regenerate with <code>scripts/export_lesson_catalog.py</code>.</blockquote>
-<p>This catalog shows public learning surfaces only: shared lesson templates and code-defined scenario cards. Private uploads, raw source texts, user answers, reflections, and PDFs are not exported.</p>
-<h2>Browse</h2>
-<ul>
-<li><a href="lesson-types.md">Lesson types</a></li>
-<li><a href="b2-b2plus-seed.md">B2/B2+ seed lessons</a></li>
-<li><a href="english-for-tech.md">English for Tech</a></li>
-<li><a href="scenarios.md">Business/IT scenarios</a></li>
-</ul>
-<h2>Public surfaces</h2>
-<h3>B2/B2+ Seed Lessons</h3>
-<ul>
-<li><strong>Executive Summaries and Concise Recommendations</strong> (Critical Reading) - <code>/subscribe 43</code> - Write short summaries for decision-makers.</li>
-<li><strong>Incident Updates and ETA Caveats</strong> (Critical Reading) - <code>/subscribe 26</code> - Write a concise production issue update with uncertainty.</li>
-<li><strong>Customer Feedback and Feature Prioritisation</strong> (Diplomatic Workplace English) - <code>/subscribe 34</code> - Prioritise product work from customer feedback.</li>
-<li><strong>Deadline Negotiation and Pushback</strong> (Diplomatic Workplace English) - <code>/subscribe 42</code> - Negotiate a deadline while protecting quality.</li>
-<li><strong>Diplomatic Stakeholder Pushback</strong> (Diplomatic Workplace English) - <code>/subscribe 25</code> - Push back on a risky plan without sounding defensive.</li>
-<li><strong>Disagreeing, Proposing Alternatives, and Aligning Next Steps</strong> (Diplomatic Workplace English) - <code>/subscribe 44</code> - Disagree clearly, propose an alternative, and align on next steps.</li>
-<li><strong>Performance Feedback Diplomacy</strong> (Diplomatic Workplace English) - <code>/subscribe 38</code> - Give direct but respectful feedback to a colleague.</li>
-<li><strong>Reporting Verbs for Workplace Opinions</strong> (Diplomatic Workplace English) - <code>/subscribe 28</code> - Report suggestions, claims, doubts, and disagreements accurately.</li>
-<li><strong>Sprint Planning and Priority Negotiation</strong> (Diplomatic Workplace English) - <code>/subscribe 30</code> - Align on priorities and negotiate scope for a sprint.</li>
-<li><strong>Architecture Trade-offs and Recommendations</strong> (Grammar) - <code>/subscribe 27</code> - Compare options and recommend one without overselling it.</li>
-<li><strong>Risk Mitigation and Conditionals</strong> (Grammar) - <code>/subscribe 29</code> - Explain risks and mitigations using precise conditional language.</li>
-<li><strong>Cross-team Dependencies and Ownership</strong> (Mistake Repair) - <code>/subscribe 35</code> - Discuss dependencies, blockers, and ownership clearly.</li>
-<li><strong>Data Trends and Business Reports</strong> (Vocabulary) - <code>/subscribe 33</code> - Summarise trends and explain business impact.</li>
-<li><strong>Performance, Latency, and Reliability</strong> (Vocabulary) - <code>/subscribe 36</code> - Explain performance issues and reliability trade-offs.</li>
-<li><strong>Postmortems and Lessons Learned</strong> (Vocabulary) - <code>/subscribe 40</code> - Summarise causes and lessons without blaming people.</li>
-<li><strong>Roadmap Updates Under Uncertainty</strong> (Vocabulary) - <code>/subscribe 39</code> - Explain roadmap changes and uncertainty clearly.</li>
-<li><strong>Scope Clarification and Requirements</strong> (Vocabulary) - <code>/subscribe 31</code> - Ask precise questions and clarify ambiguous requirements.</li>
-<li><strong>Security and Privacy Risk Communication</strong> (Vocabulary) - <code>/subscribe 37</code> - Explain security/privacy risks without creating panic.</li>
-<li><strong>Technical Debt and Refactoring Rationale</strong> (Vocabulary) - <code>/subscribe 32</code> - Explain why refactoring is worth doing now.</li>
-<li><strong>Async Slack and Email Updates</strong> (Writing) - <code>/subscribe 41</code> - Write concise async updates with context and next steps.</li>
-</ul>
-<h3>English for Tech</h3>
-<ul>
-<li><strong>English for Tech 02: How to Build a Startup</strong> (Chunks and Collocations) - <code>/subscribe 14</code> - Explain a startup idea and pitch it with clear past/present experience contrast.</li>
-<li><strong>English for Tech 03: Trending Technology</strong> (Chunks and Collocations) - <code>/subscribe 15</code> - Describe technology trends and future plans using future forms naturally.</li>
-<li><strong>English for Tech 04: Programming Languages</strong> (Chunks and Collocations) - <code>/subscribe 16</code> - Compare technologies and reply to bug reports with clear comparative language.</li>
-<li><strong>English for Tech 06: QA Testing</strong> (Chunks and Collocations) - <code>/subscribe 18</code> - Write bug reports and describe testing work with passive voice and STAR structure.</li>
-<li><strong>English for Tech 09: Famous People in Tech</strong> (Chunks and Collocations) - <code>/subscribe 21</code> - Use fixed expressions and possibility modals when discussing leadership and reviews.</li>
-<li><strong>English for Tech 11: Top-Notch Resume</strong> (Critical Reading) - <code>/subscribe 23</code> - Improve resume language and phone-interview readiness using accurate articles.</li>
-<li><strong>English for Tech 05: Version Control and Hosting Platforms</strong> (Diplomatic Workplace English) - <code>/subscribe 17</code> - Talk about Git workflows and negotiate workplace issues precisely.</li>
-<li><strong>English for Tech 01: Jobs in Tech</strong> (Grammar) - <code>/subscribe 13</code> - Introduce your role and explain popular tech jobs using accurate present tenses.</li>
-<li><strong>English for Tech 08: Chatting in Tech</strong> (Grammar) - <code>/subscribe 20</code> - Write chat messages and build rapport using conditionals and natural tone.</li>
-<li><strong>English for Tech 10: Mentorship</strong> (Grammar) - <code>/subscribe 22</code> - Discuss mentorship, goals, and outreach using business conditionals.</li>
-<li><strong>English for Tech 07: Frameworks for Software Development</strong> (Writing) - <code>/subscribe 19</code> - Explain your workflow, obligations, and follow-ups in software projects.</li>
-<li><strong>English for Tech 12: Job Interview</strong> (Writing) - <code>/subscribe 24</code> - Answer interview questions and talk to recruiters with precise prepositions and resume grammar.</li>
-</ul>
-<h3>Business/IT Scenarios</h3>
-<ul>
-<li><strong>1:1 mentoring conversation</strong> (Scenario / Roleplay) - <code>/scene 19</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Admit I do not know without losing face</strong> (Scenario / Roleplay) - <code>/scene 40</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Apologize for production outage</strong> (Scenario / Roleplay) - <code>/scene 37</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Architecture migration proposal</strong> (Scenario / Roleplay) - <code>/scene 6</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Ask for help when you should know</strong> (Scenario / Roleplay) - <code>/scene 39</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Bad news to customer</strong> (Scenario / Roleplay) - <code>/scene 16</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Board update on engineering velocity</strong> (Scenario / Roleplay) - <code>/scene 29</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Code review feedback - give criticism diplomatically</strong> (Scenario / Roleplay) - <code>/scene 3</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Code review feedback - receive criticism gracefully</strong> (Scenario / Roleplay) - <code>/scene 2</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Conference talk Q&amp;A handling</strong> (Scenario / Roleplay) - <code>/scene 32</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Cross-team dependency negotiation</strong> (Scenario / Roleplay) - <code>/scene 10</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Customer demo opening and Q&amp;A</strong> (Scenario / Roleplay) - <code>/scene 11</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Customer escalation absorb and de-escalate</strong> (Scenario / Roleplay) - <code>/scene 12</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Decline scope creep</strong> (Scenario / Roleplay) - <code>/scene 36</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Design review - defend choice A vs B</strong> (Scenario / Roleplay) - <code>/scene 1</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Diplomatic refusal of impossible deadline</strong> (Scenario / Roleplay) - <code>/scene 38</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Disagree with senior architect publicly</strong> (Scenario / Roleplay) - <code>/scene 33</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Discovery call</strong> (Scenario / Roleplay) - <code>/scene 15</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Estimation pushback</strong> (Scenario / Roleplay) - <code>/scene 9</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Hiring interview - candidate</strong> (Scenario / Roleplay) - <code>/scene 26</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Hiring interview - interviewer</strong> (Scenario / Roleplay) - <code>/scene 25</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Incident post-mortem facilitation</strong> (Scenario / Roleplay) - <code>/scene 5</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Investor demo</strong> (Scenario / Roleplay) - <code>/scene 31</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Performance review - giving</strong> (Scenario / Roleplay) - <code>/scene 20</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Performance review - receiving</strong> (Scenario / Roleplay) - <code>/scene 21</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Promotion case presentation</strong> (Scenario / Roleplay) - <code>/scene 23</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Push back on micromanagement gently</strong> (Scenario / Roleplay) - <code>/scene 35</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Quarterly all-hands speech</strong> (Scenario / Roleplay) - <code>/scene 28</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Reference call</strong> (Scenario / Roleplay) - <code>/scene 18</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Resignation conversation</strong> (Scenario / Roleplay) - <code>/scene 24</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>RFC discussion in Slack threading</strong> (Scenario / Roleplay) - <code>/scene 4</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Salary negotiation</strong> (Scenario / Roleplay) - <code>/scene 22</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Sales hand-off conversation</strong> (Scenario / Roleplay) - <code>/scene 17</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Scope renegotiation with PM</strong> (Scenario / Roleplay) - <code>/scene 8</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Standup update</strong> (Scenario / Roleplay) - <code>/scene 27</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Tech blog post draft</strong> (Scenario / Roleplay) - <code>/scene 30</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Tech-debt prioritization debate</strong> (Scenario / Roleplay) - <code>/scene 7</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Tell teammate they are underperforming</strong> (Scenario / Roleplay) - <code>/scene 34</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Vendor pricing pushback</strong> (Scenario / Roleplay) - <code>/scene 13</code> - Rehearse a high-stakes workplace conversation.</li>
-<li><strong>Vendor SLA negotiation</strong> (Scenario / Roleplay) - <code>/scene 14</code> - Rehearse a high-stakes workplace conversation.</li>
-</ul>
+<section class="hero-panel">
+<div class="hero-copy">
+<p class="kicker">Public catalog</p>
+<h1>FluentLoop lesson catalog</h1>
+<p>
+A browseable view of public learning surfaces: shared templates, lesson-type examples, and business/IT scenario cards.
+</p>
+</div>
+<div class="hero-aside">
+<strong>Privacy boundary</strong>
+<span>Private uploads, raw source texts, answers, reflections, and PDFs are excluded from this export.</span>
+</div>
+</section>
+<section class="metric-row">
+<div class="metric-card"><span>Public templates</span><strong>32</strong><em>Subscribable lessons</em></div>
+<div class="metric-card"><span>Scenario cards</span><strong>40</strong><em>Roleplay surfaces</em></div>
+<div class="metric-card"><span>Lesson types</span><strong>13</strong><em>Full taxonomy</em></div>
+<div class="metric-card"><span>Guide pages</span><strong>5</strong><em>Catalog, types, examples, series</em></div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Where to start</p>
+<h2>Navigation guide</h2>
+<p>Use these pages as an executive map before opening individual lessons.</p>
+</div>
+<div class="link-grid">
+<a class="nav-tile" href="examples-by-type.html"><strong>Examples by type</strong><span>Human-readable examples for every lesson type.</span></a>
+<a class="nav-tile" href="lesson-types.html"><strong>Lesson types</strong><span>The training taxonomy: intent, commands, metrics, next modes.</span></a>
+<a class="nav-tile" href="b2-b2plus-seed.html"><strong>B2/B2+ seed lessons</strong><span>Core business/IT templates for communication and production.</span></a>
+<a class="nav-tile" href="english-for-tech.html"><strong>English for Tech</strong><span>Curated tech-English series with role, workflow, and interview topics.</span></a>
+<a class="nav-tile" href="scenarios.html"><strong>Scenarios</strong><span>Roleplay cards for meetings, escalation, reviews, and negotiation.</span></a>
+</div>
+</section>
+<section class="section-block">
+<div class="section-header">
+<p class="kicker">Public surfaces</p>
+<h2>Library overview</h2>
+<p>Each row links to the detailed HTML series page and keeps the Telegram entry point visible.</p>
+</div>
+<div class="series-overview">
+<article class="overview-card">
+<div class="card-heading-row">
+<h3><a href="b2-b2plus-seed.html">B2/B2+ Seed Lessons</a></h3>
+<span>20 items</span>
+</div>
+<div class="compact-list">
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#executive-summaries-and-concise-recommendations">Executive Summaries and Concise Recommendations</a><span>Critical Reading · Write short summaries for decision-makers.</span></div><code>/subscribe 43</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#incident-updates-and-eta-caveats">Incident Updates and ETA Caveats</a><span>Critical Reading · Write a concise production issue update with uncertainty.</span></div><code>/subscribe 26</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#customer-feedback-and-feature-prioritisation">Customer Feedback and Feature Prioritisation</a><span>Diplomatic Workplace English · Prioritise product work from customer feedback.</span></div><code>/subscribe 34</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#deadline-negotiation-and-pushback">Deadline Negotiation and Pushback</a><span>Diplomatic Workplace English · Negotiate a deadline while protecting quality.</span></div><code>/subscribe 42</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#diplomatic-stakeholder-pushback">Diplomatic Stakeholder Pushback</a><span>Diplomatic Workplace English · Push back on a risky plan without sounding defensive.</span></div><code>/subscribe 25</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#disagreeing-proposing-alternatives-and-aligning-next-steps">Disagreeing, Proposing Alternatives, and Aligning Next Steps</a><span>Diplomatic Workplace English · Disagree clearly, propose an alternative, and align on next steps.</span></div><code>/subscribe 44</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#performance-feedback-diplomacy">Performance Feedback Diplomacy</a><span>Diplomatic Workplace English · Give direct but respectful feedback to a colleague.</span></div><code>/subscribe 38</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#reporting-verbs-for-workplace-opinions">Reporting Verbs for Workplace Opinions</a><span>Diplomatic Workplace English · Report suggestions, claims, doubts, and disagreements accurately.</span></div><code>/subscribe 28</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#sprint-planning-and-priority-negotiation">Sprint Planning and Priority Negotiation</a><span>Diplomatic Workplace English · Align on priorities and negotiate scope for a sprint.</span></div><code>/subscribe 30</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#architecture-trade-offs-and-recommendations">Architecture Trade-offs and Recommendations</a><span>Grammar · Compare options and recommend one without overselling it.</span></div><code>/subscribe 27</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#risk-mitigation-and-conditionals">Risk Mitigation and Conditionals</a><span>Grammar · Explain risks and mitigations using precise conditional language.</span></div><code>/subscribe 29</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#cross-team-dependencies-and-ownership">Cross-team Dependencies and Ownership</a><span>Mistake Repair · Discuss dependencies, blockers, and ownership clearly.</span></div><code>/subscribe 35</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#data-trends-and-business-reports">Data Trends and Business Reports</a><span>Vocabulary · Summarise trends and explain business impact.</span></div><code>/subscribe 33</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#performance-latency-and-reliability">Performance, Latency, and Reliability</a><span>Vocabulary · Explain performance issues and reliability trade-offs.</span></div><code>/subscribe 36</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#postmortems-and-lessons-learned">Postmortems and Lessons Learned</a><span>Vocabulary · Summarise causes and lessons without blaming people.</span></div><code>/subscribe 40</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#roadmap-updates-under-uncertainty">Roadmap Updates Under Uncertainty</a><span>Vocabulary · Explain roadmap changes and uncertainty clearly.</span></div><code>/subscribe 39</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#scope-clarification-and-requirements">Scope Clarification and Requirements</a><span>Vocabulary · Ask precise questions and clarify ambiguous requirements.</span></div><code>/subscribe 31</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#security-and-privacy-risk-communication">Security and Privacy Risk Communication</a><span>Vocabulary · Explain security/privacy risks without creating panic.</span></div><code>/subscribe 37</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#technical-debt-and-refactoring-rationale">Technical Debt and Refactoring Rationale</a><span>Vocabulary · Explain why refactoring is worth doing now.</span></div><code>/subscribe 32</code></div>
+<div class="compact-row"><div><a href="b2-b2plus-seed.html#async-slack-and-email-updates">Async Slack and Email Updates</a><span>Writing · Write concise async updates with context and next steps.</span></div><code>/subscribe 41</code></div>
+</div>
+</article>
+<article class="overview-card">
+<div class="card-heading-row">
+<h3><a href="english-for-tech.html">English for Tech</a></h3>
+<span>12 items</span>
+</div>
+<div class="compact-list">
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-02-how-to-build-a-startup">English for Tech 02: How to Build a Startup</a><span>Chunks and Collocations · Explain a startup idea and pitch it with clear past/present experience contrast.</span></div><code>/subscribe 14</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-03-trending-technology">English for Tech 03: Trending Technology</a><span>Chunks and Collocations · Describe technology trends and future plans using future forms naturally.</span></div><code>/subscribe 15</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-04-programming-languages">English for Tech 04: Programming Languages</a><span>Chunks and Collocations · Compare technologies and reply to bug reports with clear comparative language.</span></div><code>/subscribe 16</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-06-qa-testing">English for Tech 06: QA Testing</a><span>Chunks and Collocations · Write bug reports and describe testing work with passive voice and STAR structure.</span></div><code>/subscribe 18</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-09-famous-people-in-tech">English for Tech 09: Famous People in Tech</a><span>Chunks and Collocations · Use fixed expressions and possibility modals when discussing leadership and reviews.</span></div><code>/subscribe 21</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-11-top-notch-resume">English for Tech 11: Top-Notch Resume</a><span>Critical Reading · Improve resume language and phone-interview readiness using accurate articles.</span></div><code>/subscribe 23</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-05-version-control-and-hosting-platforms">English for Tech 05: Version Control and Hosting Platforms</a><span>Diplomatic Workplace English · Talk about Git workflows and negotiate workplace issues precisely.</span></div><code>/subscribe 17</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-01-jobs-in-tech">English for Tech 01: Jobs in Tech</a><span>Grammar · Introduce your role and explain popular tech jobs using accurate present tenses.</span></div><code>/subscribe 13</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-08-chatting-in-tech">English for Tech 08: Chatting in Tech</a><span>Grammar · Write chat messages and build rapport using conditionals and natural tone.</span></div><code>/subscribe 20</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-10-mentorship">English for Tech 10: Mentorship</a><span>Grammar · Discuss mentorship, goals, and outreach using business conditionals.</span></div><code>/subscribe 22</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-07-frameworks-for-software-development">English for Tech 07: Frameworks for Software Development</a><span>Writing · Explain your workflow, obligations, and follow-ups in software projects.</span></div><code>/subscribe 19</code></div>
+<div class="compact-row"><div><a href="english-for-tech.html#english-for-tech-12-job-interview">English for Tech 12: Job Interview</a><span>Writing · Answer interview questions and talk to recruiters with precise prepositions and resume grammar.</span></div><code>/subscribe 24</code></div>
+</div>
+</article>
+<article class="overview-card">
+<div class="card-heading-row">
+<h3><a href="scenarios.html">Business/IT Scenarios</a></h3>
+<span>40 items</span>
+</div>
+<div class="compact-list">
+<div class="compact-row"><div><a href="scenarios.html#11-mentoring-conversation">1:1 mentoring conversation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 19</code></div>
+<div class="compact-row"><div><a href="scenarios.html#admit-i-do-not-know-without-losing-face">Admit I do not know without losing face</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 40</code></div>
+<div class="compact-row"><div><a href="scenarios.html#apologize-for-production-outage">Apologize for production outage</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 37</code></div>
+<div class="compact-row"><div><a href="scenarios.html#architecture-migration-proposal">Architecture migration proposal</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 6</code></div>
+<div class="compact-row"><div><a href="scenarios.html#ask-for-help-when-you-should-know">Ask for help when you should know</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 39</code></div>
+<div class="compact-row"><div><a href="scenarios.html#bad-news-to-customer">Bad news to customer</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 16</code></div>
+<div class="compact-row"><div><a href="scenarios.html#board-update-on-engineering-velocity">Board update on engineering velocity</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 29</code></div>
+<div class="compact-row"><div><a href="scenarios.html#code-review-feedback-give-criticism-diplomatically">Code review feedback - give criticism diplomatically</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 3</code></div>
+<div class="compact-row"><div><a href="scenarios.html#code-review-feedback-receive-criticism-gracefully">Code review feedback - receive criticism gracefully</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 2</code></div>
+<div class="compact-row"><div><a href="scenarios.html#conference-talk-qa-handling">Conference talk Q&amp;A handling</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 32</code></div>
+<div class="compact-row"><div><a href="scenarios.html#cross-team-dependency-negotiation">Cross-team dependency negotiation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 10</code></div>
+<div class="compact-row"><div><a href="scenarios.html#customer-demo-opening-and-qa">Customer demo opening and Q&amp;A</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 11</code></div>
+<div class="compact-row"><div><a href="scenarios.html#customer-escalation-absorb-and-de-escalate">Customer escalation absorb and de-escalate</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 12</code></div>
+<div class="compact-row"><div><a href="scenarios.html#decline-scope-creep">Decline scope creep</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 36</code></div>
+<div class="compact-row"><div><a href="scenarios.html#design-review-defend-choice-a-vs-b">Design review - defend choice A vs B</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 1</code></div>
+<div class="compact-row"><div><a href="scenarios.html#diplomatic-refusal-of-impossible-deadline">Diplomatic refusal of impossible deadline</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 38</code></div>
+<div class="compact-row"><div><a href="scenarios.html#disagree-with-senior-architect-publicly">Disagree with senior architect publicly</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 33</code></div>
+<div class="compact-row"><div><a href="scenarios.html#discovery-call">Discovery call</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 15</code></div>
+<div class="compact-row"><div><a href="scenarios.html#estimation-pushback">Estimation pushback</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 9</code></div>
+<div class="compact-row"><div><a href="scenarios.html#hiring-interview-candidate">Hiring interview - candidate</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 26</code></div>
+<div class="compact-row"><div><a href="scenarios.html#hiring-interview-interviewer">Hiring interview - interviewer</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 25</code></div>
+<div class="compact-row"><div><a href="scenarios.html#incident-post-mortem-facilitation">Incident post-mortem facilitation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 5</code></div>
+<div class="compact-row"><div><a href="scenarios.html#investor-demo">Investor demo</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 31</code></div>
+<div class="compact-row"><div><a href="scenarios.html#performance-review-giving">Performance review - giving</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 20</code></div>
+<div class="compact-row"><div><a href="scenarios.html#performance-review-receiving">Performance review - receiving</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 21</code></div>
+<div class="compact-row"><div><a href="scenarios.html#promotion-case-presentation">Promotion case presentation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 23</code></div>
+<div class="compact-row"><div><a href="scenarios.html#push-back-on-micromanagement-gently">Push back on micromanagement gently</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 35</code></div>
+<div class="compact-row"><div><a href="scenarios.html#quarterly-all-hands-speech">Quarterly all-hands speech</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 28</code></div>
+<div class="compact-row"><div><a href="scenarios.html#reference-call">Reference call</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 18</code></div>
+<div class="compact-row"><div><a href="scenarios.html#resignation-conversation">Resignation conversation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 24</code></div>
+<div class="compact-row"><div><a href="scenarios.html#rfc-discussion-in-slack-threading">RFC discussion in Slack threading</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 4</code></div>
+<div class="compact-row"><div><a href="scenarios.html#salary-negotiation">Salary negotiation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 22</code></div>
+<div class="compact-row"><div><a href="scenarios.html#sales-hand-off-conversation">Sales hand-off conversation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 17</code></div>
+<div class="compact-row"><div><a href="scenarios.html#scope-renegotiation-with-pm">Scope renegotiation with PM</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 8</code></div>
+<div class="compact-row"><div><a href="scenarios.html#standup-update">Standup update</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 27</code></div>
+<div class="compact-row"><div><a href="scenarios.html#tech-blog-post-draft">Tech blog post draft</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 30</code></div>
+<div class="compact-row"><div><a href="scenarios.html#tech-debt-prioritization-debate">Tech-debt prioritization debate</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 7</code></div>
+<div class="compact-row"><div><a href="scenarios.html#tell-teammate-they-are-underperforming">Tell teammate they are underperforming</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 34</code></div>
+<div class="compact-row"><div><a href="scenarios.html#vendor-pricing-pushback">Vendor pricing pushback</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 13</code></div>
+<div class="compact-row"><div><a href="scenarios.html#vendor-sla-negotiation">Vendor SLA negotiation</a><span>Scenario / Roleplay · Rehearse a high-stakes workplace conversation.</span></div><code>/scene 14</code></div>
+</div>
+</article>
+</div>
+</section>
 </main>
 </body>
 </html>
