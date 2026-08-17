@@ -335,6 +335,14 @@ def handle_channel_help(
     return BotReply(
         "#help\n"
         "How to use FluentLoop\n\n"
+        "Your day: words at 08:00, a drill at 13:00, a quiz at 19:00, in your "
+        "own timezone. /pause and /resume control them, /settings changes the "
+        "times. Send any word or phrase to add it - commas for several.\n\n"
+        "Practising the same words, from lightest to hardest:\n"
+        "- /today 5 shows cards; you only read them.\n"
+        "- /review drills the words that are due - start here.\n"
+        "- /practice vocab is a full vocabulary lesson around them.\n"
+        "- /today is the general 15-minute lesson from your lesson plans.\n\n"
         "1. Start with /today for the automatic 15-minute lesson, or choose a "
         "lesson with /lessons and /lesson.\n"
         "2. Browse shared seed lessons with /library, then copy one into your "
@@ -353,7 +361,8 @@ def handle_channel_help(
         "- Feedback: corrections and explanations\n"
         "- Next Prompts: follow-up prompts\n"
         "- Mistakes, Summaries, Stats: weak points and progress\n\n"
-        "Useful commands: /today, /baseline, /outcomes, /library, /subscribe, "
+        "Useful commands: /today, /review, /practice vocab, /words, /more, "
+        "/learned, /setup, /baseline, /outcomes, /library, /subscribe, "
         "/practice, /topics, /lessons, /lesson random, /lesson topic <query>, "
         "/upload, /skip, /help, /howto.",
         channel_id,

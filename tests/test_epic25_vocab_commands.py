@@ -471,3 +471,38 @@ def test_help_explains_the_daily_loop(db_session, settings) -> None:
     assert "cut corners, push back on, roll out" in text
     for command in NEW_COMMANDS + ("/setup", "/today 5"):
         assert command in text
+
+
+def test_help_disambiguates_cards_review_and_lessons() -> None:
+    """The four commands train the same words; /help must say which to pick."""
+
+    from fluentloop.bot.handlers import handle_help
+
+    text = handle_help().text
+
+    assert "train the SAME words" in text
+    for command in ("/today 5", "/review", "/practice vocab", "/today"):
+        assert command in text
+    assert "Start here to practise them." in text
+
+
+def test_pinned_workspace_help_covers_the_daily_loop() -> None:
+    from fluentloop.bot.handlers import handle_channel_help
+
+    text = handle_channel_help("-100123").text
+
+    assert "words at 08:00" in text
+    assert "/review drills the words that are due" in text
+    assert "/practice vocab" in text
+    assert "/pause" in text
+
+
+def test_start_message_points_at_the_loop_and_practice() -> None:
+    from fluentloop.bot.messages import start_message
+
+    text = start_message()
+
+    assert "08:00" in text
+    assert "/review" in text
+    assert "/practice vocab" in text
+    assert "/help" in text

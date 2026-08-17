@@ -45,6 +45,17 @@ Adding your own words - just send them, no command needed:
   cut corners, push back on, roll out
 Commas or new lines for several at once. Your own words always come first.
 
+Which command do I want? The cards and the lessons train the SAME words -
+the difference is how hard they make you work:
+
+  /today 5          shows cards. Passive: you read, nothing is asked.
+  /review           drills the words that are due right now - the ones this
+                    morning's cards showed. Start here to practise them.
+  /practice vocab   a full vocabulary lesson built around those words:
+                    collocations, paraphrase, cloze, reverse translation.
+  /today            the general 15-minute lesson from your lesson plans -
+                    grammar, scenarios, free writing. A different thing.
+
 Daily-loop commands:
   /today 5          show 5 cards right now, without waiting for the morning
   /words            your list, what is coming up, how many graduated
@@ -117,8 +128,14 @@ def start_message(channel_enabled: bool = False) -> str:
         else "Practice runs here."
     )
     return (
-        f"FluentLoop is ready.\n{where}\n"
-        "Send /library, /upload, /baseline, or /today."
+        f"FluentLoop is ready.\n{where}\n\n"
+        "Three short messages a day: words at 08:00, a drill at 13:00, "
+        "a quiz at 19:00. /pause stops them.\n"
+        "Send me any word or phrase to add it.\n\n"
+        "To practise now: /review for the words that are due, "
+        "/practice vocab for a vocabulary lesson, /today for the full "
+        "15-minute session.\n"
+        "/help explains everything."
     )
 
 

@@ -68,6 +68,16 @@ Send any word or phrase as a plain message to add it — commas or new lines for
 several at once. Your own words always get top priority. `/pause` and `/resume`
 turn the daily messages off and back on.
 
+The cards and the lessons train the same words; the commands differ in how hard
+they make you work:
+
+| Command | What it does |
+|---|---|
+| `/today 5` | shows cards — you only read them |
+| `/review` | drills the words that are due, i.e. the ones the cards showed |
+| `/practice vocab` | a full vocabulary lesson around those words |
+| `/today` | the general 15-minute lesson from your lesson plans |
+
 If you already have material from a teacher, work, Slack, email, an article, or
 meeting notes, start with:
 
