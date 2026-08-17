@@ -73,6 +73,12 @@ destructive action is high.
   disclosure (what gets sent to OpenAI / Anthropic and why).
 - Before any commit, scan staged files for `BOT_TOKEN`, `API_KEY`, `sk-`,
   `xoxb-`, real Telegram user IDs, and email addresses. If unsure, ask.
+- **Gate the commit on the scan, don't just run it.** Chain it:
+  `python scripts/secret_scan.py && git commit ...`. Running it as a separate
+  line lets a commit proceed over a printed warning — that is how a real
+  Telegram user id reached the public history on 2026-08-17.
+- Tests use the `123456789` placeholder id. Never paste a real chat or user id
+  into a fixture, even as "just a sample value".
 
 ## Architectural invariants
 
@@ -96,6 +102,13 @@ destructive action is high.
 - **Native quiz polls require `public_voters=True`.** Telegram delivers no
   vote update at all for an anonymous poll, and the Bot API HTTP path cannot
   receive votes under any setting. See ADR-0011.
+- **Answer where you were asked.** Use `_here_or_workspace(event, ...)` for
+  replies; `workspace_destination(...)` is only for broadcasts the workspace
+  is the audience for. Routing a private-chat reply into a forum topic looks
+  exactly like the bot ignoring the user. See the ADR-0005 amendment.
+- **Persistent-keyboard taps arrive as plain text.** `quick_action_for` must
+  stay ahead of every free-text capture path in `on_free_text`, or a button
+  label gets stored as a vocabulary item.
 - **Single tenancy, shared content.** One bot, one container, one set of
   secrets. Lesson plans flagged as templates can be discovered via `/library`
   and cloned per-user on subscribe (ADR-0008, EPIC-23). The current deployment
@@ -141,7 +154,7 @@ FluentLoop/
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 │   └── seeds/                    Shipped seed data (starter word bank JSONL).
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (27 modules, 312+ tests).
+└── tests/                        Pytest suite (27 modules, 331+ tests).
 ```
 
 ## Verification commands

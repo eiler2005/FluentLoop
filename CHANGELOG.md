@@ -18,12 +18,27 @@ All notable changes to FluentLoop are recorded here. Format follows
   graduation, and how to add your own words.
 - After the evening quiz the bot explains the three rejected options with their
   meanings, in English and Russian.
+- Bare `/today` now asks whether you want words or a lesson; `/cards [n]` is
+  the direct command for cards.
+- A persistent keyboard (Cards, Review, Lesson, My words, Add words) installed
+  by `/start`, so practice is one tap from anywhere in the chat.
+- The 13 `/practice` modes are grouped into Words, Grammar and mistakes, and
+  Writing and speaking.
+- `scripts/spread_due_dates.py` deals a seeded backlog of overdue reviews out
+  over N days instead of leaving it as one wall.
 - Native Telegram quiz polls over Telethon raw API, with an inline-button
   fallback and a `VOCAB_QUIZ_POLLS` kill switch (ADR-0011).
 - Qwen as a selectable LLM provider alongside OpenAI and DeepSeek, behind the
   existing `AI_PROVIDER` switch (ADR-0010).
 
 ### Fixed
+- Practice replies were routed to the forum workspace regardless of where the
+  request came from, so a button tapped in a private chat produced nothing
+  visible. Replies now follow the request; broadcasts still address the
+  workspace (ADR-0005 amendment).
+- `/review` ran the same 16-step template as a lesson, making the two
+  indistinguishable. It is now a six-step pass.
+- Reading the cards was a dead end with no way to practise them.
 - Slot claim rolled back the whole tick: `claim_slot` used
   `session.rollback()` on a duplicate, which discarded every delivery row
   already written in that tick, so a slot whose message had been sent was

@@ -71,12 +71,15 @@ turn the daily messages off and back on.
 The cards and the lessons train the same words; the commands differ in how hard
 they make you work:
 
-| Command | What it does |
-|---|---|
-| `/today 5` | shows cards — you only read them |
-| `/review` | drills the words that are due, i.e. the ones the cards showed |
-| `/practice vocab` | a full vocabulary lesson around those words |
-| `/today` | the general 15-minute lesson from your lesson plans |
+| Command | Time | What it does |
+|---|---|---|
+| `/cards` | 0 min | shows cards — you only read them |
+| `/review` | 2-3 min | five recall drills plus a cold-recall closer |
+| `/practice vocab` | 15 min | the full vocabulary lesson |
+| `/today` | — | asks which of the two tracks you want |
+
+`/start` installs a keyboard under the input field — Cards, Review, Lesson,
+My words, Add words — so practice is one tap from anywhere in the chat.
 
 If you already have material from a teacher, work, Slack, email, an article, or
 meeting notes, start with:

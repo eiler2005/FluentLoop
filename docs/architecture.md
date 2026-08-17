@@ -126,6 +126,15 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
 - **Telethon owns the update stream.** The Bot API path below can send but
   never receive, so anything needing a reply — quiz polls in particular — must
   go through MTProto. See [ADR-0011](adr/0011-native-telegram-quiz-polls.md).
+- **Answer where you were asked.** `_here_or_workspace(event, settings, topic)`
+  routes a reply to a forum topic only when the request arrived from the
+  workspace; otherwise it answers in the originating chat. Broadcasts (the
+  pinned help hub, the `/start` channel hubs) still address the workspace
+  directly. See the 2026-08-17 amendment to
+  [ADR-0005](adr/0005-forum-workspace-routing.md).
+- **A persistent reply keyboard** (Cards / Review / Lesson / My words / Add
+  words) is installed by `/start`. Taps arrive as plain text, so
+  `handlers.quick_action_for` must run before every free-text capture path.
 - Bot API is used for forum-topic sends, pins, command-menu sync, and Help-topic
   maintenance where MTProto topic ergonomics are weaker.
 - `/help` and `/howto` render the same learner guide. `/start` and `/help`

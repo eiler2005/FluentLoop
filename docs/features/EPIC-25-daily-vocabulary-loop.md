@@ -27,7 +27,7 @@ Commit and deploy are still explicit user-approved gates.
 
 ## Validation Evidence
 
-- Local gate: `pytest -q` -> `312 passed`; `ruff check src tests scripts`,
+- Local gate: `pytest -q` -> `331 passed`; `ruff check src tests scripts`,
   `python scripts/secret_scan.py`, and `git diff --check` clean.
 - Migration `0004_epic25` verified idempotent and reversible against a fresh
   SQLite file, and applied on the VPS (`alembic_version = 0004_epic25`).
@@ -45,7 +45,14 @@ Commit and deploy are still explicit user-approved gates.
   covered, every entry carrying a meaning, an example, and three distractors.
 - Live LLM check against Qwen: `check_answer` returned the correct verdict and
   correction; `usage_log` attributed the call to `provider=qwen`,
-  `model=qwen3.7-flash`.
+  `model=qwen3.7-flash`. Disabling reasoning cut output from 4973 to 444
+  tokens with no change in verdict.
+- Reply routing verified on the deployed bot: a request from the private chat
+  resolves to `TelegramDestination(chat_id=None)`, one from the forum to
+  `('-100…', thread 4)`.
+- `/review` on the live base returns six steps ending in cold recall.
+- Backlog spread applied: due-now fell from 197 to 30, with the rest dealt
+  over 21 days at nine a day.
 
 ## Scope
 
@@ -141,7 +148,57 @@ sizes up to 500, so a large pick is capped by the bank and the completion
 message says so. Growing the bank is additive: append lines, and
 `scripts/seed_wordbank.py` imports the delta.
 
-### 5. Own words first
+### 5. Two tracks, and a way into them
+
+FluentLoop offers two things on different timescales, and both used to hide
+behind `/today`, with cards reachable only by appending a number. A command
+whose meaning changes with an optional integer cannot tell you what it will
+do, and that is where the confusion came from.
+
+Bare `/today` now forks:
+
+```
+What's on today?
+  🃏 Words  ~2 min      →  Show cards · Review due · Vocabulary lesson
+  📚 Lesson ~15 min     →  the existing staged session
+```
+
+`/cards [n]` is the direct command; `/today <n>` remains a shortcut.
+
+The effort ladder is real and every surface states it in minutes:
+
+| | Time | What happens |
+|---|---|---|
+| `/cards` | 0 min | read them; nothing is asked |
+| `/review` | 2-3 min | five recall drills plus a cold-recall closer |
+| `/practice vocab` | 15 min | the full Vocabulary Lab session |
+| `/today` → Lesson | 15 min | the general staged lesson |
+
+`/review` used to run the same 16-step template as a lesson, so the label
+promised a distinction that did not exist. `build_staged_exercises` now
+branches on `mode == "review"` and returns `QUICK_REVIEW_DRILL_COUNT` steps.
+
+The 13 practice modes are grouped by what the learner wants to work on -
+Words, Grammar and mistakes, Writing and speaking - rather than one flat list.
+
+**Persistent keyboard.** Commands are discoverable only if you already know
+them, so `/start` installs a reply keyboard that stays under the input field:
+
+```
+🃏 Cards      🔁 Review
+📚 Lesson     📖 My words
+➕ Add words
+```
+
+These arrive as ordinary text messages, so `quick_action_for` runs before
+every capture path in `on_free_text`. Without that, tapping "🃏 Cards" would
+be stored as a vocabulary item - `looks_like_word_list` accepts it happily.
+
+`➕ Add words` arms an explicit add: the next message goes straight to the
+vocabulary path, bypassing the material heuristic. Tapping any other quick
+action clears a pending add.
+
+### 6. Own words first
 
 `learning_items.priority` is `10` for user-added items and `0` otherwise. It is
 the first `ORDER BY` term in `srs.get_due_items` and a scoring bonus in
@@ -212,6 +269,26 @@ towards" (*A natural way to make a recommendation without overclaiming*). Fixed
 by inverting the tag preference and adding `is_near_synonym`.
 
 **4. Mixed-language prompts.** See "Content and language" above.
+
+**5. Replies went to the workspace, not to the asker.** Practice handlers
+called `workspace_destination` unconditionally, so with a forum configured a
+button tapped in the private chat sent the session to the Practice Flow topic
+and the learner saw nothing. It affected `/review`, `/today`, `/skip`, and the
+feedback and summary replies. See the ADR-0005 amendment.
+
+**6. A dead end after the cards.** Reading the cards offered no next step; the
+passive half was shipped without the active one. The cards message now ends
+with "Practise these" and "Vocabulary lesson".
+
+## Process failure worth recording
+
+A regression test was written using the owner's real Telegram user id as a
+sample chat id. `scripts/secret_scan.py` flagged it, but the commit was not
+gated on the scan's exit status, so the commit and push went through over the
+warning. The id reached the public history and was replaced in a follow-up
+(`21289dc`); rewriting the published history was left as the owner's call.
+
+Running the scan is not the control. **Gating the commit on it is.**
 
 ## Pre-existing defects fixed in passing
 
