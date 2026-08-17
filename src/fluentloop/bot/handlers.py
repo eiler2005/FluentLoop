@@ -120,6 +120,10 @@ class BotReply:
     message_thread_id: int | None = None
     extra_replies: tuple[BotReply, ...] = ()
     parse_mode: str | None = None
+    # Callback replies that redraw their own message instead of posting a new
+    # one. A multi-select keyboard would otherwise spam the chat with one
+    # message per tap.
+    edit_message: bool = False
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -2079,51 +2083,55 @@ def _save_onboarding(
     )
 
 
-def _topics_reply(payload: dict) -> BotReply:
+def _topics_reply(payload: dict, *, edit: bool = False) -> BotReply:
     return BotReply(
         "❤️ Pick a few topics you enjoy — your example sentences will be about "
-        "them.",
+        "them.\n\nTap to toggle, then Done.",
         buttons=_multiselect_buttons(
             TOPIC_CHOICES,
             set(payload.get("topics", [])),
             prefix="onb:topic:",
             done_data="onb:done:topics",
         ),
+        edit_message=edit,
     )
 
 
-def _kinds_reply(payload: dict) -> BotReply:
+def _kinds_reply(payload: dict, *, edit: bool = False) -> BotReply:
     selected = set(payload.get("kinds", [])) | set(payload.get("sets", []))
     return BotReply(
         "📦 What kind of vocabulary do you want to build?\n\n"
         "🎪 The bottom rows are fun sets — optional, but they make practice a "
-        "lot more entertaining.",
+        "lot more entertaining.\n\nPick as many as you like, then Done.",
         buttons=_multiselect_buttons(
             (*KIND_CHOICES, *SET_CHOICES),
             selected,
             prefix="onb:kind:",
             done_data="onb:done:kinds",
         ),
+        edit_message=edit,
     )
 
 
-def _size_reply() -> BotReply:
+def _size_reply(*, edit: bool = False) -> BotReply:
     return BotReply(
         "📊 How many words should I put in your starter list?\n"
         "You can always add more of your own later.",
         buttons=[
             [_button(str(size), f"onb:size:{size}") for size in SIZE_CHOICES]
         ],
+        edit_message=edit,
     )
 
 
-def _per_day_reply() -> BotReply:
+def _per_day_reply(*, edit: bool = False) -> BotReply:
     return BotReply(
         "🐢 How many words per day do you want to practice?",
         buttons=[
             [_button(label, f"onb:perday:{value}")]
             for value, label in PER_DAY_CHOICES
         ],
+        edit_message=edit,
     )
 
 
@@ -2157,29 +2165,29 @@ def handle_onboarding_callback(
     if action == "topic":
         payload["topics"] = _toggle(payload.get("topics", []), value)
         _save_onboarding(session, chat_id, user, payload)
-        return _topics_reply(payload)
+        return _topics_reply(payload, edit=True)
 
     if action == "kind":
         known_sets = {slug for slug, _ in SET_CHOICES}
         key = "sets" if value in known_sets else "kinds"
         payload[key] = _toggle(payload.get(key, []), value)
         _save_onboarding(session, chat_id, user, payload)
-        return _kinds_reply(payload)
+        return _kinds_reply(payload, edit=True)
 
     if action == "done":
         if value == "topics":
             payload["step"] = "kinds"
             _save_onboarding(session, chat_id, user, payload)
-            return _kinds_reply(payload)
+            return _kinds_reply(payload, edit=True)
         payload["step"] = "size"
         _save_onboarding(session, chat_id, user, payload)
-        return _size_reply()
+        return _size_reply(edit=True)
 
     if action == "size":
         payload["size"] = int(value) if value.isdigit() else 200
         payload["step"] = "per_day"
         _save_onboarding(session, chat_id, user, payload)
-        return _per_day_reply()
+        return _per_day_reply(edit=True)
 
     if action == "perday":
         payload["per_day"] = int(value) if value.isdigit() else 5
@@ -2236,7 +2244,8 @@ def _finish_onboarding(
         )
     lines.append(f"First cards tomorrow at {morning}.")
     lines.append(f"Try /today {per_day} for a preview right now.")
-    return BotReply("\n".join(lines))
+    # Replaces the wizard rather than leaving a dead keyboard behind.
+    return BotReply("\n".join(lines), edit_message=True)
 
 
 def set_drill_state(

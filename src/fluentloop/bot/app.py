@@ -166,6 +166,26 @@ async def send_reply(  # type: ignore[no-untyped-def]
     return message
 
 
+async def edit_reply(event, reply: BotReply) -> bool:  # type: ignore[no-untyped-def]
+    """Redraw the message the button belongs to. False if it could not be done.
+
+    Keeps a multi-select keyboard in one message instead of posting a new one
+    per tap. Telegram rejects an edit that changes nothing, which is harmless
+    here: the caller falls back to sending.
+    """
+
+    try:
+        await event.edit(
+            reply.text,
+            buttons=_telethon_buttons(reply),
+            parse_mode=reply.parse_mode,
+        )
+        return True
+    except Exception as exc:  # noqa: BLE001 - message may be gone or unchanged
+        LOG.debug("Could not edit callback message: %s", type(exc).__name__)
+        return False
+
+
 async def answer_callback(event, text: str) -> None:  # type: ignore[no-untyped-def]
     try:
         await event.answer(text)
@@ -971,6 +991,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             else:
                 reply = BotReply("Unknown button action. Send /help.")
                 await answer_callback(event, "Unknown action")
+            if reply.edit_message and await edit_reply(event, reply):
+                return
             await send_reply(client, event.chat_id, reply, settings)
 
     from telethon.tl.types import UpdateMessagePollVote

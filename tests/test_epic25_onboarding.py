@@ -155,3 +155,49 @@ def test_start_runs_the_wizard_only_once(db_session, settings) -> None:
 def test_setup_is_registered_in_both_catalogs() -> None:
     assert "/setup" in command_catalog()
     assert "setup" in {command for command, _ in BOT_COMMANDS}
+
+
+def test_wizard_screens_redraw_in_place(db_session, settings) -> None:
+    """One message for the whole wizard, not one per tap."""
+
+    user = ensure_user(db_session, 123456789, settings)
+
+    # The opening screen is a fresh message; it has no message to edit yet.
+    assert handle_onboarding_start(db_session, user, chat_id=CHAT).edit_message is False
+
+    # Everything driven by a button redraws the message it belongs to.
+    toggled = handle_onboarding_callback(
+        db_session, user, "topic", "tech", chat_id=CHAT
+    )
+    advanced = handle_onboarding_callback(
+        db_session, user, "done", "topics", chat_id=CHAT
+    )
+    kind = handle_onboarding_callback(db_session, user, "kind", "idioms", chat_id=CHAT)
+    size_screen = handle_onboarding_callback(
+        db_session, user, "done", "kinds", chat_id=CHAT
+    )
+    pace_screen = handle_onboarding_callback(
+        db_session, user, "size", "100", chat_id=CHAT
+    )
+    finished = handle_onboarding_callback(
+        db_session, user, "perday", "5", chat_id=CHAT
+    )
+
+    for reply in (toggled, advanced, kind, size_screen, pace_screen, finished):
+        assert reply.edit_message is True
+
+    # The summary replaces the wizard, so no dead keyboard is left behind.
+    assert finished.buttons is None
+
+
+def test_wizard_tells_you_selection_is_multiple(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+
+    topics = handle_onboarding_start(db_session, user, chat_id=CHAT)
+    handle_onboarding_callback(db_session, user, "done", "topics", chat_id=CHAT)
+    kinds = handle_onboarding_callback(
+        db_session, user, "kind", "idioms", chat_id=CHAT
+    )
+
+    assert "Tap to toggle" in topics.text
+    assert "Pick as many as you like" in kinds.text
