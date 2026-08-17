@@ -1,6 +1,6 @@
 # Tests
 
-Pytest suite for FluentLoop. Twenty test modules organized by epic and by
+Pytest suite for FluentLoop. Twenty-seven test modules organized by epic and by
 operational concern. The suite must stay green on every commit; CI enforces it
 via `.github/workflows/ci.yml`.
 
@@ -49,6 +49,15 @@ and stubs the Telegram client and AI providers — no real network calls.
 | `test_epic22_migration.py` | Alembic upgrade/downgrade/upgrade roundtrip for EPIC-22/23 schema additions. |
 | `test_epic23_lesson_library.py` | Shared seed library publishing, `/library`, `/subscribe`, duplicate clone reuse, private visibility, and owner-only publish. |
 | `test_epic24_outcomes.py` | `/baseline`, `/outcomes`, held-out retention, productive chunks, L1 density, mistake extinction, Article Lab probes, and outcome snapshots. |
+| `test_epic25_vocab_model.py` | Daily-loop preferences, JSON round-trip after commit, graduation thresholds, and user-added priority ordering. |
+| `test_epic25_migration.py` | Migration `0004_epic25` upgrade/downgrade round-trip and idempotency. |
+| `test_epic25_vocab_commands.py` | Slot windows, card rendering, word-list detection, bulk add, and `/words` `/more` `/learned` `/delete` `/pause` `/resume`. |
+| `test_epic25_vocab_scheduler.py` | Minute-tick delivery per timezone, restart idempotency, catch-up window, job registration, and the UTC-date regression. |
+| `test_epic25_quiz.py` | Distractor selection, quiz assembly, answering, and the midday drill state machine. |
+| `test_epic25_quiz_polls.py` | Native poll construction, vote resolution, and the inline-button fallback. |
+| `test_epic25_wordbank.py` | Word-bank validation, deterministic starter selection, and idempotent seeding. |
+| `test_epic25_onboarding.py` | The `/setup` wizard state machine end to end. |
+| `test_epic25_qwen_provider.py` | Provider selection, model routing, gateway attribution, and DeepSeek back-compat. |
 | `test_bot_upload_documents.py` | Telegram document-upload handler: text decoding, oversize rejection, friendly errors. |
 | `test_seed_demo_data.py` | Idempotency and shape of `scripts/seed_demo_data.py`. |
 | `test_smoke_telegram.py` | Smoke message format: build/time/plan-note headers, sanitized payloads. |

@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from fluentloop.ai.factory import make_provider
 from fluentloop.bot.handlers import (
+    DRILL_STATE,
     BotReply,
     handle_add_text,
     handle_answer,
@@ -25,7 +26,11 @@ from fluentloop.bot.handlers import (
     handle_channel_hub,
     handle_confidence_rating,
     handle_debate,
+    handle_delete,
     handle_dispute,
+    handle_drill_answer,
+    handle_drill_skip,
+    handle_drill_start,
     handle_favorite_toggle,
     handle_favorites,
     handle_feedback_explain,
@@ -34,6 +39,7 @@ from fluentloop.bot.handlers import (
     handle_help,
     handle_item_status,
     handle_items,
+    handle_learned,
     handle_lesson,
     handle_lesson_callback,
     handle_lessons,
@@ -43,10 +49,17 @@ from fluentloop.bot.handlers import (
     handle_mentor,
     handle_mistake_action,
     handle_mistakes,
+    handle_more,
+    handle_onboarding_callback,
+    handle_onboarding_start,
     handle_outcomes,
+    handle_pause,
+    handle_poll_vote,
     handle_practice,
     handle_publish,
+    handle_quiz_answer,
     handle_reflect,
+    handle_resume,
     handle_rules,
     handle_scene,
     handle_setting_update,
@@ -63,6 +76,10 @@ from fluentloop.bot.handlers import (
     handle_upload_prompt,
     handle_upload_start,
     handle_upload_type_choice,
+    handle_vocab_add,
+    handle_vocab_cards,
+    handle_vocab_undo,
+    handle_words,
 )
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
@@ -74,6 +91,7 @@ from fluentloop.scheduler import build_scheduler
 from fluentloop.telegram_bot_api import pin_bot_api_message, send_bot_api_reply
 from fluentloop.telegram_workspace import workspace_destination, workspace_enabled
 from fluentloop.users import ensure_user
+from fluentloop.vocab_loop import looks_like_word_list
 
 LOG = logging.getLogger(__name__)
 ITEM_STATUS_USAGE = (
@@ -81,6 +99,13 @@ ITEM_STATUS_USAGE = (
 )
 CANDIDATE_USAGE = "Use /candidate add <id> or /candidate skip <id>."
 CHANNEL_DISCOVERY_PATH = Path("data/channel_discovery.json")
+
+
+def _argument(raw_text: str) -> str:
+    """Everything after the command word, kept whole for multi-word arguments."""
+
+    parts = raw_text.split(maxsplit=1)
+    return parts[1].strip() if len(parts) > 1 else ""
 
 
 def _is_forum_chat(chat_id: int | str | None, settings: Settings) -> bool:
@@ -260,8 +285,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             user = ensure_user(session, telegram_user_id, settings)
             parts = event.raw_text.split(maxsplit=2)
             command = parts[0]
-            if command == "/start":
-                reply = handle_start(session, settings, telegram_user_id)
+            if command == "/setup":
+                reply = handle_onboarding_start(
+                    session, user, chat_id=event.chat_id
+                )
+            elif command == "/start":
+                reply = handle_start(
+                    session, settings, telegram_user_id, chat_id=event.chat_id
+                )
                 if workspace_enabled(settings):
                     help_target = workspace_destination(settings, "help")
                     practice_target = workspace_destination(settings, "practice_flow")
@@ -309,17 +340,22 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         ),
                     )
             elif command == "/today":
-                practice_target = workspace_destination(settings, "practice_flow")
-                reply = handle_today(
-                    session,
-                    user,
-                    channel_id=(
-                        str(practice_target.chat_id)
-                        if practice_target.chat_id is not None
-                        else None
-                    ),
-                    message_thread_id=practice_target.message_thread_id,
-                )
+                if len(parts) >= 2 and parts[1].isdigit():
+                    # /today <n> shows n vocabulary cards; bare /today still
+                    # starts the full practice session.
+                    reply = handle_vocab_cards(session, user, int(parts[1]))
+                else:
+                    practice_target = workspace_destination(settings, "practice_flow")
+                    reply = handle_today(
+                        session,
+                        user,
+                        channel_id=(
+                            str(practice_target.chat_id)
+                            if practice_target.chat_id is not None
+                            else None
+                        ),
+                        message_thread_id=practice_target.message_thread_id,
+                    )
             elif command == "/review":
                 practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_practice(
@@ -596,6 +632,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         reply = BotReply(ITEM_STATUS_USAGE)
                     else:
                         reply = handle_item_status(session, user, item_id, parts[1])
+            elif command == "/words":
+                reply = handle_words(session, user)
+            elif command == "/more":
+                reply = handle_more(session, user, _argument(event.raw_text))
+            elif command == "/learned":
+                reply = handle_learned(session, user, _argument(event.raw_text))
+            elif command == "/delete":
+                reply = handle_delete(session, user, _argument(event.raw_text))
+            elif command == "/pause":
+                reply = handle_pause(session, user)
+            elif command == "/resume":
+                reply = handle_resume(session, user)
             elif command == "/rules":
                 reply = handle_rules(session)
             else:
@@ -788,6 +836,45 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 else:
                     reply = handle_item_status(session, user, item_id, parts[1])
                 await answer_callback(event, "Item updated")
+            elif len(parts) == 3 and parts[0] == "onb":
+                reply = handle_onboarding_callback(
+                    session, user, parts[1], parts[2], chat_id=event.chat_id
+                )
+                await answer_callback(event, "Saved")
+            elif len(parts) == 3 and parts[0] == "vocab" and parts[1] == "undo":
+                reply = handle_vocab_undo(session, user, parts[2])
+                await answer_callback(event, "Removed")
+            elif len(parts) == 3 and parts[0] == "vocab" and parts[1] == "ans":
+                # parts[2] is "<delivery_id>:<option_index>".
+                answer_parts = parts[2].split(":")
+                if len(answer_parts) != 2 or not all(
+                    piece.isdigit() for piece in answer_parts
+                ):
+                    reply = BotReply("That answer is no longer available.")
+                else:
+                    reply = handle_quiz_answer(
+                        session,
+                        user,
+                        int(answer_parts[0]),
+                        int(answer_parts[1]),
+                    )
+                await answer_callback(event, "Answer recorded")
+            elif len(parts) == 3 and parts[0] == "vocab" and parts[1] == "drill":
+                if parts[2].isdigit():
+                    reply = handle_drill_start(
+                        session, user, int(parts[2]), chat_id=event.chat_id
+                    )
+                else:
+                    reply = BotReply("That drill is no longer available.")
+                await answer_callback(event, "Send your answer")
+            elif len(parts) == 3 and parts[0] == "vocab" and parts[1] == "skip":
+                if parts[2].isdigit():
+                    reply = handle_drill_skip(
+                        session, user, int(parts[2]), chat_id=event.chat_id
+                    )
+                else:
+                    reply = BotReply("That drill is no longer available.")
+                await answer_callback(event, "Skipped")
             elif len(parts) == 3 and parts[0] == "mistake":
                 try:
                     pattern_id = int(parts[2])
@@ -886,6 +973,20 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 await answer_callback(event, "Unknown action")
             await send_reply(client, event.chat_id, reply, settings)
 
+    from telethon.tl.types import UpdateMessagePollVote
+
+    @client.on(events.Raw(UpdateMessagePollVote))
+    async def on_poll_vote(update) -> None:  # type: ignore[no-untyped-def]
+        with session_scope(session_factory) as session:
+            reply = handle_poll_vote(
+                session,
+                int(update.poll_id),
+                list(update.options or []),
+            )
+        if reply is None or reply.target_chat_id is None:
+            return
+        await send_reply(client, reply.target_chat_id, reply, settings)
+
     @client.on(events.NewMessage)
     async def on_free_text(event) -> None:  # type: ignore[no-untyped-def]
         if str(event.raw_text).startswith("/"):
@@ -927,6 +1028,15 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         )
                 state_store.clear(event.chat_id, telegram_user_id)
                 reply = _material_upload_reply(reply, event, settings)
+            elif state is not None and state.name == DRILL_STATE:
+                reply = handle_drill_answer(
+                    session,
+                    user,
+                    provider,
+                    int(state.payload["delivery_id"]),
+                    event.raw_text,
+                    chat_id=event.chat_id,
+                )
             elif state is not None and state.name == "add":
                 reply = handle_add_text(session, user, event.raw_text)
                 state_store.clear(event.chat_id, telegram_user_id)
@@ -982,13 +1092,23 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     progress_message_thread_id=practice_target.message_thread_id,
                 )
                 if reply.text.startswith("No active exercise."):
-                    state_store.set(
-                        event.chat_id,
-                        telegram_user_id,
-                        "confirm_upload",
-                        {"raw_text": event.raw_text},
-                    )
-                    reply = handle_upload_prompt()
+                    if looks_like_word_list(event.raw_text):
+                        reply = handle_vocab_add(session, user, event.raw_text)
+                        # Keep the upload path reachable from the reply button.
+                        state_store.set(
+                            event.chat_id,
+                            telegram_user_id,
+                            "confirm_upload",
+                            {"raw_text": event.raw_text},
+                        )
+                    else:
+                        state_store.set(
+                            event.chat_id,
+                            telegram_user_id,
+                            "confirm_upload",
+                            {"raw_text": event.raw_text},
+                        )
+                        reply = handle_upload_prompt()
             await send_reply(client, event.chat_id, reply, settings)
 
     await client.start(bot_token=settings.telegram_bot_token)

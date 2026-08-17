@@ -86,10 +86,16 @@ rsync -az \
 "${ssh_cmd[@]}" "chmod 600 ${REMOTE_DIR}/.env"
 
 echo "==> Backup SQLite before migrations when present"
+# BACKUP_RETENTION_DAYS only prunes the scheduled db-*.sqlite snapshots, so
+# without the trim below every deploy leaves a ~30MB file behind forever.
+PRE_MIGRATION_KEEP="${PRE_MIGRATION_KEEP:-5}"
 "${ssh_cmd[@]}" "
   cd ${REMOTE_DIR}
   if [ -f data/fluentloop.sqlite ]; then
     cp data/fluentloop.sqlite data/backups/pre-migration-\$(date +%Y%m%d-%H%M%S).sqlite
+    ls -1t data/backups/pre-migration-*.sqlite 2>/dev/null \
+      | tail -n +\$((${PRE_MIGRATION_KEEP} + 1)) \
+      | xargs -r rm -f
   fi
 "
 

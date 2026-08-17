@@ -120,6 +120,12 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
   helper in `src/fluentloop/bot/state.py` (~50–100 LoC, persisted in
   SQLite so restarts don't lose mid-flow state).
 - Inline keyboards: `telethon.tl.custom.Button.inline(...)`.
+- Four Telethon handlers: `NewMessage(pattern="^/")` for commands,
+  `CallbackQuery` for inline buttons, `NewMessage` for free text, and
+  `Raw(UpdateMessagePollVote)` for native quiz-poll answers (EPIC-25).
+- **Telethon owns the update stream.** The Bot API path below can send but
+  never receive, so anything needing a reply — quiz polls in particular — must
+  go through MTProto. See [ADR-0011](adr/0011-native-telegram-quiz-polls.md).
 - Bot API is used for forum-topic sends, pins, command-menu sync, and Help-topic
   maintenance where MTProto topic ergonomics are weaker.
 - `/help` and `/howto` render the same learner guide. `/start` and `/help`
@@ -137,10 +143,24 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
   the schema, and `journal_mode = WAL` lets the backup job read while the bot
   writes.
 
-## 3. AI provider — OpenAI two-tier plus DeepSeek gateway
+## 3. AI provider — OpenAI two-tier plus an OpenAI-compatible gateway
 
 **Decision:** [ADR-0003](adr/0003-ai-model-tiering-and-cost.md).
 **Roadmap update:** [ADR-0007](adr/0007-deepseek-llm-gateway.md).
+**Multi-provider:** [ADR-0010](adr/0010-multi-provider-llm-gateway.md).
+
+`AI_PROVIDER` selects one of:
+
+| Value | Provider | Env prefix | Notes |
+|---|---|---|---|
+| `stub` | none | — | Deterministic. Test and offline default. |
+| `openai` | OpenAI | `OPENAI_` | Original MVP path, two-tier (below). |
+| `deepseek` | DeepSeek | `DEEPSEEK_` | Learning-engine default since EPIC-18. |
+| `qwen` | Qwen (DashScope) | `QWEN_` | Added in EPIC-25. Ignores `reasoning_effort`. |
+
+`deepseek` and `qwen` share one gateway: it speaks the OpenAI-compatible chat
+protocol against a configurable `base_url`, and `llm/router.provider_config`
+picks the endpoint, models, and usage-log attribution.
 
 | Tier | Model | Tasks |
 |---|---|---|
@@ -200,15 +220,29 @@ Current learning-engine runtime behavior:
 ## 5. Scheduler — APScheduler in-process
 
 - `apscheduler==3.10.4` (matches `openclaw_firststeps`).
-- Three jobs:
-  1. **Daily reminder** — fires at `User.reminder_time` in
-     `User.timezone`, sends the "ready for today's English?" message.
+- Five jobs:
+  1. **Daily reminder** — sends the "ready for today's English?" message.
   2. **Overnight pre-gen** — see §4.
   3. **Daily SQLite backup** — snapshot
      `data/fluentloop.sqlite` to `data/backups/db-YYYY-MM-DD.sqlite`,
      keep 14 days.
+  4. **Weekly summary** — Sunday digest (EPIC-13).
+  5. **`vocab_loop_tick`** — fires every minute and delivers any daily-loop
+     slot that is due in the learner's own timezone (EPIC-25).
+- Jobs are registered as coroutine functions with `args=[...]`. They must never
+  be wrapped in `lambda: asyncio.create_task(...)`: that drops the task
+  reference, swallows exceptions, and makes `misfire_grace_time` and
+  `max_instances` measure the wrapper rather than the work.
+- **Per-user timing** ([ADR-0012](adr/0012-per-user-slot-dispatcher.md)): the
+  minute tick resolves each learner's local time from `User.timezone`. A slot
+  stays deliverable for 90 minutes, and a `vocab_deliveries` row is claimed
+  before sending — its unique constraint on
+  `(user_id, local_date, slot, seq)` is what makes the tick idempotent across
+  restarts, overlapping ticks, and the repeated hour at the end of DST.
+- Date arithmetic for a user is always local, never UTC, so it agrees with
+  `PracticeSession.target_date_local`.
 - Misfire grace handles container restarts.
-- All three run in the same process as the bot (one container).
+- All five run in the same process as the bot (one container).
 
 ## 6. Prompt structure
 
@@ -300,11 +334,20 @@ No public ports — Telethon long-polls the Telegram MTProto layer.
 
 PRD §24 is the product-level source of truth. Key runtime entities:
 
-- `User` — one row per admitted Telegram user/profile.
+- `User` — one row per admitted Telegram user/profile. `preferences_json`
+  carries the EPIC-25 daily-loop settings (slot times, pause flag, words per
+  day, chosen topics/kinds/fun sets, starter size, onboarding stamp) as one
+  JSON blob rather than eight columns.
 - `SourceMaterial` + `ExtractedCandidate` — upload-and-approve pipeline.
 - `MaterialChunk` — bounded local chunks for keyword context search over
   uploaded materials.
 - `LearningItem` — words, expressions, grammar rules, mistake patterns.
+  EPIC-25 adds `priority` (10 for words the learner typed in themselves, 0 for
+  seeded content) and a fourth `status` value, `graduated`, for items that have
+  been mastered. Every existing query already filters on `status == "active"`,
+  so graduated items leave the rotation without any query change.
+- `vocab_deliveries` — one row per delivered daily-loop unit (EPIC-25). Serves
+  both slot idempotency and the `poll_id → item` lookup for quiz votes.
 - `GrammarConcept` — graph (parent/child) for grammar topics.
 - `MistakeEvent` + `MistakePattern` — mistake-as-training loop.
 - `ReviewState` — spaced-repetition bookkeeping per learning item.

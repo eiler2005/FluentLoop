@@ -93,4 +93,12 @@ def _task_instruction(task: LLMTask, payload: dict[str, Any]) -> str:
             "Generate concise business/IT English micro-drills that fit the "
             "provided stage, metadata, and target items."
         )
+    if task == LLMTask.QUIZ_DISTRACTORS:
+        return (
+            "Return exactly three wrong answers for a vocabulary quiz. Each must "
+            "be a real English word or phrase of the same kind and register as "
+            "the target, plausible enough to require knowing the meaning, but "
+            "clearly incorrect for the given definition. Never return the target "
+            "itself, a synonym of it, or a variant sharing its stem."
+        )
     return "Return compact, validated JSON for the requested FluentLoop task."

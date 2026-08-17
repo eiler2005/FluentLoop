@@ -36,6 +36,9 @@ Changelog = "https://github.com/eiler2005/FluentLoop/blob/main/CHANGELOG.md"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+fluentloop = ["seeds/*.jsonl"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

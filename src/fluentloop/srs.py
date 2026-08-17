@@ -9,6 +9,10 @@ from fluentloop.db.models import LearningItem, ReviewState
 
 RESULTS = {"Again", "Hard", "Good", "Easy"}
 SECOND = 1.0 / 86_400.0
+# An item graduates once it reaches the 120-day rung of the ladder below, which
+# takes about five clean successes spread over a month or more (EPIC-25).
+GRADUATION_INTERVAL_DAYS = 120.0
+GRADUATION_MIN_SUCCESSES = 4
 GIR_INTERVAL_DAYS = (
     5 * SECOND,
     25 * SECOND,
@@ -81,6 +85,37 @@ def record_result(
     return state
 
 
+def is_graduation_ready(state: ReviewState) -> bool:
+    return (
+        state.last_interval_days >= GRADUATION_INTERVAL_DAYS
+        and state.last_result in {"Good", "Easy"}
+        and state.success_count >= GRADUATION_MIN_SUCCESSES
+    )
+
+
+def apply_review(
+    session: Session,
+    item: LearningItem,
+    result: str,
+    *,
+    now: datetime | None = None,
+) -> tuple[ReviewState, bool]:
+    """Record a review result and graduate the item once it is mastered.
+
+    Returns the review state and whether this call graduated the item. Callers
+    that only need the interval update can keep using ``record_result``.
+    """
+
+    state = record_result(session, item.id, result, now=now)
+    graduated = False
+    if item.status == "active" and is_graduation_ready(state):
+        item.status = "graduated"
+        session.add(item)
+        session.flush()
+        graduated = True
+    return state, graduated
+
+
 def convert_last_good_to_hard(session: Session, item_id: int) -> ReviewState:
     state = session.scalar(
         select(ReviewState).where(ReviewState.learning_item_id == item_id)
@@ -119,6 +154,7 @@ def get_due_items(
             ReviewState.due_at <= due_soon,
         )
         .order_by(
+            LearningItem.priority.desc(),
             ReviewState.due_at.asc(),
             (ReviewState.fail_count - ReviewState.success_count).desc(),
             LearningItem.is_favorite.desc(),

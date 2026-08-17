@@ -13,6 +13,10 @@ def bold(value: object) -> str:
     return f"<b>{html_escape(value)}</b>"
 
 
+def italic(value: object) -> str:
+    return f"<i>{html_escape(value)}</i>"
+
+
 def code(value: object) -> str:
     return f"<code>{html_escape(value)}</code>"
 

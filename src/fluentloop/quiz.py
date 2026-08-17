@@ -1,0 +1,352 @@
+"""Multiple-choice question building for the evening slot (EPIC-25).
+
+Distractors come from three sources, cheapest first:
+
+1. Pre-baked in the item's metadata, which is how word-bank entries arrive.
+2. The learner's own other items, picked deterministically.
+3. The LLM, only for items neither of the above can cover.
+
+Whatever the source, the result is cached back into
+``LearningItem.metadata_json["mcq"]`` so the expensive path runs at most once
+per item.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from fluentloop.db.models import LearningItem, User, utc_now
+from fluentloop.vocab_loop import (
+    CARD_ITEM_TYPES,
+    QuizSpec,
+    any_definition,
+    english_definition,
+    russian_definition,
+    select_cards,
+)
+
+LOG = logging.getLogger(__name__)
+
+DISTRACTOR_COUNT = 3
+QUIZ_OPTION_COUNT = DISTRACTOR_COUNT + 1
+_MAX_LENGTH_GAP = 12
+
+
+def question_for(item: LearningItem) -> str:
+    """The quiz prompt. English wherever the item has an English gloss."""
+
+    return f'Which word or phrase means: "{any_definition(item)}"?'
+
+
+def cached_distractors(item: LearningItem) -> list[str]:
+    mcq = (item.metadata_json or {}).get("mcq") or {}
+    values = mcq.get("distractors") or []
+    return [str(value) for value in values if str(value).strip()]
+
+
+def cache_distractors(
+    session: Session, item: LearningItem, distractors: list[str]
+) -> None:
+    # JSON columns are not mutation-tracked, so reassign the whole dict.
+    item.metadata_json = {
+        **(item.metadata_json or {}),
+        "mcq": {
+            "distractors": list(distractors),
+            "generated_at": utc_now().isoformat(),
+        },
+    }
+    session.add(item)
+    session.flush()
+
+
+def _stable_rank(item_id: int, candidate_id: int) -> int:
+    # Deterministic across processes, unlike hash() on str.
+    return (item_id * 1_000_003 + candidate_id * 7919) % 100_003
+
+
+_STOPWORDS = frozenset({
+    "a", "an", "the", "to", "of", "for", "in", "on", "at", "by", "with",
+    "and", "or", "is", "are", "be", "being", "been", "that", "this",
+    "these", "those", "it", "its", "as", "from", "your", "you", "way",
+    "make", "makes", "making", "without", "something", "someone", "one",
+})
+# Provenance markers, not meaning. They must not count as shared function.
+_GENERIC_TAGS = frozenset({"demo", "wordbank", "user_added", "seed"})
+# Above this overlap the two definitions describe the same idea, so the
+# distractor would be a second correct answer.
+_SYNONYM_OVERLAP = 0.33
+
+
+def _stem(word: str) -> str:
+    for suffix in ("ations", "ation", "ing", "ed", "es", "s"):
+        if len(word) > len(suffix) + 2 and word.endswith(suffix):
+            return word[: -len(suffix)]
+    return word
+
+
+def _content_words(text: str) -> set[str]:
+    words = re.findall(r"[a-z]+", (text or "").lower())
+    return {
+        _stem(word) for word in words if word not in _STOPWORDS and len(word) > 2
+    }
+
+
+def is_near_synonym(target_definition: str, candidate_definition: str) -> bool:
+    """True when two glosses describe the same thing.
+
+    Distractor ranking deliberately prefers items sharing tags and register,
+    which makes it prone to picking an actual synonym. A quiz with two
+    defensible answers teaches nothing, so those candidates are dropped.
+    """
+
+    target = _content_words(target_definition)
+    candidate = _content_words(candidate_definition)
+    if not target or not candidate:
+        return False
+    overlap = len(target & candidate) / min(len(target), len(candidate))
+    return overlap >= _SYNONYM_OVERLAP
+
+
+def select_distractors(
+    session: Session,
+    user: User,
+    item: LearningItem,
+    *,
+    count: int = DISTRACTOR_COUNT,
+) -> list[str]:
+    """Pick plausible wrong answers from the learner's own items."""
+
+    candidates = session.scalars(
+        select(LearningItem).where(
+            LearningItem.user_id == user.id,
+            LearningItem.id != item.id,
+            LearningItem.type == item.type,
+            LearningItem.status.in_(("active", "graduated")),
+        )
+    ).all()
+
+    target_text = item.text.strip().casefold()
+    target_tags = {
+        str(tag).casefold() for tag in (item.tags or [])
+    } - _GENERIC_TAGS
+    target_register = str((item.metadata_json or {}).get("register", "")).casefold()
+    target_definition = any_definition(item)
+
+    scored: list[tuple[tuple[int, int, int, int], str]] = []
+    for candidate in candidates:
+        text = candidate.text.strip()
+        folded = text.casefold()
+        if not text or folded == target_text:
+            continue
+        if folded in target_text or target_text in folded:
+            continue
+        if is_near_synonym(target_definition, any_definition(candidate)):
+            continue
+        tags = {str(tag).casefold() for tag in (candidate.tags or [])} - _GENERIC_TAGS
+        # Shared content tags mean shared FUNCTION, which is what makes a
+        # distractor a second correct answer. Candidates are already limited to
+        # the learner's own items of the same type, so they are plausible
+        # without it; prefer the ones that do a different job.
+        tag_overlap = len(target_tags & tags)
+        register = str(
+            (candidate.metadata_json or {}).get("register", "")
+        ).casefold()
+        register_match = 1 if target_register and register == target_register else 0
+        length_gap = abs(len(text) - len(item.text))
+        if length_gap > _MAX_LENGTH_GAP:
+            length_gap = _MAX_LENGTH_GAP
+        # Stable tiebreak last, so the same item always produces the same quiz.
+        key = (
+            tag_overlap,
+            -register_match,
+            length_gap,
+            _stable_rank(item.id, candidate.id),
+        )
+        scored.append((key, text))
+
+    scored.sort()
+    return [text for _, text in scored[:count]]
+
+
+def llm_distractors(item: LearningItem, settings: Any | None = None) -> list[str]:
+    """Last resort: ask the model, once, for a brand-new learner's item.
+
+    A dead or unconfigured LLM degrades to an empty list, which means "skip
+    tonight's quiz" rather than an error.
+    """
+
+    from fluentloop.config import get_settings
+    from fluentloop.llm.router import llm_gateway, task_profile
+    from fluentloop.llm.schemas import QuizDistractors
+    from fluentloop.llm.tasks import LLMTask
+
+    cfg = settings or get_settings()
+    try:
+        profile = task_profile(LLMTask.QUIZ_DISTRACTORS, cfg)
+        result = llm_gateway(cfg).run_json(
+            LLMTask.QUIZ_DISTRACTORS,
+            {
+                "target": item.text,
+                "definition": item.meaning or item.explanation,
+                "type": item.type,
+                "level": item.level,
+            },
+            QuizDistractors,
+            model=profile.model,
+            fallback=lambda: QuizDistractors(options=[]),
+        )
+    except Exception:
+        LOG.warning("Distractor generation failed for item %s", item.id)
+        return []
+    target = item.text.strip().casefold()
+    return [
+        option.strip()
+        for option in result.options
+        if option.strip() and option.strip().casefold() != target
+    ][:DISTRACTOR_COUNT]
+
+
+@dataclass(frozen=True)
+class OptionNote:
+    text: str
+    english: str = ""
+    russian: str = ""
+
+
+def option_glossary(
+    session: Session,
+    user: User,
+    options: list[str],
+    correct_index: int,
+) -> list[OptionNote]:
+    """(text, meaning) for the options that were not the answer.
+
+    A wrong option the learner just rejected is a free teaching moment: they
+    have already thought about it. Meanings are looked up from the learner's
+    own items; bank distractors that are not in their base yet come back with
+    an empty meaning and are still listed by name.
+    """
+
+    from sqlalchemy import func
+
+    notes: list[OptionNote] = []
+    for index, option in enumerate(options):
+        if index == correct_index:
+            continue
+        text = str(option).strip()
+        if not text:
+            continue
+        item = session.scalar(
+            select(LearningItem).where(
+                LearningItem.user_id == user.id,
+                func.lower(LearningItem.text) == text.casefold(),
+            )
+        )
+        if item is None:
+            notes.append(OptionNote(text=text))
+            continue
+        notes.append(
+            OptionNote(
+                text=text,
+                english=english_definition(item),
+                russian=russian_definition(item),
+            )
+        )
+    return notes
+
+
+def _definition_of(session: Session, user: User, text: str) -> str:
+    """The learner's own gloss for an option, or "" if they do not have it."""
+
+    from sqlalchemy import func
+
+    item = session.scalar(
+        select(LearningItem).where(
+            LearningItem.user_id == user.id,
+            func.lower(LearningItem.text) == str(text).strip().casefold(),
+        )
+    )
+    return any_definition(item) if item is not None else ""
+
+
+def build_quiz_spec(
+    session: Session,
+    user: User,
+    item: LearningItem,
+    *,
+    distractors: list[str] | None = None,
+    settings: Any | None = None,
+    allow_llm: bool = True,
+) -> QuizSpec | None:
+    """Assemble a four-option quiz, or None when there is nothing to ask."""
+
+    definition = any_definition(item)
+    if not definition:
+        return None
+
+    options = distractors if distractors is not None else cached_distractors(item)
+    # Cached and pre-baked sets are not trusted blindly: a set written before
+    # the synonym guard existed would otherwise keep serving a quiz with two
+    # defensible answers forever.
+    options = [
+        option
+        for option in options
+        if not is_near_synonym(definition, _definition_of(session, user, option))
+    ]
+    if len(options) < DISTRACTOR_COUNT:
+        options = select_distractors(session, user, item)
+        if len(options) >= DISTRACTOR_COUNT:
+            cache_distractors(session, item, options)
+    if len(options) < DISTRACTOR_COUNT and allow_llm:
+        options = llm_distractors(item, settings)
+        if len(options) >= DISTRACTOR_COUNT:
+            cache_distractors(session, item, options)
+    if len(options) < DISTRACTOR_COUNT:
+        return None
+
+    options = options[:DISTRACTOR_COUNT]
+    correct_index = _stable_rank(item.id, item.id) % QUIZ_OPTION_COUNT
+    ordered = list(options)
+    ordered.insert(correct_index, item.text)
+    return QuizSpec(
+        item_id=item.id,
+        question=question_for(item),
+        options=ordered,
+        correct_index=correct_index,
+        solution=english_definition(item) or definition,
+    )
+
+
+def evening_quiz(
+    session: Session,
+    user: User,
+    *,
+    now: datetime | None = None,
+    settings: Any | None = None,
+    allow_llm: bool = True,
+) -> QuizSpec | None:
+    """Pick an item for tonight's quiz and build the question for it."""
+
+    candidates = [
+        item
+        for item in select_cards(session, user, count=5, now=now)
+        if item.type in CARD_ITEM_TYPES
+    ]
+    # Ask in English when any candidate allows it; fall back to a Russian
+    # gloss only when nothing in today's pool has an English definition.
+    ordered = [item for item in candidates if english_definition(item)]
+    ordered += [item for item in candidates if not english_definition(item)]
+    for item in ordered:
+        spec = build_quiz_spec(
+            session, user, item, settings=settings, allow_llm=allow_llm
+        )
+        if spec is not None:
+            return spec
+    return None

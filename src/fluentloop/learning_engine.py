@@ -182,6 +182,10 @@ def score_learning_items(
         if item.is_favorite:
             score += 30
             reasons.append("favorite")
+        if item.priority > 0:
+            # Words the learner added themselves outrank seeded content.
+            score += min(item.priority, 12) * 5
+            reasons.append("user_added")
         recent_cutoff = current - timedelta(days=14)
         if (
             item.source_material_id is not None

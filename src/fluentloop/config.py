@@ -58,6 +58,17 @@ class Settings:
     telegram_topic_summary_id: int | None
     telegram_topic_mistakes_id: int | None
     telegram_topic_stats_id: int | None
+    # Fields below carry defaults so existing Settings(...) call sites keep
+    # working. Any new field must also have one, and must be added at the end.
+    vocab_quiz_polls: bool = True
+    qwen_api_key: str = ""
+    qwen_base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    qwen_chat_model: str = "qwen3.7-flash"
+    qwen_fast_model: str = "qwen3.7-flash"
+    qwen_planner_model: str = "qwen3.7-flash"
+    qwen_extractor_model: str = "qwen3.7-flash"
+    qwen_timeout_seconds: float = 30.0
+    qwen_max_retries: int = 2
 
 
 def _optional_int(name: str) -> int | None:
@@ -136,4 +147,25 @@ def get_settings() -> Settings:
         telegram_topic_summary_id=_optional_int("TELEGRAM_TOPIC_SUMMARY_ID"),
         telegram_topic_mistakes_id=_optional_int("TELEGRAM_TOPIC_MISTAKES_ID"),
         telegram_topic_stats_id=_optional_int("TELEGRAM_TOPIC_STATS_ID"),
+        vocab_quiz_polls=os.environ.get("VOCAB_QUIZ_POLLS", "1").strip().lower()
+        not in {"0", "false", "no", "off"},
+        # DASHSCOPE_API_KEY is the name Alibaba's own SDK uses, so accept it as
+        # a fallback: a pay-as-you-go key copied from another project works
+        # unchanged. Never point this at a Token Plan key - that endpoint 404s
+        # on the flash models (see docs/adr/0010).
+        qwen_api_key=os.environ.get("QWEN_API_KEY", "")
+        or os.environ.get("DASHSCOPE_API_KEY", ""),
+        qwen_base_url=os.environ.get(
+            "QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+        ),
+        qwen_chat_model=os.environ.get("QWEN_CHAT_MODEL", "qwen3.7-flash"),
+        qwen_fast_model=os.environ.get(
+            "QWEN_FAST_MODEL", os.environ.get("QWEN_CHAT_MODEL", "qwen3.7-flash")
+        ),
+        qwen_planner_model=os.environ.get("QWEN_PLANNER_MODEL", "qwen3.7-flash"),
+        qwen_extractor_model=os.environ.get(
+            "QWEN_EXTRACTOR_MODEL", "qwen3.7-flash"
+        ),
+        qwen_timeout_seconds=float(os.environ.get("QWEN_TIMEOUT_SECONDS", "30")),
+        qwen_max_retries=int(os.environ.get("QWEN_MAX_RETRIES", "2")),
     )

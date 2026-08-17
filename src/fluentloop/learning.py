@@ -14,7 +14,8 @@ from fluentloop.db.models import (
 )
 
 ITEM_TYPES = {"word", "expression", "grammar_rule", "mistake_pattern", "chunk"}
-ITEM_STATUSES = {"active", "archived", "suspended"}
+ITEM_STATUSES = {"active", "archived", "suspended", "graduated"}
+USER_ADDED_PRIORITY = 10
 
 
 def create_learning_item(
@@ -30,6 +31,7 @@ def create_learning_item(
     source_material_id: int | None = None,
     is_favorite: bool = False,
     metadata: dict | None = None,
+    priority: int = 0,
 ) -> LearningItem:
     if type_ not in ITEM_TYPES:
         raise ValueError(f"Unsupported item type: {type_}")
@@ -58,6 +60,7 @@ def create_learning_item(
         source_material_id=source_material_id,
         is_favorite=is_favorite,
         status="active",
+        priority=priority,
     )
     session.add(item)
     session.flush()

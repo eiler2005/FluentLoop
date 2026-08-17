@@ -709,6 +709,7 @@ class DeepSeekProvider(AIProvider):
         timeout_seconds: float,
         max_retries: int,
         usage_path: Path | str = "data/usage_log.jsonl",
+        provider_name: str = "deepseek",
     ) -> None:
         self.gateway = DeepSeekGateway(
             api_key=api_key,
@@ -717,7 +718,9 @@ class DeepSeekProvider(AIProvider):
             timeout_seconds=timeout_seconds,
             max_retries=max_retries,
             usage_path=usage_path,
+            provider_name=provider_name,
         )
+        self.provider_name = provider_name
         self.stub = StubProvider(usage_path)
         self.fast_model = fast_model or model
         self.planner_model = planner_model or model
@@ -739,6 +742,7 @@ class DeepSeekProvider(AIProvider):
                     self.planner_model,
                     self.extractor_model,
                     self.planner_reasoning_effort,
+                    self.provider_name,
                 ),
                 material_type=str(payload.get("type", "")),
             )
@@ -767,6 +771,7 @@ class DeepSeekProvider(AIProvider):
                     self.planner_model,
                     self.extractor_model,
                     self.planner_reasoning_effort,
+                    self.provider_name,
                 ),
             )
             return self.gateway.run_json(
@@ -786,6 +791,7 @@ class DeepSeekProvider(AIProvider):
                     self.planner_model,
                     self.extractor_model,
                     self.planner_reasoning_effort,
+                    self.provider_name,
                 ),
             )
             return self.gateway.run_json(
@@ -803,6 +809,7 @@ class DeepSeekProvider(AIProvider):
                     self.planner_model,
                     self.extractor_model,
                     self.planner_reasoning_effort,
+                    self.provider_name,
                 ),
             )
             return self.gateway.run_json(
@@ -820,6 +827,7 @@ class DeepSeekProvider(AIProvider):
                     self.planner_model,
                     self.extractor_model,
                     self.planner_reasoning_effort,
+                    self.provider_name,
                 ),
             )
             return self.gateway.run_json(
@@ -837,6 +845,7 @@ class DeepSeekProvider(AIProvider):
                     self.planner_model,
                     self.extractor_model,
                     self.planner_reasoning_effort,
+                    self.provider_name,
                 ),
             )
             return self.gateway.run_json(
@@ -849,18 +858,69 @@ class DeepSeekProvider(AIProvider):
         return self.stub.heavy_call(task, payload)
 
 
+class QwenProvider(DeepSeekProvider):
+    """Qwen through its OpenAI-compatible DashScope endpoint (ADR-0010).
+
+    The gateway is protocol-level, not vendor-level, so only the defaults and
+    the usage-log attribution differ.
+    """
+
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        model: str = "qwen-plus",
+        fast_model: str | None = None,
+        planner_model: str | None = None,
+        extractor_model: str | None = None,
+        timeout_seconds: float = 30.0,
+        max_retries: int = 2,
+        usage_path: Path | str = "data/usage_log.jsonl",
+    ) -> None:
+        super().__init__(
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
+            fast_model=fast_model,
+            planner_model=planner_model,
+            extractor_model=extractor_model,
+            # Qwen's compatible endpoint ignores reasoning_effort.
+            planner_reasoning_effort="",
+            timeout_seconds=timeout_seconds,
+            max_retries=max_retries,
+            usage_path=usage_path,
+            provider_name="qwen",
+        )
+
+
 def _settings_for_models(
     fast_model: str,
     planner_model: str,
     extractor_model: str,
     planner_reasoning_effort: str,
+    provider_name: str = "deepseek",
 ):
+    """A minimal Settings stand-in so a provider can route its own models.
+
+    ``router.provider_config`` reads the connection fields too, so they are
+    present but unused: the provider already owns its gateway.
+    """
+
     from types import SimpleNamespace
 
-    return SimpleNamespace(
-        deepseek_chat_model=fast_model,
-        deepseek_fast_model=fast_model,
-        deepseek_planner_model=planner_model,
-        deepseek_extractor_model=extractor_model,
-        deepseek_planner_reasoning_effort=planner_reasoning_effort,
-    )
+    prefix = "qwen" if provider_name == "qwen" else "deepseek"
+    fields = {
+        "ai_provider": prefix,
+        f"{prefix}_api_key": "",
+        f"{prefix}_base_url": "",
+        f"{prefix}_chat_model": fast_model,
+        f"{prefix}_fast_model": fast_model,
+        f"{prefix}_planner_model": planner_model,
+        f"{prefix}_extractor_model": extractor_model,
+        f"{prefix}_timeout_seconds": 30.0,
+        f"{prefix}_max_retries": 2,
+    }
+    if prefix == "deepseek":
+        fields["deepseek_planner_reasoning_effort"] = planner_reasoning_effort
+    return SimpleNamespace(**fields)
