@@ -109,7 +109,23 @@ def test_poll_solution_is_truncated() -> None:
 def test_poll_without_solution_sends_none() -> None:
     spec = QuizSpec(1, "q?", ["a", "b", "c", "d"], 0, solution="")
 
-    assert build_input_media_poll(spec).solution is None
+    media = build_input_media_poll(spec)
+
+    assert media.solution is None
+    assert media.solution_entities is None
+
+
+@pytest.mark.parametrize("solution", ["a definition", "", "x" * 500])
+def test_poll_media_serialises(solution) -> None:
+    """Telethon validates solution/solution_entities only in _bytes().
+
+    Asserting on attributes alone missed a production failure where a poll
+    with a solution but no solution_entities blew up on send.
+    """
+
+    spec = QuizSpec(1, "q?", ["a", "b", "c", "d"], 2, solution=solution)
+
+    assert bytes(build_input_media_poll(spec))
 
 
 @pytest.mark.asyncio

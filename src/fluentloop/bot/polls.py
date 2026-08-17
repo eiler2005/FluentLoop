@@ -64,6 +64,9 @@ def build_input_media_poll(spec: QuizSpec):  # type: ignore[no-untyped-def]
         TextWithEntities,
     )
 
+    # Telethon asserts that solution and solution_entities are both set or
+    # both absent, and it only checks at serialisation time.
+    solution = (spec.solution or "")[:MAX_SOLUTION_CHARS]
     return InputMediaPoll(
         poll=Poll(
             id=0,  # the server assigns the real id
@@ -80,7 +83,8 @@ def build_input_media_poll(spec: QuizSpec):  # type: ignore[no-untyped-def]
             multiple_choice=False,
         ),
         correct_answers=[option_bytes(spec.correct_index)],
-        solution=(spec.solution or "")[:MAX_SOLUTION_CHARS] or None,
+        solution=solution or None,
+        solution_entities=[] if solution else None,
     )
 
 
