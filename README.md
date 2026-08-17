@@ -79,7 +79,13 @@ they make you work:
 | `/today` | — | asks which of the two tracks you want |
 
 `/start` installs a keyboard under the input field — Cards, Review, Lesson,
-My words, Add words — so practice is one tap from anywhere in the chat.
+My words, Add words, Quiz, Stop — so practice is one tap from anywhere in the
+chat.
+
+The evening quiz is a set of questions, not one: an intro announces how many
+and roughly how long, each answer is followed by the next, and the last one
+carries the score. Size is 5/10/15/20 in `/settings`, default 10. `/quiz`
+starts or resumes it on demand without waiting for 19:00; `/stop` pauses it.
 
 If you already have material from a teacher, work, Slack, email, an article, or
 meeting notes, start with:

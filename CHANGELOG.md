@@ -26,6 +26,15 @@ All notable changes to FluentLoop are recorded here. Format follows
   Writing and speaking.
 - `scripts/spread_due_dates.py` deals a seeded backlog of overdue reviews out
   over N days instead of leaving it as one wall.
+- The evening quiz is a multi-question set rather than a single question: one
+  `vocab_deliveries` row per question, an intro stating the count and
+  estimated minutes, the next question after each answer, and a wrap-up score
+  on the last. Size is 5/10/15/20 in `/settings`, default 10.
+- `/quiz` starts or resumes today's quiz on demand, under its own slot so it
+  never consumes the scheduled evening delivery. `/stop` clears pending
+  captures and abandons the practice session, reporting any paused quiz
+  questions rather than claiming nothing is pending.
+- `🎯 Quiz` and `⏹ Stop` joined the persistent keyboard.
 - Native Telegram quiz polls over Telethon raw API, with an inline-button
   fallback and a `VOCAB_QUIZ_POLLS` kill switch (ADR-0011).
 - Qwen as a selectable LLM provider alongside OpenAI and DeepSeek, behind the

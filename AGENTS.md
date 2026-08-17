@@ -109,6 +109,10 @@ destructive action is high.
 - **Persistent-keyboard taps arrive as plain text.** `quick_action_for` must
   stay ahead of every free-text capture path in `on_free_text`, or a button
   label gets stored as a vocabulary item.
+- **A quiz is a sequence of `vocab_deliveries` rows**, one per question, with
+  the `seq=0` claim as the idempotency lock for the whole set. Rows stay
+  `claimed` until answered — that is what lets `/quiz` resume. Anything that
+  reports "nothing pending" must count them first.
 - **Single tenancy, shared content.** One bot, one container, one set of
   secrets. Lesson plans flagged as templates can be discovered via `/library`
   and cloned per-user on subscribe (ADR-0008, EPIC-23). The current deployment
@@ -154,7 +158,7 @@ FluentLoop/
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 │   └── seeds/                    Shipped seed data (starter word bank JSONL).
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (27 modules, 331+ tests).
+└── tests/                        Pytest suite (27 modules, 336+ tests).
 ```
 
 ## Verification commands

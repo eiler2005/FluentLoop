@@ -53,8 +53,8 @@ and stubs the Telegram client and AI providers — no real network calls.
 | `test_epic25_migration.py` | Migration `0004_epic25` upgrade/downgrade round-trip and idempotency. |
 | `test_epic25_vocab_commands.py` | Slot windows, card rendering, word-list detection, bulk add, and `/words` `/more` `/learned` `/delete` `/pause` `/resume`. |
 | `test_epic25_vocab_scheduler.py` | Minute-tick delivery per timezone, restart idempotency, catch-up window, job registration, and the UTC-date regression. |
-| `test_epic25_quiz.py` | Distractor selection, quiz assembly, answering, and the midday drill state machine. |
-| `test_epic25_quiz_polls.py` | Native poll construction, vote resolution, and the inline-button fallback. |
+| `test_epic25_quiz.py` | Distractor selection and the synonym guard, quiz assembly, answering, the midday drill state machine, and pausing/resuming a multi-question quiz. |
+| `test_epic25_quiz_polls.py` | Native poll construction and serialisation, vote resolution, question chaining, and the inline-button fallback. |
 | `test_epic25_wordbank.py` | Word-bank validation, deterministic starter selection, and idempotent seeding. |
 | `test_epic25_onboarding.py` | The `/setup` wizard state machine end to end. |
 | `test_epic25_qwen_provider.py` | Provider selection, model routing, gateway attribution, and DeepSeek back-compat. |

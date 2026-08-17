@@ -133,8 +133,13 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
   directly. See the 2026-08-17 amendment to
   [ADR-0005](adr/0005-forum-workspace-routing.md).
 - **A persistent reply keyboard** (Cards / Review / Lesson / My words / Add
-  words) is installed by `/start`. Taps arrive as plain text, so
+  words / Quiz / Stop) is installed by `/start`. Taps arrive as plain text, so
   `handlers.quick_action_for` must run before every free-text capture path.
+- **A quiz is a sequence of deliveries**, one `vocab_deliveries` row per
+  question, with the `seq=0` claim as the idempotency lock for the set. Rows
+  stay `claimed` until answered, which is what makes `/quiz` resumable. See
+  the 2026-08-17 amendment to
+  [ADR-0011](adr/0011-native-telegram-quiz-polls.md).
 - Bot API is used for forum-topic sends, pins, command-menu sync, and Help-topic
   maintenance where MTProto topic ergonomics are weaker.
 - `/help` and `/howto` render the same learner guide. `/start` and `/help`

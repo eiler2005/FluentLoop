@@ -71,6 +71,28 @@ Telethon handler.
 - The scheduler always prepares the inline-button quiz first and only then
   attempts the poll, so the fallback costs one extra render.
 
+### Amendment, 2026-08-17: a quiz is a sequence, not one question
+
+The evening slot delivers a whole quiz rather than a single poll. Each
+question is its own `vocab_deliveries` row (`seq` 0..N-1) carrying its own
+`poll_id`, so vote resolution is unchanged — the lookup is still one indexed
+read on `poll_id`.
+
+What the sequence adds:
+
+- The `seq=0` claim is the idempotency lock for the entire set, so a tick
+  that fires twice inside the catch-up window does not restart the quiz.
+- Rows stay `claimed` until answered. That is deliberate: it is what lets
+  `/quiz` resume at the first unanswered question, and what `/stop` counts
+  when it reports paused questions.
+- On-demand quizzes use the slot name `"quiz"` rather than `"evening"`, so a
+  `/quiz` earlier in the day cannot consume the scheduled evening delivery.
+- The answer to the last question carries the wrap-up score instead of a
+  bare verdict.
+
+Question count is a per-user preference (`quiz_size`, one of 5/10/15/20,
+default 10), not a constant.
+
 ## Fallback
 
 `send_quiz_poll` is wrapped in `try/except`. On any failure the tick sends the
