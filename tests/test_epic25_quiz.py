@@ -607,3 +607,49 @@ def test_generic_tags_do_not_count_as_shared_function(db_session, settings) -> N
 
     # All share only provenance tags, so all stay eligible.
     assert len(select_distractors(db_session, user, target)) == 3
+
+
+def test_stale_cached_distractors_are_revalidated(db_session, settings) -> None:
+    """A set cached before the synonym guard must not keep being served."""
+
+    user = ensure_user(db_session, 123456789, settings)
+    target = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="it may be worth",
+        explanation="Useful hedge for recommendations.",
+        metadata={
+            "mcq": {
+                "distractors": [
+                    "I would lean towards",
+                    "the safest next step is",
+                    "the downside is",
+                ]
+            }
+        },
+    )
+    create_learning_item(
+        db_session, user, type_="expression", text="I would lean towards",
+        explanation="A natural way to make a recommendation without overclaiming.",
+    )
+    create_learning_item(
+        db_session, user, type_="expression", text="the safest next step is",
+        explanation="A structured way to recommend action under uncertainty.",
+    )
+    create_learning_item(
+        db_session, user, type_="expression", text="the downside is",
+        explanation="Introduces the cost or risk of an option.",
+    )
+    for index in range(5):
+        create_learning_item(
+            db_session, user, type_="expression", text=f"other-{index}",
+            explanation=_filler_meaning(index),
+        )
+
+    spec = build_quiz_spec(db_session, user, target, settings=settings,
+                           allow_llm=False)
+
+    assert spec is not None
+    assert "I would lean towards" not in spec.options
+    assert "the safest next step is" not in spec.options

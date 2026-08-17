@@ -262,6 +262,20 @@ def option_glossary(
     return notes
 
 
+def _definition_of(session: Session, user: User, text: str) -> str:
+    """The learner's own gloss for an option, or "" if they do not have it."""
+
+    from sqlalchemy import func
+
+    item = session.scalar(
+        select(LearningItem).where(
+            LearningItem.user_id == user.id,
+            func.lower(LearningItem.text) == str(text).strip().casefold(),
+        )
+    )
+    return any_definition(item) if item is not None else ""
+
+
 def build_quiz_spec(
     session: Session,
     user: User,
@@ -278,6 +292,14 @@ def build_quiz_spec(
         return None
 
     options = distractors if distractors is not None else cached_distractors(item)
+    # Cached and pre-baked sets are not trusted blindly: a set written before
+    # the synonym guard existed would otherwise keep serving a quiz with two
+    # defensible answers forever.
+    options = [
+        option
+        for option in options
+        if not is_near_synonym(definition, _definition_of(session, user, option))
+    ]
     if len(options) < DISTRACTOR_COUNT:
         options = select_distractors(session, user, item)
         if len(options) >= DISTRACTOR_COUNT:
