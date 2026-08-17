@@ -29,6 +29,101 @@ LOG = logging.getLogger(__name__)
 
 MAX_SOLUTION_CHARS = 200
 
+# Slots that carry a multi-question quiz sequence. The scheduled evening slot
+# and the on-demand /quiz slot share the same continuation machinery.
+QUIZ_SLOTS = ("evening", "quiz")
+
+
+def quiz_deliveries_for(
+    session: Session, delivery: VocabDelivery
+) -> list[VocabDelivery]:
+    """All questions of the quiz this delivery belongs to, in order."""
+
+    return list(
+        session.scalars(
+            select(VocabDelivery)
+            .where(
+                VocabDelivery.user_id == delivery.user_id,
+                VocabDelivery.local_date == delivery.local_date,
+                VocabDelivery.slot == delivery.slot,
+            )
+            .order_by(VocabDelivery.seq)
+        ).all()
+    )
+
+
+def next_quiz_delivery(
+    session: Session, delivery: VocabDelivery
+) -> VocabDelivery | None:
+    """The next unanswered question of the same quiz, if any."""
+
+    if delivery.slot not in QUIZ_SLOTS:
+        return None
+    return session.scalar(
+        select(VocabDelivery).where(
+            VocabDelivery.user_id == delivery.user_id,
+            VocabDelivery.local_date == delivery.local_date,
+            VocabDelivery.slot == delivery.slot,
+            VocabDelivery.seq == delivery.seq + 1,
+            VocabDelivery.status == "claimed",
+        )
+    )
+
+
+def quiz_progress(session: Session, delivery: VocabDelivery) -> tuple[int, int]:
+    rows = quiz_deliveries_for(session, delivery)
+    return delivery.seq + 1, len(rows)
+
+
+def quiz_summary_line(
+    session: Session, delivery: VocabDelivery
+) -> str | None:
+    """Wrap-up for a finished quiz, or None while questions remain."""
+
+    if delivery.slot not in QUIZ_SLOTS:
+        return None
+    rows = quiz_deliveries_for(session, delivery)
+    if any(row.status == "claimed" for row in rows):
+        return None
+    answered = [row for row in rows if row.status == "answered"]
+    if not answered:
+        return None
+    correct = 0
+    for row in answered:
+        payload = row.payload_json or {}
+        if payload.get("chosen_index") == payload.get("correct_index"):
+            correct += 1
+    return (
+        f"🏁 Quiz done — {correct}/{len(rows)} right. "
+        "Missed words come back sooner."
+    )
+
+
+def quiz_minutes(count: int) -> int:
+    if count <= 4:
+        return 1
+    if count <= 8:
+        return 2
+    if count <= 14:
+        return 3
+    return 5
+
+
+def quiz_intro(count: int, *, resume_at: int | None = None) -> str:
+    """The announcement that opens a quiz: size, duration, what happens next."""
+
+    from fluentloop.bot.formatting import bold
+
+    if resume_at is not None:
+        return (
+            f"🎯 {bold('Quiz')} — picking up at question {resume_at}/{count}. "
+            "Answer each one; the next follows right after."
+        )
+    return (
+        f"🎯 {bold('Quiz')} — {count} questions, about {quiz_minutes(count)} "
+        "minutes. Answer each one; the next follows right after."
+    )
+
 
 @dataclass(frozen=True)
 class VoteOutcome:
@@ -178,3 +273,66 @@ def resolve_vote(
         user_id=delivery.user_id,
         item=item,
     )
+
+
+async def send_quiz_question(
+    client: Any, session: Session, settings: Any, delivery_id: int
+) -> bool:
+    """Deliver one pre-claimed quiz question as a poll or inline buttons.
+
+    The question and options already live on the delivery row; this only
+    picks the transport and records the poll id so votes map back. Button
+    mode is the fallback when the poll path is disabled or fails.
+    """
+
+    from fluentloop.bot.formatting import HTML_PARSE_MODE, bold, html_escape
+    from fluentloop.db.models import User
+
+    delivery = session.get(VocabDelivery, delivery_id)
+    if delivery is None or delivery.status != "claimed":
+        return False
+    spec = spec_from_payload(
+        delivery.payload_json or {},
+        delivery.learning_item_ids[0] if delivery.learning_item_ids else 0,
+    )
+    if spec is None:
+        return False
+    user = session.get(User, delivery.user_id)
+    if user is None:
+        return False
+    index, total = quiz_progress(session, delivery)
+    if settings.vocab_quiz_polls:
+        poll_spec = QuizSpec(
+            item_id=spec.item_id,
+            question=f"{index}/{total} · {spec.question}",
+            options=list(spec.options),
+            correct_index=spec.correct_index,
+            solution=spec.solution,
+        )
+        try:
+            poll_id, message_id = await send_quiz_poll(
+                client, user.telegram_user_id, poll_spec
+            )
+        except Exception:
+            LOG.exception("Native quiz poll failed; falling back to buttons")
+        else:
+            delivery.poll_id = poll_id
+            delivery.message_id = message_id
+            delivery.payload_json = {
+                **(delivery.payload_json or {}),
+                "mode": "poll",
+            }
+            session.add(delivery)
+            session.flush()
+            return True
+    from fluentloop.bot.app import send_reply
+    from fluentloop.bot.handlers import BotReply, quiz_buttons
+
+    reply = BotReply(
+        f"🎯 {bold(f'Question {index}/{total}')}\n\n{html_escape(spec.question)}",
+        user.telegram_user_id,
+        buttons=quiz_buttons(delivery.id, spec.options),
+        parse_mode=HTML_PARSE_MODE,
+    )
+    await send_reply(client, user.telegram_user_id, reply, settings)
+    return True

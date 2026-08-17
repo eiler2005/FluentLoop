@@ -64,8 +64,16 @@ Commit and deploy are still explicit user-approved gates.
   definition.
 - Midday: one micro-drill from the existing exercise registry; every third day
   it is a "write your own sentence" task.
-- Evening: a native Telegram quiz poll with one correct answer and three
-  distractors, falling back to inline buttons.
+- Evening: a multi-question quiz (default 10 questions, configurable
+  5/10/15/20 in `/settings`) delivered as native Telegram quiz polls, falling
+  back to inline buttons. An intro announces the question count and estimated
+  minutes; each answer is followed by the next question, and a wrap-up scores
+  the session. `/quiz` starts or resumes the same quiz on demand.
+- `/stop` (and the ⏹ Stop keyboard button) clears whatever is waiting for
+  input and abandons the in-progress practice session. Quiz questions are
+  **paused, not discarded**: `/stop` reports how many remain and `/quiz`
+  resumes them. Saying "nothing is waiting" while questions were still
+  claimed was the one defect this feature shipped with.
 - Graduation: an item that reaches a 120-day interval with at least four
   successes leaves the review rotation as `status="graduated"`.
 - `/pause` and `/resume` stop and restart the daily pushes.
@@ -118,6 +126,16 @@ changes. `/learned <word>` forces graduation; `item:restore` undoes it.
 Telethon raw `InputMediaPoll` with `quiz=True` and `public_voters=True`. The
 poll id is stored on the delivery row, so an incoming `UpdateMessagePollVote`
 maps back to the item and feeds `apply_review`. See ADR-0011.
+
+**A quiz is a sequence of deliveries.** The evening tick and `/quiz` claim one
+`vocab_deliveries` row per question (seq 0..N-1); the seq-0 claim is the
+idempotency lock for the whole quiz. The intro message states the count and
+estimated minutes; `send_quiz_question` delivers question 1, and each vote or
+button answer attaches the next claimed row (`next_quiz_delivery`) so the
+transport layer sends it right after the verdict. When no claimed row remains,
+the verdict carries the wrap-up score. On-demand quizzes use slot `"quiz"` so
+they never collide with the scheduled evening rows; a second `/quiz` resumes
+the first claimed row, and once all rows are answered it shows the summary.
 
 ### 4. Content and language
 
@@ -187,12 +205,15 @@ them, so `/start` installs a reply keyboard that stays under the input field:
 ```
 🃏 Cards      🔁 Review
 📚 Lesson     📖 My words
-➕ Add words
+➕ Add words  🎯 Quiz
+ Stop
 ```
 
 These arrive as ordinary text messages, so `quick_action_for` runs before
 every capture path in `on_free_text`. Without that, tapping "🃏 Cards" would
 be stored as a vocabulary item - `looks_like_word_list` accepts it happily.
+
+`🎯 Quiz` maps to `/quiz`; `⏹ Stop` maps to `/stop`.
 
 `➕ Add words` arms an explicit add: the next message goes straight to the
 vocabulary path, bypassing the material heuristic. Tapping any other quick
@@ -237,7 +258,9 @@ Extended and aliased, never duplicated.
 | `/pause`, `/resume` | Toggle the daily pushes. |
 | `/setup` | Runs the onboarding wizard. |
 | `/skip` | Skips an open daily drill first, else the existing practice skip. |
-| `/settings` | Three new rows: slot times and words per day, under the existing `settings:` callback prefix. |
+| `/settings` | Slot times, words per day, and quiz size (5/10/15/20), under the existing `settings:` callback prefix. |
+| `/quiz` | Starts or resumes today's on-demand quiz; once finished, repeats show the summary. |
+| `/stop` | Clears pending captures (drill, add, upload, wizard), abandons the in-progress practice session, and reports any paused quiz questions. |
 | `/help` | Extended with a "Your day" section covering the three slots, how to answer each, the language rule, graduation, and adding your own words. |
 
 `telegram_bot_api.BOT_COMMANDS` and `handlers.command_catalog()` both grew by

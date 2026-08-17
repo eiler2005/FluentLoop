@@ -177,12 +177,37 @@ async def test_tick_delivers_evening_quiz_with_options(factory, settings) -> Non
     sent = await run_vocab_tick(client, factory, settings, now=evening)
 
     assert sent == 1
-    assert "Evening quiz" in client.sent[0].text
+    # Intro first, then question 1 (button fallback: FakeClient has no
+    # send_file, so the poll path degrades by design).
+    assert "Quiz" in client.sent[0].text
+    assert "questions" in client.sent[0].text
+    assert len(client.sent) == 2
     with factory() as session:
-        delivery = session.scalar(
+        rows = session.scalars(
             select(VocabDelivery).where(VocabDelivery.slot == "evening")
-        )
-        assert len(delivery.payload_json["options"]) == 4
+        ).all()
+        # Four seed items, so a four-question quiz.
+        assert len(rows) == 4
+        assert all(len(row.payload_json["options"]) == 4 for row in rows)
+        # Questions stay claimed until answered; continuation needs them.
+        assert all(row.status == "claimed" for row in rows)
+
+
+@pytest.mark.asyncio
+async def test_evening_tick_is_idempotent_for_the_whole_quiz(
+    factory, settings
+) -> None:
+    _seed_user(factory, settings, 123456789, "Europe/Moscow")
+    client = FakeClient()
+    evening = datetime(2026, 8, 17, 16, 0, tzinfo=UTC)
+
+    first = await run_vocab_tick(client, factory, settings, now=evening)
+    second = await run_vocab_tick(
+        client, factory, settings, now=evening + timedelta(minutes=1)
+    )
+
+    assert (first, second) == (1, 0)
+    assert len(client.sent) == 2
 
 
 @pytest.mark.asyncio

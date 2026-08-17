@@ -33,9 +33,12 @@ Your day - the bot writes to you three times, each under a minute:
   Midday  13:00   One quick drill. Tap "Answer" and reply with a message.
                   Roughly every third day it asks you to write 2-3 sentences
                   of your own; otherwise it is a gap-fill or a translation.
-  Evening 19:00   A four-option quiz. Tap an option. You then see whether it
-                  was right, what the answer means, and what the other three
-                  options meant, so the ones you rejected stick too.
+  Evening 19:00   A quiz of your size (5-20 questions, see /settings). The
+                  intro says how many questions and minutes; every answer is
+                  followed by the next question, with a wrap-up at the end.
+                  Tap an option. You then see whether it was right, what the
+                  answer means, and what the other three options meant, so
+                  the ones you rejected stick too. /quiz starts one any time.
 
 Prompts are in English. Russian appears only after you answer.
 Right answers push a word further out: 5 seconds, then minutes, hours, days.
@@ -48,6 +51,7 @@ Commas or new lines for several at once. Your own words always come first.
 The buttons under the input field start practice from anywhere:
   🃏 Cards   read today's words        📚 Lesson    the 15-minute session
   🔁 Review  2-3 min over what is due  📖 My words  your list and counts
+  🎯 Quiz    today's quiz on demand    ⏹ Stop     exit whatever is running
 Send /start if they are not showing.
 
 Not sure what to start? Send /today - it asks which of the two you want:
@@ -71,6 +75,8 @@ Daily-loop commands:
   /more <word>      full card: meaning, synonyms, collocations, examples
   /learned <word>   mark as mastered (with an Undo button)
   /delete <word>    remove a word (also undoable)
+  /quiz             start or resume today's vocabulary quiz
+  /stop             cancel pending prompts and close the active session
   /pause /resume    stop and restart the three daily messages
   /setup            redo the wizard: topics, vocabulary kinds, pace
   /settings         change slot times and words per day
@@ -103,6 +109,8 @@ Useful commands:
 /more <word> - detailed card: meaning, synonyms, collocations
 /learned <word> - mark as mastered
 /delete <word> - remove a word
+/quiz - start or resume today's vocabulary quiz
+/stop - cancel pending prompts and close the active session
 /pause and /resume - daily messages off and on
 /baseline [answer] - show or save monthly baseline
 /outcomes [full] - show 30-day learning outcomes
@@ -143,7 +151,8 @@ def start_message(channel_enabled: bool = False) -> str:
         "Send me any word or phrase to add it.\n\n"
         "To practise now: /review for the words that are due, "
         "/practice vocab for a vocabulary lesson, /today for the full "
-        "15-minute session.\n"
+        "15-minute session, /quiz for a vocabulary quiz.\n"
+        "/stop exits whatever is waiting for your input.\n"
         "/help explains everything."
     )
 

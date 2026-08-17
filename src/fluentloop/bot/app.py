@@ -60,6 +60,7 @@ from fluentloop.bot.handlers import (
     handle_practice,
     handle_publish,
     handle_quiz_answer,
+    handle_quiz_start,
     handle_reflect,
     handle_resume,
     handle_rules,
@@ -70,6 +71,7 @@ from fluentloop.bot.handlers import (
     handle_skip_current,
     handle_start,
     handle_stats,
+    handle_stop,
     handle_subscribe,
     handle_today,
     handle_today_menu,
@@ -86,6 +88,7 @@ from fluentloop.bot.handlers import (
     handle_words_menu,
     quick_action_for,
 )
+from fluentloop.bot.polls import send_quiz_question
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
 from fluentloop.config import Settings
@@ -347,6 +350,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             user = ensure_user(session, telegram_user_id, settings)
             parts = event.raw_text.split(maxsplit=2)
             command = parts[0]
+            quiz_followup_id: int | None = None
             if command == "/setup":
                 reply = handle_onboarding_start(
                     session, user, chat_id=event.chat_id
@@ -712,6 +716,10 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_learned(session, user, _argument(event.raw_text))
             elif command == "/delete":
                 reply = handle_delete(session, user, _argument(event.raw_text))
+            elif command == "/quiz":
+                reply = handle_quiz_start(session, user, settings=settings)
+            elif command == "/stop":
+                reply = handle_stop(session, user, chat_id=event.chat_id)
             elif command == "/pause":
                 reply = handle_pause(session, user)
             elif command == "/resume":
@@ -721,6 +729,13 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             else:
                 reply = handle_help()
             await send_reply(client, event.chat_id, reply, settings)
+            quiz_followup_id = reply.quiz_question_delivery_id
+        if quiz_followup_id is not None:
+            # After the commit, so the follow-up session sees the delivery row.
+            with session_scope(session_factory) as quiz_session:
+                await send_quiz_question(
+                    client, quiz_session, settings, quiz_followup_id
+                )
 
     @client.on(events.CallbackQuery)
     async def on_callback(event) -> None:  # type: ignore[no-untyped-def]
@@ -728,6 +743,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
         sender_id = int(sender.id)
         telegram_user_id = _effective_user_id(sender_id, event.chat_id, settings)
         raw_data = bytes(event.data or b"").decode("utf-8", errors="replace")
+        quiz_followup_id: int | None = None
         with session_scope(session_factory) as session:
             if (
                 settings.telegram_allowed_user_id is not None
@@ -1082,6 +1098,12 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     await send_reply(client, event.chat_id, extra, settings)
                 return
             await send_reply(client, event.chat_id, reply, settings)
+            quiz_followup_id = reply.quiz_question_delivery_id
+        if quiz_followup_id is not None:
+            with session_scope(session_factory) as quiz_session:
+                await send_quiz_question(
+                    client, quiz_session, settings, quiz_followup_id
+                )
 
     from telethon.tl.types import UpdateMessagePollVote
 
@@ -1096,6 +1118,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
         if reply is None or reply.target_chat_id is None:
             return
         await send_reply(client, reply.target_chat_id, reply, settings)
+        if reply.quiz_question_delivery_id is not None:
+            with session_scope(session_factory) as quiz_session:
+                await send_quiz_question(
+                    client,
+                    quiz_session,
+                    settings,
+                    reply.quiz_question_delivery_id,
+                )
 
     @client.on(events.NewMessage)
     async def on_free_text(event) -> None:  # type: ignore[no-untyped-def]
@@ -1146,6 +1176,10 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         channel_id=channel_id,
                         message_thread_id=practice_target.message_thread_id,
                     )
+                elif action == "quiz":
+                    reply = handle_quiz_start(session, user, settings=settings)
+                elif action == "stop":
+                    reply = handle_stop(session, user, chat_id=event.chat_id)
                 else:
                     reply = handle_today(
                         session,
@@ -1154,6 +1188,16 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         message_thread_id=practice_target.message_thread_id,
                     )
                 await send_reply(client, event.chat_id, reply, settings)
+                if reply.quiz_question_delivery_id is not None:
+                    # The follow-up session must see the just-claimed rows.
+                    session.commit()
+                    with session_scope(session_factory) as quiz_session:
+                        await send_quiz_question(
+                            client,
+                            quiz_session,
+                            settings,
+                            reply.quiz_question_delivery_id,
+                        )
                 return
             state_store = StateStore(session)
             state = state_store.get(event.chat_id, telegram_user_id)

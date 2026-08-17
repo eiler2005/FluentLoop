@@ -22,6 +22,7 @@ TIME_RE = re.compile(r"^\d{2}:\d{2}$")
 MIN_WORDS_PER_DAY = 1
 MAX_WORDS_PER_DAY = 20
 STARTER_SIZES: tuple[int, ...] = (100, 200, 300, 500)
+QUIZ_SIZES: tuple[int, ...] = (5, 10, 15, 20)
 
 DEFAULT_SLOTS: dict[str, str] = {
     "morning": "08:00",
@@ -39,6 +40,7 @@ class VocabPrefs:
     kinds: list[str] = field(default_factory=list)
     sets: list[str] = field(default_factory=list)
     starter_size: int = 200
+    quiz_size: int = 10
     onboarded_at: str | None = None
 
 
@@ -71,6 +73,7 @@ def get_prefs(user: User) -> VocabPrefs:
         kinds=list(raw.get("kinds") or []),
         sets=list(raw.get("sets") or []),
         starter_size=int(raw.get("starter_size", DEFAULTS.starter_size)),
+        quiz_size=int(raw.get("quiz_size", DEFAULTS.quiz_size)),
         onboarded_at=raw.get("onboarded_at"),
     )
 
@@ -113,6 +116,11 @@ def update_pref(session: Session, user: User, key: str, value: object) -> VocabP
         if size not in STARTER_SIZES:
             raise ValueError("Unsupported starter list size")
         prefs = replace(prefs, starter_size=size)
+    elif key == "quiz_size":
+        size = int(value)
+        if size not in QUIZ_SIZES:
+            raise ValueError("Quiz size must be one of 5, 10, 15, 20")
+        prefs = replace(prefs, quiz_size=size)
     elif key in {"topics", "kinds", "sets"}:
         items = _as_list(value)
         prefs = replace(prefs, **{key: items})
@@ -137,6 +145,7 @@ def format_vocab_settings(prefs: VocabPrefs) -> str:
         f"Daily loop: {state}",
         f"Slots: {slots}",
         f"Words per day: {prefs.words_per_day}",
+        f"Quiz size: {prefs.quiz_size} questions",
     ]
     if prefs.topics:
         lines.append(f"Topics: {', '.join(prefs.topics)}")

@@ -42,6 +42,8 @@ BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("more", "Show a detailed card for one word"),
     ("learned", "Mark a word as mastered"),
     ("delete", "Remove a word from your list"),
+    ("quiz", "Start or resume today's vocabulary quiz"),
+    ("stop", "Stop the current prompt or session"),
     ("pause", "Pause the daily messages"),
     ("resume", "Resume the daily messages"),
     ("help", "Show the FluentLoop guide"),

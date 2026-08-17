@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
@@ -24,7 +24,7 @@ from fluentloop.bot.messages import (
 from fluentloop.bot.state import StateStore
 from fluentloop.coach_journal import write_coach_journal
 from fluentloop.config import Settings
-from fluentloop.db.models import LearningItem, User
+from fluentloop.db.models import LearningItem, User, VocabDelivery
 from fluentloop.exercises import EXERCISE_TYPES
 from fluentloop.feedback import (
     apply_feedback,
@@ -128,6 +128,9 @@ class BotReply:
     # discoverable only if you already know them; this makes starting practice
     # a tap from anywhere in the chat.
     persistent_keyboard: bool = False
+    # The sender delivers this quiz question (poll or buttons) right after
+    # the reply itself. Handlers stay Telegram-free; app.py does the sending.
+    quiz_question_delivery_id: int | None = None
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -182,6 +185,12 @@ def _settings_buttons(user: User) -> list[list[InlineButton]]:
             _button("3 words", "settings:vocab_words_per_day:3"),
             _button("5 words", "settings:vocab_words_per_day:5"),
             _button("7 words", "settings:vocab_words_per_day:7"),
+        ],
+        [
+            _button("Quiz 5", "settings:vocab_quiz_size:5"),
+            _button("10", "settings:vocab_quiz_size:10"),
+            _button("15", "settings:vocab_quiz_size:15"),
+            _button("20", "settings:vocab_quiz_size:20"),
         ],
         [_button("Refresh", "settings:refresh:now")],
     ]
@@ -2105,6 +2114,8 @@ QUICK_ACTIONS: tuple[tuple[str, str], ...] = (
     ("📚 Lesson", "lesson"),
     ("📖 My words", "words"),
     ("➕ Add words", "add"),
+    ("🎯 Quiz", "quiz"),
+    ("⏹ Stop", "stop"),
 )
 QUICK_ACTION_BY_LABEL: dict[str, str] = {
     label: action for label, action in QUICK_ACTIONS
@@ -2420,9 +2431,12 @@ def render_daily_slot(
     now=None,
     settings: Settings | None = None,
 ) -> BotReply | None:
-    """Build the message for one daily slot, or None when there is nothing."""
+    """Build the message for one daily slot, or None when there is nothing.
 
-    from fluentloop.quiz import evening_quiz
+    The evening slot is not rendered here: it is a multi-question quiz, so
+    the scheduler delivers it through ``_deliver_evening_quiz`` instead.
+    """
+
     from fluentloop.vocab_loop import build_drill, render_cards, render_drill
     from fluentloop.vocab_prefs import get_prefs
 
@@ -2457,25 +2471,6 @@ def render_daily_slot(
                     _button("Skip", f"vocab:skip:{delivery.id}"),
                 ]
             ],
-            parse_mode=HTML_PARSE_MODE,
-        )
-
-    if slot == "evening":
-        spec = evening_quiz(session, user, now=now, settings=settings)
-        if spec is None:
-            return None
-        delivery.learning_item_ids = [spec.item_id]
-        delivery.payload_json = {
-            "question": spec.question,
-            "options": list(spec.options),
-            "correct_index": spec.correct_index,
-            "solution": spec.solution,
-            "mode": "buttons",
-        }
-        return BotReply(
-            f"🌙 {bold('Evening quiz')}\n\n{html_escape(spec.question)}",
-            user.telegram_user_id,
-            buttons=quiz_buttons(delivery.id, spec.options),
             parse_mode=HTML_PARSE_MODE,
         )
 
@@ -2528,7 +2523,12 @@ def handle_quiz_answer(
     if graduated:
         lines.append("🎓 Graduated!")
     lines.extend(_glossary_lines(session, user, options, correct_index))
-    return BotReply("\n".join(lines), parse_mode=HTML_PARSE_MODE)
+    followup, lines = _quiz_followup(session, delivery, lines)
+    return BotReply(
+        "\n".join(lines),
+        parse_mode=HTML_PARSE_MODE,
+        quiz_question_delivery_id=followup,
+    )
 
 
 def _answer_gloss_lines(item: LearningItem | None) -> list[str]:
@@ -2590,11 +2590,147 @@ def handle_poll_vote(
                 session, voter, list(outcome.options), outcome.correct_index
             )
         )
+    delivery = session.get(VocabDelivery, outcome.delivery_id)
+    followup, lines = _quiz_followup(session, delivery, lines)
     return BotReply(
         "\n".join(lines),
         outcome.telegram_user_id or None,
         parse_mode=HTML_PARSE_MODE,
+        quiz_question_delivery_id=followup,
     )
+
+
+def _quiz_followup(
+    session: Session, delivery, lines: list[str]
+) -> tuple[int | None, list[str]]:
+    """Chain the next quiz question, or wrap the quiz up when it ended."""
+
+    from fluentloop.bot.polls import next_quiz_delivery, quiz_summary_line
+
+    if delivery is None:
+        return None, lines
+    nxt = next_quiz_delivery(session, delivery)
+    if nxt is not None:
+        return nxt.id, lines
+    summary = quiz_summary_line(session, delivery)
+    if summary:
+        lines = [*lines, "", summary]
+    return None, lines
+
+
+def handle_quiz_start(
+    session: Session,
+    user: User,
+    *,
+    now=None,
+    settings: Settings | None = None,
+) -> BotReply:
+    """Start or resume today's on-demand quiz.
+
+    One on-demand quiz per local day: a second /quiz while questions remain
+    picks up where the learner stopped, and once everything is answered the
+    summary is shown again instead of building a fresh set.
+    """
+
+    from fluentloop.bot.polls import quiz_intro, quiz_summary_line
+    from fluentloop.quiz import evening_quiz_set
+    from fluentloop.vocab_loop import local_date
+    from fluentloop.vocab_prefs import get_prefs
+
+    day = local_date(user, now=now)
+    rows = list(
+        session.scalars(
+            select(VocabDelivery)
+            .where(
+                VocabDelivery.user_id == user.id,
+                VocabDelivery.local_date == day,
+                VocabDelivery.slot == "quiz",
+            )
+            .order_by(VocabDelivery.seq)
+        ).all()
+    )
+    claimed = [row for row in rows if row.status == "claimed"]
+    if rows and not claimed:
+        text = quiz_summary_line(session, rows[0]) or "You finished today's quiz."
+        return BotReply(text, parse_mode=HTML_PARSE_MODE)
+    if claimed:
+        first = claimed[0]
+        intro = quiz_intro(len(rows), resume_at=first.seq + 1)
+    else:
+        specs = evening_quiz_set(
+            session,
+            user,
+            count=get_prefs(user).quiz_size,
+            now=now,
+            settings=settings,
+        )
+        if not specs:
+            return BotReply("No words to quiz yet. Send me a few words first.")
+        rows = []
+        for seq, spec in enumerate(specs):
+            row = VocabDelivery(
+                user_id=user.id,
+                local_date=day,
+                slot="quiz",
+                seq=seq,
+                status="claimed",
+            )
+            row.learning_item_ids = [spec.item_id]
+            row.payload_json = {
+                "question": spec.question,
+                "options": list(spec.options),
+                "correct_index": spec.correct_index,
+                "solution": spec.solution,
+                "mode": "buttons",
+            }
+            session.add(row)
+            rows.append(row)
+        session.flush()
+        first = rows[0]
+        intro = quiz_intro(len(rows))
+    return BotReply(
+        intro,
+        user.telegram_user_id,
+        parse_mode=HTML_PARSE_MODE,
+        quiz_question_delivery_id=first.id,
+    )
+
+
+def handle_stop(session: Session, user: User, *, chat_id: int) -> BotReply:
+    """Cancel whatever is waiting for input and close the active session."""
+
+    from fluentloop.bot.polls import QUIZ_SLOTS
+    from fluentloop.practice import get_in_progress_session
+    from fluentloop.vocab_loop import local_date
+
+    StateStore(session).clear(chat_id, user.telegram_user_id)
+    lines = ["⏹ Stopped. Nothing is waiting for your input."]
+    current = get_in_progress_session(session, user)
+    if current is not None:
+        current.status = "abandoned"
+        session.add(current)
+        lines.append(
+            "Today's practice session is closed — /today starts a fresh one."
+        )
+    # Quiz questions are paused rather than discarded: the learner asked the
+    # bot to stop talking, not to throw away their progress. Saying nothing
+    # about them would make the line above untrue.
+    pending = session.scalar(
+        select(func.count())
+        .select_from(VocabDelivery)
+        .where(
+            VocabDelivery.user_id == user.id,
+            VocabDelivery.local_date == local_date(user),
+            VocabDelivery.slot.in_(QUIZ_SLOTS),
+            VocabDelivery.status == "claimed",
+        )
+    )
+    if pending:
+        lines.append(
+            f"{pending} quiz question(s) are paused — /quiz picks up where "
+            "you left off."
+        )
+    return BotReply("\n".join(lines))
 
 
 def handle_drill_start(
@@ -2769,6 +2905,8 @@ def command_catalog() -> list[str]:
         "/more",
         "/learned",
         "/delete",
+        "/quiz",
+        "/stop",
         "/pause",
         "/resume",
         "/settings",

@@ -593,7 +593,9 @@ def test_quick_actions_map_taps_to_actions() -> None:
     assert quick_action_for("cut corners") is None
     assert quick_action_for("") is None
     assert quick_action_for("➕ Add words") == "add"
-    assert len(QUICK_ACTIONS) == 5
+    assert quick_action_for("🎯 Quiz") == "quiz"
+    assert quick_action_for("⏹ Stop") == "stop"
+    assert len(QUICK_ACTIONS) == 7
 
 
 def test_quick_action_labels_are_not_mistaken_for_words() -> None:

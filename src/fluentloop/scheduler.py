@@ -117,12 +117,15 @@ def claim_slot(
     user: User,
     slot: str,
     day: Any,
+    *,
+    seq: int = 0,
 ) -> VocabDelivery | None:
-    """Reserve a slot for one local day.
+    """Reserve one question of a slot for one local day.
 
     The unique constraint on (user, local_date, slot, seq) is the lock: if
     another tick already claimed it the insert fails and we skip. This is what
-    makes the dispatcher safe across restarts and overlapping ticks.
+    makes the dispatcher safe across restarts and overlapping ticks. A
+    multi-question quiz claims one row per question, seq 0..N-1.
 
     The insert runs inside a SAVEPOINT. A plain ``session.rollback()`` here
     would discard every other delivery already recorded in this tick, so a
@@ -136,7 +139,7 @@ def claim_slot(
                 user_id=user.id,
                 local_date=day,
                 slot=slot,
-                seq=0,
+                seq=seq,
                 status="claimed",
             )
             session.add(delivery)
@@ -180,6 +183,19 @@ async def run_vocab_tick(
             if not slots:
                 continue
             for slot in slots:
+                if slot == "evening":
+                    # The evening slot is a multi-question quiz with its own
+                    # intro and continuation, delivered as one unit.
+                    try:
+                        sent += await _deliver_evening_quiz(
+                            client, session, user, settings, now=now
+                        )
+                    except Exception:
+                        _fail_claimed_evening(session, user, now_local.date())
+                        LOG.exception(
+                            "Vocabulary evening slot failed for user %s", user.id
+                        )
+                    continue
                 delivery = claim_slot(session, user, slot, now_local.date())
                 if delivery is None:
                     continue
@@ -191,14 +207,10 @@ async def run_vocab_tick(
                         delivery.status = "skipped"
                         session.add(delivery)
                         continue
-                    delivered = False
-                    if slot == "evening" and settings.vocab_quiz_polls:
-                        delivered = await _try_quiz_poll(client, user, delivery)
-                    if not delivered:
-                        message = await send_reply(
-                            client, user.telegram_user_id, reply, settings
-                        )
-                        delivery.message_id = _message_id(message)
+                    message = await send_reply(
+                        client, user.telegram_user_id, reply, settings
+                    )
+                    delivery.message_id = _message_id(message)
                     delivery.status = "sent"
                     if slot == "midday":
                         set_drill_state(session, user, delivery.id)
@@ -217,31 +229,88 @@ async def run_vocab_tick(
     return sent
 
 
-async def _try_quiz_poll(client: Any, user: User, delivery: VocabDelivery) -> bool:
-    """Send the evening quiz as a native poll, or report failure.
+def _fail_claimed_evening(session: Any, user: User, day: Any) -> None:
+    """Mark tonight's still-claimed quiz rows failed so they are not retried."""
 
-    A False return means the caller should fall back to the inline-button
-    quiz, which is always prepared alongside.
+    rows = session.scalars(
+        select(VocabDelivery).where(
+            VocabDelivery.user_id == user.id,
+            VocabDelivery.local_date == day,
+            VocabDelivery.slot == "evening",
+            VocabDelivery.status == "claimed",
+        )
+    ).all()
+    for row in rows:
+        row.status = "failed"
+        session.add(row)
+
+
+async def _deliver_evening_quiz(
+    client: Any,
+    session: Any,
+    user: User,
+    settings: Settings,
+    *,
+    now: Any | None = None,
+) -> int:
+    """Claim tonight's quiz questions and deliver the intro plus question 1.
+
+    Every question gets its own delivery row (seq 0..N-1); the seq-0 claim is
+    the idempotency lock for the whole quiz. The remaining questions are sent
+    one per answer by the vote/answer handlers, so a restart mid-quiz loses
+    nothing that was already claimed.
     """
 
-    from fluentloop.bot.polls import send_quiz_poll, spec_from_payload
+    from fluentloop.bot.app import send_reply
+    from fluentloop.bot.formatting import HTML_PARSE_MODE
+    from fluentloop.bot.handlers import BotReply
+    from fluentloop.bot.polls import quiz_intro, send_quiz_question
+    from fluentloop.quiz import evening_quiz_set
+    from fluentloop.vocab_prefs import get_prefs
 
-    payload = delivery.payload_json or {}
-    item_ids = delivery.learning_item_ids or []
-    spec = spec_from_payload(payload, item_ids[0] if item_ids else 0)
-    if spec is None:
-        return False
-    try:
-        poll_id, message_id = await send_quiz_poll(
-            client, user.telegram_user_id, spec
-        )
-    except Exception:
-        LOG.exception("Native quiz poll failed; falling back to inline buttons")
-        return False
-    delivery.poll_id = poll_id
-    delivery.message_id = message_id
-    delivery.payload_json = {**payload, "mode": "poll"}
-    return True
+    day = local_date(user, now=now)
+    first = claim_slot(session, user, "evening", day)
+    if first is None:
+        return 0
+    specs = evening_quiz_set(
+        session,
+        user,
+        count=get_prefs(user).quiz_size,
+        now=now,
+        settings=settings,
+    )
+    if not specs:
+        first.status = "skipped"
+        session.add(first)
+        return 0
+    deliveries = [first]
+    for seq in range(1, len(specs)):
+        row = claim_slot(session, user, "evening", day, seq=seq)
+        if row is None:
+            break
+        deliveries.append(row)
+    # Claiming can stop early if a row already exists, so trim the specs to
+    # match. strict= then asserts the two really are aligned.
+    specs = specs[: len(deliveries)]
+    for row, spec in zip(deliveries, specs, strict=True):
+        row.learning_item_ids = [spec.item_id]
+        row.payload_json = {
+            "question": spec.question,
+            "options": list(spec.options),
+            "correct_index": spec.correct_index,
+            "solution": spec.solution,
+            "mode": "buttons",
+        }
+        session.add(row)
+    session.flush()
+    intro = BotReply(
+        quiz_intro(len(deliveries)),
+        user.telegram_user_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+    await send_reply(client, user.telegram_user_id, intro, settings)
+    await send_quiz_question(client, session, settings, deliveries[0].id)
+    return 1
 
 
 def _message_id(message: Any) -> int | None:

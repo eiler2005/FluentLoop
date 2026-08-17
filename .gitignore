@@ -61,3 +61,6 @@ dist/
 # --- Claude Code: keep settings.json, ignore local overrides ---
 .claude/settings.local.json
 .claude/cache/
+
+# Agent scratch dirs
+.qwen/

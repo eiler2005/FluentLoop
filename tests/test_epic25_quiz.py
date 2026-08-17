@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+from sqlalchemy import select
+
 from fluentloop.ai.provider import StubProvider
 from fluentloop.bot.handlers import (
     DRILL_STATE,
@@ -9,10 +11,11 @@ from fluentloop.bot.handlers import (
     handle_drill_skip,
     handle_drill_start,
     handle_quiz_answer,
+    handle_quiz_start,
     render_daily_slot,
 )
 from fluentloop.bot.state import StateStore
-from fluentloop.db.models import ReviewState, VocabDelivery
+from fluentloop.db.models import LearningItem, ReviewState, VocabDelivery
 from fluentloop.learning import create_learning_item
 from fluentloop.quiz import (
     QUIZ_OPTION_COUNT,
@@ -63,6 +66,33 @@ def _delivery(session, user, slot: str) -> VocabDelivery:
     session.add(delivery)
     session.flush()
     return delivery
+
+
+def _start_quiz(session, user, settings):
+    reply = handle_quiz_start(session, user, now=NOW, settings=settings)
+    assert reply.quiz_question_delivery_id is not None
+    return reply
+
+
+def _quiz_rows(session, user) -> list[VocabDelivery]:
+    return list(
+        session.scalars(
+            select(VocabDelivery)
+            .where(
+                VocabDelivery.user_id == user.id,
+                VocabDelivery.slot == "quiz",
+            )
+            .order_by(VocabDelivery.seq)
+        ).all()
+    )
+
+
+def _quiz_row_for(session, user, text: str) -> VocabDelivery:
+    for row in _quiz_rows(session, user):
+        item = session.get(LearningItem, row.learning_item_ids[0])
+        if item is not None and item.text == text:
+            return row
+    raise AssertionError(f"no quiz question for {text}")
 
 
 # --- distractors -----------------------------------------------------------
@@ -198,14 +228,30 @@ def test_evening_quiz_skips_items_it_cannot_ask_about(db_session, settings) -> N
 # --- answering the quiz ----------------------------------------------------
 
 
+def test_quiz_start_announces_size_and_chains_questions(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    _item(db_session, user, "pipeline", "a chain of build steps")
+    _pool(db_session, user)
+
+    reply = _start_quiz(db_session, user, settings)
+
+    # The intro states the size and the minutes, so the learner knows what
+    # they are getting into.
+    assert "questions" in reply.text
+    assert "minutes" in reply.text
+    rows = _quiz_rows(db_session, user)
+    assert len(rows) == 6
+    assert reply.quiz_question_delivery_id == rows[0].id
+
+
 def test_quiz_answer_correct_records_success(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     _item(db_session, user, "pipeline", "a chain of build steps")
     _pool(db_session, user)
-    delivery = _delivery(db_session, user, "evening")
-    reply = render_daily_slot(
-        db_session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    reply = _start_quiz(db_session, user, settings)
+    delivery = db_session.get(VocabDelivery, reply.quiz_question_delivery_id)
     correct = delivery.payload_json["correct_index"]
 
     answer = handle_quiz_answer(db_session, user, delivery.id, correct)
@@ -215,17 +261,17 @@ def test_quiz_answer_correct_records_success(db_session, settings) -> None:
     item_id = delivery.learning_item_ids[0]
     state = db_session.query(ReviewState).filter_by(learning_item_id=item_id).one()
     assert state.success_count == 1
-    assert "Evening quiz" in reply.text
+    # The verdict chains the next question of the quiz.
+    assert answer.quiz_question_delivery_id is not None
+    assert answer.quiz_question_delivery_id != delivery.id
 
 
 def test_quiz_answer_wrong_shows_the_right_one(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     _item(db_session, user, "pipeline", "a chain of build steps")
     _pool(db_session, user)
-    delivery = _delivery(db_session, user, "evening")
-    render_daily_slot(
-        db_session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    reply = _start_quiz(db_session, user, settings)
+    delivery = db_session.get(VocabDelivery, reply.quiz_question_delivery_id)
     correct = delivery.payload_json["correct_index"]
     wrong = (correct + 1) % QUIZ_OPTION_COUNT
 
@@ -241,13 +287,10 @@ def test_quiz_answer_is_recorded_once(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     _item(db_session, user, "pipeline", "a chain of build steps")
     _pool(db_session, user)
-    delivery = _delivery(db_session, user, "evening")
-    render_daily_slot(
-        db_session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    reply = _start_quiz(db_session, user, settings)
 
-    handle_quiz_answer(db_session, user, delivery.id, 0)
-    second = handle_quiz_answer(db_session, user, delivery.id, 0)
+    handle_quiz_answer(db_session, user, reply.quiz_question_delivery_id, 0)
+    second = handle_quiz_answer(db_session, user, reply.quiz_question_delivery_id, 0)
 
     assert "already answered" in second.text
 
@@ -262,13 +305,10 @@ def test_quiz_answer_rejects_out_of_range_choice(db_session, settings) -> None:
     user = ensure_user(db_session, 123456789, settings)
     _item(db_session, user, "pipeline", "a chain of build steps")
     _pool(db_session, user)
-    delivery = _delivery(db_session, user, "evening")
-    render_daily_slot(
-        db_session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    reply = _start_quiz(db_session, user, settings)
 
     assert "no longer available" in handle_quiz_answer(
-        db_session, user, delivery.id, 42
+        db_session, user, reply.quiz_question_delivery_id, 42
     ).text
 
 
@@ -365,10 +405,8 @@ def test_quiz_answer_explains_the_other_options(db_session, settings) -> None:
         ("bottleneck", "the step that limits everything"),
     ):
         _item(db_session, user, text, meaning)
-    delivery = _delivery(db_session, user, "evening")
-    render_daily_slot(
-        db_session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    start = _start_quiz(db_session, user, settings)
+    delivery = db_session.get(VocabDelivery, start.quiz_question_delivery_id)
     correct = delivery.payload_json["correct_index"]
     options = delivery.payload_json["options"]
 
@@ -463,14 +501,12 @@ def test_answer_reveals_the_russian_translation(db_session, settings) -> None:
         explanation="a chain of build steps",
     )
     _pool(db_session, user)
-    delivery = _delivery(db_session, user, "evening")
-    reply = render_daily_slot(
-        db_session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    _start_quiz(db_session, user, settings)
+    delivery = _quiz_row_for(db_session, user, "pipeline")
     correct = delivery.payload_json["correct_index"]
 
     # The question itself stays English.
-    assert "конвейер" not in reply.text
+    assert "конвейер" not in delivery.payload_json["question"]
 
     answer = handle_quiz_answer(db_session, user, delivery.id, correct)
 
@@ -653,3 +689,69 @@ def test_stale_cached_distractors_are_revalidated(db_session, settings) -> None:
     assert spec is not None
     assert "I would lean towards" not in spec.options
     assert "the safest next step is" not in spec.options
+
+
+# --- /stop tells the truth about a paused quiz -----------------------------
+
+
+def _quiz_pool(session, user, count: int = 8) -> None:
+    for index in range(count):
+        _item(session, user, f"quiz-word-{index}", _filler_meaning(index))
+
+
+def test_stop_reports_paused_quiz_questions(db_session, settings) -> None:
+    """/stop said "nothing is waiting" while questions were still pending."""
+
+    from fluentloop.bot.handlers import handle_quiz_start, handle_stop
+    from fluentloop.db.models import VocabDelivery
+
+    user = ensure_user(db_session, 123456789, settings)
+    _quiz_pool(db_session, user)
+    handle_quiz_start(db_session, user, settings=settings)
+
+    reply = handle_stop(db_session, user, chat_id=123456789)
+
+    pending = [
+        row
+        for row in db_session.scalars(select(VocabDelivery)).all()
+        if row.status == "claimed"
+    ]
+    assert pending, "the fixture should leave questions pending"
+    assert "paused" in reply.text
+    assert "/quiz" in reply.text
+
+
+def test_stop_keeps_quiz_progress_for_resuming(db_session, settings) -> None:
+    from fluentloop.bot.handlers import (
+        handle_quiz_answer,
+        handle_quiz_start,
+        handle_stop,
+    )
+    from fluentloop.db.models import VocabDelivery
+
+    user = ensure_user(db_session, 123456789, settings)
+    _quiz_pool(db_session, user)
+    handle_quiz_start(db_session, user, settings=settings)
+    rows = db_session.scalars(
+        select(VocabDelivery).order_by(VocabDelivery.seq)
+    ).all()
+    handle_quiz_answer(
+        db_session, user, rows[0].id, rows[0].payload_json["correct_index"]
+    )
+
+    handle_stop(db_session, user, chat_id=123456789)
+    resumed = handle_quiz_start(db_session, user, settings=settings)
+
+    # Stopping pauses; it must not discard what was already answered.
+    assert "picking up at question 2" in resumed.text
+
+
+def test_stop_is_quiet_when_nothing_is_pending(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_stop
+
+    user = ensure_user(db_session, 123456789, settings)
+
+    reply = handle_stop(db_session, user, chat_id=123456789)
+
+    assert "Nothing is waiting" in reply.text
+    assert "paused" not in reply.text

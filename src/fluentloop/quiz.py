@@ -324,6 +324,43 @@ def build_quiz_spec(
     )
 
 
+def evening_quiz_set(
+    session: Session,
+    user: User,
+    *,
+    count: int,
+    now: datetime | None = None,
+    settings: Any | None = None,
+    allow_llm: bool = True,
+) -> list[QuizSpec]:
+    """Build up to ``count`` distinct questions for one quiz session.
+
+    Some items cannot yield a question (no gloss, or not enough non-synonym
+    distractors), so the candidate pool is twice the requested size before
+    giving up on filling the set.
+    """
+
+    candidates = [
+        item
+        for item in select_cards(session, user, count=max(count * 2, 5), now=now)
+        if item.type in CARD_ITEM_TYPES
+    ]
+    # Ask in English when any candidate allows it; fall back to a Russian
+    # gloss only when nothing in today's pool has an English definition.
+    ordered = [item for item in candidates if english_definition(item)]
+    ordered += [item for item in candidates if not english_definition(item)]
+    specs: list[QuizSpec] = []
+    for item in ordered:
+        spec = build_quiz_spec(
+            session, user, item, settings=settings, allow_llm=allow_llm
+        )
+        if spec is not None:
+            specs.append(spec)
+        if len(specs) >= count:
+            break
+    return specs
+
+
 def evening_quiz(
     session: Session,
     user: User,
@@ -334,19 +371,7 @@ def evening_quiz(
 ) -> QuizSpec | None:
     """Pick an item for tonight's quiz and build the question for it."""
 
-    candidates = [
-        item
-        for item in select_cards(session, user, count=5, now=now)
-        if item.type in CARD_ITEM_TYPES
-    ]
-    # Ask in English when any candidate allows it; fall back to a Russian
-    # gloss only when nothing in today's pool has an English definition.
-    ordered = [item for item in candidates if english_definition(item)]
-    ordered += [item for item in candidates if not english_definition(item)]
-    for item in ordered:
-        spec = build_quiz_spec(
-            session, user, item, settings=settings, allow_llm=allow_llm
-        )
-        if spec is not None:
-            return spec
-    return None
+    specs = evening_quiz_set(
+        session, user, count=1, now=now, settings=settings, allow_llm=allow_llm
+    )
+    return specs[0] if specs else None

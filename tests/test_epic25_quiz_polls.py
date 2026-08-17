@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from fluentloop.bot.handlers import handle_poll_vote, render_daily_slot
+from fluentloop.bot.handlers import handle_poll_vote
 from fluentloop.bot.polls import (
     build_input_media_poll,
     option_bytes,
@@ -59,10 +59,15 @@ class FakePollClient:
     def __init__(self, poll_id: int = 999) -> None:
         self.poll_id = poll_id
         self.media = None
+        self.sent: list[str] = []
 
     async def send_file(self, chat_id, media):
         self.media = media
         return FakePollMessage(self.poll_id)
+
+    async def send_message(self, chat_id, text, buttons=None, parse_mode=None):
+        self.sent.append(text)
+        return type("Msg", (), {"id": 1})()
 
 
 def _prepared_delivery(session, user, *, settings, poll_id: int | None = None):
@@ -74,7 +79,7 @@ def _prepared_delivery(session, user, *, settings, poll_id: int | None = None):
             text=f"filler-{index}",
             meaning=_filler_meaning(index),
         )
-    create_learning_item(
+    target = create_learning_item(
         session, user, type_="word", text="pipeline", meaning="a chain of build steps"
     )
     delivery = VocabDelivery(
@@ -82,13 +87,20 @@ def _prepared_delivery(session, user, *, settings, poll_id: int | None = None):
     )
     session.add(delivery)
     session.flush()
-    render_daily_slot(
-        session, user, "evening", delivery, now=NOW, settings=settings
-    )
+    spec = build_quiz_spec(session, user, target, settings=settings)
+    assert spec is not None
+    delivery.learning_item_ids = [spec.item_id]
+    delivery.payload_json = {
+        "question": spec.question,
+        "options": list(spec.options),
+        "correct_index": spec.correct_index,
+        "solution": spec.solution,
+        "mode": "buttons",
+    }
     if poll_id is not None:
         delivery.poll_id = poll_id
-        session.add(delivery)
-        session.flush()
+    session.add(delivery)
+    session.flush()
     return delivery
 
 
@@ -318,11 +330,15 @@ async def test_tick_falls_back_to_buttons_when_poll_fails(
     )
 
     assert sent == 1
-    assert "Evening quiz" in client.sent[0]
+    # Intro, then the question rendered as buttons after the poll path fails.
+    assert "Quiz" in client.sent[0]
+    assert len(client.sent) == 2
     with factory() as session:
-        delivery = session.query(VocabDelivery).one()
-        assert delivery.status == "sent"
-        assert delivery.poll_id is None
+        rows = session.query(VocabDelivery).order_by(VocabDelivery.seq).all()
+        first = rows[0]
+        assert first.status == "claimed"
+        assert first.poll_id is None
+        assert all(row.status == "claimed" for row in rows)
 
 
 @pytest.mark.asyncio
@@ -355,10 +371,16 @@ async def test_tick_stores_poll_id_on_success(tmp_path, settings) -> None:
     )
 
     assert sent == 1
+    # Intro goes through send_message; question 1 through the raw poll path.
+    assert "Quiz" in client.sent[0]
+    assert client.media is not None
     with factory() as session:
-        delivery = session.query(VocabDelivery).one()
-        assert delivery.poll_id == 31337
-        assert delivery.payload_json["mode"] == "poll"
+        rows = session.query(VocabDelivery).order_by(VocabDelivery.seq).all()
+        assert len(rows) == 6
+        assert rows[0].poll_id == 31337
+        assert rows[0].payload_json["mode"] == "poll"
+        # Only question 1 is delivered; the rest wait for answers.
+        assert all(row.poll_id is None for row in rows[1:])
 
 
 def test_quiz_spec_is_reproducible(db_session, settings) -> None:
