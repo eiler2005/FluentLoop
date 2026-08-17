@@ -2380,10 +2380,22 @@ def handle_quiz_answer(
     solution = str(payload.get("solution") or "").strip()
     if solution:
         lines.append(italic(solution))
+    lines.extend(_answer_gloss_lines(item))
     if graduated:
         lines.append("🎓 Graduated!")
     lines.extend(_glossary_lines(session, user, options, correct_index))
     return BotReply("\n".join(lines), parse_mode=HTML_PARSE_MODE)
+
+
+def _answer_gloss_lines(item: LearningItem | None) -> list[str]:
+    """Russian translation of the answer, shown only once it is revealed."""
+
+    if item is None:
+        return []
+    from fluentloop.vocab_loop import russian_definition
+
+    russian = russian_definition(item)
+    return [italic(russian)] if russian else []
 
 
 def _glossary_lines(
@@ -2397,11 +2409,14 @@ def _glossary_lines(
     if not notes:
         return []
     lines = ["", bold("The others were:")]
-    for text, meaning in notes:
-        if meaning:
-            lines.append(f"• {bold(text)} — {html_escape(meaning)}")
+    for note in notes:
+        if note.english:
+            lines.append(f"• {bold(note.text)} — {html_escape(note.english)}")
         else:
-            lines.append(f"• {bold(text)}")
+            lines.append(f"• {bold(note.text)}")
+        # Russian only ever appears after the learner has answered.
+        if note.russian:
+            lines.append(f"   {italic(note.russian)}")
     return lines
 
 
@@ -2421,6 +2436,7 @@ def handle_poll_vote(
         lines = [f"❌ It was {bold(outcome.item_text)}"]
     if outcome.solution:
         lines.append(italic(outcome.solution))
+    lines.extend(_answer_gloss_lines(outcome.item))
     if outcome.graduated:
         lines.append("🎓 Graduated!")
     voter = session.get(User, outcome.user_id) if outcome.user_id else None

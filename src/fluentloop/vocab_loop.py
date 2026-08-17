@@ -35,6 +35,39 @@ MAX_SEGMENT_WORDS = 6
 MAX_SEGMENT_CHARS = 64
 _SEGMENT_SPLIT_RE = re.compile(r"[\n,;]+")
 _LETTER_RE = re.compile(r"[^\W\d_]", re.UNICODE)
+_CYRILLIC_RE = re.compile(r"[Ѐ-ӿ]")
+
+
+def has_cyrillic(text: str) -> bool:
+    return bool(_CYRILLIC_RE.search(text or ""))
+
+
+def english_definition(item: LearningItem) -> str:
+    """The English gloss for an item, preferred for anything the bot asks.
+
+    Items arrive from several sources and some carry a Russian gloss in
+    `meaning` while the English one sits in `explanation`, or the other way
+    round. Prompts stay in English, so pick whichever field has no Cyrillic.
+    """
+
+    candidates = [(item.meaning or "").strip(), (item.explanation or "").strip()]
+    for text in candidates:
+        if text and not has_cyrillic(text):
+            return text
+    return ""
+
+
+def russian_definition(item: LearningItem) -> str:
+    """The Russian gloss, shown only after the learner has answered."""
+
+    for text in ((item.meaning or "").strip(), (item.explanation or "").strip()):
+        if text and has_cyrillic(text):
+            return text
+    return ""
+
+
+def any_definition(item: LearningItem) -> str:
+    return english_definition(item) or russian_definition(item)
 
 
 @dataclass(frozen=True)
@@ -115,7 +148,7 @@ def render_cards(items: list[LearningItem], *, title: str = "Morning phrases") -
         if example:
             headline += f" — {html_escape(example)}"
         lines.append(headline)
-        meaning = (item.meaning or item.explanation or "").strip()
+        meaning = any_definition(item)
         if meaning:
             lines.append(f"    {italic(meaning)}")
         lines.append("")

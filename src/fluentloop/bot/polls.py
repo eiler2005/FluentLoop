@@ -41,6 +41,7 @@ class VoteOutcome:
     options: tuple[str, ...] = ()
     correct_index: int = -1
     user_id: int = 0
+    item: LearningItem | None = None
 
 
 def option_bytes(index: int) -> bytes:
@@ -175,4 +176,5 @@ def resolve_vote(
         options=tuple(stored_options),
         correct_index=correct_index,
         user_id=delivery.user_id,
+        item=item,
     )

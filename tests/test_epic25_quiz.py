@@ -363,7 +363,7 @@ def test_glossary_lists_unknown_options_by_name(db_session, settings) -> None:
 
     notes = option_glossary(db_session, user, ["alpha", "beta"], correct_index=0)
 
-    assert notes == [("beta", "")]
+    assert [(n.text, n.english, n.russian) for n in notes] == [("beta", "", "")]
 
 
 def test_glossary_skips_the_correct_answer(db_session, settings) -> None:
@@ -374,4 +374,98 @@ def test_glossary_skips_the_correct_answer(db_session, settings) -> None:
 
     notes = option_glossary(db_session, user, ["pipeline", "other"], correct_index=0)
 
-    assert [text for text, _ in notes] == ["other"]
+    assert [n.text for n in notes] == ["other"]
+
+
+# --- English prompts, Russian only after the answer ------------------------
+
+
+def test_question_uses_the_english_gloss(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="I see one risk",
+        meaning="я вижу один риск",
+        explanation="a hedge that flags a single concern",
+    )
+
+    assert question_for(item) == (
+        'Which word or phrase means: "a hedge that flags a single concern"?'
+    )
+
+
+def test_question_falls_back_to_russian_when_that_is_all_there_is(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(
+        db_session, user, type_="word", text="risk", meaning="риск"
+    )
+
+    assert "риск" in question_for(item)
+
+
+def test_evening_quiz_prefers_an_item_it_can_ask_in_english(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(
+        db_session, user, type_="word", text="ru-only", meaning="только по-русски"
+    )
+    create_learning_item(
+        db_session, user, type_="word", text="en-item", meaning="an English gloss"
+    )
+    _pool(db_session, user)
+
+    spec = evening_quiz(db_session, user, now=NOW, settings=settings, allow_llm=False)
+
+    assert spec is not None
+    assert "только по-русски" not in spec.question
+
+
+def test_answer_reveals_the_russian_translation(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(
+        db_session,
+        user,
+        type_="word",
+        text="pipeline",
+        meaning="конвейер сборки",
+        explanation="a chain of build steps",
+    )
+    _pool(db_session, user)
+    delivery = _delivery(db_session, user, "evening")
+    reply = render_daily_slot(
+        db_session, user, "evening", delivery, now=NOW, settings=settings
+    )
+    correct = delivery.payload_json["correct_index"]
+
+    # The question itself stays English.
+    assert "конвейер" not in reply.text
+
+    answer = handle_quiz_answer(db_session, user, delivery.id, correct)
+
+    # The translation appears only once the answer is revealed.
+    assert "конвейер сборки" in answer.text
+    assert "a chain of build steps" in answer.text
+
+
+def test_glossary_shows_both_languages(db_session, settings) -> None:
+    from fluentloop.quiz import option_glossary
+
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(
+        db_session,
+        user,
+        type_="word",
+        text="rollout",
+        meaning="постепенный выпуск",
+        explanation="a gradual release",
+    )
+
+    note = option_glossary(db_session, user, ["target", "rollout"], correct_index=0)[0]
+
+    assert note.english == "a gradual release"
+    assert note.russian == "постепенный выпуск"

@@ -14,6 +14,7 @@ per item.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
@@ -21,7 +22,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.db.models import LearningItem, User, utc_now
-from fluentloop.vocab_loop import CARD_ITEM_TYPES, QuizSpec, select_cards
+from fluentloop.vocab_loop import (
+    CARD_ITEM_TYPES,
+    QuizSpec,
+    any_definition,
+    english_definition,
+    russian_definition,
+    select_cards,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -31,8 +39,9 @@ _MAX_LENGTH_GAP = 12
 
 
 def question_for(item: LearningItem) -> str:
-    definition = (item.meaning or item.explanation or "").strip()
-    return f'Which word or phrase means: "{definition}"?'
+    """The quiz prompt. English wherever the item has an English gloss."""
+
+    return f'Which word or phrase means: "{any_definition(item)}"?'
 
 
 def cached_distractors(item: LearningItem) -> list[str]:
@@ -152,12 +161,19 @@ def llm_distractors(item: LearningItem, settings: Any | None = None) -> list[str
     ][:DISTRACTOR_COUNT]
 
 
+@dataclass(frozen=True)
+class OptionNote:
+    text: str
+    english: str = ""
+    russian: str = ""
+
+
 def option_glossary(
     session: Session,
     user: User,
     options: list[str],
     correct_index: int,
-) -> list[tuple[str, str]]:
+) -> list[OptionNote]:
     """(text, meaning) for the options that were not the answer.
 
     A wrong option the learner just rejected is a free teaching moment: they
@@ -168,7 +184,7 @@ def option_glossary(
 
     from sqlalchemy import func
 
-    notes: list[tuple[str, str]] = []
+    notes: list[OptionNote] = []
     for index, option in enumerate(options):
         if index == correct_index:
             continue
@@ -181,10 +197,16 @@ def option_glossary(
                 func.lower(LearningItem.text) == text.casefold(),
             )
         )
-        meaning = ""
-        if item is not None:
-            meaning = (item.meaning or item.explanation or "").strip()
-        notes.append((text, meaning))
+        if item is None:
+            notes.append(OptionNote(text=text))
+            continue
+        notes.append(
+            OptionNote(
+                text=text,
+                english=english_definition(item),
+                russian=russian_definition(item),
+            )
+        )
     return notes
 
 
@@ -199,7 +221,7 @@ def build_quiz_spec(
 ) -> QuizSpec | None:
     """Assemble a four-option quiz, or None when there is nothing to ask."""
 
-    definition = (item.meaning or item.explanation or "").strip()
+    definition = any_definition(item)
     if not definition:
         return None
 
@@ -224,7 +246,7 @@ def build_quiz_spec(
         question=question_for(item),
         options=ordered,
         correct_index=correct_index,
-        solution=definition,
+        solution=english_definition(item) or definition,
     )
 
 
@@ -238,9 +260,16 @@ def evening_quiz(
 ) -> QuizSpec | None:
     """Pick an item for tonight's quiz and build the question for it."""
 
-    for item in select_cards(session, user, count=5, now=now):
-        if item.type not in CARD_ITEM_TYPES:
-            continue
+    candidates = [
+        item
+        for item in select_cards(session, user, count=5, now=now)
+        if item.type in CARD_ITEM_TYPES
+    ]
+    # Ask in English when any candidate allows it; fall back to a Russian
+    # gloss only when nothing in today's pool has an English definition.
+    ordered = [item for item in candidates if english_definition(item)]
+    ordered += [item for item in candidates if not english_definition(item)]
+    for item in ordered:
         spec = build_quiz_spec(
             session, user, item, settings=settings, allow_llm=allow_llm
         )
