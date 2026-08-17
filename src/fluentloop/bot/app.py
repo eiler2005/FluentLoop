@@ -82,6 +82,7 @@ from fluentloop.bot.handlers import (
     handle_vocab_undo,
     handle_words,
     handle_words_menu,
+    quick_action_for,
 )
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
@@ -146,6 +147,16 @@ def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
     ]
 
 
+def _persistent_keyboard():  # type: ignore[no-untyped-def]
+    from telethon import Button
+
+    from fluentloop.bot.handlers import QUICK_ACTIONS
+
+    labels = [label for label, _ in QUICK_ACTIONS]
+    rows = [labels[index : index + 2] for index in range(0, len(labels), 2)]
+    return [[Button.text(label, resize=True) for label in row] for row in rows]
+
+
 async def send_reply(  # type: ignore[no-untyped-def]
     client,
     fallback_chat_id,
@@ -157,10 +168,15 @@ async def send_reply(  # type: ignore[no-untyped-def]
             raise RuntimeError("Forum topic replies need Settings for Bot API")
         message = await send_bot_api_reply(settings.telegram_bot_token, reply)
     else:
+        buttons = (
+            _persistent_keyboard()
+            if reply.persistent_keyboard
+            else _telethon_buttons(reply)
+        )
         message = await client.send_message(
             reply.target_chat_id or fallback_chat_id,
             reply.text,
-            buttons=_telethon_buttons(reply),
+            buttons=buttons,
             parse_mode=reply.parse_mode,
         )
     for extra in reply.extra_replies:
@@ -1041,6 +1057,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = BotReply("Unknown button action. Send /help.")
                 await answer_callback(event, "Unknown action")
             if reply.edit_message and await edit_reply(event, reply):
+                for extra in reply.extra_replies:
+                    await send_reply(client, event.chat_id, extra, settings)
                 return
             await send_reply(client, event.chat_id, reply, settings)
 
@@ -1077,6 +1095,37 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 await _reject_or_ignore(event, settings)
                 return
             user: User = ensure_user(session, telegram_user_id, settings)
+            # Persistent-keyboard taps arrive as ordinary text. Dispatch them
+            # before every capture path, or "🃏 Cards" gets stored as a word.
+            action = quick_action_for(event.raw_text)
+            if action is not None:
+                practice_target = workspace_destination(settings, "practice_flow")
+                channel_id = (
+                    str(practice_target.chat_id)
+                    if practice_target.chat_id is not None
+                    else None
+                )
+                if action == "cards":
+                    reply = handle_vocab_cards(session, user)
+                elif action == "words":
+                    reply = handle_words_menu(session, user)
+                elif action == "review":
+                    reply = handle_practice(
+                        session,
+                        user,
+                        "review",
+                        channel_id=channel_id,
+                        message_thread_id=practice_target.message_thread_id,
+                    )
+                else:
+                    reply = handle_today(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=practice_target.message_thread_id,
+                    )
+                await send_reply(client, event.chat_id, reply, settings)
+                return
             state_store = StateStore(session)
             state = state_store.get(event.chat_id, telegram_user_id)
             if state is not None and state.name == "upload":

@@ -45,6 +45,11 @@ Adding your own words - just send them, no command needed:
   cut corners, push back on, roll out
 Commas or new lines for several at once. Your own words always come first.
 
+The buttons under the input field start practice from anywhere:
+  🃏 Cards   read today's words        📚 Lesson    the 15-minute session
+  🔁 Review  recall what is due        📖 My words  your list and counts
+Send /start if they are not showing.
+
 Not sure what to start? Send /today - it asks which of the two you want:
 
   Words   ~2 min   the vocabulary track, below

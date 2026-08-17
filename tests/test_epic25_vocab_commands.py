@@ -576,3 +576,52 @@ def test_practice_modes_are_grouped() -> None:
 def test_cards_command_is_registered() -> None:
     assert "/cards" in command_catalog()
     assert "cards" in {command for command, _ in BOT_COMMANDS}
+
+
+# --- always-on keyboard ----------------------------------------------------
+
+
+def test_quick_actions_map_taps_to_actions() -> None:
+    from fluentloop.bot.handlers import QUICK_ACTIONS, quick_action_for
+
+    assert quick_action_for("🃏 Cards") == "cards"
+    assert quick_action_for("  🔁 Review  ") == "review"
+    assert quick_action_for("📚 Lesson") == "lesson"
+    assert quick_action_for("📖 My words") == "words"
+    assert quick_action_for("cut corners") is None
+    assert quick_action_for("") is None
+    assert len(QUICK_ACTIONS) == 4
+
+
+def test_quick_action_labels_are_not_mistaken_for_words() -> None:
+    """A tap arrives as text; it must never be stored as vocabulary."""
+
+    from fluentloop.bot.handlers import QUICK_ACTIONS, quick_action_for
+
+    for label, _ in QUICK_ACTIONS:
+        # looks_like_word_list would happily accept these, which is exactly
+        # why the dispatcher runs first.
+        assert quick_action_for(label) is not None
+
+
+def test_start_installs_the_keyboard(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_start
+    from fluentloop.vocab_prefs import mark_onboarded
+
+    mark_onboarded(db_session, ensure_user(db_session, 123456789, settings))
+
+    reply = handle_start(db_session, settings, 123456789)
+
+    assert reply.persistent_keyboard is True
+
+
+def test_cards_offer_a_way_to_practise_them(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(
+        db_session, user, type_="word", text="pipeline", meaning="build steps"
+    )
+
+    reply = handle_vocab_cards(db_session, user)
+
+    data = [button.data for row in reply.buttons for button in row]
+    assert data == ["words:review", "words:lesson"]

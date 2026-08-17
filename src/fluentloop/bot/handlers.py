@@ -124,6 +124,10 @@ class BotReply:
     # one. A multi-select keyboard would otherwise spam the chat with one
     # message per tap.
     edit_message: bool = False
+    # Attach the always-visible keyboard under the input field. Commands are
+    # discoverable only if you already know them; this makes starting practice
+    # a tap from anywhere in the chat.
+    persistent_keyboard: bool = False
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -426,6 +430,7 @@ def handle_start(
         )
         + "\n\nRun /setup to redo the setup wizard.",
         user.telegram_user_id,
+        persistent_keyboard=True,
     )
 
 
@@ -2016,7 +2021,18 @@ def handle_vocab_cards(
         return BotReply(
             "No words to show yet. Send me any word or phrase to add it."
         )
-    return BotReply(render_cards(items), parse_mode=HTML_PARSE_MODE)
+    # Reading the cards is the passive half; offer the active half right here
+    # rather than leaving the learner at a dead end.
+    return BotReply(
+        render_cards(items),
+        buttons=[
+            [
+                _button("🔁 Practise these", "words:review"),
+                _button("📖 Vocabulary lesson", "words:lesson"),
+            ]
+        ],
+        parse_mode=HTML_PARSE_MODE,
+    )
 
 
 def handle_vocab_add(session: Session, user: User, raw: str) -> BotReply:
@@ -2080,6 +2096,27 @@ def handle_vocab_add(session: Session, user: User, raw: str) -> BotReply:
         buttons=buttons,
         parse_mode=HTML_PARSE_MODE,
     )
+
+
+QUICK_ACTIONS: tuple[tuple[str, str], ...] = (
+    ("🃏 Cards", "cards"),
+    ("🔁 Review", "review"),
+    ("📚 Lesson", "lesson"),
+    ("📖 My words", "words"),
+)
+QUICK_ACTION_BY_LABEL: dict[str, str] = {
+    label: action for label, action in QUICK_ACTIONS
+}
+
+
+def quick_action_for(text: str) -> str | None:
+    """Map a tap on the persistent keyboard back to an action.
+
+    These arrive as ordinary text messages, so this has to run before the
+    free-text paths - otherwise "🃏 Cards" gets added as a vocabulary item.
+    """
+
+    return QUICK_ACTION_BY_LABEL.get((text or "").strip())
 
 
 DRILL_STATE = "vocab_drill"
