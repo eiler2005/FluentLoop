@@ -153,9 +153,17 @@ def build_drill(
 
 
 def render_drill(exercise: Exercise) -> str:
-    from fluentloop.bot.formatting import bold, html_escape
+    from fluentloop.bot.formatting import bold, html_escape, italic
 
     lines = [f"✍️ {bold('Quick drill')}", "", html_escape(exercise.prompt)]
+    hint = (exercise.hint or "").strip()
+    if hint:
+        lines.append("")
+        lines.append(italic(hint))
+    lines.append("")
+    lines.append(
+        italic("Type your answer in English, or tap Skip to see it.")
+    )
     return "\n".join(lines)
 
 

@@ -152,6 +152,42 @@ def llm_distractors(item: LearningItem, settings: Any | None = None) -> list[str
     ][:DISTRACTOR_COUNT]
 
 
+def option_glossary(
+    session: Session,
+    user: User,
+    options: list[str],
+    correct_index: int,
+) -> list[tuple[str, str]]:
+    """(text, meaning) for the options that were not the answer.
+
+    A wrong option the learner just rejected is a free teaching moment: they
+    have already thought about it. Meanings are looked up from the learner's
+    own items; bank distractors that are not in their base yet come back with
+    an empty meaning and are still listed by name.
+    """
+
+    from sqlalchemy import func
+
+    notes: list[tuple[str, str]] = []
+    for index, option in enumerate(options):
+        if index == correct_index:
+            continue
+        text = str(option).strip()
+        if not text:
+            continue
+        item = session.scalar(
+            select(LearningItem).where(
+                LearningItem.user_id == user.id,
+                func.lower(LearningItem.text) == text.casefold(),
+            )
+        )
+        meaning = ""
+        if item is not None:
+            meaning = (item.meaning or item.explanation or "").strip()
+        notes.append((text, meaning))
+    return notes
+
+
 def build_quiz_spec(
     session: Session,
     user: User,

@@ -324,3 +324,54 @@ def test_slots_return_none_without_content(db_session, settings) -> None:
     assert render_daily_slot(
         db_session, user, "evening", delivery, now=NOW, settings=settings
     ) is None
+
+
+# --- the other options are explained after answering -----------------------
+
+
+def test_quiz_answer_explains_the_other_options(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    _item(db_session, user, "pipeline", "a chain of build steps")
+    for text, meaning in (
+        ("rollout", "a gradual release"),
+        ("backlog", "work that has piled up"),
+        ("bottleneck", "the step that limits everything"),
+    ):
+        _item(db_session, user, text, meaning)
+    delivery = _delivery(db_session, user, "evening")
+    render_daily_slot(
+        db_session, user, "evening", delivery, now=NOW, settings=settings
+    )
+    correct = delivery.payload_json["correct_index"]
+    options = delivery.payload_json["options"]
+
+    reply = handle_quiz_answer(db_session, user, delivery.id, correct)
+
+    assert "The others were:" in reply.text
+    for index, option in enumerate(options):
+        if index == correct:
+            continue
+        assert option in reply.text
+    # And the meanings, so a rejected option still teaches something.
+    assert "a gradual release" in reply.text or "work that has piled up" in reply.text
+
+
+def test_glossary_lists_unknown_options_by_name(db_session, settings) -> None:
+    from fluentloop.quiz import option_glossary
+
+    user = ensure_user(db_session, 123456789, settings)
+
+    notes = option_glossary(db_session, user, ["alpha", "beta"], correct_index=0)
+
+    assert notes == [("beta", "")]
+
+
+def test_glossary_skips_the_correct_answer(db_session, settings) -> None:
+    from fluentloop.quiz import option_glossary
+
+    user = ensure_user(db_session, 123456789, settings)
+    _item(db_session, user, "pipeline", "a chain of build steps")
+
+    notes = option_glossary(db_session, user, ["pipeline", "other"], correct_index=0)
+
+    assert [text for text, _ in notes] == ["other"]

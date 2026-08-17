@@ -2382,7 +2382,27 @@ def handle_quiz_answer(
         lines.append(italic(solution))
     if graduated:
         lines.append("🎓 Graduated!")
+    lines.extend(_glossary_lines(session, user, options, correct_index))
     return BotReply("\n".join(lines), parse_mode=HTML_PARSE_MODE)
+
+
+def _glossary_lines(
+    session: Session, user: User, options: list[str], correct_index: int
+) -> list[str]:
+    """Explain the options the learner did not pick, so they stick too."""
+
+    from fluentloop.quiz import option_glossary
+
+    notes = option_glossary(session, user, list(options), correct_index)
+    if not notes:
+        return []
+    lines = ["", bold("The others were:")]
+    for text, meaning in notes:
+        if meaning:
+            lines.append(f"• {bold(text)} — {html_escape(meaning)}")
+        else:
+            lines.append(f"• {bold(text)}")
+    return lines
 
 
 def handle_poll_vote(
@@ -2403,6 +2423,13 @@ def handle_poll_vote(
         lines.append(italic(outcome.solution))
     if outcome.graduated:
         lines.append("🎓 Graduated!")
+    voter = session.get(User, outcome.user_id) if outcome.user_id else None
+    if voter is not None:
+        lines.extend(
+            _glossary_lines(
+                session, voter, list(outcome.options), outcome.correct_index
+            )
+        )
     return BotReply(
         "\n".join(lines),
         outcome.telegram_user_id or None,
@@ -2419,11 +2446,9 @@ def handle_drill_start(
     if delivery.status == "answered":
         return BotReply("You already answered this one.")
     set_drill_state(session, user, delivery_id, chat_id=chat_id)
-    prompt = (delivery.payload_json or {}).get("exercise", {}).get("prompt", "")
-    return BotReply(
-        f"Send me your answer.\n\n{html_escape(prompt)}",
-        parse_mode=HTML_PARSE_MODE,
-    )
+    # The prompt is already on screen in the message above; repeating it just
+    # adds noise.
+    return BotReply("Go ahead — send your answer as a message.")
 
 
 def handle_drill_skip(

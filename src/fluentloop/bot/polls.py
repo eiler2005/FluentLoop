@@ -38,6 +38,9 @@ class VoteOutcome:
     correct: bool
     graduated: bool
     solution: str = ""
+    options: tuple[str, ...] = ()
+    correct_index: int = -1
+    user_id: int = 0
 
 
 def option_bytes(index: int) -> bytes:
@@ -165,4 +168,7 @@ def resolve_vote(
         correct=correct,
         graduated=graduated,
         solution=str(payload.get("solution", "")),
+        options=tuple(stored_options),
+        correct_index=correct_index,
+        user_id=delivery.user_id,
     )
