@@ -12,13 +12,35 @@ All notable changes to FluentLoop are recorded here. Format follows
   state for mastered items, `/setup` onboarding wizard with topic and
   vocabulary presets, a 164-entry starter word bank shipped in the repo, adding
   your own words by plain message, and `/words`, `/more`, `/learned`,
-  `/delete`, `/pause`, `/resume`, `/today <n>`.
+  `/delete`, `/pause`, `/resume`, `/setup`, `/today <n>`.
+- `/help` now explains the daily loop: the three slots with their times, how to
+  answer each, the English-prompt/Russian-after rule, the interval ladder and
+  graduation, and how to add your own words.
+- After the evening quiz the bot explains the three rejected options with their
+  meanings, in English and Russian.
 - Native Telegram quiz polls over Telethon raw API, with an inline-button
   fallback and a `VOCAB_QUIZ_POLLS` kill switch (ADR-0011).
 - Qwen as a selectable LLM provider alongside OpenAI and DeepSeek, behind the
   existing `AI_PROVIDER` switch (ADR-0010).
 
 ### Fixed
+- Slot claim rolled back the whole tick: `claim_slot` used
+  `session.rollback()` on a duplicate, which discarded every delivery row
+  already written in that tick, so a slot whose message had been sent was
+  re-delivered every minute. Now uses a SAVEPOINT.
+- Native quiz polls were rejected at serialisation: Telethon requires
+  `solution` and `solution_entities` to be both set or both absent, and only
+  checks in `_bytes()`. Every evening poll silently fell back to buttons.
+- Quizzes could offer two defensible answers: distractor ranking preferred
+  candidates sharing tags, which pulled in synonyms. Tag preference is now
+  inverted and near-synonymous glosses are excluded.
+- Prompts mixed languages when an item stored its Russian gloss in `meaning`.
+  Cards and questions now take the English gloss; Russian appears after the
+  answer.
+- The daily tick tried to message seed and demo accounts the command handlers
+  reject, producing a failed delivery and a traceback per slot per day.
+- `scripts/deploy.sh` never pruned its `pre-migration-*.sqlite` snapshots;
+  `BACKUP_RETENTION_DAYS` only covers the scheduled `db-*.sqlite` files.
 - `send_reminders` and `run_pre_generation` computed dates in UTC while
   `PracticeSession.target_date_local` is written in the user's timezone, so a
   non-UTC learner could be nudged during an active session.

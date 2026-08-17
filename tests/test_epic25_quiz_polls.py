@@ -21,6 +21,22 @@ from fluentloop.quiz import build_quiz_spec
 from fluentloop.users import ensure_user
 from fluentloop.vocab_loop import QuizSpec
 
+_FILLER_MEANINGS = (
+    "A gradual release to users.",
+    "Work that has piled up unfinished.",
+    "The step that limits overall speed.",
+    "A planned route for a journey.",
+    "Tiredness after crossing time zones.",
+    "Money set aside for later use.",
+    "A short rest between efforts.",
+    "The person who makes decisions.",
+)
+
+
+def _filler_meaning(index: int) -> str:
+    return _FILLER_MEANINGS[index % len(_FILLER_MEANINGS)]
+
+
 NOW = datetime(2026, 8, 17, 16, 0, tzinfo=UTC)
 SPEC = QuizSpec(
     item_id=7,
@@ -52,7 +68,11 @@ class FakePollClient:
 def _prepared_delivery(session, user, *, settings, poll_id: int | None = None):
     for index in range(5):
         create_learning_item(
-            session, user, type_="word", text=f"filler-{index}", meaning="a meaning"
+            session,
+            user,
+            type_="word",
+            text=f"filler-{index}",
+            meaning=_filler_meaning(index),
         )
     create_learning_item(
         session, user, type_="word", text="pipeline", meaning="a chain of build steps"
@@ -275,7 +295,7 @@ async def test_tick_falls_back_to_buttons_when_poll_fails(
                 session.get(type(user), user.id),
                 type_="word",
                 text=f"word-{index}",
-                meaning="a meaning",
+                meaning=_filler_meaning(index),
             )
         session.commit()
 
@@ -319,7 +339,11 @@ async def test_tick_stores_poll_id_on_success(tmp_path, settings) -> None:
         user.timezone = "Europe/Moscow"
         for index in range(6):
             create_learning_item(
-                session, user, type_="word", text=f"word-{index}", meaning="a meaning"
+                session,
+                user,
+                type_="word",
+                text=f"word-{index}",
+                meaning=_filler_meaning(index),
             )
         session.commit()
 

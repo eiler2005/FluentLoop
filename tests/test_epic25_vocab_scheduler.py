@@ -20,6 +20,22 @@ from fluentloop.users import ensure_user
 from fluentloop.vocab_prefs import update_pref
 
 # 05:00 UTC is 08:00 in Moscow and 01:00 in New York.
+_FILLER_MEANINGS = (
+    "A gradual release to users.",
+    "Work that has piled up unfinished.",
+    "The step that limits overall speed.",
+    "A planned route for a journey.",
+    "Tiredness after crossing time zones.",
+    "Money set aside for later use.",
+    "A short rest between efforts.",
+    "The person who makes decisions.",
+)
+
+
+def _filler_meaning(index: int) -> str:
+    return _FILLER_MEANINGS[index % len(_FILLER_MEANINGS)]
+
+
 MORNING_UTC = datetime(2026, 8, 17, 5, 0, tzinfo=UTC)
 
 
@@ -58,7 +74,9 @@ def _seed_user(factory, settings, telegram_id: int, timezone: str) -> int:
                 user,
                 type_="word",
                 text=f"word-{telegram_id}-{index}",
-                meaning="a meaning",
+                # Distinct glosses: identical ones now read as synonyms and
+                # are refused as quiz distractors.
+                meaning=_filler_meaning(index),
                 examples=["An example sentence."],
             )
         session.commit()

@@ -14,6 +14,7 @@ per item.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -70,6 +71,49 @@ def _stable_rank(item_id: int, candidate_id: int) -> int:
     return (item_id * 1_000_003 + candidate_id * 7919) % 100_003
 
 
+_STOPWORDS = frozenset({
+    "a", "an", "the", "to", "of", "for", "in", "on", "at", "by", "with",
+    "and", "or", "is", "are", "be", "being", "been", "that", "this",
+    "these", "those", "it", "its", "as", "from", "your", "you", "way",
+    "make", "makes", "making", "without", "something", "someone", "one",
+})
+# Provenance markers, not meaning. They must not count as shared function.
+_GENERIC_TAGS = frozenset({"demo", "wordbank", "user_added", "seed"})
+# Above this overlap the two definitions describe the same idea, so the
+# distractor would be a second correct answer.
+_SYNONYM_OVERLAP = 0.33
+
+
+def _stem(word: str) -> str:
+    for suffix in ("ations", "ation", "ing", "ed", "es", "s"):
+        if len(word) > len(suffix) + 2 and word.endswith(suffix):
+            return word[: -len(suffix)]
+    return word
+
+
+def _content_words(text: str) -> set[str]:
+    words = re.findall(r"[a-z]+", (text or "").lower())
+    return {
+        _stem(word) for word in words if word not in _STOPWORDS and len(word) > 2
+    }
+
+
+def is_near_synonym(target_definition: str, candidate_definition: str) -> bool:
+    """True when two glosses describe the same thing.
+
+    Distractor ranking deliberately prefers items sharing tags and register,
+    which makes it prone to picking an actual synonym. A quiz with two
+    defensible answers teaches nothing, so those candidates are dropped.
+    """
+
+    target = _content_words(target_definition)
+    candidate = _content_words(candidate_definition)
+    if not target or not candidate:
+        return False
+    overlap = len(target & candidate) / min(len(target), len(candidate))
+    return overlap >= _SYNONYM_OVERLAP
+
+
 def select_distractors(
     session: Session,
     user: User,
@@ -89,8 +133,11 @@ def select_distractors(
     ).all()
 
     target_text = item.text.strip().casefold()
-    target_tags = {str(tag).casefold() for tag in (item.tags or [])}
+    target_tags = {
+        str(tag).casefold() for tag in (item.tags or [])
+    } - _GENERIC_TAGS
     target_register = str((item.metadata_json or {}).get("register", "")).casefold()
+    target_definition = any_definition(item)
 
     scored: list[tuple[tuple[int, int, int, int], str]] = []
     for candidate in candidates:
@@ -100,7 +147,13 @@ def select_distractors(
             continue
         if folded in target_text or target_text in folded:
             continue
-        tags = {str(tag).casefold() for tag in (candidate.tags or [])}
+        if is_near_synonym(target_definition, any_definition(candidate)):
+            continue
+        tags = {str(tag).casefold() for tag in (candidate.tags or [])} - _GENERIC_TAGS
+        # Shared content tags mean shared FUNCTION, which is what makes a
+        # distractor a second correct answer. Candidates are already limited to
+        # the learner's own items of the same type, so they are plausible
+        # without it; prefer the ones that do a different job.
         tag_overlap = len(target_tags & tags)
         register = str(
             (candidate.metadata_json or {}).get("register", "")
@@ -109,10 +162,9 @@ def select_distractors(
         length_gap = abs(len(text) - len(item.text))
         if length_gap > _MAX_LENGTH_GAP:
             length_gap = _MAX_LENGTH_GAP
-        # Sort key: better matches first, then a stable tiebreak so the same
-        # item always produces the same quiz.
+        # Stable tiebreak last, so the same item always produces the same quiz.
         key = (
-            -tag_overlap,
+            tag_overlap,
             -register_match,
             length_gap,
             _stable_rank(item.id, candidate.id),

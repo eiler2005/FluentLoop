@@ -451,3 +451,23 @@ def test_new_commands_are_registered_in_both_catalogs() -> None:
     for command in NEW_COMMANDS:
         assert command in catalog
         assert command in menu
+
+
+def test_help_explains_the_daily_loop(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_help
+
+    text = handle_help().text
+
+    # The three slots, with times, so the learner knows what to expect.
+    for marker in ("Morning 08:00", "Midday  13:00", "Evening 19:00"):
+        assert marker in text
+    # How to answer each kind of prompt.
+    assert "reply with a message" in text
+    assert "Tap an option" in text
+    # The language rule and the graduation rule.
+    assert "Russian appears only after you answer" in text
+    assert "graduates" in text
+    # Adding your own words, and every daily-loop command.
+    assert "cut corners, push back on, roll out" in text
+    for command in NEW_COMMANDS + ("/setup", "/today 5"):
+        assert command in text

@@ -141,7 +141,7 @@ FluentLoop/
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 │   └── seeds/                    Shipped seed data (starter word bank JSONL).
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (27 modules, 288+ tests).
+└── tests/                        Pytest suite (27 modules, 312+ tests).
 ```
 
 ## Verification commands

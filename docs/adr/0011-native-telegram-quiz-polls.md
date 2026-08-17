@@ -38,6 +38,10 @@ Telethon handler.
   vote handler recovers the index with `int(raw.decode())`.
 - Wrap the poll question and each option in `TextWithEntities` — required by the
   Telethon 1.36 TL schema.
+- `solution` and `solution_entities` must be **both set or both absent**.
+  Telethon only asserts this while serialising the request, so a poll built
+  with a solution and no entities looks valid until it is sent. Tests must
+  call `bytes()` on the media to reach that check.
 - Persist `(poll_id, message_id)` on the `vocab_deliveries` row. An incoming
   vote is resolved by an indexed lookup on `poll_id`.
 - `resolve_vote` is pure database work with no Telethon import, so the entire
@@ -57,9 +61,10 @@ Telethon handler.
 - `public_voters=True` means the bot can see who voted. In a one-to-one chat
   this is information the bot already has, but the flag would be a privacy
   consideration if polls were ever posted to a group.
-- `UpdateMessagePollVote` travels the `qts` update sequence. Telethon processes
-  qts for bots, but this is the one part of the design that cannot be verified
-  offline; it needs a live smoke test after deploy.
+- `UpdateMessagePollVote` travels the `qts` update sequence. **Confirmed in
+  production on 2026-08-17**: a poll sent over MTProto received the learner's
+  vote through the `events.Raw` handler and updated `ReviewState`. Telethon
+  does deliver qts updates to bots.
 
 **Neutral**
 

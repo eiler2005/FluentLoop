@@ -43,7 +43,16 @@ timing per user inside the job.
   cards and one restarted at 10:00 does not.
 - Before sending, the tick INSERTs a `vocab_deliveries` row. The unique
   constraint on `(user_id, local_date, slot, seq)` is the lock: a second tick
-  hits `IntegrityError`, rolls back, and skips.
+  hits `IntegrityError` and skips.
+- **The insert must run inside a SAVEPOINT** (`session.begin_nested()`). A
+  plain `session.rollback()` unwinds the whole session, so a duplicate claim
+  later in the same tick erases delivery rows already written for earlier
+  users — including ones whose message was already sent, which are then
+  re-delivered on the next tick. This shipped and had to be fixed in
+  production.
+- Users the command handlers would reject (seed and demo rows) are skipped
+  before any Telegram call, so they do not produce a failed delivery and a
+  traceback per slot per day.
 - A slot that raises is marked `failed` rather than left `claimed`, so a broken
   slot is logged once instead of retried every minute.
 - Cost per tick is one `select(User)`. Everything after that is pure Python

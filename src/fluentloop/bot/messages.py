@@ -26,13 +26,37 @@ What happens in practice:
 - SRS, confidence, L1 traps, and mistake patterns decide what comes back.
 - /stats shows activity; /outcomes shows learning evidence.
 
-Your day:
-- Morning: your words with example sentences.
-- Midday: a quick drill; some days you write your own sentence.
-- Evening: a short quiz.
-Right answers push a word further out; it graduates once you have mastered it.
-Send me any word or phrase any time to add it - commas or new lines for
-several at once. Your own words always get top priority.
+Your day - the bot writes to you three times, each under a minute:
+
+  Morning 08:00   Your words for today. Each one shows an example sentence
+                  and a short definition.
+  Midday  13:00   One quick drill. Tap "Answer" and reply with a message.
+                  Roughly every third day it asks you to write 2-3 sentences
+                  of your own; otherwise it is a gap-fill or a translation.
+  Evening 19:00   A four-option quiz. Tap an option. You then see whether it
+                  was right, what the answer means, and what the other three
+                  options meant, so the ones you rejected stick too.
+
+Prompts are in English. Russian appears only after you answer.
+Right answers push a word further out: 5 seconds, then minutes, hours, days.
+Once a word survives a 120-day gap it graduates and leaves the rotation.
+
+Adding your own words - just send them, no command needed:
+  cut corners, push back on, roll out
+Commas or new lines for several at once. Your own words always come first.
+
+Daily-loop commands:
+  /today 5          show 5 cards right now, without waiting for the morning
+  /words            your list, what is coming up, how many graduated
+  /more <word>      full card: meaning, synonyms, collocations, examples
+  /learned <word>   mark as mastered (with an Undo button)
+  /delete <word>    remove a word (also undoable)
+  /pause /resume    stop and restart the three daily messages
+  /setup            redo the wizard: topics, vocabulary kinds, pace
+  /settings         change slot times and words per day
+
+Note that bare /today still starts the full 15-minute session. Only
+/today <number> shows cards.
 
 If you want focused practice:
 - /practice notebook - free writing + native diff

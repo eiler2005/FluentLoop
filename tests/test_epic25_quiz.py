@@ -33,9 +33,27 @@ def _item(session, user, text: str, meaning: str = "a meaning", **kwargs):
     )
 
 
+_FILLER_MEANINGS = (
+    "A gradual release to users.",
+    "Work that has piled up unfinished.",
+    "The step that limits overall speed.",
+    "A planned route for a journey.",
+    "Tiredness after crossing time zones.",
+    "Money set aside for later use.",
+    "A short rest between efforts.",
+    "The person who makes decisions.",
+)
+
+
+def _filler_meaning(index: int) -> str:
+    return _FILLER_MEANINGS[index % len(_FILLER_MEANINGS)]
+
+
 def _pool(session, user, count: int = 5) -> None:
+    # Genuinely different glosses. Near-identical ones now read as synonyms
+    # and are correctly refused as distractors.
     for index in range(count):
-        _item(session, user, f"filler-{index}")
+        _item(session, user, f"filler-{index}", _filler_meaning(index))
 
 
 def _delivery(session, user, slot: str) -> VocabDelivery:
@@ -85,13 +103,22 @@ def test_select_distractors_is_stable(db_session, settings) -> None:
     assert first == second
 
 
-def test_select_distractors_prefers_shared_tags(db_session, settings) -> None:
+def test_select_distractors_avoids_the_same_function(db_session, settings) -> None:
+    """Inverted deliberately: a shared content tag means a shared job.
+
+    Candidates are already limited to the learner's own items of the same
+    type, so they are plausible without matching tags; matching tags is what
+    produced quizzes with two defensible answers.
+    """
+
     user = ensure_user(db_session, 123456789, settings)
-    target = _item(db_session, user, "pipeline", tags=["tech"])
-    _item(db_session, user, "tagged-peer", tags=["tech"])
+    target = _item(db_session, user, "pipeline", "A chain of build steps.",
+                   tags=["hedging"])
+    _item(db_session, user, "tagged-peer", "Something else entirely here.",
+          tags=["hedging"])
     _pool(db_session, user, count=6)
 
-    assert "tagged-peer" in select_distractors(db_session, user, target)
+    assert "tagged-peer" not in select_distractors(db_session, user, target)
 
 
 def test_select_distractors_skips_substring_overlap(db_session, settings) -> None:
@@ -469,3 +496,114 @@ def test_glossary_shows_both_languages(db_session, settings) -> None:
 
     assert note.english == "a gradual release"
     assert note.russian == "постепенный выпуск"
+
+
+# --- distractors must not be second correct answers ------------------------
+
+
+def test_near_synonym_detection() -> None:
+    from fluentloop.quiz import is_near_synonym
+
+    # The pair that shipped a two-answer quiz to production.
+    assert is_near_synonym(
+        "Useful hedge for recommendations.",
+        "A natural way to make a recommendation without overclaiming.",
+    )
+    assert is_near_synonym(
+        "Useful hedge for recommendations.",
+        "A structured way to recommend action under uncertainty.",
+    )
+    assert not is_near_synonym(
+        "Useful hedge for recommendations.",
+        "Introduces the cost or risk of an option.",
+    )
+    assert not is_near_synonym("a chain of build steps", "a gradual release")
+    assert not is_near_synonym("", "anything")
+
+
+def test_distractors_exclude_synonyms_of_the_target(db_session, settings) -> None:
+    """Regression: the real quiz offered two defensible answers."""
+
+    user = ensure_user(db_session, 123456789, settings)
+    target = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="it may be worth",
+        explanation="Useful hedge for recommendations.",
+        tags=["demo", "hedging", "recommendations"],
+    )
+    create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="I would lean towards",
+        explanation="A natural way to make a recommendation without overclaiming.",
+        tags=["demo", "recommendations", "architecture"],
+    )
+    for index in range(6):
+        create_learning_item(
+            db_session,
+            user,
+            type_="expression",
+            text=f"unrelated-{index}",
+            explanation=f"Describes topic number {index} in a factory setting.",
+            tags=["demo", f"topic{index}"],
+        )
+
+    distractors = select_distractors(db_session, user, target)
+
+    assert "I would lean towards" not in distractors
+    assert len(distractors) == 3
+
+
+def test_distractors_prefer_a_different_function(db_session, settings) -> None:
+    """Shared content tags mean shared job, which is what causes collisions."""
+
+    user = ensure_user(db_session, 123456789, settings)
+    target = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="target phrase",
+        explanation="Alpha beta gamma delta.",
+        tags=["demo", "recommendations"],
+    )
+    create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="same function",
+        explanation="Epsilon zeta eta theta.",
+        tags=["demo", "recommendations"],
+    )
+    for index in range(4):
+        create_learning_item(
+            db_session,
+            user,
+            type_="expression",
+            text=f"other function {index}",
+            explanation=f"Iota kappa lambda number {index}.",
+            tags=["demo", f"unrelated{index}"],
+        )
+
+    distractors = select_distractors(db_session, user, target)
+
+    # The tag-sharing candidate is ranked last, so it falls outside the top 3.
+    assert "same function" not in distractors
+
+
+def test_generic_tags_do_not_count_as_shared_function(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    target = create_learning_item(
+        db_session, user, type_="word", text="alpha",
+        meaning="A gradual release to users.", tags=["wordbank", "demo"],
+    )
+    for index in range(4):
+        create_learning_item(
+            db_session, user, type_="word", text=f"peer-{index}",
+            meaning=_filler_meaning(index + 1), tags=["wordbank", "demo"],
+        )
+
+    # All share only provenance tags, so all stay eligible.
+    assert len(select_distractors(db_session, user, target)) == 3
