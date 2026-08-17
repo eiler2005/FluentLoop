@@ -592,7 +592,8 @@ def test_quick_actions_map_taps_to_actions() -> None:
     assert quick_action_for("📖 My words") == "words"
     assert quick_action_for("cut corners") is None
     assert quick_action_for("") is None
-    assert len(QUICK_ACTIONS) == 4
+    assert quick_action_for("➕ Add words") == "add"
+    assert len(QUICK_ACTIONS) == 5
 
 
 def test_quick_action_labels_are_not_mistaken_for_words() -> None:
@@ -627,3 +628,19 @@ def test_cards_offer_a_way_to_practise_them(db_session, settings) -> None:
 
     data = [button.data for row in reply.buttons for button in row]
     assert data == ["words:review", "words:lesson"]
+
+
+def test_add_words_button_arms_an_explicit_add(db_session, settings) -> None:
+    """Tapping Add bypasses the material heuristic for the next message."""
+
+    from fluentloop.bot.handlers import ADD_WORDS_STATE, handle_add_words_prompt
+    from fluentloop.bot.state import StateStore
+
+    user = ensure_user(db_session, 123456789, settings)
+
+    reply = handle_add_words_prompt(db_session, user, chat_id=555)
+
+    assert "Send the word or phrase" in reply.text
+    state = StateStore(db_session).get(555, user.telegram_user_id)
+    assert state is not None
+    assert state.name == ADD_WORDS_STATE

@@ -331,3 +331,33 @@ async def test_tick_skips_accounts_the_bot_would_reject(factory, settings) -> No
     with factory() as session:
         rows = session.scalars(select(VocabDelivery)).all()
         assert len(rows) == 1
+
+
+def test_replies_follow_the_request_not_the_workspace(settings) -> None:
+    """Regression: tapping Review in a DM sent the session to a forum topic.
+
+    From the learner's side that is indistinguishable from the bot ignoring
+    them, which is exactly how it was reported.
+    """
+
+    from dataclasses import replace as replace_dataclass
+
+    from fluentloop.bot.app import _here_or_workspace
+
+    configured = replace_dataclass(
+        settings,
+        telegram_forum_group_id="-100999",
+        telegram_topic_practice_flow_id=4,
+    )
+
+    class _Event:
+        def __init__(self, chat_id):
+            self.chat_id = chat_id
+
+    private = _here_or_workspace(_Event(123456789), configured, "practice_flow")
+    assert private.chat_id is None
+    assert private.message_thread_id is None
+
+    forum = _here_or_workspace(_Event(-100999), configured, "practice_flow")
+    assert str(forum.chat_id) == "-100999"
+    assert forum.message_thread_id == 4

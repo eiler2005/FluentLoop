@@ -2104,6 +2104,7 @@ QUICK_ACTIONS: tuple[tuple[str, str], ...] = (
     ("🔁 Review", "review"),
     ("📚 Lesson", "lesson"),
     ("📖 My words", "words"),
+    ("➕ Add words", "add"),
 )
 QUICK_ACTION_BY_LABEL: dict[str, str] = {
     label: action for label, action in QUICK_ACTIONS
@@ -2121,6 +2122,24 @@ def quick_action_for(text: str) -> str | None:
 
 
 DRILL_STATE = "vocab_drill"
+ADD_WORDS_STATE = "vocab_add"
+
+
+def set_add_words_state(session: Session, user: User, *, chat_id: int) -> None:
+    StateStore(session).set(chat_id, user.telegram_user_id, ADD_WORDS_STATE, {})
+
+
+def handle_add_words_prompt(
+    session: Session, user: User, *, chat_id: int
+) -> BotReply:
+    """Arm an explicit add, so the material heuristic cannot get in the way."""
+
+    set_add_words_state(session, user, chat_id=chat_id)
+    return BotReply(
+        "Send the word or phrase you want to add.\n"
+        "Several at once: separate them with commas or new lines.\n\n"
+        "cut corners, push back on, roll out",
+    )
 ONBOARDING_STATE = "onboarding"
 
 TOPIC_CHOICES: tuple[tuple[str, str], ...] = (

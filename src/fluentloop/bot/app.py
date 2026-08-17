@@ -7,9 +7,11 @@ from sqlalchemy.orm import sessionmaker
 
 from fluentloop.ai.factory import make_provider
 from fluentloop.bot.handlers import (
+    ADD_WORDS_STATE,
     DRILL_STATE,
     BotReply,
     handle_add_text,
+    handle_add_words_prompt,
     handle_answer,
     handle_approve_all,
     handle_article,
@@ -131,6 +133,21 @@ async def _reject_or_ignore(event, settings: Settings) -> None:  # type: ignore[
     if _is_forum_chat(event.chat_id, settings):
         return
     await event.reply("This is a personal FluentLoop bot.")
+
+
+def _here_or_workspace(event, settings: Settings, topic: str):  # type: ignore[no-untyped-def]
+    """Where a reply to this request belongs.
+
+    Answer where you were asked. Routing a private-chat request into a forum
+    topic looks exactly like the bot ignoring you, which is what tapping
+    Review in a DM used to do.
+    """
+
+    from fluentloop.telegram_workspace import TelegramDestination
+
+    if _is_forum_chat(event.chat_id, settings):
+        return workspace_destination(settings, topic)
+    return TelegramDestination(None, None)
 
 
 def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
@@ -339,6 +356,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     session, settings, telegram_user_id, chat_id=event.chat_id
                 )
                 if workspace_enabled(settings):
+                    # The hub posts are addressed to the workspace on purpose,
+                    # unlike practice replies, which follow the request.
                     help_target = workspace_destination(settings, "help")
                     practice_target = workspace_destination(settings, "practice_flow")
                     materials_target = workspace_destination(
@@ -396,7 +415,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     # Bare /today asks which of the two tracks you want.
                     reply = handle_today_menu(session, user)
                 else:
-                    practice_target = workspace_destination(settings, "practice_flow")
+                    practice_target = _here_or_workspace(
+                        event, settings, "practice_flow"
+                    )
                     reply = handle_today(
                         session,
                         user,
@@ -408,7 +429,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         message_thread_id=practice_target.message_thread_id,
                     )
             elif command == "/review":
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
                     user,
@@ -422,7 +443,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
             elif command == "/practice":
                 mode = parts[1] if len(parts) >= 2 else ""
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
                     user,
@@ -477,7 +498,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_lessons(session, user, query)
             elif command == "/lesson":
                 payload = event.raw_text.removeprefix("/lesson").strip()
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_lesson(
                     session,
                     user,
@@ -615,9 +636,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     else:
                         reply = handle_feedback_explain(session, user, attempt_id)
             elif command == "/skip":
-                next_target = workspace_destination(settings, "next_prompt")
-                summary_target = workspace_destination(settings, "summary")
-                practice_target = workspace_destination(settings, "practice_flow")
+                next_target = _here_or_workspace(event, settings, "next_prompt")
+                summary_target = _here_or_workspace(event, settings, "summary")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_skip_current(
                     session,
                     user,
@@ -717,7 +738,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             user = ensure_user(session, telegram_user_id, settings)
             parts = raw_data.split(":", 2)
             if raw_data in {"start_today", "today:start", "today:lesson"}:
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_today(
                     session,
                     user,
@@ -745,7 +766,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_library_callback(session, user, parts[1], parts[2])
                 await answer_callback(event, "Library")
             elif len(parts) == 3 and parts[0] == "lesson":
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_lesson_callback(
                     session,
                     user,
@@ -894,7 +915,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_vocab_cards(session, user)
                 await answer_callback(event, "Cards")
             elif raw_data == "words:review":
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
                     user,
@@ -908,7 +929,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 await answer_callback(event, "Review")
             elif raw_data == "words:lesson":
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
                     user,
@@ -1027,9 +1048,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     )
                 await answer_callback(event, "Confidence recorded")
             elif raw_data == "practice:skip":
-                next_target = workspace_destination(settings, "next_prompt")
-                summary_target = workspace_destination(settings, "summary")
-                practice_target = workspace_destination(settings, "practice_flow")
+                next_target = _here_or_workspace(event, settings, "next_prompt")
+                summary_target = _here_or_workspace(event, settings, "summary")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_skip_current(
                     session,
                     user,
@@ -1099,13 +1120,21 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             # before every capture path, or "🃏 Cards" gets stored as a word.
             action = quick_action_for(event.raw_text)
             if action is not None:
-                practice_target = workspace_destination(settings, "practice_flow")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 channel_id = (
                     str(practice_target.chat_id)
                     if practice_target.chat_id is not None
                     else None
                 )
-                if action == "cards":
+                if action != "add":
+                    # Tapping anything else abandons a pending add, so the
+                    # next message is not silently swallowed as vocabulary.
+                    StateStore(session).clear(event.chat_id, telegram_user_id)
+                if action == "add":
+                    reply = handle_add_words_prompt(
+                        session, user, chat_id=event.chat_id
+                    )
+                elif action == "cards":
                     reply = handle_vocab_cards(session, user)
                 elif action == "words":
                     reply = handle_words_menu(session, user)
@@ -1148,6 +1177,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         )
                 state_store.clear(event.chat_id, telegram_user_id)
                 reply = _material_upload_reply(reply, event, settings)
+            elif state is not None and state.name == ADD_WORDS_STATE:
+                reply = handle_vocab_add(session, user, event.raw_text)
+                state_store.clear(event.chat_id, telegram_user_id)
             elif state is not None and state.name == DRILL_STATE:
                 reply = handle_drill_answer(
                     session,
@@ -1171,10 +1203,10 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 state_store.clear(event.chat_id, telegram_user_id)
                 reply = _material_upload_reply(reply, event, settings)
             else:
-                feedback_target = workspace_destination(settings, "feedback")
-                next_target = workspace_destination(settings, "next_prompt")
-                summary_target = workspace_destination(settings, "summary")
-                practice_target = workspace_destination(settings, "practice_flow")
+                feedback_target = _here_or_workspace(event, settings, "feedback")
+                next_target = _here_or_workspace(event, settings, "next_prompt")
+                summary_target = _here_or_workspace(event, settings, "summary")
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_answer(
                     session,
                     user,
