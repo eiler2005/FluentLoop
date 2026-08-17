@@ -171,10 +171,51 @@ def format_for_mode(mode: str) -> LessonFormat | None:
     return next((item for item in LESSON_FORMATS if item.mode == normalized), None)
 
 
+# Thirteen modes in one flat list gave no clue which to reach for. Grouped by
+# what the learner wants to work on, not by when the mode was built.
+PRACTICE_MODE_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Words", ("vocab", "review")),
+    ("Grammar and mistakes", ("grammar", "mistakes")),
+    (
+        "Writing and speaking",
+        (
+            "writing",
+            "writing_workshop",
+            "notebook",
+            "diplomatic",
+            "discourse",
+            "reading",
+            "genre",
+        ),
+    ),
+)
+_UNGROUPED_HEADING = "Everything at once"
+
+
+def grouped_practice_modes() -> list[tuple[str, list[LessonFormat]]]:
+    """Practice modes by theme, with anything ungrouped kept at the end."""
+
+    by_mode = {item.mode: item for item in LESSON_FORMATS}
+    groups: list[tuple[str, list[LessonFormat]]] = []
+    placed: set[str] = set()
+    for heading, modes in PRACTICE_MODE_GROUPS:
+        members = [by_mode[mode] for mode in modes if mode in by_mode]
+        placed.update(item.mode for item in members)
+        if members:
+            groups.append((heading, members))
+    leftover = [item for item in LESSON_FORMATS if item.mode not in placed]
+    if leftover:
+        groups.append((_UNGROUPED_HEADING, leftover))
+    return groups
+
+
 def practice_modes_help() -> str:
     lines = ["Practice modes"]
-    for item in LESSON_FORMATS:
-        lines.append(f"{item.command} - {item.title}: {item.focus}")
+    for heading, members in grouped_practice_modes():
+        lines.append("")
+        lines.append(f"{heading}:")
+        for item in members:
+            lines.append(f"  {item.command} - {item.title}: {item.focus}")
     return "\n".join(lines)
 
 

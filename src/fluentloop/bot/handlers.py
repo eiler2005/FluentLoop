@@ -752,6 +752,75 @@ def handle_today(
     )
 
 
+def handle_today_menu(session: Session, user: User) -> BotReply:
+    """The fork between the two things FluentLoop actually offers.
+
+    Words and lessons train different units on different timescales; putting
+    both behind bare /today (and cards behind /today <n>) meant the command
+    did not say what it would do.
+    """
+
+    from fluentloop.srs import get_due_items
+    from fluentloop.vocab_prefs import get_prefs
+
+    due = len(get_due_items(session, user.id, limit=99))
+    per_day = get_prefs(user).words_per_day
+    lines = [
+        bold("What's on today?"),
+        "",
+        f"🃏 {bold('Words')} — about 2 minutes."
+        + (f" {due} due now." if due else " Nothing due right now."),
+        f"📚 {bold('Lesson')} — about 15 minutes, from your lesson base.",
+    ]
+    return BotReply(
+        "\n".join(lines),
+        buttons=[
+            [
+                _button(f"🃏 Words · {per_day}", "today:words"),
+                _button("📚 Lesson", "today:lesson"),
+            ]
+        ],
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_words_menu(
+    session: Session, user: User, *, edit: bool = False
+) -> BotReply:
+    """Second screen: the three ways to work on the same vocabulary."""
+
+    from fluentloop.srs import get_due_items
+    from fluentloop.vocab_prefs import get_prefs
+
+    counts = {
+        status: len(list_items(session, user.id, status=status, limit=1000))
+        for status in ("active", "graduated")
+    }
+    due = len(get_due_items(session, user.id, limit=99))
+    per_day = get_prefs(user).words_per_day
+    lines = [
+        bold("📖 Words"),
+        f"Active: {counts['active']} · 🎓 Graduated: {counts['graduated']} "
+        f"· Due now: {due}",
+        "",
+        f"{bold('Show cards')} — read {per_day} of them, nothing is asked.",
+        f"{bold('Review due')} — recall the ones that are due.",
+        f"{bold('Vocabulary lesson')} — a full session built around them.",
+    ]
+    return BotReply(
+        "\n".join(lines),
+        buttons=[
+            [
+                _button("🃏 Show cards", "words:cards"),
+                _button("🔁 Review due", "words:review"),
+            ],
+            [_button("📖 Vocabulary lesson", "words:lesson")],
+        ],
+        parse_mode=HTML_PARSE_MODE,
+        edit_message=edit,
+    )
+
+
 def handle_practice(
     session: Session,
     user: User,
@@ -2615,6 +2684,7 @@ def command_catalog() -> list[str]:
         "/start",
         "/setup",
         "/today",
+        "/cards",
         "/review",
         "/practice",
         "/baseline",

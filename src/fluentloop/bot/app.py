@@ -70,6 +70,7 @@ from fluentloop.bot.handlers import (
     handle_stats,
     handle_subscribe,
     handle_today,
+    handle_today_menu,
     handle_topics,
     handle_translate_lab,
     handle_upload,
@@ -80,6 +81,7 @@ from fluentloop.bot.handlers import (
     handle_vocab_cards,
     handle_vocab_undo,
     handle_words,
+    handle_words_menu,
 )
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
@@ -182,7 +184,14 @@ async def edit_reply(event, reply: BotReply) -> bool:  # type: ignore[no-untyped
         )
         return True
     except Exception as exc:  # noqa: BLE001 - message may be gone or unchanged
-        LOG.debug("Could not edit callback message: %s", type(exc).__name__)
+        # Visible on purpose: falling back to a new message is exactly the
+        # spam this is meant to avoid, so a silent failure is indistinguishable
+        # from the bug.
+        LOG.warning(
+            "Could not edit callback message, sending instead: %s: %s",
+            type(exc).__name__,
+            exc,
+        )
         return False
 
 
@@ -359,11 +368,17 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             message_thread_id=help_target.message_thread_id,
                         ),
                     )
+            elif command == "/cards":
+                has_count = len(parts) >= 2 and parts[1].isdigit()
+                count = int(parts[1]) if has_count else None
+                reply = handle_vocab_cards(session, user, count)
             elif command == "/today":
                 if len(parts) >= 2 and parts[1].isdigit():
-                    # /today <n> shows n vocabulary cards; bare /today still
-                    # starts the full practice session.
+                    # /today <n> stays a shortcut for /cards <n>.
                     reply = handle_vocab_cards(session, user, int(parts[1]))
+                elif len(parts) == 1:
+                    # Bare /today asks which of the two tracks you want.
+                    reply = handle_today_menu(session, user)
                 else:
                     practice_target = workspace_destination(settings, "practice_flow")
                     reply = handle_today(
@@ -685,7 +700,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 return
             user = ensure_user(session, telegram_user_id, settings)
             parts = raw_data.split(":", 2)
-            if raw_data in {"start_today", "today:start"}:
+            if raw_data in {"start_today", "today:start", "today:lesson"}:
                 practice_target = workspace_destination(settings, "practice_flow")
                 reply = handle_today(
                     session,
@@ -856,6 +871,40 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 else:
                     reply = handle_item_status(session, user, item_id, parts[1])
                 await answer_callback(event, "Item updated")
+            elif raw_data == "today:words":
+                reply = handle_words_menu(session, user, edit=True)
+                await answer_callback(event, "Words")
+            elif raw_data == "words:cards":
+                reply = handle_vocab_cards(session, user)
+                await answer_callback(event, "Cards")
+            elif raw_data == "words:review":
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_practice(
+                    session,
+                    user,
+                    "review",
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+                await answer_callback(event, "Review")
+            elif raw_data == "words:lesson":
+                practice_target = workspace_destination(settings, "practice_flow")
+                reply = handle_practice(
+                    session,
+                    user,
+                    "vocab",
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+                await answer_callback(event, "Vocabulary lesson")
             elif len(parts) == 3 and parts[0] == "onb":
                 reply = handle_onboarding_callback(
                     session, user, parts[1], parts[2], chat_id=event.chat_id

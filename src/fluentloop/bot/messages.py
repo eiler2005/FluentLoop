@@ -21,7 +21,7 @@ Start here:
 What happens in practice:
 - Your lesson base lives in /topics, /lessons, and /lesson.
 - /lesson shows lesson type, what you train, and target mix.
-- /today chooses practice from your personal base.
+- /today asks whether you want words or a lesson.
 - Feedback has layers: Errors, Native, Why.
 - SRS, confidence, L1 traps, and mistake patterns decide what comes back.
 - /stats shows activity; /outcomes shows learning evidence.
@@ -45,19 +45,22 @@ Adding your own words - just send them, no command needed:
   cut corners, push back on, roll out
 Commas or new lines for several at once. Your own words always come first.
 
-Which command do I want? The cards and the lessons train the SAME words -
-the difference is how hard they make you work:
+Not sure what to start? Send /today - it asks which of the two you want:
 
-  /today 5          shows cards. Passive: you read, nothing is asked.
+  Words   ~2 min   the vocabulary track, below
+  Lesson  ~15 min  a structured session from your lesson plans
+
+The cards and the vocabulary lessons train the SAME words - they differ only
+in how hard they make you work:
+
+  /cards            shows cards. Passive: you read, nothing is asked.
   /review           drills the words that are due right now - the ones this
                     morning's cards showed. Start here to practise them.
   /practice vocab   a full vocabulary lesson built around those words:
                     collocations, paraphrase, cloze, reverse translation.
-  /today            the general 15-minute lesson from your lesson plans -
-                    grammar, scenarios, free writing. A different thing.
 
 Daily-loop commands:
-  /today 5          show 5 cards right now, without waiting for the morning
+  /cards 5          show 5 cards right now, without waiting for the morning
   /words            your list, what is coming up, how many graduated
   /more <word>      full card: meaning, synonyms, collocations, examples
   /learned <word>   mark as mastered (with an Undo button)
@@ -66,8 +69,7 @@ Daily-loop commands:
   /setup            redo the wizard: topics, vocabulary kinds, pace
   /settings         change slot times and words per day
 
-Note that bare /today still starts the full 15-minute session. Only
-/today <number> shows cards.
+/today 5 still works as a shortcut for /cards 5.
 
 If you want focused practice:
 - /practice notebook - free writing + native diff
@@ -89,7 +91,8 @@ trade-offs, risks, tech debt, reports, reliability, postmortems, async updates,
 exec summaries, alignment.
 
 Useful commands:
-/today - start daily practice; /today <n> shows n word cards
+/today - choose: word cards or the full lesson
+/cards [n] - show word cards right now
 /words - your list and what is coming up
 /more <word> - detailed card: meaning, synonyms, collocations
 /learned <word> - mark as mastered

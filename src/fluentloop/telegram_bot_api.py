@@ -12,7 +12,8 @@ from fluentloop.bot.handlers import BotReply
 BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("start", "Create or load your FluentLoop profile"),
     ("setup", "Run the setup wizard: topics, vocabulary, daily pace"),
-    ("today", "Start today's 15-minute practice"),
+    ("today", "Choose: word cards or the full lesson"),
+    ("cards", "Show vocabulary cards right now"),
     ("review", "Review due items"),
     ("practice", "Start focused and EPIC-22 breakthrough practice modes"),
     ("baseline", "Show or record monthly learning baseline"),

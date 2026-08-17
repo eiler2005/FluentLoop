@@ -506,3 +506,73 @@ def test_start_message_points_at_the_loop_and_practice() -> None:
     assert "/review" in text
     assert "/practice vocab" in text
     assert "/help" in text
+
+
+# --- the words / lessons fork ---------------------------------------------
+
+
+def test_today_menu_offers_both_tracks(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_today_menu
+
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="word", text="pipeline")
+
+    reply = handle_today_menu(db_session, user)
+
+    data = [button.data for row in reply.buttons for button in row]
+    assert data == ["today:words", "today:lesson"]
+    assert "about 2 minutes" in reply.text
+    assert "about 15 minutes" in reply.text
+
+
+def test_today_menu_reports_what_is_due(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_today_menu
+
+    user = ensure_user(db_session, 123456789, settings)
+    empty = handle_today_menu(db_session, user)
+    create_learning_item(db_session, user, type_="word", text="pipeline")
+    filled = handle_today_menu(db_session, user)
+
+    assert "Nothing due right now" in empty.text
+    assert "1 due now" in filled.text
+
+
+def test_words_menu_offers_the_three_intensities(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_words_menu
+
+    user = ensure_user(db_session, 123456789, settings)
+    create_learning_item(db_session, user, type_="word", text="pipeline")
+
+    reply = handle_words_menu(db_session, user, edit=True)
+
+    data = [button.data for row in reply.buttons for button in row]
+    assert data == ["words:cards", "words:review", "words:lesson"]
+    assert reply.edit_message is True
+    assert "Active: 1" in reply.text
+
+
+def test_practice_modes_are_grouped() -> None:
+    from fluentloop.lesson_formats import (
+        LESSON_FORMATS,
+        grouped_practice_modes,
+        practice_modes_help,
+    )
+
+    groups = grouped_practice_modes()
+    headings = [heading for heading, _ in groups]
+    assert headings[:3] == ["Words", "Grammar and mistakes", "Writing and speaking"]
+
+    # Every mode still appears exactly once.
+    listed = [item.mode for _, members in groups for item in members]
+    assert sorted(listed) == sorted(item.mode for item in LESSON_FORMATS)
+    assert len(listed) == len(set(listed))
+
+    text = practice_modes_help()
+    for heading in headings:
+        assert f"{heading}:" in text
+    assert "/practice vocab" in text
+
+
+def test_cards_command_is_registered() -> None:
+    assert "/cards" in command_catalog()
+    assert "cards" in {command for command, _ in BOT_COMMANDS}
