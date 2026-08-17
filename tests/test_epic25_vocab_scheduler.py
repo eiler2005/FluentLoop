@@ -248,3 +248,68 @@ async def test_send_reminders_uses_the_user_local_date(factory, settings) -> Non
 
     assert sent == 0
     assert client.sent == []
+
+
+@pytest.mark.asyncio
+async def test_a_duplicate_claim_does_not_erase_earlier_deliveries(
+    factory, settings
+) -> None:
+    """Regression: session.rollback() in claim_slot wiped the whole tick.
+
+    Two users are due in the same tick. The first has no delivery row yet and
+    is sent to; the second already has one, so its claim conflicts. That
+    conflict must not discard the first user's row - otherwise the slot is
+    re-delivered every minute for the whole catch-up window.
+    """
+
+    _seed_user(factory, settings, settings.telegram_allowed_user_id, "Europe/Moscow")
+    _seed_user(factory, settings, 222222222, "Europe/Moscow")
+    with factory() as session:
+        # Pre-claim the morning slot for the SECOND user only.
+        second = ensure_user(session, 222222222, settings)
+        session.add(
+            VocabDelivery(
+                user_id=second.id,
+                local_date=MORNING_UTC.astimezone(
+                    __import__("zoneinfo").ZoneInfo("Europe/Moscow")
+                ).date(),
+                slot="morning",
+                seq=0,
+                status="sent",
+            )
+        )
+        session.commit()
+
+    client = FakeClient()
+    sent = await run_vocab_tick(client, factory, settings, now=MORNING_UTC)
+
+    assert sent == 1
+    with factory() as session:
+        rows = session.scalars(select(VocabDelivery)).all()
+        # One pre-existing row plus one newly persisted row.
+        assert len(rows) == 2
+        assert {row.status for row in rows} == {"sent"}
+
+    # The next tick must be a no-op, which is only true if the row survived.
+    again = await run_vocab_tick(
+        client, factory, settings, now=MORNING_UTC + timedelta(minutes=1)
+    )
+    assert again == 0
+    assert len(client.sent) == 1
+
+
+@pytest.mark.asyncio
+async def test_tick_skips_accounts_the_bot_would_reject(factory, settings) -> None:
+    """Seed/demo rows must not generate a Telegram call per slot per day."""
+
+    _seed_user(factory, settings, settings.telegram_allowed_user_id, "Europe/Moscow")
+    _seed_user(factory, settings, 900000501, "Europe/Moscow")
+    client = FakeClient()
+
+    sent = await run_vocab_tick(client, factory, settings, now=MORNING_UTC)
+
+    assert sent == 1
+    assert client.sent[0].chat_id == settings.telegram_allowed_user_id
+    with factory() as session:
+        rows = session.scalars(select(VocabDelivery)).all()
+        assert len(rows) == 1

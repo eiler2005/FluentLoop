@@ -123,20 +123,24 @@ def claim_slot(
     The unique constraint on (user, local_date, slot, seq) is the lock: if
     another tick already claimed it the insert fails and we skip. This is what
     makes the dispatcher safe across restarts and overlapping ticks.
+
+    The insert runs inside a SAVEPOINT. A plain ``session.rollback()`` here
+    would discard every other delivery already recorded in this tick, so a
+    later duplicate claim would silently erase an earlier successful send and
+    that slot would be re-delivered on the next tick.
     """
 
-    delivery = VocabDelivery(
-        user_id=user.id,
-        local_date=day,
-        slot=slot,
-        seq=0,
-        status="claimed",
-    )
-    session.add(delivery)
     try:
-        session.flush()
+        with session.begin_nested():
+            delivery = VocabDelivery(
+                user_id=user.id,
+                local_date=day,
+                slot=slot,
+                seq=0,
+                status="claimed",
+            )
+            session.add(delivery)
     except IntegrityError:
-        session.rollback()
         return None
     return delivery
 
@@ -162,6 +166,14 @@ async def run_vocab_tick(
     with session_scope(session_factory) as session:
         users = session.scalars(select(User)).all()
         for user in users:
+            # Don't push to accounts the command handlers would reject anyway.
+            # Seed and demo rows otherwise produce a failed delivery and a
+            # Telegram traceback for every slot, every day.
+            if (
+                settings.telegram_allowed_user_id is not None
+                and user.telegram_user_id != settings.telegram_allowed_user_id
+            ):
+                continue
             prefs = get_prefs(user)
             now_local = local_now(user, now=now)
             slots = due_slots(prefs, now_local)
