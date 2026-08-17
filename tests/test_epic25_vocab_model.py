@@ -216,3 +216,57 @@ def test_create_learning_item_defaults_to_zero_priority(db_session, settings) ->
     item = create_learning_item(db_session, user, type_="word", text="baseline")
 
     assert item.priority == 0
+
+
+def test_review_is_a_short_pass_not_a_second_lesson(db_session, settings) -> None:
+    """Cards -> review -> lesson has to be a real ladder of effort."""
+
+    from collections import Counter
+
+    from fluentloop.learning_engine import (
+        QUICK_REVIEW_DRILL_COUNT,
+        compose_learning_session,
+    )
+
+    user = ensure_user(db_session, 123456789, settings)
+    for index in range(12):
+        create_learning_item(
+            db_session,
+            user,
+            type_="expression",
+            text=f"chunk {index}",
+            meaning=f"meaning {index}",
+            examples=[f"Example {index} here."],
+        )
+
+    review = compose_learning_session(db_session, user, mode_override="review")
+    lesson = compose_learning_session(db_session, user, mode_override="vocab")
+
+    assert len(review) == QUICK_REVIEW_DRILL_COUNT
+    assert len(lesson) > len(review) * 2
+    stages = Counter(step.get("stage") for step in review)
+    # No warm-up, no free writing: straight to recall, closing on cold recall.
+    assert set(stages) == {"controlled_practice", "recap"}
+    assert review[-1]["stage"] == "recap"
+
+
+def test_other_modes_keep_the_full_template(db_session, settings) -> None:
+    from fluentloop.learning_engine import (
+        DEFAULT_MICRO_DRILL_COUNT,
+        compose_learning_session,
+    )
+
+    user = ensure_user(db_session, 123456789, settings)
+    for index in range(12):
+        create_learning_item(
+            db_session,
+            user,
+            type_="expression",
+            text=f"chunk {index}",
+            meaning=f"meaning {index}",
+            examples=[f"Example {index} here."],
+        )
+
+    for mode in ("vocab", "mixed", "grammar"):
+        steps = compose_learning_session(db_session, user, mode_override=mode)
+        assert len(steps) == DEFAULT_MICRO_DRILL_COUNT, mode

@@ -483,7 +483,9 @@ def test_help_disambiguates_cards_review_and_lessons() -> None:
     assert "train the SAME words" in text
     for command in ("/today 5", "/review", "/practice vocab", "/today"):
         assert command in text
-    assert "Start here to practise them." in text
+    assert "Start here." in text
+    # The ladder must state the effort, or the labels mislead again.
+    assert "2-3 min" in text and "15 min" in text
 
 
 def test_pinned_workspace_help_covers_the_daily_loop() -> None:
@@ -492,7 +494,7 @@ def test_pinned_workspace_help_covers_the_daily_loop() -> None:
     text = handle_channel_help("-100123").text
 
     assert "words at 08:00" in text
-    assert "/review drills the words that are due" in text
+    assert "/review is a short 2-3 minute pass" in text
     assert "/practice vocab" in text
     assert "/pause" in text
 

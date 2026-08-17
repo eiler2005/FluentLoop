@@ -47,7 +47,7 @@ Commas or new lines for several at once. Your own words always come first.
 
 The buttons under the input field start practice from anywhere:
   🃏 Cards   read today's words        📚 Lesson    the 15-minute session
-  🔁 Review  recall what is due        📖 My words  your list and counts
+  🔁 Review  2-3 min over what is due  📖 My words  your list and counts
 Send /start if they are not showing.
 
 Not sure what to start? Send /today - it asks which of the two you want:
@@ -58,11 +58,12 @@ Not sure what to start? Send /today - it asks which of the two you want:
 The cards and the vocabulary lessons train the SAME words - they differ only
 in how hard they make you work:
 
-  /cards            shows cards. Passive: you read, nothing is asked.
-  /review           drills the words that are due right now - the ones this
-                    morning's cards showed. Start here to practise them.
-  /practice vocab   a full vocabulary lesson built around those words:
-                    collocations, paraphrase, cloze, reverse translation.
+  /cards            0 min   shows cards. You read; nothing is asked.
+  /review           2-3 min a short pass over what is due: 5 recall drills
+                            and a cold-recall closer. Start here.
+  /practice vocab   15 min  the full vocabulary lesson: field/register/
+                            function grouping, collocations, paraphrase,
+                            cloze, reverse translation, free writing.
 
 Daily-loop commands:
   /cards 5          show 5 cards right now, without waiting for the morning

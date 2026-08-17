@@ -29,6 +29,10 @@ from fluentloop.material_context import build_material_context
 from fluentloop.srs import get_due_items
 
 DEFAULT_MICRO_DRILL_COUNT = 16
+# /review is the short rung of the ladder: cards (read) -> review (2-3 min) ->
+# vocabulary lab (15 min) -> lesson (15 min). It used to run the full 16-step
+# template, which made it indistinguishable from a lesson.
+QUICK_REVIEW_DRILL_COUNT = 6
 SESSION_STAGES = (
     "warmup",
     "input",
@@ -412,6 +416,21 @@ def build_staged_exercises(
     patterns: list[MistakePattern],
 ) -> list[dict[str, Any]]:
     selected = [row.item for row in scored_items]
+    if mode == "review":
+        # A review is meant to be a short pass over what is due, not a second
+        # full lesson. Drop the framing stages and go straight to recall.
+        drills = build_controlled_practice_steps(
+            selected, mode=mode, topic=topic, lesson_goal=lesson_goal
+        )[: QUICK_REVIEW_DRILL_COUNT - 1]
+        quick: list[dict[str, Any]] = [
+            *drills,
+            # Cold recall closes the pass; slicing it off would remove the one
+            # step that actually tests retention.
+            build_recap_step(
+                selected, mode=mode, topic=topic, lesson_goal=lesson_goal, cold=True
+            ),
+        ]
+        return _dedupe_target_ids(quick)
     steps: list[dict[str, Any]] = [
         build_warmup_step(
             selected[:1], mode=mode, topic=topic, lesson_goal=lesson_goal

@@ -344,7 +344,7 @@ def handle_channel_help(
         "times. Send any word or phrase to add it - commas for several.\n\n"
         "Practising the same words, from lightest to hardest:\n"
         "- /today 5 shows cards; you only read them.\n"
-        "- /review drills the words that are due - start here.\n"
+        "- /review is a short 2-3 minute pass over what is due - start here.\n"
         "- /practice vocab is a full vocabulary lesson around them.\n"
         "- /today is the general 15-minute lesson from your lesson plans.\n\n"
         "1. Start with /today for the automatic 15-minute lesson, or choose a "
@@ -808,9 +808,10 @@ def handle_words_menu(
         f"Active: {counts['active']} · 🎓 Graduated: {counts['graduated']} "
         f"· Due now: {due}",
         "",
-        f"{bold('Show cards')} — read {per_day} of them, nothing is asked.",
-        f"{bold('Review due')} — recall the ones that are due.",
-        f"{bold('Vocabulary lesson')} — a full session built around them.",
+        f"{bold('Show cards')} — {per_day} to read. Nothing is asked.",
+        f"{bold('Review due')} — 2-3 minutes: five recall drills, then a "
+        "cold recall.",
+        f"{bold('Vocabulary lesson')} — the full 15-minute session.",
     ]
     return BotReply(
         "\n".join(lines),
