@@ -30,10 +30,12 @@ class DeepSeekGateway:
         max_retries: int = 2,
         client: Any | None = None,
         usage_path: Path | str = "data/usage_log.jsonl",
+        provider_name: str = "deepseek",
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url
         self.model = model
+        self.provider_name = provider_name
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
         self.client = client
@@ -76,6 +78,11 @@ class DeepSeekGateway:
                 }
                 if thinking:
                     request["extra_body"] = {"thinking": {"type": "enabled"}}
+                elif self.provider_name == "qwen":
+                    # qwen3.x flash reasons by default. Every FluentLoop task
+                    # is schema-constrained JSON, so those reasoning tokens are
+                    # billed output that never reaches the learner.
+                    request["extra_body"] = {"enable_thinking": False}
                 if reasoning_effort:
                     request["reasoning_effort"] = reasoning_effort
                 response = self.client.chat.completions.create(
@@ -108,7 +115,7 @@ class DeepSeekGateway:
     ) -> T:
         append_usage(
             self.usage_path,
-            provider="deepseek",
+            provider=self.provider_name,
             model=model or self.model,
             task=task.value,
             prompt_tokens=0,
@@ -132,7 +139,7 @@ class DeepSeekGateway:
         completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
         append_usage(
             self.usage_path,
-            provider="deepseek",
+            provider=self.provider_name,
             model=model or self.model,
             task=task.value,
             prompt_tokens=prompt_tokens,
@@ -141,3 +148,8 @@ class DeepSeekGateway:
             status=status,
             latency_ms=int((time.monotonic() - started) * 1000),
         )
+
+
+# Provider-neutral alias: the gateway speaks the OpenAI-compatible protocol and
+# is not DeepSeek-specific (ADR-0010).
+LLMGateway = DeepSeekGateway

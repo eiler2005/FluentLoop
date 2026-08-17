@@ -232,6 +232,10 @@ Telegram remains the primary interface for daily practice.
 12. Learning outcomes loop: monthly `/baseline`, 30-day `/outcomes`, held-out
     retention, productive chunk usage, writing metrics, L1 density, mistake
     extinction, and Article/Critical Reading probes (EPIC-24).
+13. Daily vocabulary loop: three short pushes a day in the learner's own
+    timezone (morning cards, midday drill, evening quiz), an explicit
+    "graduated" end state for mastered items, adding your own words by plain
+    message, and a setup wizard with topic and vocabulary presets (EPIC-25).
 ```
 
 ### P2 — future
@@ -286,6 +290,12 @@ practice_duration_minutes: default 15
 reminder_time
 timezone
 school_days
+daily_loop: on/paused
+daily_loop_slots: morning, midday, evening times
+words_per_day: default 5
+vocabulary_topics: chosen interest areas
+vocabulary_kinds: chosen vocabulary types and optional fun sets
+starter_list_size
 created_at
 updated_at
 ```
@@ -536,6 +546,10 @@ Easy
 
 For MVP, the implementation may use a simple interval-based algorithm. It should be possible to replace or upgrade it later with a more advanced FSRS-like algorithm.
 
+### Graduation
+
+A correct answer pushes an item further out. Once an item has been answered correctly often enough over a long enough span, it graduates: it is treated as mastered and leaves the review rotation, while remaining visible in the learner's word list with a graduation marker. The learner can also graduate an item by hand, and can undo that.
+
 ### Example MVP intervals
 
 ```text
@@ -659,6 +673,28 @@ Then the user must be asked for approval
 The daily session should take approximately 15 minutes.
 The default session should contain about 15-20 short micro-drills, with fewer
 items for writing-heavy sessions and more items for quick cloze/rewrite drills.
+
+### Daily rhythm
+
+Alongside the 15-minute session, the bot reaches out three times a day with
+something short and finishable. Each touch happens at a time the learner
+chooses, in the learner's own timezone, and the whole rhythm can be paused and
+resumed.
+
+```text
+Morning   Your words for today, each with an example sentence and a short
+          definition.
+Midday    One quick drill. Some days it asks you to write your own sentence.
+Evening   A short quiz: pick the word that matches a definition.
+```
+
+Answers from any of the three feed the same spaced-repetition state as the main
+session. Nothing here replaces the daily session; it is a lighter parallel loop
+for learners who want contact with the language more than once a day.
+
+The learner can also send any word or phrase to the bot as a plain message to
+add it, several at once separated by commas or new lines. Words added this way
+take priority over seeded content when the bot chooses what to show.
 
 ### Example daily session
 
@@ -1166,6 +1202,28 @@ Show grammar rules and weak rules.
 
 /stats
 Show progress.
+
+/setup
+Run the setup wizard: topics, vocabulary kinds, starter list size, words per day.
+
+/today <n>
+Show n vocabulary cards right now. Bare /today still starts the full session.
+
+/words
+Show your word list, graduation count, and what is coming up.
+
+/more <word>
+Show a detailed card: meaning, synonyms, collocations, examples.
+
+/learned <word>
+Mark a word as mastered.
+
+/delete <word>
+Remove a word from your list.
+
+/pause
+/resume
+Turn the daily messages off and back on.
 
 /settings
 Change settings.

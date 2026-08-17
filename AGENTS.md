@@ -16,14 +16,14 @@ notes.
   the current environment gate is still a separate ADR-0009 concern.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 24
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 25
   numbered epics plus the EPIC-16..21 roadmap overview. EPIC-01 through
   EPIC-15 mirror the PRD §28 backlog (EPIC-15 is Deferred); EPIC-16 through
-  EPIC-24 cover the post-MVP learning engine, breakthrough roadmap, shared
-  lesson library, and outcomes loop. See
+  EPIC-25 cover the post-MVP learning engine, breakthrough roadmap, shared
+  lesson library, outcomes loop, and daily vocabulary loop. See
   [`docs/features/README.md`](docs/features/README.md).
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
-  + ADRs in [`docs/adr/`](docs/adr/) (0002-0008 all Accepted).
+  + ADRs in [`docs/adr/`](docs/adr/) (0002-0012 all Accepted; 0009 reserved).
 - **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
   autonomous overnight session brief and morning report. Frozen artifacts —
   read for context, do not treat as living documentation.
@@ -85,6 +85,17 @@ destructive action is high.
 - **Mistake patterns are auto-created with `confidence=low` only** after ≥3
   similar mistake events within 14 days. User confirmation promotes them to
   `confidence=high`. See `docs/features/EPIC-11-mistake-events-and-patterns.md`.
+- **Scheduler jobs are coroutine functions, never `lambda: create_task(...)`.**
+  The lambda form drops the task reference and swallows exceptions. Date
+  arithmetic for a user is always local (`vocab_loop.local_date`), never UTC —
+  it has to agree with `PracticeSession.target_date_local`. See ADR-0012.
+- **`Settings` fields added from now on must carry a default and go at the
+  end.** The dataclass is frozen and constructed with explicit kwargs in
+  `tests/conftest.py`; a non-defaulted field in the middle breaks every call
+  site. See ADR-0010.
+- **Native quiz polls require `public_voters=True`.** Telegram delivers no
+  vote update at all for an anonymous poll, and the Bot API HTTP path cannot
+  receive votes under any setting. See ADR-0011.
 - **Single tenancy, shared content.** One bot, one container, one set of
   secrets. Lesson plans flagged as templates can be discovered via `/library`
   and cloned per-user on subscribe (ADR-0008, EPIC-23). The current deployment
@@ -116,8 +127,8 @@ FluentLoop/
 │   ├── README.md                 Doc index.
 │   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
 │   ├── testing.md                Standard test gate and what tests cover.
-│   ├── adr/                      Architecture decision records (0002-0008 Accepted).
-│   ├── features/                 24 numbered epics + EPIC-16..21 overview.
+│   ├── adr/                      Architecture decision records (0002-0012 Accepted).
+│   ├── features/                 25 numbered epics + EPIC-16..21 overview.
 │   ├── user-guide.md             Learner guide and learning-loop map.
 │   ├── material-upload-guide.md  Upload formats and LLM prep prompt.
 │   ├── runbooks/                 Operational procedures.
@@ -128,8 +139,9 @@ FluentLoop/
 ├── secrets/                      Local-only confidential data (gitignored).
 ├── data/                         Runtime artifacts: SQLite, sessions, backups (gitignored).
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
+│   └── seeds/                    Shipped seed data (starter word bank JSONL).
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (20 modules, 121+ tests).
+└── tests/                        Pytest suite (27 modules, 288+ tests).
 ```
 
 ## Verification commands
@@ -139,7 +151,7 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # 24 numbered epics + EPIC-16..21 overview
+ls docs/features/EPIC-*.md | wc -l    # 25 numbered epics + EPIC-16..21 overview
 
 # No secrets staged
 python scripts/secret_scan.py
@@ -161,3 +173,10 @@ pytest -q
 - New ideas that don't fit the existing epics → add a P1/P2 entry to PRD §6
   first; only carve out a new epic file once scope is concrete enough to
   estimate.
+
+<!-- lean-ctx -->
+## lean-ctx
+
+Prefer lean-ctx MCP tools over native equivalents for token savings.
+Full rules: @LEAN-CTX.md
+<!-- /lean-ctx -->

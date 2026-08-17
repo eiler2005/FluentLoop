@@ -5,7 +5,7 @@ unit of work. EPIC-01 through EPIC-15 are the original PRD backlog; EPIC-16
 through EPIC-21 extend the learning engine; EPIC-22 adds the breakthrough
 learning loop; EPIC-23 adds the shared seed lesson library, lesson-type layer,
 and generated public catalog; EPIC-24 adds the measurable learning-outcomes
-layer.
+layer; EPIC-25 adds the daily vocabulary loop.
 
 ## Epic index
 
@@ -35,6 +35,7 @@ layer.
 | 22 | [breakthrough-roadmap](EPIC-22-breakthrough-roadmap.md) | Done | Phase 1-2 implemented, deployed, and validated: in-session GIR, negative-path tests, schema verification, and live smoke. |
 | 23 | [shared-lesson-library](EPIC-23-shared-lesson-library.md) | Done | Shared seed lesson library via `/library` and `/subscribe`, English for Tech public series, lesson-type labels, generated catalog, cloned per-user progress (ADR-0008). |
 | 24 | [learning-outcomes-loop](EPIC-24-learning-outcomes-loop.md) | Done | Measurement-first layer: `/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article/Critical Reading probes; deployed and smoke validated. |
+| 25 | [daily-vocabulary-loop](EPIC-25-daily-vocabulary-loop.md) | In progress | Three daily pushes in the learner's timezone (cards, drill, quiz poll), item graduation, `/setup` wizard, in-repo starter word bank, own words by plain message, Qwen provider (ADR-0010/0011/0012). |
 
 ## Dependency graph
 

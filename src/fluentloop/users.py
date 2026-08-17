@@ -34,6 +34,8 @@ def ensure_user(session: Session, telegram_user_id: int, settings: Settings) -> 
 
 
 def format_settings(user: User) -> str:
+    from fluentloop.vocab_prefs import format_vocab_settings, get_prefs
+
     focus = ", ".join(user.focus_areas)
     return (
         "Settings\n"
@@ -42,7 +44,8 @@ def format_settings(user: User) -> str:
         f"Timezone: {user.timezone}\n"
         f"Reminder: {user.reminder_time}\n"
         f"Practice: {user.practice_duration_minutes} min\n"
-        f"Explanations: {user.explanation_language}"
+        f"Explanations: {user.explanation_language}\n"
+        "\n" + format_vocab_settings(get_prefs(user))
     )
 
 
@@ -76,6 +79,10 @@ def update_setting(session: Session, user: User, field: str, value: str) -> User
         if minutes < 5 or minutes > 60:
             raise ValueError("Practice duration must be 5-60 minutes")
         user.practice_duration_minutes = minutes
+    elif field.startswith("vocab_"):
+        from fluentloop.vocab_prefs import update_pref
+
+        update_pref(session, user, field.removeprefix("vocab_"), value)
     else:
         raise ValueError("Unknown setting")
     user.updated_at = utc_now()

@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime
 from typing import Any
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     Date,
     DateTime,
@@ -46,6 +47,7 @@ class User(Base, TimestampMixin):
     reminder_time: Mapped[str] = mapped_column(String(5), default="20:00")
     explanation_language: Mapped[str] = mapped_column(String(16), default="mixed")
     practice_duration_minutes: Mapped[int] = mapped_column(Integer, default=15)
+    preferences_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
 class BotState(Base, TimestampMixin):
@@ -148,6 +150,7 @@ class LearningItem(Base, TimestampMixin):
     )
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[str] = mapped_column(String(16), default="active")
+    priority: Mapped[int] = mapped_column(Integer, default=0, index=True)
     review_state: Mapped[ReviewState] = relationship(
         back_populates="learning_item", uselist=False
     )
@@ -245,6 +248,37 @@ class PracticeSessionCached(Base, TimestampMixin):
     target_date_local: Mapped[date] = mapped_column(Date, index=True)
     exercises: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
     status: Mapped[str] = mapped_column(String(16), default="ready")
+
+
+class VocabDelivery(Base, TimestampMixin):
+    """One delivered daily-loop unit.
+
+    The unique constraint is the lock: the tick inserts a row before sending,
+    so a slot fires at most once per local day even across restarts,
+    overlapping ticks, and the repeated hour at the end of DST.
+    """
+
+    __tablename__ = "vocab_deliveries"
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "local_date",
+            "slot",
+            "seq",
+            name="uq_vocab_delivery_slot",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    local_date: Mapped[date] = mapped_column(Date, index=True)
+    slot: Mapped[str] = mapped_column(String(16), index=True)
+    seq: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(16), default="claimed")
+    poll_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True, index=True)
+    message_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    learning_item_ids: Mapped[list[int]] = mapped_column(JSON, default=list)
+    payload_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
 class LessonPlan(Base, TimestampMixin):

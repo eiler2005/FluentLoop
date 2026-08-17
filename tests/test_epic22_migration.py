@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 from fluentloop.db.session import make_engine
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "0003_epic24"
+REVISION = "0004_epic25"
 
 
 def test_epic22_migration_roundtrip_on_copied_sqlite_db(tmp_path) -> None:

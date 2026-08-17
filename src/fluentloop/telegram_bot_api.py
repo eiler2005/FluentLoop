@@ -11,6 +11,7 @@ from fluentloop.bot.handlers import BotReply
 
 BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("start", "Create or load your FluentLoop profile"),
+    ("setup", "Run the setup wizard: topics, vocabulary, daily pace"),
     ("today", "Start today's 15-minute practice"),
     ("review", "Review due items"),
     ("practice", "Start focused and EPIC-22 breakthrough practice modes"),
@@ -36,6 +37,12 @@ BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("mistakes", "Show recurring mistake patterns"),
     ("rules", "Show grammar concepts"),
     ("stats", "Show progress stats"),
+    ("words", "Show your word list and what is coming up"),
+    ("more", "Show a detailed card for one word"),
+    ("learned", "Mark a word as mastered"),
+    ("delete", "Remove a word from your list"),
+    ("pause", "Pause the daily messages"),
+    ("resume", "Resume the daily messages"),
     ("help", "Show the FluentLoop guide"),
     ("howto", "Show how to use FluentLoop"),
 )

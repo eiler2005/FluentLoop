@@ -29,3 +29,7 @@ class LLMTextResult(BaseModel):
     title: str = ""
     text: str = ""
     tags: list[str] = Field(default_factory=list)
+
+
+class QuizDistractors(BaseModel):
+    options: list[str] = Field(default_factory=list)

@@ -7,6 +7,28 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- EPIC-25 daily vocabulary loop: three short pushes a day in the learner's own
+  timezone (morning cards, midday drill, evening quiz), an explicit `graduated`
+  state for mastered items, `/setup` onboarding wizard with topic and
+  vocabulary presets, a 164-entry starter word bank shipped in the repo, adding
+  your own words by plain message, and `/words`, `/more`, `/learned`,
+  `/delete`, `/pause`, `/resume`, `/today <n>`.
+- Native Telegram quiz polls over Telethon raw API, with an inline-button
+  fallback and a `VOCAB_QUIZ_POLLS` kill switch (ADR-0011).
+- Qwen as a selectable LLM provider alongside OpenAI and DeepSeek, behind the
+  existing `AI_PROVIDER` switch (ADR-0010).
+
+### Fixed
+- `send_reminders` and `run_pre_generation` computed dates in UTC while
+  `PracticeSession.target_date_local` is written in the user's timezone, so a
+  non-UTC learner could be nudged during an active session.
+- Scheduler jobs were registered as `lambda: asyncio.create_task(...)`, which
+  dropped the task reference and swallowed exceptions. They are now coroutine
+  functions passed directly to APScheduler.
+- `User.timezone` and `User.reminder_time` were stored and validated but never
+  read by the scheduler; per-user slot timing makes them load-bearing.
+
+### Added (earlier)
 - Public-release polish: `LICENSE` (MIT), `CHANGELOG.md`, `CONTRIBUTING.md`.
 - README rewrite with badges, ASCII architecture diagram, sample session, and
   roadmap table aimed at portfolio readers.

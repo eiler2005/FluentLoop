@@ -16,9 +16,16 @@ from fluentloop.bot.handlers import (
 from fluentloop.bot.state import StateStore
 from fluentloop.telegram_bot_api import bot_commands_payload
 from fluentloop.telegram_workspace import workspace_destination, workspace_enabled
+from fluentloop.users import ensure_user
+from fluentloop.vocab_prefs import mark_onboarded
 
 
 def test_app_constructs_and_start_creates_profile(db_session, settings) -> None:
+    # A first-time user lands in the EPIC-25 setup wizard.
+    reply = handle_start(db_session, settings, 123456789)
+    assert "Pick a few topics" in reply.text
+    # Once set up, /start goes back to the standard welcome.
+    mark_onboarded(db_session, ensure_user(db_session, 123456789, settings))
     reply = handle_start(db_session, settings, 123456789)
     assert "FluentLoop is ready" in reply.text
     assert "/start" in command_catalog()

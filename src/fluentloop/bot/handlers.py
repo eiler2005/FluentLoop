@@ -7,7 +7,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.ai.provider import AIProvider
-from fluentloop.bot.formatting import HTML_PARSE_MODE, bold, code, html_escape, labeled
+from fluentloop.bot.formatting import (
+    HTML_PARSE_MODE,
+    bold,
+    code,
+    html_escape,
+    italic,
+    labeled,
+)
 from fluentloop.bot.messages import (
     HELP,
     candidate_summary,
@@ -17,7 +24,7 @@ from fluentloop.bot.messages import (
 from fluentloop.bot.state import StateStore
 from fluentloop.coach_journal import write_coach_journal
 from fluentloop.config import Settings
-from fluentloop.db.models import User
+from fluentloop.db.models import LearningItem, User
 from fluentloop.exercises import EXERCISE_TYPES
 from fluentloop.feedback import (
     apply_feedback,
@@ -152,6 +159,21 @@ def _settings_buttons(user: User) -> list[list[InlineButton]]:
         [
             _button("Moscow TZ", "settings:timezone:Europe/Moscow"),
             _button("Berlin TZ", "settings:timezone:Europe/Berlin"),
+        ],
+        [
+            _button("Morning 07:00", "settings:vocab_morning:07:00"),
+            _button("08:00", "settings:vocab_morning:08:00"),
+            _button("09:00", "settings:vocab_morning:09:00"),
+        ],
+        [
+            _button("Midday 12:00", "settings:vocab_midday:12:00"),
+            _button("13:00", "settings:vocab_midday:13:00"),
+            _button("Evening 19:00", "settings:vocab_evening:19:00"),
+        ],
+        [
+            _button("3 words", "settings:vocab_words_per_day:3"),
+            _button("5 words", "settings:vocab_words_per_day:5"),
+            _button("7 words", "settings:vocab_words_per_day:7"),
         ],
         [_button("Refresh", "settings:refresh:now")],
     ]
@@ -371,14 +393,25 @@ def is_allowed(settings: Settings, telegram_user_id: int) -> bool:
 
 
 def handle_start(
-    session: Session, settings: Settings, telegram_user_id: int
+    session: Session,
+    settings: Settings,
+    telegram_user_id: int,
+    *,
+    chat_id: int | None = None,
 ) -> BotReply:
+    from fluentloop.vocab_prefs import get_prefs
+
     user = ensure_user(session, telegram_user_id, settings)
     seed_concepts(session)
+    if get_prefs(user).onboarded_at is None:
+        return handle_onboarding_start(
+            session, user, chat_id=chat_id if chat_id is not None else telegram_user_id
+        )
     return BotReply(
         start_message(
             bool(settings.telegram_forum_group_id or settings.telegram_channel_id)
-        ),
+        )
+        + "\n\nRun /setup to redo the setup wizard.",
         user.telegram_user_id,
     )
 
@@ -1726,6 +1759,764 @@ def handle_item_status(
     )
 
 
+def _find_item_by_text(
+    session: Session, user: User, word: str, *, exclude_graduated: bool = False
+) -> LearningItem | None:
+    from sqlalchemy import func
+
+    normalized = word.strip().casefold()
+    if not normalized:
+        return None
+    stmt = select(LearningItem).where(
+        LearningItem.user_id == user.id,
+        func.lower(LearningItem.text) == normalized,
+    )
+    if exclude_graduated:
+        stmt = stmt.where(LearningItem.status != "graduated")
+    matches = list(session.scalars(stmt.order_by(LearningItem.created_at)))
+    return matches[0] if matches else None
+
+
+def _near_matches(
+    session: Session, user: User, word: str, *, limit: int = 5
+) -> list[str]:
+    needle = word.strip()
+    if not needle:
+        return []
+    rows = session.scalars(
+        select(LearningItem)
+        .where(LearningItem.user_id == user.id, LearningItem.text.ilike(f"%{needle}%"))
+        .order_by(LearningItem.created_at)
+        .limit(limit)
+    )
+    return [row.text for row in rows]
+
+
+def _not_found_reply(session: Session, user: User, word: str, action: str) -> BotReply:
+    near = _near_matches(session, user, word)
+    if near:
+        listing = "\n".join(f"- {html_escape(text)}" for text in near)
+        return BotReply(
+            f"No exact match for {code(word)}. Did you mean:\n{listing}",
+            parse_mode=HTML_PARSE_MODE,
+        )
+    return BotReply(f"Nothing to {action}: no item matches {code(word)}.",
+                    parse_mode=HTML_PARSE_MODE)
+
+
+def handle_words(session: Session, user: User) -> BotReply:
+    from fluentloop.srs import get_due_items
+
+    counts = {
+        status: len(list_items(session, user.id, status=status, limit=1000))
+        for status in ("active", "graduated", "archived")
+    }
+    lines = [
+        bold("Your words"),
+        f"Active: {counts['active']}",
+        f"🎓 Graduated: {counts['graduated']}",
+    ]
+    if counts["archived"]:
+        lines.append(f"Archived: {counts['archived']}")
+
+    upcoming = get_due_items(session, user.id, limit=20)
+    if upcoming:
+        lines.append("")
+        lines.append(bold("Coming up"))
+        for item in upcoming:
+            marker = " ⭐" if item.is_favorite else ""
+            mine = " (yours)" if item.priority > 0 else ""
+            lines.append(f"- {html_escape(item.text)}{marker}{mine}")
+    elif not counts["active"]:
+        lines.append("")
+        lines.append("Send me any word or phrase to add it.")
+    return BotReply("\n".join(lines), parse_mode=HTML_PARSE_MODE)
+
+
+def handle_more(session: Session, user: User, word: str) -> BotReply:
+    if not word.strip():
+        return BotReply("Use /more <word>.")
+    item = _find_item_by_text(session, user, word)
+    if item is None:
+        return _not_found_reply(session, user, word, "expand")
+    metadata = item.metadata_json or {}
+    lines = [bold(item.text)]
+    meaning = (item.meaning or item.explanation or "").strip()
+    if meaning:
+        lines.append(html_escape(meaning))
+    synonyms = metadata.get("synonyms") or []
+    if synonyms:
+        lines.append("")
+        lines.append(labeled("Synonyms", ", ".join(str(s) for s in synonyms)))
+    collocations = metadata.get("collocations") or []
+    if collocations:
+        lines.append(labeled("Collocations", ", ".join(str(c) for c in collocations)))
+    if item.examples:
+        lines.append("")
+        lines.append(bold("Examples"))
+        for example in item.examples[:3]:
+            lines.append(f"- {html_escape(example)}")
+    if len(lines) == 1:
+        lines.append("No details stored for this item yet.")
+    return BotReply(
+        "\n".join(lines),
+        buttons=[_item_buttons(item.id, item.status, item.is_favorite)],
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_learned(session: Session, user: User, word: str) -> BotReply:
+    from datetime import timedelta
+
+    from fluentloop.db.models import ReviewState, utc_now
+
+    if not word.strip():
+        return BotReply("Use /learned <word>.")
+    item = _find_item_by_text(session, user, word, exclude_graduated=True)
+    if item is None:
+        return _not_found_reply(session, user, word, "graduate")
+    set_item_status(session, item, "graduated")
+    state = session.scalar(
+        select(ReviewState).where(ReviewState.learning_item_id == item.id)
+    )
+    if state is not None:
+        # Park it far out so a later restore does not dump it straight back
+        # into the due queue.
+        state.due_at = utc_now() + timedelta(days=730)
+        session.add(state)
+        session.flush()
+    return BotReply(
+        f"🎓 Graduated: {bold(item.text)}",
+        buttons=[[_button("Undo", f"item:restore:{item.id}")]],
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_delete(session: Session, user: User, word: str) -> BotReply:
+    if not word.strip():
+        return BotReply("Use /delete <word>.")
+    item = _find_item_by_text(session, user, word)
+    if item is None:
+        return _not_found_reply(session, user, word, "delete")
+    set_item_status(session, item, "archived")
+    return BotReply(
+        f"Removed {bold(item.text)}.",
+        buttons=[[_button("Undo", f"item:restore:{item.id}")]],
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_pause(session: Session, user: User) -> BotReply:
+    from fluentloop.vocab_prefs import update_pref
+
+    update_pref(session, user, "paused", True)
+    return BotReply("Daily messages paused. Send /resume to turn them back on.")
+
+
+def handle_resume(session: Session, user: User) -> BotReply:
+    from fluentloop.vocab_prefs import SLOTS, update_pref
+
+    prefs = update_pref(session, user, "paused", False)
+    slots = " / ".join(prefs.slots[slot] for slot in SLOTS)
+    return BotReply(f"Daily messages on again: {slots}.")
+
+
+def handle_vocab_cards(
+    session: Session, user: User, count: int | None = None
+) -> BotReply:
+    from fluentloop.vocab_loop import render_cards, select_cards
+    from fluentloop.vocab_prefs import MAX_WORDS_PER_DAY, MIN_WORDS_PER_DAY, get_prefs
+
+    wanted = count if count is not None else get_prefs(user).words_per_day
+    wanted = max(MIN_WORDS_PER_DAY, min(MAX_WORDS_PER_DAY, wanted))
+    items = select_cards(session, user, count=wanted)
+    if not items:
+        return BotReply(
+            "No words to show yet. Send me any word or phrase to add it."
+        )
+    return BotReply(render_cards(items), parse_mode=HTML_PARSE_MODE)
+
+
+def handle_vocab_add(session: Session, user: User, raw: str) -> BotReply:
+    from fluentloop.learning import USER_ADDED_PRIORITY
+    from fluentloop.vocab_loop import guess_item_type, split_word_list
+
+    segments = split_word_list(raw)
+    if not segments:
+        return BotReply("Nothing to add.")
+    added: list[str] = []
+    existing: list[str] = []
+    added_ids: list[int] = []
+    for segment in segments:
+        type_ = guess_item_type(segment)
+        # create_learning_item returns the existing row on collision, so ask
+        # first to tell "added" from "already had".
+        was_present = (
+            session.scalar(
+                select(LearningItem).where(
+                    LearningItem.user_id == user.id,
+                    LearningItem.type == type_,
+                    LearningItem.text == segment,
+                )
+            )
+            is not None
+        )
+        item = create_learning_item(
+            session,
+            user,
+            type_=type_,
+            text=segment,
+            tags=["user_added"],
+            metadata={"source": "user_added"},
+            priority=USER_ADDED_PRIORITY,
+        )
+        if item.priority < USER_ADDED_PRIORITY:
+            item.priority = USER_ADDED_PRIORITY
+            session.add(item)
+            session.flush()
+        if was_present:
+            existing.append(item.text)
+        else:
+            added.append(item.text)
+            added_ids.append(item.id)
+
+    lines: list[str] = []
+    if added:
+        lines.append(f"Added {len(added)}:")
+        lines.extend(f"- {html_escape(text)}" for text in added)
+    if existing:
+        lines.append(f"Already had {len(existing)}:")
+        lines.extend(f"- {html_escape(text)}" for text in existing)
+    lines.append("")
+    lines.append(italic("Your own words always get top priority."))
+    buttons = [[_button("Treat as material instead", "upload:confirm:pending")]]
+    if added_ids:
+        joined = ",".join(str(item_id) for item_id in added_ids)
+        buttons.append([_button("Undo", f"vocab:undo:{joined}")])
+    return BotReply(
+        "\n".join(lines),
+        buttons=buttons,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+DRILL_STATE = "vocab_drill"
+ONBOARDING_STATE = "onboarding"
+
+TOPIC_CHOICES: tuple[tuple[str, str], ...] = (
+    ("sports", "⚽ Sports"),
+    ("tech", "💻 Tech"),
+    ("food", "🍳 Food & cooking"),
+    ("travel", "✈️ Travel"),
+    ("business", "📈 Business"),
+    ("science", "🔬 Science"),
+    ("gaming", "🎮 Gaming"),
+    ("books", "📚 Books"),
+    ("fitness", "🏋️ Fitness"),
+    ("art", "🎨 Art & design"),
+)
+KIND_CHOICES: tuple[tuple[str, str], ...] = (
+    ("phrasal_verbs", "🧩 Phrasal verbs"),
+    ("idioms", "💬 Idioms"),
+    ("business_english", "💼 Business English"),
+    ("academic_ielts", "🎓 Academic / IELTS"),
+    ("everyday_talk", "🗣 Everyday talk"),
+    ("collocations", "🔗 Collocations"),
+    ("news", "📰 News & current events"),
+    ("small_talk", "🤝 Small talk"),
+)
+SET_CHOICES: tuple[tuple[str, str], ...] = (
+    ("pulp_fiction", "🔫 Pulp Fiction"),
+    ("film_noir", "🕵️ Film noir"),
+    ("fantasy_epic", "🐉 Fantasy epic"),
+    ("sci_fi", "🚀 Sci-fi"),
+    ("internet_speak", "😂 Internet speak"),
+    ("hiphop_slang", "🎤 Hip-hop slang"),
+    ("posh_british", "👑 Posh British"),
+    ("horror_true_crime", "🔪 Horror & true crime"),
+    ("rom_com", "🍿 Rom-com"),
+)
+SIZE_CHOICES = (100, 200, 300, 500)
+PER_DAY_CHOICES: tuple[tuple[int, str], ...] = (
+    (3, "3 — light"),
+    (5, "5 — steady"),
+    (7, "7 — brisk"),
+    (10, "10 — intense"),
+)
+
+
+def _multiselect_buttons(
+    options: tuple[tuple[str, str], ...],
+    selected: set[str],
+    *,
+    prefix: str,
+    done_data: str,
+    per_row: int = 2,
+) -> list[list[InlineButton]]:
+    rows: list[list[InlineButton]] = []
+    current: list[InlineButton] = []
+    for slug, label in options:
+        text = f"✅ {label}" if slug in selected else label
+        current.append(_button(text, f"{prefix}{slug}"))
+        if len(current) == per_row:
+            rows.append(current)
+            current = []
+    if current:
+        rows.append(current)
+    rows.append([_button("Done ▶", done_data)])
+    return rows
+
+
+def _onboarding_state(session: Session, chat_id: int, user: User):
+    return StateStore(session).get(chat_id, user.telegram_user_id)
+
+
+def _save_onboarding(
+    session: Session, chat_id: int, user: User, payload: dict
+) -> None:
+    StateStore(session).set(
+        chat_id, user.telegram_user_id, ONBOARDING_STATE, payload
+    )
+
+
+def _topics_reply(payload: dict) -> BotReply:
+    return BotReply(
+        "❤️ Pick a few topics you enjoy — your example sentences will be about "
+        "them.",
+        buttons=_multiselect_buttons(
+            TOPIC_CHOICES,
+            set(payload.get("topics", [])),
+            prefix="onb:topic:",
+            done_data="onb:done:topics",
+        ),
+    )
+
+
+def _kinds_reply(payload: dict) -> BotReply:
+    selected = set(payload.get("kinds", [])) | set(payload.get("sets", []))
+    return BotReply(
+        "📦 What kind of vocabulary do you want to build?\n\n"
+        "🎪 The bottom rows are fun sets — optional, but they make practice a "
+        "lot more entertaining.",
+        buttons=_multiselect_buttons(
+            (*KIND_CHOICES, *SET_CHOICES),
+            selected,
+            prefix="onb:kind:",
+            done_data="onb:done:kinds",
+        ),
+    )
+
+
+def _size_reply() -> BotReply:
+    return BotReply(
+        "📊 How many words should I put in your starter list?\n"
+        "You can always add more of your own later.",
+        buttons=[
+            [_button(str(size), f"onb:size:{size}") for size in SIZE_CHOICES]
+        ],
+    )
+
+
+def _per_day_reply() -> BotReply:
+    return BotReply(
+        "🐢 How many words per day do you want to practice?",
+        buttons=[
+            [_button(label, f"onb:perday:{value}")]
+            for value, label in PER_DAY_CHOICES
+        ],
+    )
+
+
+def handle_onboarding_start(
+    session: Session, user: User, *, chat_id: int
+) -> BotReply:
+    payload = {
+        "step": "topics",
+        "topics": [],
+        "kinds": [],
+        "sets": [],
+        "size": 200,
+        "per_day": 5,
+    }
+    _save_onboarding(session, chat_id, user, payload)
+    return _topics_reply(payload)
+
+
+def handle_onboarding_callback(
+    session: Session, user: User, action: str, value: str, *, chat_id: int
+) -> BotReply:
+    state = _onboarding_state(session, chat_id, user)
+    if state is None or state.name != ONBOARDING_STATE:
+        return handle_onboarding_start(session, user, chat_id=chat_id)
+    payload = dict(state.payload or {})
+
+    if action == "cancel":
+        StateStore(session).clear(chat_id, user.telegram_user_id)
+        return BotReply("Setup cancelled. Run /setup any time.")
+
+    if action == "topic":
+        payload["topics"] = _toggle(payload.get("topics", []), value)
+        _save_onboarding(session, chat_id, user, payload)
+        return _topics_reply(payload)
+
+    if action == "kind":
+        known_sets = {slug for slug, _ in SET_CHOICES}
+        key = "sets" if value in known_sets else "kinds"
+        payload[key] = _toggle(payload.get(key, []), value)
+        _save_onboarding(session, chat_id, user, payload)
+        return _kinds_reply(payload)
+
+    if action == "done":
+        if value == "topics":
+            payload["step"] = "kinds"
+            _save_onboarding(session, chat_id, user, payload)
+            return _kinds_reply(payload)
+        payload["step"] = "size"
+        _save_onboarding(session, chat_id, user, payload)
+        return _size_reply()
+
+    if action == "size":
+        payload["size"] = int(value) if value.isdigit() else 200
+        payload["step"] = "per_day"
+        _save_onboarding(session, chat_id, user, payload)
+        return _per_day_reply()
+
+    if action == "perday":
+        payload["per_day"] = int(value) if value.isdigit() else 5
+        return _finish_onboarding(session, user, payload, chat_id=chat_id)
+
+    return BotReply("Unknown setup step. Run /setup to start over.")
+
+
+def _toggle(values: list[str], value: str) -> list[str]:
+    current = list(values)
+    if value in current:
+        current.remove(value)
+    else:
+        current.append(value)
+    return current
+
+
+def _finish_onboarding(
+    session: Session, user: User, payload: dict, *, chat_id: int
+) -> BotReply:
+    from dataclasses import replace as replace_dataclass
+
+    from fluentloop.db.models import utc_now
+    from fluentloop.vocab_prefs import get_prefs, set_prefs
+    from fluentloop.wordbank import seed_starter_list
+
+    topics = list(payload.get("topics", []))
+    kinds = list(payload.get("kinds", []))
+    sets = list(payload.get("sets", []))
+    size = int(payload.get("size", 200))
+    per_day = int(payload.get("per_day", 5))
+
+    prefs = replace_dataclass(
+        get_prefs(user),
+        topics=topics,
+        kinds=kinds,
+        sets=sets,
+        starter_size=size,
+        words_per_day=per_day,
+        onboarded_at=utc_now().isoformat(),
+    )
+    set_prefs(session, user, prefs)
+    StateStore(session).clear(chat_id, user.telegram_user_id)
+
+    created, _skipped = seed_starter_list(
+        session, user, topics=topics, kinds=kinds, sets=sets, size=size
+    )
+    morning = prefs.slots["morning"]
+    lines = [f"✅ {created} words added."]
+    if created < size:
+        lines.append(
+            f"That is everything the bank has for your picks; the target was "
+            f"{size}. Send me your own words any time to top it up."
+        )
+    lines.append(f"First cards tomorrow at {morning}.")
+    lines.append(f"Try /today {per_day} for a preview right now.")
+    return BotReply("\n".join(lines))
+
+
+def set_drill_state(
+    session: Session,
+    user: User,
+    delivery_id: int,
+    *,
+    chat_id: int | None = None,
+) -> None:
+    """Arm the free-text capture for a midday drill.
+
+    The daily loop always delivers to the private chat, where chat_id equals
+    the Telegram user id, so that is the default.
+    """
+
+    StateStore(session).set(
+        chat_id if chat_id is not None else user.telegram_user_id,
+        user.telegram_user_id,
+        DRILL_STATE,
+        {"delivery_id": delivery_id},
+    )
+
+
+def quiz_buttons(delivery_id: int, options: list[str]) -> list[list[InlineButton]]:
+    return [
+        [_button(option, f"vocab:ans:{delivery_id}:{index}")]
+        for index, option in enumerate(options)
+    ]
+
+
+def render_daily_slot(
+    session: Session,
+    user: User,
+    slot: str,
+    delivery,
+    *,
+    now=None,
+    settings: Settings | None = None,
+) -> BotReply | None:
+    """Build the message for one daily slot, or None when there is nothing."""
+
+    from fluentloop.quiz import evening_quiz
+    from fluentloop.vocab_loop import build_drill, render_cards, render_drill
+    from fluentloop.vocab_prefs import get_prefs
+
+    if slot == "morning":
+        from fluentloop.vocab_loop import select_cards
+
+        items = select_cards(
+            session, user, count=get_prefs(user).words_per_day, now=now
+        )
+        if not items:
+            return None
+        delivery.learning_item_ids = [item.id for item in items]
+        return BotReply(
+            render_cards(items),
+            user.telegram_user_id,
+            parse_mode=HTML_PARSE_MODE,
+        )
+
+    if slot == "midday":
+        built = build_drill(session, user, now=now)
+        if built is None:
+            return None
+        item, exercise = built
+        delivery.learning_item_ids = [item.id]
+        delivery.payload_json = {"exercise": exercise.as_dict()}
+        return BotReply(
+            render_drill(exercise),
+            user.telegram_user_id,
+            buttons=[
+                [
+                    _button("✍️ Answer", f"vocab:drill:{delivery.id}"),
+                    _button("Skip", f"vocab:skip:{delivery.id}"),
+                ]
+            ],
+            parse_mode=HTML_PARSE_MODE,
+        )
+
+    if slot == "evening":
+        spec = evening_quiz(session, user, now=now, settings=settings)
+        if spec is None:
+            return None
+        delivery.learning_item_ids = [spec.item_id]
+        delivery.payload_json = {
+            "question": spec.question,
+            "options": list(spec.options),
+            "correct_index": spec.correct_index,
+            "solution": spec.solution,
+            "mode": "buttons",
+        }
+        return BotReply(
+            f"🌙 {bold('Evening quiz')}\n\n{html_escape(spec.question)}",
+            user.telegram_user_id,
+            buttons=quiz_buttons(delivery.id, spec.options),
+            parse_mode=HTML_PARSE_MODE,
+        )
+
+    return None
+
+
+def _load_delivery(session: Session, user: User, delivery_id: int):
+    from fluentloop.db.models import VocabDelivery
+
+    delivery = session.get(VocabDelivery, delivery_id)
+    if delivery is None or delivery.user_id != user.id:
+        return None
+    return delivery
+
+
+def handle_quiz_answer(
+    session: Session, user: User, delivery_id: int, choice: int
+) -> BotReply:
+    from fluentloop.srs import apply_review
+
+    delivery = _load_delivery(session, user, delivery_id)
+    if delivery is None:
+        return BotReply("That quiz is no longer available.")
+    if delivery.status == "answered":
+        return BotReply("You already answered this one.")
+    payload = delivery.payload_json or {}
+    options = payload.get("options") or []
+    correct_index = int(payload.get("correct_index", -1))
+    if not options or not 0 <= choice < len(options):
+        return BotReply("That answer is no longer available.")
+
+    item_ids = delivery.learning_item_ids or []
+    item = session.get(LearningItem, item_ids[0]) if item_ids else None
+    correct = choice == correct_index
+    graduated = False
+    if item is not None:
+        _, graduated = apply_review(session, item, "Good" if correct else "Again")
+    delivery.status = "answered"
+    delivery.payload_json = {**payload, "chosen_index": choice}
+    session.add(delivery)
+    session.flush()
+
+    answer = options[correct_index] if 0 <= correct_index < len(options) else ""
+    verdict = f"✅ Right — {bold(answer)}" if correct else f"❌ It was {bold(answer)}"
+    lines = [verdict]
+    solution = str(payload.get("solution") or "").strip()
+    if solution:
+        lines.append(italic(solution))
+    if graduated:
+        lines.append("🎓 Graduated!")
+    return BotReply("\n".join(lines), parse_mode=HTML_PARSE_MODE)
+
+
+def handle_poll_vote(
+    session: Session, poll_id: int, options: list[bytes]
+) -> BotReply | None:
+    """Turn an incoming native poll vote into a reply, or None to stay silent."""
+
+    from fluentloop.bot.polls import resolve_vote
+
+    outcome = resolve_vote(session, poll_id, options)
+    if outcome is None:
+        return None
+    if outcome.correct:
+        lines = [f"✅ Right — {bold(outcome.item_text)}"]
+    else:
+        lines = [f"❌ It was {bold(outcome.item_text)}"]
+    if outcome.solution:
+        lines.append(italic(outcome.solution))
+    if outcome.graduated:
+        lines.append("🎓 Graduated!")
+    return BotReply(
+        "\n".join(lines),
+        outcome.telegram_user_id or None,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_drill_start(
+    session: Session, user: User, delivery_id: int, *, chat_id: int | None = None
+) -> BotReply:
+    delivery = _load_delivery(session, user, delivery_id)
+    if delivery is None:
+        return BotReply("That drill is no longer available.")
+    if delivery.status == "answered":
+        return BotReply("You already answered this one.")
+    set_drill_state(session, user, delivery_id, chat_id=chat_id)
+    prompt = (delivery.payload_json or {}).get("exercise", {}).get("prompt", "")
+    return BotReply(
+        f"Send me your answer.\n\n{html_escape(prompt)}",
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_drill_skip(
+    session: Session, user: User, delivery_id: int, *, chat_id: int | None = None
+) -> BotReply:
+    from fluentloop.srs import apply_review
+
+    delivery = _load_delivery(session, user, delivery_id)
+    if delivery is None:
+        return BotReply("That drill is no longer available.")
+    delivery.status = "skipped"
+    session.add(delivery)
+    exercise = (delivery.payload_json or {}).get("exercise", {})
+    item_ids = delivery.learning_item_ids or []
+    if item_ids:
+        item = session.get(LearningItem, item_ids[0])
+        if item is not None:
+            apply_review(session, item, "Hard")
+    StateStore(session).clear(
+        chat_id if chat_id is not None else user.telegram_user_id,
+        user.telegram_user_id,
+    )
+    expected = str(exercise.get("expected_answer") or "").strip()
+    if expected:
+        return BotReply(
+            f"Skipped. The answer was {bold(expected)}.",
+            parse_mode=HTML_PARSE_MODE,
+        )
+    return BotReply("Skipped.")
+
+
+def handle_drill_answer(
+    session: Session,
+    user: User,
+    provider: AIProvider,
+    delivery_id: int,
+    answer: str,
+    *,
+    chat_id: int | None = None,
+) -> BotReply:
+    from fluentloop.feedback import srs_result_from_feedback
+    from fluentloop.srs import apply_review
+
+    delivery = _load_delivery(session, user, delivery_id)
+    if delivery is None:
+        return BotReply("That drill is no longer available.")
+    payload = delivery.payload_json or {}
+    exercise = payload.get("exercise") or {}
+    # check_answer takes the stored exercise dict directly.
+    feedback = check_answer(provider, exercise, answer)
+    item_ids = delivery.learning_item_ids or []
+    graduated = False
+    if item_ids:
+        item = session.get(LearningItem, item_ids[0])
+        if item is not None:
+            _, graduated = apply_review(
+                session, item, srs_result_from_feedback(feedback)
+            )
+    delivery.status = "answered"
+    delivery.payload_json = {**payload, "user_answer": answer}
+    session.add(delivery)
+    session.flush()
+    StateStore(session).clear(
+        chat_id if chat_id is not None else user.telegram_user_id,
+        user.telegram_user_id,
+    )
+
+    lines = [labeled("Verdict", f"{feedback.status.title()}.")]
+    better = feedback.natural_answer or feedback.corrected_answer
+    if better:
+        lines.append(f"{bold('Better:')} {code(better)}")
+    if feedback.explanation:
+        lines.append(html_escape(feedback.explanation))
+    if graduated:
+        lines.append("🎓 Graduated!")
+    return BotReply("\n".join(lines), parse_mode=HTML_PARSE_MODE)
+
+
+def handle_vocab_undo(session: Session, user: User, raw_ids: str) -> BotReply:
+    removed = 0
+    for chunk in raw_ids.split(","):
+        chunk = chunk.strip()
+        if not chunk.isdigit():
+            continue
+        item = session.get(LearningItem, int(chunk))
+        if item is not None and item.user_id == user.id:
+            set_item_status(session, item, "archived")
+            removed += 1
+    if not removed:
+        return BotReply("Nothing to undo.")
+    return BotReply(f"Removed {removed} item(s).")
+
+
 def handle_rules(session: Session) -> BotReply:
     from sqlalchemy import func, select
 
@@ -1763,6 +2554,7 @@ def handle_rules(session: Session) -> BotReply:
 def command_catalog() -> list[str]:
     return [
         "/start",
+        "/setup",
         "/today",
         "/review",
         "/practice",
@@ -1787,6 +2579,12 @@ def command_catalog() -> list[str]:
         "/favorite",
         "/items",
         "/item",
+        "/words",
+        "/more",
+        "/learned",
+        "/delete",
+        "/pause",
+        "/resume",
         "/settings",
         "/help",
         "/howto",

@@ -26,6 +26,14 @@ What happens in practice:
 - SRS, confidence, L1 traps, and mistake patterns decide what comes back.
 - /stats shows activity; /outcomes shows learning evidence.
 
+Your day:
+- Morning: your words with example sentences.
+- Midday: a quick drill; some days you write your own sentence.
+- Evening: a short quiz.
+Right answers push a word further out; it graduates once you have mastered it.
+Send me any word or phrase any time to add it - commas or new lines for
+several at once. Your own words always get top priority.
+
 If you want focused practice:
 - /practice notebook - free writing + native diff
 - /practice diplomatic - softer workplace tone
@@ -46,7 +54,12 @@ trade-offs, risks, tech debt, reports, reliability, postmortems, async updates,
 exec summaries, alignment.
 
 Useful commands:
-/today - start daily practice
+/today - start daily practice; /today <n> shows n word cards
+/words - your list and what is coming up
+/more <word> - detailed card: meaning, synonyms, collocations
+/learned <word> - mark as mastered
+/delete <word> - remove a word
+/pause and /resume - daily messages off and on
 /baseline [answer] - show or save monthly baseline
 /outcomes [full] - show 30-day learning outcomes
 /library [query] - browse shared seed lessons

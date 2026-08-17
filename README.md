@@ -45,12 +45,28 @@ If you are here as a learner, not as a developer, read these first:
 The simplest path inside Telegram:
 
 ```text
+/setup
 /library
 /subscribe <template_id>
 /baseline <your 120-180 word answer>
 /today
 /outcomes full
 ```
+
+`/setup` runs a short wizard — topics, vocabulary kinds, list size, words per
+day — and seeds a starter list from the word bank shipped with the repo. After
+that the bot reaches out three times a day on its own:
+
+```text
+🌅 Morning   your words with example sentences
+✍️ Midday    a quick drill; some days you write your own sentence
+🌙 Evening   a short quiz
+```
+
+Right answers push a word further out; it graduates once you have mastered it.
+Send any word or phrase as a plain message to add it — commas or new lines for
+several at once. Your own words always get top priority. `/pause` and `/resume`
+turn the daily messages off and back on.
 
 If you already have material from a teacher, work, Slack, email, an article, or
 meeting notes, start with:
@@ -206,12 +222,14 @@ Bot          Session done — 15/15 in 14 min.
   (`bot/state.py`).
 - **Persistence** — SQLAlchemy 2.x ORM + Alembic migrations, SQLite single
   file mounted from the host into `/app/data`.
-- **Scheduling** — APScheduler 3.10 in-process, three cron-style jobs:
-  daily reminder, 03:00 overnight pre-gen, 04:00 SQLite backup.
-- **AI** — provider abstraction in `src/fluentloop/ai/`; DeepSeek gateway
-  in `src/fluentloop/llm/` with task-aware Pro/Flash routing, JSON
-  contract, bounded timeout/retry/fallback policy. OpenAI is wired as an
-  alternative tier (`AI_PROVIDER=openai`).
+- **Scheduling** — APScheduler 3.10 in-process, five cron-style jobs:
+  daily reminder, 03:00 overnight pre-gen, 04:00 SQLite backup, weekly
+  summary, and a minute tick that delivers the daily vocabulary loop at each
+  learner's own local slot times.
+- **AI** — provider abstraction in `src/fluentloop/ai/`; an
+  OpenAI-compatible gateway in `src/fluentloop/llm/` with task-aware
+  Pro/Flash routing, JSON contract, bounded timeout/retry/fallback policy.
+  `AI_PROVIDER` selects `stub`, `openai`, `deepseek`, or `qwen`.
 - **Ops** — Dockerfile + `docker-compose.yml`, `scripts/deploy.sh` for
   rsync+SSH+`docker compose` to the VPS, GitHub Actions CI on every push.
 
