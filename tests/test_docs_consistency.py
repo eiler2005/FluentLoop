@@ -94,3 +94,36 @@ def test_savepoint_rule_is_recorded(docs) -> None:
 
     assert "SAVEPOINT" in docs["adr12"]
     assert "begin_nested" in docs["adr12"]
+
+
+def test_card_rules_are_written_down(docs) -> None:
+    """The card spec is non-obvious enough that losing it costs a bug.
+
+    Both defects it records - a predicate disagreeing about where the Russian
+    gloss lives, and a generation prompt stored as an example - were invisible
+    until they reached a learner.
+    """
+
+    epic = docs["epic"]
+    assert "Card composition rules" in epic
+    for helper in ("stored_russian", "usable_example", "enrich_item"):
+        assert helper in epic, f"{helper} undocumented"
+    # The rule that keeps enrichment off the delivery path.
+    assert "word_cards" in docs["arch"]
+    assert "stored_russian" in docs["agents"]
+
+
+def test_scheduler_job_count_is_current(docs, settings) -> None:
+    """The diagram claimed three jobs long after there were five."""
+
+    from fluentloop.db.session import make_engine, make_session_factory
+    from fluentloop.scheduler import build_scheduler
+
+    class _Client:
+        pass
+
+    factory = make_session_factory(make_engine("sqlite:///:memory:"))
+    scheduler = build_scheduler(settings, factory, client=_Client())
+
+    assert len(scheduler.get_jobs()) == 5
+    assert "five jobs" in docs["arch"]

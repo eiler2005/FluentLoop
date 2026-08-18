@@ -58,7 +58,7 @@ and stubs the Telegram client and AI providers — no real network calls.
 | `test_epic25_wordbank.py` | Word-bank validation, deterministic starter selection, and idempotent seeding. |
 | `test_epic25_onboarding.py` | The `/setup` wizard state machine end to end. |
 | `test_epic25_qwen_provider.py` | Provider selection, model routing, gateway attribution, and DeepSeek back-compat. |
-| `test_epic25_word_cards.py` | Card enrichment: what counts as missing, curated content never overwritten, wrong-language glosses refused, and unwrapping a schema-shaped model answer. |
+| `test_epic25_word_cards.py` | The EPIC-25 §4a card rules: what counts as missing, curated content never overwritten, wrong-language glosses refused, a leaked prompt rejected as an example, and unwrapping a schema-shaped model answer. |
 | `test_docs_consistency.py` | Documentation claims checked against the code: keyboard buttons, both command catalogs, quiz slots and sizes, slot defaults, practice groups, and the SAVEPOINT rule. |
 | `test_bot_upload_documents.py` | Telegram document-upload handler: text decoding, oversize rejection, friendly errors. |
 | `test_seed_demo_data.py` | Idempotency and shape of `scripts/seed_demo_data.py`. |

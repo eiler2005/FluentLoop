@@ -39,7 +39,10 @@ All notable changes to FluentLoop are recorded here. Format follows
   English gloss, and an example containing the phrase. Missing pieces are
   generated once per item and never overwrite curated content; newly added
   words are enriched at add time and the confirmation shows the finished card.
-  `scripts/enrich_word_cards.py` backfills an existing base.
+  `scripts/enrich_word_cards.py` backfills an existing base. The composition
+  rules are written down as EPIC-25 §4a and asserted by the consistency suite.
+- Examples that were really generation prompts ("Use 'x' in a realistic tech
+  workplace sentence") are recognised, hidden, and replaced.
 - The keyboard collapses after each tap and lays out three buttons per row, so
   it no longer occupies half a phone screen. `/keyboard` removes it entirely
   and restores it; the hide message lists the commands that still work.

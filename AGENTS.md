@@ -109,6 +109,13 @@ destructive action is high.
 - **Persistent-keyboard taps arrive as plain text.** `quick_action_for` must
   stay ahead of every free-text capture path in `on_free_text`, or a button
   label gets stored as a vocabulary item.
+- **A card carries form, meaning and use**: the phrase, a Russian gloss, an
+  English gloss, and an example containing the phrase. Read the Russian one
+  with `word_cards.stored_russian` and the example with
+  `word_cards.usable_example` — a translation can live in `meaning`,
+  `explanation`, or `metadata_json`, and any predicate that disagrees makes
+  the backfill loop forever. Enrichment only fills blanks; it never overwrites
+  a curated gloss. See EPIC-25 §4a.
 - **Never hand a JSON Schema to the model.** `user_prompt` lists the fields
   plainly instead: given a schema, models answer with its envelope
   (`{"description": ..., "properties": {...}}`) rather than an instance, and
@@ -162,7 +169,7 @@ FluentLoop/
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 │   └── seeds/                    Shipped seed data (starter word bank JSONL).
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (29 modules, 359+ tests).
+└── tests/                        Pytest suite (29 modules, 363+ tests).
 ```
 
 ## Verification commands

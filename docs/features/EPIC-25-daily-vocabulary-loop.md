@@ -27,7 +27,7 @@ Commit and deploy are still explicit user-approved gates.
 
 ## Validation Evidence
 
-- Local gate: `pytest -q` -> `359 passed`; `ruff check src tests scripts`,
+- Local gate: `pytest -q` -> `363 passed`; `ruff check src tests scripts`,
   `python scripts/secret_scan.py`, and `git diff --check` clean.
 - Migration `0004_epic25` verified idempotent and reversible against a fresh
   SQLite file, and applied on the VPS (`alembic_version = 0004_epic25`).
@@ -161,6 +161,56 @@ are enriched too; `scripts/enrich_word_cards.py` backfills an existing base
 in batches, dry-run by default. Words the learner types in are enriched at
 add time and the confirmation shows the finished card, so a wrong translation
 is visible immediately.
+
+### 4a. Card composition rules
+
+The canonical spec for what a card is and how one gets built. `word_cards.py`
+implements it; `tests/test_epic25_word_cards.py` enforces it.
+
+**A complete card carries three things.** Nation splits knowing a word into
+form, meaning and use, and a card missing any of them is easy to read past:
+
+| Slot | Field | Rule |
+|---|---|---|
+| Form | `LearningItem.text` | The phrase itself, never rewritten. |
+| Meaning | Russian gloss | On the headline - the line the eye stops on. |
+| Meaning | English gloss | Under it, so recognition does not stop at the translation. |
+| Use | one example | Must contain the phrase, not describe it. |
+
+**Where each gloss lives.** Items arrive from several sources with the two
+text fields already used in different ways, so there is no fixed column:
+
+- `english_definition()` returns whichever of `meaning` / `explanation` has no
+  Cyrillic; `russian_definition()` returns whichever has some.
+- `enrich_item` writes a new Russian gloss into whichever field is free, and
+  into `metadata_json["russian"]` when both are taken.
+- **Every reader must use `stored_russian()`**, which looks in all three.
+  `needs_enrichment` once checked only the two fields, so metadata-stored
+  translations looked permanently missing and the backfill re-processed the
+  same rows on every run.
+
+**Never overwrite what is already there.** A generated gloss is worth less
+than a curated or bank-supplied one, so enrichment only fills blanks. The one
+exception is an example that is not an example - see below.
+
+**An example must be a sentence, not an instruction.** Seeded items carried
+`"Use 'x' in a realistic tech workplace sentence"` - the generation prompt
+written to the database instead of its output. `is_instruction_not_example()`
+recognises those; `usable_example()` is what cards and `needs_enrichment` read,
+so such a string counts as missing and is replaced on the next pass.
+
+**Language.** The card shows both languages because nothing is being tested
+there. Prompts that *ask* something stay English-only; see below.
+
+**When enrichment runs.** Once per item, never in a loop:
+
+- at add time for a word the learner typed in, with the finished card echoed
+  back so a bad translation is visible immediately;
+- via `scripts/enrich_word_cards.py` for an existing base, in batches, dry run
+  by default;
+- never during a slot delivery - the tick must not depend on the LLM.
+
+A missing or failing model degrades to a bare card, never to a failed add.
 
 ### 5. Content and language
 

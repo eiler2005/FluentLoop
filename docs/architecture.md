@@ -1,8 +1,8 @@
 # Architecture
 
-> **Status:** v0.2 — MVP foundation (EPIC-01..14), learning-engine roadmap
-> (EPIC-16..21), and EPIC-22/23 extensions are shipped. ADRs 0002-0008 are
-> Accepted. Schema specifics
+> **Status:** v0.3 — MVP foundation (EPIC-01..14), learning-engine roadmap
+> (EPIC-16..21), and EPIC-22..25 extensions are shipped. ADRs 0002-0012 are
+> Accepted (0009 reserved). Schema specifics
 > for individual epics live in those epic files.
 
 The PRD deliberately keeps tech choices out of itself. This document is the
@@ -19,7 +19,8 @@ decisions as ADRs in [`adr/`](adr/).
   dev and degraded-AI failure modes.
 - **SQLite** via SQLAlchemy 2.x, single-file DB, mounted from host.
 - **APScheduler** in-process for daily reminders, overnight pre-gen
-  (ADR-0004), and daily SQLite backups.
+  (ADR-0004), daily SQLite backups, the weekly digest, and the per-user
+  vocabulary tick (ADR-0012).
 - **Long polling** against Telegram (no webhook, no public ports).
 - **Telegram workspace maintenance** syncs Bot API commands, refreshes the
   pinned Help topic, and safely removes only identifiable bot-authored stale
@@ -55,10 +56,12 @@ container:
    └────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
-                   APScheduler (in-process, three jobs)
+                   APScheduler (in-process, five jobs)
                    ├─ Daily reminder (User.reminder_time)
                    ├─ Overnight pre-gen (PRE_GEN_HOUR=3)
-                   └─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
+                   ├─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
+                   ├─ Weekly summary (Sun 18:00)
+                   └─ vocab_loop_tick (every minute, per-user local slots)
 ```
 
 Daily-loop data flow — what happens between bedtime and the morning's
@@ -94,7 +97,7 @@ Daily-loop data flow — what happens between bedtime and the morning's
 One Docker container (`python:3.11-slim`) running:
 
 - the Telethon long-poll loop,
-- APScheduler with three cron-style jobs,
+- APScheduler with five cron-style jobs,
 - the SQLite database on `/app/data` (host-mounted),
 - session files on `/app/data/sessions/`,
 - daily backups on `/app/data/backups/` (14-day rotation),
@@ -135,6 +138,11 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
 - **A persistent reply keyboard** (Cards / Review / Lesson / My words / Add
   words / Quiz / Stop) is installed by `/start`. Taps arrive as plain text, so
   `handlers.quick_action_for` must run before every free-text capture path.
+- **Card content is filled once, off the delivery path.**
+  `word_cards.enrich_item` adds a Russian gloss, an English gloss and an
+  example when they are missing, at add time or via
+  `scripts/enrich_word_cards.py`. The minute tick never calls it, so a slow or
+  dead LLM cannot delay a slot. Composition rules live in EPIC-25 §4a.
 - **A quiz is a sequence of deliveries**, one `vocab_deliveries` row per
   question, with the `seq=0` claim as the idempotency lock for the set. Rows
   stay `claimed` until answered, which is what makes `/quiz` resumable. See
