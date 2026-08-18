@@ -27,7 +27,7 @@ Commit and deploy are still explicit user-approved gates.
 
 ## Validation Evidence
 
-- Local gate: `pytest -q` -> `344 passed`; `ruff check src tests scripts`,
+- Local gate: `pytest -q` -> `348 passed`; `ruff check src tests scripts`,
   `python scripts/secret_scan.py`, and `git diff --check` clean.
 - Migration `0004_epic25` verified idempotent and reversible against a fresh
   SQLite file, and applied on the VPS (`alembic_version = 0004_epic25`).
@@ -221,6 +221,13 @@ be stored as a vocabulary item - `looks_like_word_list` accepts it happily.
 `➕ Add words` arms an explicit add: the next message goes straight to the
 vocabulary path, bypassing the material heuristic. Tapping any other quick
 action clears a pending add.
+
+The panel is `single_use`, so it collapses after every tap - seven buttons in
+four rows is half a phone screen, and Telegram keeps a keyboard icon in the
+input field to reopen it. Three buttons per row brings it down to three rows.
+`/keyboard` removes it entirely (`Button.clear()`) and restores it, stored as
+`VocabPrefs.keyboard`; the hide message names the commands that still work so
+nobody is stranded.
 
 ### 6. Own words first
 

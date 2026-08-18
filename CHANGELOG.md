@@ -35,6 +35,9 @@ All notable changes to FluentLoop are recorded here. Format follows
   captures and abandons the practice session, reporting any paused quiz
   questions rather than claiming nothing is pending.
 - `🎯 Quiz` and `⏹ Stop` joined the persistent keyboard.
+- The keyboard collapses after each tap and lays out three buttons per row, so
+  it no longer occupies half a phone screen. `/keyboard` removes it entirely
+  and restores it; the hide message lists the commands that still work.
 - Native Telegram quiz polls over Telethon raw API, with an inline-button
   fallback and a `VOCAB_QUIZ_POLLS` kill switch (ADR-0011).
 - Qwen as a selectable LLM provider alongside OpenAI and DeepSeek, behind the

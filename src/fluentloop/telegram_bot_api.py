@@ -44,6 +44,7 @@ BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("delete", "Remove a word from your list"),
     ("quiz", "Start or resume today's vocabulary quiz"),
     ("stop", "Stop the current prompt or session"),
+    ("keyboard", "Show or hide the button panel"),
     ("pause", "Pause the daily messages"),
     ("resume", "Resume the daily messages"),
     ("help", "Show the FluentLoop guide"),

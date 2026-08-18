@@ -646,3 +646,62 @@ def test_add_words_button_arms_an_explicit_add(db_session, settings) -> None:
     state = StateStore(db_session).get(555, user.telegram_user_id)
     assert state is not None
     assert state.name == ADD_WORDS_STATE
+
+
+# --- the panel can be dismissed --------------------------------------------
+
+
+def test_keyboard_toggle_hides_and_restores(db_session, settings) -> None:
+    """Four rows of buttons is half a phone screen; it has to be dismissable."""
+
+    from fluentloop.bot.handlers import handle_keyboard_toggle
+    from fluentloop.vocab_prefs import get_prefs
+
+    user = ensure_user(db_session, 123456789, settings)
+    assert get_prefs(user).keyboard is True
+
+    off = handle_keyboard_toggle(db_session, user)
+    assert off.clear_keyboard is True
+    assert off.persistent_keyboard is False
+    assert get_prefs(user).keyboard is False
+    # Hiding must not strand the learner: name the commands that still work.
+    for command in ("/cards", "/review", "/quiz", "/keyboard"):
+        assert command in off.text
+
+    on = handle_keyboard_toggle(db_session, user)
+    assert on.persistent_keyboard is True
+    assert on.clear_keyboard is False
+    assert get_prefs(user).keyboard is True
+
+
+def test_start_respects_a_hidden_keyboard(db_session, settings) -> None:
+    from fluentloop.bot.handlers import handle_start
+    from fluentloop.vocab_prefs import mark_onboarded, update_pref
+
+    user = ensure_user(db_session, 123456789, settings)
+    mark_onboarded(db_session, user)
+    update_pref(db_session, user, "keyboard", False)
+
+    reply = handle_start(db_session, settings, 123456789)
+
+    assert reply.persistent_keyboard is False
+    assert "/keyboard" in reply.text
+
+
+def test_panel_collapses_after_a_tap() -> None:
+    """single_use is what stops it sitting there permanently."""
+
+    from fluentloop.bot.app import _persistent_keyboard
+
+    rows = _persistent_keyboard()
+
+    assert all(button.single_use for row in rows for button in row)
+    assert all(button.resize for row in rows for button in row)
+    # Three per row keeps seven buttons to three rows, not four.
+    assert max(len(row) for row in rows) == 3
+    assert len(rows) == 3
+
+
+def test_keyboard_command_is_registered() -> None:
+    assert "/keyboard" in command_catalog()
+    assert "keyboard" in {command for command, _ in BOT_COMMANDS}

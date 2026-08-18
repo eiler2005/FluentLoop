@@ -41,6 +41,7 @@ from fluentloop.bot.handlers import (
     handle_help,
     handle_item_status,
     handle_items,
+    handle_keyboard_toggle,
     handle_learned,
     handle_lesson,
     handle_lesson_callback,
@@ -168,13 +169,29 @@ def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
 
 
 def _persistent_keyboard():  # type: ignore[no-untyped-def]
+    """The quick-action panel.
+
+    `single_use` collapses it after a tap: on a phone four rows of buttons are
+    half the screen, and Telegram keeps a keyboard icon in the input field to
+    bring it back. Three per row keeps it to three rows instead of four.
+    """
+
     from telethon import Button
 
     from fluentloop.bot.handlers import QUICK_ACTIONS
 
     labels = [label for label, _ in QUICK_ACTIONS]
-    rows = [labels[index : index + 2] for index in range(0, len(labels), 2)]
-    return [[Button.text(label, resize=True) for label in row] for row in rows]
+    rows = [labels[index : index + 3] for index in range(0, len(labels), 3)]
+    return [
+        [Button.text(label, resize=True, single_use=True) for label in row]
+        for row in rows
+    ]
+
+
+def _clear_keyboard():  # type: ignore[no-untyped-def]
+    from telethon import Button
+
+    return Button.clear()
 
 
 async def send_reply(  # type: ignore[no-untyped-def]
@@ -188,11 +205,12 @@ async def send_reply(  # type: ignore[no-untyped-def]
             raise RuntimeError("Forum topic replies need Settings for Bot API")
         message = await send_bot_api_reply(settings.telegram_bot_token, reply)
     else:
-        buttons = (
-            _persistent_keyboard()
-            if reply.persistent_keyboard
-            else _telethon_buttons(reply)
-        )
+        if reply.persistent_keyboard:
+            buttons = _persistent_keyboard()
+        elif reply.clear_keyboard:
+            buttons = _clear_keyboard()
+        else:
+            buttons = _telethon_buttons(reply)
         message = await client.send_message(
             reply.target_chat_id or fallback_chat_id,
             reply.text,
@@ -720,6 +738,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_quiz_start(session, user, settings=settings)
             elif command == "/stop":
                 reply = handle_stop(session, user, chat_id=event.chat_id)
+            elif command == "/keyboard":
+                reply = handle_keyboard_toggle(session, user)
             elif command == "/pause":
                 reply = handle_pause(session, user)
             elif command == "/resume":

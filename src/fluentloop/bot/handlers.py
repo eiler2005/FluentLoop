@@ -128,6 +128,8 @@ class BotReply:
     # discoverable only if you already know them; this makes starting practice
     # a tap from anywhere in the chat.
     persistent_keyboard: bool = False
+    # Take it away again. Mutually exclusive with the flag above.
+    clear_keyboard: bool = False
     # The sender delivers this quiz question (poll or buttons) right after
     # the reply itself. Handlers stay Telegram-free; app.py does the sending.
     quiz_question_delivery_id: int | None = None
@@ -437,9 +439,10 @@ def handle_start(
         start_message(
             bool(settings.telegram_forum_group_id or settings.telegram_channel_id)
         )
-        + "\n\nRun /setup to redo the setup wizard.",
+        + "\n\nRun /setup to redo the setup wizard."
+        + ("" if get_prefs(user).keyboard else "\n/keyboard brings the buttons back."),
         user.telegram_user_id,
-        persistent_keyboard=True,
+        persistent_keyboard=get_prefs(user).keyboard,
     )
 
 
@@ -2003,6 +2006,32 @@ def handle_delete(session: Session, user: User, word: str) -> BotReply:
     )
 
 
+def handle_keyboard_toggle(session: Session, user: User) -> BotReply:
+    """Show or hide the button panel.
+
+    It collapses after each tap anyway, but on a small screen even a collapsed
+    panel is one more thing in the way, so it can be switched off entirely.
+    """
+
+    from fluentloop.vocab_prefs import get_prefs, update_pref
+
+    wanted = not get_prefs(user).keyboard
+    update_pref(session, user, "keyboard", wanted)
+    if wanted:
+        return BotReply(
+            "Buttons are back. They collapse after each tap - the keyboard "
+            "icon in the input field brings them up again.\n"
+            "/keyboard hides them.",
+            persistent_keyboard=True,
+        )
+    return BotReply(
+        "Buttons hidden. Everything still works as a command:\n"
+        "/cards · /review · /quiz · /today · /words · /stop\n"
+        "/keyboard brings them back.",
+        clear_keyboard=True,
+    )
+
+
 def handle_pause(session: Session, user: User) -> BotReply:
     from fluentloop.vocab_prefs import update_pref
 
@@ -2907,6 +2936,7 @@ def command_catalog() -> list[str]:
         "/delete",
         "/quiz",
         "/stop",
+        "/keyboard",
         "/pause",
         "/resume",
         "/settings",

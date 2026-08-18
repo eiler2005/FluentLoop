@@ -41,6 +41,9 @@ class VocabPrefs:
     sets: list[str] = field(default_factory=list)
     starter_size: int = 200
     quiz_size: int = 10
+    # The reply keyboard is convenient on desktop and eats half a phone
+    # screen. Off means commands and inline buttons only.
+    keyboard: bool = True
     onboarded_at: str | None = None
 
 
@@ -73,6 +76,7 @@ def get_prefs(user: User) -> VocabPrefs:
         kinds=list(raw.get("kinds") or []),
         sets=list(raw.get("sets") or []),
         starter_size=int(raw.get("starter_size", DEFAULTS.starter_size)),
+        keyboard=bool(raw.get("keyboard", DEFAULTS.keyboard)),
         quiz_size=int(raw.get("quiz_size", DEFAULTS.quiz_size)),
         onboarded_at=raw.get("onboarded_at"),
     )
@@ -104,6 +108,8 @@ def update_pref(session: Session, user: User, key: str, value: object) -> VocabP
         prefs = replace(prefs, slots={**prefs.slots, key: str(value).strip()})
     elif key == "paused":
         prefs = replace(prefs, paused=_as_bool(value))
+    elif key == "keyboard":
+        prefs = replace(prefs, keyboard=_as_bool(value))
     elif key == "words_per_day":
         count = int(value)
         if count < MIN_WORDS_PER_DAY or count > MAX_WORDS_PER_DAY:
@@ -146,6 +152,7 @@ def format_vocab_settings(prefs: VocabPrefs) -> str:
         f"Slots: {slots}",
         f"Words per day: {prefs.words_per_day}",
         f"Quiz size: {prefs.quiz_size} questions",
+        f"Keyboard: {'on' if prefs.keyboard else 'off'}",
     ]
     if prefs.topics:
         lines.append(f"Topics: {', '.join(prefs.topics)}")

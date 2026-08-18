@@ -52,7 +52,9 @@ The buttons under the input field start practice from anywhere:
   🃏 Cards   read today's words        📚 Lesson    the 15-minute session
   🔁 Review  2-3 min over what is due  📖 My words  your list and counts
   🎯 Quiz    today's quiz on demand    ⏹ Stop     exit whatever is running
-Send /start if they are not showing.
+They collapse after each tap; the keyboard icon in the input field brings
+them back. /keyboard hides the panel for good, /keyboard again restores it.
+Send /start if they are not showing at all.
 
 Not sure what to start? Send /today - it asks which of the two you want:
 
@@ -77,6 +79,7 @@ Daily-loop commands:
   /delete <word>    remove a word (also undoable)
   /quiz             start or resume today's vocabulary quiz
   /stop             cancel pending prompts and close the active session
+  /keyboard         show or hide the button panel
   /pause /resume    stop and restart the three daily messages
   /setup            redo the wizard: topics, vocabulary kinds, pace
   /settings         change slot times and words per day
