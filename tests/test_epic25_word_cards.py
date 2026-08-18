@@ -172,3 +172,27 @@ def test_prompts_never_hand_over_a_json_schema() -> None:
     assert "$defs" not in text
     for field in WordCard.model_fields:
         assert field in text
+
+
+def test_a_metadata_stored_translation_counts_as_present(
+    db_session, settings
+) -> None:
+    """Regression: the backfill re-processed these items on every run."""
+
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="suggest having",
+        meaning="suggest + gerund",
+        explanation="Use suggest + -ing to report an idea.",
+        examples=["She suggested having one meeting a week."],
+    )
+
+    # Both text fields are taken, so the translation goes to metadata.
+    enrich_item(db_session, item, card=WordCard(russian="предлагать сделать"))
+
+    assert item.metadata_json["russian"] == "предлагать сделать"
+    assert stored_russian(item) == "предлагать сделать"
+    assert needs_enrichment(item) is False

@@ -25,10 +25,28 @@ MAX_SYNONYMS = 3
 MAX_COLLOCATIONS = 3
 
 
-def needs_enrichment(item: LearningItem) -> bool:
-    """True while the card is still missing a translation or an example."""
+def stored_russian(item: LearningItem) -> str:
+    """The Russian gloss wherever it ended up.
 
-    return not russian_definition(item) or not (item.examples or [])
+    It lands in `meaning` or `explanation` when one is free, and in metadata
+    when both are taken, so every reader has to look in all three.
+    """
+
+    direct = russian_definition(item)
+    if direct:
+        return direct
+    return str((item.metadata_json or {}).get("russian", "")).strip()
+
+
+def needs_enrichment(item: LearningItem) -> bool:
+    """True while the card is still missing a translation or an example.
+
+    Must agree with where enrich_item actually writes: checking only the two
+    text fields left metadata-stored translations looking permanently missing,
+    so the backfill re-processed the same items on every run.
+    """
+
+    return not stored_russian(item) or not (item.examples or [])
 
 
 def generate_card(item: LearningItem, settings: Any | None = None):
@@ -121,12 +139,3 @@ def enrich_item(
         session.add(item)
         session.flush()
     return changed
-
-
-def stored_russian(item: LearningItem) -> str:
-    """The Russian gloss wherever it ended up."""
-
-    direct = russian_definition(item)
-    if direct:
-        return direct
-    return str((item.metadata_json or {}).get("russian", "")).strip()
