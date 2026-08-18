@@ -1242,7 +1242,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 state_store.clear(event.chat_id, telegram_user_id)
                 reply = _material_upload_reply(reply, event, settings)
             elif state is not None and state.name == ADD_WORDS_STATE:
-                reply = handle_vocab_add(session, user, event.raw_text)
+                reply = handle_vocab_add(
+                    session, user, event.raw_text, settings=settings
+                )
                 state_store.clear(event.chat_id, telegram_user_id)
             elif state is not None and state.name == DRILL_STATE:
                 reply = handle_drill_answer(
@@ -1309,7 +1311,9 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 if reply.text.startswith("No active exercise."):
                     if looks_like_word_list(event.raw_text):
-                        reply = handle_vocab_add(session, user, event.raw_text)
+                        reply = handle_vocab_add(
+                            session, user, event.raw_text, settings=settings
+                        )
                         # Keep the upload path reachable from the reply button.
                         state_store.set(
                             event.chat_id,

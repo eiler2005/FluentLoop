@@ -21,14 +21,27 @@ def user_prompt(
 ) -> str:
     if task == LLMTask.MATERIAL_EXTRACTION:
         return _material_extraction_prompt(payload)
-    schema_json = schema.model_json_schema()
     instruction = _task_instruction(task, payload)
+    # Never hand over the JSON Schema itself. Models mirror its shape and
+    # answer with {"description": ..., "properties": {...}} instead of the
+    # instance; describing the fields plainly avoids the whole class of bug.
     return (
         f"Task: {task.value}\n"
         f"Instruction: {instruction}\n"
         f"Payload: {payload!r}\n"
-        f"Return JSON matching this schema:\n{schema_json!r}"
+        f"Return one flat JSON object with exactly these keys:\n"
+        f"{_field_lines(schema)}\n"
+        "Return the values themselves. Do not wrap them in another key and "
+        "do not describe the format."
     )
+
+
+def _field_lines(schema: type[BaseModel]) -> str:
+    lines = []
+    for name, field in schema.model_fields.items():
+        annotation = getattr(field.annotation, "__name__", str(field.annotation))
+        lines.append(f"  {name}: {annotation}")
+    return "\n".join(lines)
 
 
 def _material_extraction_prompt(payload: dict[str, Any]) -> str:
@@ -92,6 +105,18 @@ def _task_instruction(task: LLMTask, payload: dict[str, Any]) -> str:
         return (
             "Generate concise business/IT English micro-drills that fit the "
             "provided stage, metadata, and target items."
+        )
+    if task == LLMTask.WORD_CARD:
+        return (
+            "Build a learner card for one English word or phrase at B2+/C1 "
+            "level, business and IT context. Return: a short English "
+            "definition (under 12 words, no articles like 'a word that "
+            "means'); a natural Russian translation of the phrase itself, not "
+            "a description; one example sentence from a workplace or "
+            "engineering setting that uses the exact phrase; up to three "
+            "synonyms; up to three common collocations. meaning, russian and "
+            "example must always be filled; leave only synonyms or "
+            "collocations empty if none are natural."
         )
     if task == LLMTask.QUIZ_DISTRACTORS:
         return (

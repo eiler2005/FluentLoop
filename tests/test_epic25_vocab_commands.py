@@ -110,21 +110,42 @@ def test_midday_type_rotates_and_includes_writing() -> None:
 # --- card rendering --------------------------------------------------------
 
 
-def test_render_cards_matches_the_expected_shape(db_session, settings) -> None:
+def test_render_cards_carries_form_meaning_and_use(db_session, settings) -> None:
+    """Nation's three aspects: the phrase, what it means, how it is used."""
+
     user = ensure_user(db_session, 123456789, settings)
-    item = _card_item(
+    item = create_learning_item(
         db_session,
         user,
-        "cut corners",
-        "to do something the cheapest way",
-        "They cut corners on testing.",
+        type_="expression",
+        text="cut corners",
+        meaning="срезать углы",
+        explanation="to do something the cheapest way",
+        examples=["They cut corners on testing."],
     )
 
     text = render_cards([item])
 
     assert "🌅 <b>Morning phrases</b>" in text
-    assert "1. <b>cut corners</b> — They cut corners on testing." in text
+    # Form + the translation that anchors it, on the line the eye stops on.
+    assert "1. <b>cut corners</b> — срезать углы" in text
+    # Meaning in English, so recognition does not stop at the translation.
     assert "<i>to do something the cheapest way</i>" in text
+    # Use: an example containing the phrase itself.
+    assert "▸ They cut corners on testing." in text
+
+
+def test_render_cards_omits_what_is_missing(db_session, settings) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(
+        db_session, user, type_="word", text="pipeline", meaning="build steps"
+    )
+
+    text = render_cards([item])
+
+    assert "1. <b>pipeline</b>" in text
+    assert "<i>build steps</i>" in text
+    assert "▸" not in text
 
 
 def test_render_cards_escapes_user_text(db_session, settings) -> None:

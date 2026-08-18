@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -17,6 +18,26 @@ T = TypeVar("T", bound=BaseModel)
 
 class LLMGatewayError(RuntimeError):
     pass
+
+
+def _unwrap(content: str, schema: type[BaseModel]) -> Any:
+    """Find the answer when a model wraps it in the schema's own shape.
+
+    Qwen has been seen replying with {"description": ..., "properties": {...}}
+    - the JSON Schema envelope rather than an instance of it. Rather than
+    contort every schema, look one level down for the real object.
+    """
+
+    data = json.loads(content)
+    if not isinstance(data, dict):
+        return data
+    fields = set(schema.model_fields)
+    if set(data) & fields:
+        return data
+    for value in data.values():
+        if isinstance(value, dict) and set(value) & fields:
+            return value
+    return data
 
 
 class DeepSeekGateway:
@@ -89,7 +110,7 @@ class DeepSeekGateway:
                     **request,
                 )
                 content = response.choices[0].message.content or "{}"
-                result = schema.model_validate_json(content)
+                result = schema.model_validate(_unwrap(content, schema))
                 self._log(task, response, "success", started, selected_model)
                 return result
             except (ValidationError, ValueError, TypeError, RuntimeError) as exc:

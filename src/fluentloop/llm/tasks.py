@@ -11,4 +11,5 @@ class LLMTask(StrEnum):
     GRAMMAR_EXPLANATION = "grammar_explanation"
     TONE_FEEDBACK = "tone_feedback"
     QUIZ_DISTRACTORS = "quiz_distractors"
+    WORD_CARD = "word_card"
 

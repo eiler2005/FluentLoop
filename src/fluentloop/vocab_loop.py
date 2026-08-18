@@ -139,18 +139,36 @@ def select_cards(
 
 
 def render_cards(items: list[LearningItem], *, title: str = "Morning phrases") -> str:
+    """One card per item, carrying form, meaning and use.
+
+    Nation splits knowing a word into form, meaning and use, and a card that
+    drops any of the three is easy to read past without the meaning landing.
+    So: the phrase, a Russian translation to anchor it, an English gloss, and
+    an example that contains the phrase itself rather than describing it.
+
+    The translation goes on the headline because that is the line the eye
+    stops on; the English definition sits under it so recognition does not
+    stop at the translation.
+    """
+
     from fluentloop.bot.formatting import bold, html_escape, italic
+    from fluentloop.word_cards import stored_russian
 
     lines = [f"🌅 {bold(title)}", ""]
     for index, item in enumerate(items, start=1):
-        example = item.examples[0] if item.examples else ""
         headline = f"{index}. {bold(item.text)}"
-        if example:
-            headline += f" — {html_escape(example)}"
+        russian = stored_russian(item)
+        if russian:
+            headline += f" — {html_escape(russian)}"
         lines.append(headline)
-        meaning = any_definition(item)
-        if meaning:
-            lines.append(f"    {italic(meaning)}")
+
+        english = english_definition(item)
+        if english:
+            lines.append(f"    {italic(english)}")
+
+        example = item.examples[0] if item.examples else ""
+        if example:
+            lines.append(f"    ▸ {html_escape(example)}")
         lines.append("")
     return "\n".join(lines).rstrip()
 

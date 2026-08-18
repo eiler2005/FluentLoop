@@ -35,6 +35,11 @@ All notable changes to FluentLoop are recorded here. Format follows
   captures and abandons the practice session, reporting any paused quiz
   questions rather than claiming nothing is pending.
 - `🎯 Quiz` and `⏹ Stop` joined the persistent keyboard.
+- Cards now carry form, meaning and use: the phrase, a Russian translation, the
+  English gloss, and an example containing the phrase. Missing pieces are
+  generated once per item and never overwrite curated content; newly added
+  words are enriched at add time and the confirmation shows the finished card.
+  `scripts/enrich_word_cards.py` backfills an existing base.
 - The keyboard collapses after each tap and lays out three buttons per row, so
   it no longer occupies half a phone screen. `/keyboard` removes it entirely
   and restores it; the hide message lists the commands that still work.
@@ -44,6 +49,11 @@ All notable changes to FluentLoop are recorded here. Format follows
   existing `AI_PROVIDER` switch (ADR-0010).
 
 ### Fixed
+- Prompts handed the model a JSON Schema, and Qwen answered with the schema's
+  own envelope, so every generated card parsed as empty. Prompts now list the
+  fields plainly; the gateway unwraps a nested answer as a safety net.
+- Tests could reach the live LLM with the real API key when they forgot to
+  pass their own Settings. conftest now blocks the ambient `.env`.
 - Practice replies were routed to the forum workspace regardless of where the
   request came from, so a button tapped in a private chat produced nothing
   visible. Replies now follow the request; broadcasts still address the

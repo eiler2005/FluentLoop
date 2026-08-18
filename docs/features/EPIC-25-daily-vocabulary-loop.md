@@ -27,7 +27,7 @@ Commit and deploy are still explicit user-approved gates.
 
 ## Validation Evidence
 
-- Local gate: `pytest -q` -> `348 passed`; `ruff check src tests scripts`,
+- Local gate: `pytest -q` -> `359 passed`; `ruff check src tests scripts`,
   `python scripts/secret_scan.py`, and `git diff --check` clean.
 - Migration `0004_epic25` verified idempotent and reversible against a fresh
   SQLite file, and applied on the VPS (`alembic_version = 0004_epic25`).
@@ -140,7 +140,29 @@ the verdict carries the wrap-up score. On-demand quizzes use slot `"quiz"` so
 they never collide with the scheduled evening rows; a second `/quiz` resumes
 the first claimed row, and once all rows are answered it shows the summary.
 
-### 4. Content and language
+### 4. What a card carries
+
+Nation splits knowing a word into **form, meaning and use**, and research on
+flashcards finds bilingual pairs and a sentence containing the item both beat
+a bare monolingual gloss. A card therefore shows the phrase, a Russian
+translation on the headline, the English definition under it, and an example
+that uses the phrase itself:
+
+```text
+1. cut corners — экономить на спичках, халтурить
+    To do something poorly to save time or money
+    ▸ We cannot cut corners on security protocols in this release.
+```
+
+`word_cards.enrich_item` fills whatever is missing, once per item, and never
+overwrites a curated gloss or example - a generated one is worth less. Bank
+entries arrive with an English gloss and an example but no Russian, so they
+are enriched too; `scripts/enrich_word_cards.py` backfills an existing base
+in batches, dry-run by default. Words the learner types in are enriched at
+add time and the confirmation shows the finished card, so a wrong translation
+is visible immediately.
+
+### 5. Content and language
 
 Distractors are pre-baked into the in-repo word bank, so the common path costs
 nothing. For user-added words the bot first tries the learner's own items, then
@@ -169,7 +191,7 @@ sizes up to 500, so a large pick is capped by the bank and the completion
 message says so. Growing the bank is additive: append lines, and
 `scripts/seed_wordbank.py` imports the delta.
 
-### 5. Two tracks, and a way into them
+### 6. Two tracks, and a way into them
 
 FluentLoop offers two things on different timescales, and both used to hide
 behind `/today`, with cards reachable only by appending a number. A command
@@ -229,7 +251,7 @@ input field to reopen it. Three buttons per row brings it down to three rows.
 `VocabPrefs.keyboard`; the hide message names the commands that still work so
 nobody is stranded.
 
-### 6. Own words first
+### 7. Own words first
 
 `learning_items.priority` is `10` for user-added items and `0` otherwise. It is
 the first `ORDER BY` term in `srs.get_due_items` and a scoring bonus in
@@ -308,6 +330,13 @@ called `workspace_destination` unconditionally, so with a forum configured a
 button tapped in the private chat sent the session to the Practice Flow topic
 and the learner saw nothing. It affected `/review`, `/today`, `/skip`, and the
 feedback and summary replies. See the ADR-0005 amendment.
+
+**7. Models mirror a JSON Schema instead of filling it.** `user_prompt` handed
+the model `schema.model_json_schema()`, and Qwen replied with the envelope -
+`{"description": ..., "properties": {...}}` - so every generated card parsed
+as empty. Prompts now list the fields plainly and never send a schema, and the
+gateway unwraps a nested answer as a safety net. This affected any task using
+the generic prompt, not just word cards.
 
 **6. A dead end after the cards.** Reading the cards offered no next step; the
 passive half was shipped without the active one. The cards message now ends

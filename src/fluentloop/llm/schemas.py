@@ -33,3 +33,13 @@ class LLMTextResult(BaseModel):
 
 class QuizDistractors(BaseModel):
     options: list[str] = Field(default_factory=list)
+
+
+class WordCard(BaseModel):
+    """Everything a learner card needs beyond the phrase itself."""
+
+    meaning: str = ""
+    russian: str = ""
+    example: str = ""
+    synonyms: list[str] = Field(default_factory=list)
+    collocations: list[str] = Field(default_factory=list)

@@ -2074,9 +2074,12 @@ def handle_vocab_cards(
     )
 
 
-def handle_vocab_add(session: Session, user: User, raw: str) -> BotReply:
+def handle_vocab_add(
+    session: Session, user: User, raw: str, *, settings: Settings | None = None
+) -> BotReply:
     from fluentloop.learning import USER_ADDED_PRIORITY
     from fluentloop.vocab_loop import guess_item_type, split_word_list
+    from fluentloop.word_cards import enrich_item
 
     segments = split_word_list(raw)
     if not segments:
@@ -2084,6 +2087,7 @@ def handle_vocab_add(session: Session, user: User, raw: str) -> BotReply:
     added: list[str] = []
     existing: list[str] = []
     added_ids: list[int] = []
+    added_items: list[LearningItem] = []
     for segment in segments:
         type_ = guess_item_type(segment)
         # create_learning_item returns the existing row on collision, so ask
@@ -2114,13 +2118,21 @@ def handle_vocab_add(session: Session, user: User, raw: str) -> BotReply:
         if was_present:
             existing.append(item.text)
         else:
+            # A bare phrase is not a card yet: fill in the translation, gloss
+            # and an example before it ever reaches the learner.
+            enrich_item(session, item, settings=settings)
             added.append(item.text)
             added_ids.append(item.id)
+            added_items.append(item)
 
     lines: list[str] = []
     if added:
+        from fluentloop.vocab_loop import render_cards
+
         lines.append(f"Added {len(added)}:")
-        lines.extend(f"- {html_escape(text)}" for text in added)
+        # Show the card that was built, so the learner sees at once whether the
+        # translation and example are right - and can fix them if not.
+        lines.append(render_cards(added_items, title="New words"))
     if existing:
         lines.append(f"Already had {len(existing)}:")
         lines.extend(f"- {html_escape(text)}" for text in existing)

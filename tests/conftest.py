@@ -9,6 +9,26 @@ from fluentloop.config import Settings
 from fluentloop.db.session import make_engine, make_session_factory
 
 
+@pytest.fixture(autouse=True)
+def _no_ambient_env(monkeypatch) -> None:
+    """Keep the developer's real .env out of every test.
+
+    get_settings() calls load_env(), which populates os.environ from .env.
+    A test that forgets to pass its own Settings would otherwise reach the
+    live LLM with the real API key - slow, billable, and non-deterministic.
+    """
+
+    monkeypatch.setattr("fluentloop.config.load_env", lambda path=None: None)
+    for name in (
+        "AI_PROVIDER",
+        "OPENAI_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "QWEN_API_KEY",
+        "DASHSCOPE_API_KEY",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture
 def settings() -> Settings:
     return Settings(

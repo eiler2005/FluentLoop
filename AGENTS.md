@@ -109,6 +109,10 @@ destructive action is high.
 - **Persistent-keyboard taps arrive as plain text.** `quick_action_for` must
   stay ahead of every free-text capture path in `on_free_text`, or a button
   label gets stored as a vocabulary item.
+- **Never hand a JSON Schema to the model.** `user_prompt` lists the fields
+  plainly instead: given a schema, models answer with its envelope
+  (`{"description": ..., "properties": {...}}`) rather than an instance, and
+  every field parses as empty.
 - **A quiz is a sequence of `vocab_deliveries` rows**, one per question, with
   the `seq=0` claim as the idempotency lock for the whole set. Rows stay
   `claimed` until answered — that is what lets `/quiz` resume. Anything that
@@ -158,7 +162,7 @@ FluentLoop/
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
 │   └── seeds/                    Shipped seed data (starter word bank JSONL).
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (28 modules, 348+ tests).
+└── tests/                        Pytest suite (29 modules, 359+ tests).
 ```
 
 ## Verification commands
