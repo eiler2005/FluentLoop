@@ -152,7 +152,7 @@ def render_cards(items: list[LearningItem], *, title: str = "Morning phrases") -
     """
 
     from fluentloop.bot.formatting import bold, html_escape, italic
-    from fluentloop.word_cards import stored_russian
+    from fluentloop.word_cards import stored_russian, usable_example
 
     lines = [f"🌅 {bold(title)}", ""]
     for index, item in enumerate(items, start=1):
@@ -166,7 +166,7 @@ def render_cards(items: list[LearningItem], *, title: str = "Morning phrases") -
         if english:
             lines.append(f"    {italic(english)}")
 
-        example = item.examples[0] if item.examples else ""
+        example = usable_example(item)
         if example:
             lines.append(f"    ▸ {html_escape(example)}")
         lines.append("")

@@ -196,3 +196,37 @@ def test_a_metadata_stored_translation_counts_as_present(
     assert item.metadata_json["russian"] == "предлагать сделать"
     assert stored_russian(item) == "предлагать сделать"
     assert needs_enrichment(item) is False
+
+
+def test_a_leaked_prompt_is_not_an_example(db_session, settings) -> None:
+    """Seeded items carried the generation instruction as their example."""
+
+    from fluentloop.word_cards import is_instruction_not_example, usable_example
+
+    assert is_instruction_not_example(
+        "Use 'scalable solution' in a realistic tech workplace sentence"
+    )
+    assert is_instruction_not_example("Write a sentence with this phrase.")
+    assert not is_instruction_not_example(
+        "We chose a scalable solution to handle the growth."
+    )
+
+    user = ensure_user(db_session, 123456789, settings)
+    item = create_learning_item(
+        db_session,
+        user,
+        type_="expression",
+        text="scalable solution",
+        examples=["Use 'scalable solution' in a realistic tech workplace sentence"],
+    )
+
+    assert usable_example(item) == ""
+    assert needs_enrichment(item) is True
+
+    enrich_item(
+        db_session,
+        item,
+        card=WordCard(russian="масштабируемое решение", example="It scaled well."),
+    )
+
+    assert item.examples == ["It scaled well."]

@@ -24,6 +24,30 @@ LOG = logging.getLogger(__name__)
 MAX_SYNONYMS = 3
 MAX_COLLOCATIONS = 3
 
+# Some seeded items carry a generation instruction where the example should
+# be - "Use 'x' in a realistic tech workplace sentence". That is a prompt that
+# leaked into the data, not an example, and it teaches nothing.
+_INSTRUCTION_OPENERS = ("use '", 'use "', "write ", "say ", "give ")
+_INSTRUCTION_MARKERS = ("realistic tech workplace", "in a sentence")
+
+
+def is_instruction_not_example(text: str, phrase: str = "") -> bool:
+    low = (text or "").strip().lower()
+    if not low:
+        return False
+    if any(low.startswith(opener) for opener in _INSTRUCTION_OPENERS):
+        return True
+    return any(marker in low for marker in _INSTRUCTION_MARKERS)
+
+
+def usable_example(item: LearningItem) -> str:
+    """The first example that is actually a sentence."""
+
+    for candidate in item.examples or []:
+        if not is_instruction_not_example(candidate, item.text):
+            return candidate
+    return ""
+
 
 def stored_russian(item: LearningItem) -> str:
     """The Russian gloss wherever it ended up.
@@ -46,7 +70,7 @@ def needs_enrichment(item: LearningItem) -> bool:
     so the backfill re-processed the same items on every run.
     """
 
-    return not stored_russian(item) or not (item.examples or [])
+    return not stored_russian(item) or not usable_example(item)
 
 
 def generate_card(item: LearningItem, settings: Any | None = None):
@@ -117,7 +141,8 @@ def enrich_item(
         changed = True
 
     example = (card.example or "").strip()
-    if not (item.examples or []) and example:
+    if example and not usable_example(item):
+        # Replaces a leaked instruction; leaves a real example alone.
         item.examples = [example]
         changed = True
 
