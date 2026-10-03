@@ -109,7 +109,12 @@ def _lock_user(session: Session, user: User) -> None:
 
 
 def _quarantine(
-    item: LearningItem, fingerprint: str, reason: str, now: datetime
+    item: LearningItem,
+    fingerprint: str,
+    reason: str,
+    now: datetime,
+    *,
+    allow_answered_snapshot: bool = False,
 ) -> bool:
     metadata = deepcopy(item.metadata_json or {})
     quality = metadata.setdefault("question_quality", {})
@@ -123,7 +128,7 @@ def _quarantine(
         if isinstance(question, dict) and question_fingerprint(question) == fingerprint:
             question["quality_status"] = "quarantined"
             found = True
-    if not found:
+    if not found and not allow_answered_snapshot:
         return False
     quality[fingerprint] = {
         "status": "quarantined",
@@ -163,7 +168,13 @@ def report_question_issue(
         )
     ):
         changed = (
-            _quarantine(item, fingerprint, "learner_report", datetime.now(UTC))
+            _quarantine(
+                item,
+                fingerprint,
+                "learner_report",
+                datetime.now(UTC),
+                allow_answered_snapshot=True,
+            )
             or changed
         )
     session.flush()

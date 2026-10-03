@@ -34,7 +34,7 @@ written use, and open introductory C1 after complete strong B2 coverage.
 
 ## Validation
 
-On 2026-10-03, the full suite passed: 482 tests, with eight existing Alembic
+On 2026-10-03, the full suite passed: 483 tests, with eight existing Alembic
 deprecation warnings. Ruff, application construction, both bank dry runs and
 diff checks passed. The new bank contains 270 questions, 180 practice and 90
 reserved transfer, with thirty topic-stage plans. Independent semantic review

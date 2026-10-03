@@ -307,6 +307,26 @@ def test_review_routes_to_planner(settings):
     assert task_profile(LLMTask.QUESTION_REVIEW, cfg).model == "reviewer"
 
 
+def test_report_quarantines_answered_private_card_snapshot_without_auto_generation(
+    tmp_path, settings, monkeypatch
+):
+    factory, uid, iid, rid = _setup(tmp_path, settings, monkeypatch)
+    with factory.begin() as session:
+        item = session.get(LearningItem, iid)
+        item.metadata_json = {}
+        session.flush()
+        assert report_question_issue(session, session.get(User, uid), rid, 0)
+        assert not report_question_issue(session, session.get(User, uid), rid, 0)
+        quality = item.metadata_json["question_quality"][question_fingerprint(SOURCE)]
+        assert quality["status"] == "quarantined"
+    gateway = Gateway()
+    assert (
+        run_question_maintenance(settings, factory, now=NOW, gateway=gateway).attempted
+        == 0
+    )
+    assert not gateway.calls
+
+
 def test_item_variant_limit_stops_more_generation(tmp_path, settings, monkeypatch):
     factory, _, iid, _ = _setup(tmp_path, settings, monkeypatch)
     with factory.begin() as session:
