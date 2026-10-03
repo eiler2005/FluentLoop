@@ -1,7 +1,10 @@
 # FluentLoop
 
-> Telegram bot for B2–introductory C1 English: a general foundation with business and IT supplements,
-> text-only MVP, shared seed lesson library, measurable outcomes loop, single Docker container on a VPS.
+![FluentLoop — English for life and work. Islands of everyday English, travel, writing and client communication connected by a learning path.](docs/assets/fluentloop-hero.png)
+
+**English for life & work.** A Telegram learning companion for B2 → B2+ →
+introductory C1, with general English as the foundation and client, business
+and technology situations as supplements.
 
 [![CI](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml/badge.svg)](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -10,25 +13,36 @@
 [![Telethon 1.36](https://img.shields.io/badge/telethon-1.36-2ca5e0.svg)](https://docs.telethon.dev/)
 [![Status](https://img.shields.io/badge/status-MVP%20shipped-success.svg)](docs/features/README.md)
 
+[Start learning](#start-here-if-you-want-to-learn) ·
+[Personal plan](docs/curriculum/workplace-plan-guide.md) ·
+[Visual planner](docs/curriculum/workplace-planner.html) ·
+[Research](docs/research/README.md) ·
+[Self-hosting](#quick-start) ·
+[Documentation](#documentation-map)
+
 ## TL;DR
 
-FluentLoop is an English-learning bot that lives entirely in Telegram. You can
-drop in your own lesson notes or subscribe to an owner-curated B2/B2+ seed
-lesson, then the bot turns approved targets into spaced repetition. The simple
-pilot offers a continuous phrase-and-grammar stream: `/study`, tap an answer,
-read a short explanation, continue until `Хватит`. It runs only on request.
-Full 15-minute, 15-20-drill lessons remain available through the extra menu.
-Mistakes feed a pattern detector; recurring patterns shape future practice.
-`/baseline` and `/outcomes` show whether the learning loop is producing
-measurable progress.
-The runtime is intentionally small: Telethon, SQLite, APScheduler, a
-DeepSeek-backed LLM gateway with deterministic fallback, all in one
-`python:3.11-slim` container.
+Press **Учиться**: answer one question, read a short explanation and continue
+until **Хватит**. Optional short writing lets you apply what you learned.
+Simple mode runs on request and resumes an unfinished question after a restart.
 
-The original MVP (14 epics) plus a learning-engine roadmap (6 more epics) were
-shipped in a single autonomous overnight build session; EPIC-22..24 now add the
-breakthrough pedagogy, shared lesson library, and outcome-measurement layer.
-See [`docs/build-log/`](docs/build-log/) for the frozen build record.
+A saved personal plan connects this stream to **48 modules: 16 general-English
+and 32 workplace supplements**, with **144 contextual questions and 288 writing
+situations** across B2, B2+ and introductory C1. The default balance is 60%
+general practice and 40% work/language practice. Edit priorities, order and
+pauses in Telegram or the offline planner; future questions follow your plan.
+
+Progress separates correct choices, fresh-context transfer and independently
+checked writing. Module advancement requires spaced written application;
+introductory C1 also retains the ten-topic language evidence gate. These are
+practice milestones, not CEFR certification. Speaking and listening activities
+are external practice and self-reported, not assessed by this text-only bot.
+
+Your approved materials, shared lessons, vocabulary cards and full lessons
+remain available. Each learner has isolated progress. The bot is owner/admitted-user
+controlled and runs in one Docker container with SQLite and a configurable AI
+provider. See [the architecture](docs/architecture.md) and
+[the historical build record](docs/build-log/).
 
 ```mermaid
 flowchart LR
@@ -51,17 +65,24 @@ If you are here as a learner, not as a developer, read these first:
 | Understand what FluentLoop does | [`docs/user-guide.md`](docs/user-guide.md) |
 | Understand the learning methodology | [`docs/learning-methodology.md`](docs/learning-methodology.md) |
 | Start this week without thinking too much | [`docs/learning-plans.md`](docs/learning-plans.md) |
+| Set up the plan that drives Учиться | [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) |
+| Edit priorities, order and notes visually | [Download and open the offline planner](docs/curriculum/workplace-planner.html) |
 | Prepare your own lesson notes for `/upload` | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) |
 | See lesson types and public catalogs | [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md) |
 
-The simple pilot starts with:
+For an admitted profile in simple mode, start with:
 
 ```text
 /study
 tap answers until Хватит
 /progress
-/plan
+/roadmap
 ```
+
+To connect a plan for the first time, use `/roadmap activate` or the
+**Подключить план** button. Merely viewing `/roadmap` does not activate it.
+The owner's existing plan is already connected. `/plan` shows the next adaptive
+language step; `/roadmap` edits the broader general/workplace programme.
 
 The pilot is enabled per profile, initially only for the owner. Its keyboard
 is `Учиться`, `Прогресс`, `Ещё`; the extra menu opens the personal plan, materials,
@@ -71,7 +92,8 @@ the current question; `Хватит` completes the run and the next launch selec
 again. Familiar questions not yet due require `Повторить знакомое`.
 
 `/progress` separates recognition, fresh-context transfer, and writing by
-topic. `/plan` shows the next B2 → B2+ → introductory C1 step; these are
+language topic, and shows started roadmap modules with their next evidence gap.
+`/plan` shows the next B2 → B2+ → introductory C1 step; these are
 practice indicators, not a CEFR certification. A learner can flag an answered
 question for review, which excludes that personal question from selection.
 
@@ -87,8 +109,8 @@ independently reviews bounded variants of approved targets; see the
 
 The [editable general/workplace programme](docs/curriculum/workplace-plan-guide.md)
 adds 16 general-English modules and 32 optional areas of workplace focus, each
-with B2/B2+/introductory-C1 tasks. General English receives 60% of the default
-time budget; client work and large-technology companies are supplementary tracks.
+with B2/B2+/introductory-C1 tasks. General English receives 60% of default
+answered practice units; client work and large-technology companies are supplementary tracks.
 Use `/roadmap` for the plan and common edits, or download and open the
 [offline visual planner](docs/curriculum/workplace-planner.html) to reorder
 topics, pause them, add notes and export a personal JSON plan. With a saved plan,
@@ -97,11 +119,14 @@ topics, pause them, add notes and export a personal JSON plan. With a saved plan
 60/40 split balances answered questions; weekly minutes remain a suggested
 workload. Focus, order and pauses affect subsequent selection, while an already
 displayed question resumes unchanged. Two independent, genuinely checked written
-applications on different days support each module's progression; choices and
+applications in distinct situations, on different local dates at least 24 hours
+apart, plus correct recognition, support each module's progression; choices and
 external practice reports are counted separately. Introductory C1 also requires
 the existing ten-topic language gate. See the
 [Study integration runbook](docs/runbooks/roadmap-study.md).
 The [research reports](docs/research/README.md) explain sources and coverage gaps.
+
+### Advanced lessons and vocabulary
 
 The advanced path inside Telegram:
 
@@ -196,17 +221,21 @@ For the full methodology map, see
 
 ## Current lessons and practice surfaces
 
-FluentLoop has three different sources of practice. They are intentionally
-separate:
+Choose the practice surface that fits your session:
 
-1. **Your own materials** via `/upload`: teacher notes, phrase lists, Slack or
+1. **Personal roadmap and adaptive stream** via `/study`: general and workplace
+   module questions, optional writing, phrases and grammar. The separate language
+   banks contain 270 adaptive B2–C1 questions (including 90 reserved transfer
+   checks) and 86 reviewed lang-lessons questions. See
+   [the plan guide](docs/curriculum/workplace-plan-guide.md).
+2. **Your own materials** via `/upload`: teacher notes, phrase lists, Slack or
    email drafts, articles, and meeting notes. See
    [`docs/material-upload-guide.md`](docs/material-upload-guide.md).
-2. **Shared seed lessons** via `/library` and `/subscribe`. The generated public
+3. **Shared seed lessons** via `/library` and `/subscribe`. The generated public
    catalog lives in [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md):
    B2/B2+ seed lessons, the English for Tech series, lesson types, and scenario
    cards.
-3. **40 business/IT scenario cards** via `/scene <topic or number>` for quick
+4. **40 business/IT scenario cards** via `/scene <topic or number>` for quick
    roleplay and pre-meeting rehearsal. Examples: design review, code review
    feedback, incident postmortem, scope negotiation, customer escalation,
    performance review, deadline refusal, and admitting "I do not know" without
@@ -219,38 +248,24 @@ before you start.
 
 ## Architecture at a glance
 
+```mermaid
+flowchart TD
+    Telegram[Telegram: private chat or forum] --> Bot[Bot handlers and persistent state]
+    Bot --> Study[Simple learning stream]
+    Study --> Roadmap[Personal roadmap and module evidence]
+    Study --> Adaptive[Adaptive language topics and transfer]
+    Bot --> Lessons[Materials, shared lessons and practice]
+    Roadmap --> DB[(SQLite)]
+    Adaptive --> DB
+    Lessons --> DB
+    Study --> AI[Configured AI provider and validated feedback]
+    Lessons --> AI
+    Scheduler[APScheduler: backups and mode-aware jobs] --> DB
 ```
-              ┌─────────────────────────────────────────────────────┐
-              │ Telegram (forum + DM, admitted users)               │
-              │ /today /baseline /outcomes /upload /library /skip ... │
-              └─────────────────────────┬───────────────────────────┘
-                                        │ MTProto long-poll + Bot API
-                                        ▼
-   ┌────────────────────────────────────────────────────────────────────────┐
-   │ src/fluentloop/                                                        │
-   │                                                                        │
-   │  bot/             ┌─── learning_engine ─── lesson_plans ─── practice ──┤
-   │   ├ app.py        │           │                  │              │      │
-   │   ├ handlers/  ───┤           ▼                  ▼              ▼      │
-   │   ├ state.py      │       materials ─────── exercises ─── mistakes     │
-   │   └ workspace/    │           │                  │              │      │
-   │                   │           └──────────┬───────┴──────────────┘      │
-   │                   │                      ▼                             │
-   │                   │       db/  (SQLAlchemy 2.x, Alembic, SQLite)       │
-   │                   │                      │                             │
-   │                   ▼                      ▼                             │
-   │              ai/ provider     llm/ DeepSeek gateway                    │
-   │              (OpenAI tiered)  (task-aware, JSON, fallback)             │
-   └────────────────────────────────────────────────────────────────────────┘
-                                        │
-                                        ▼
-                   APScheduler (in-process, five jobs)
-                   ├─ Daily reminder (User.reminder_time)
-                   ├─ Overnight pre-gen (PRE_GEN_HOUR=3)
-                   ├─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
-                   ├─ Weekly summary (advanced profiles)
-                   └─ Vocabulary minute tick (advanced profiles)
-```
+
+Simple profiles receive no automatic learning messages. Scheduled vocabulary,
+reminders and summaries serve advanced profiles; backups remain enabled.
+Bounded adaptive-bank maintenance is separately opt-in.
 
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
 Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0016 Accepted;
@@ -307,10 +322,11 @@ Bot          Session done — 15/15 in 14 min.
   (`bot/state.py`).
 - **Persistence** — SQLAlchemy 2.x ORM + Alembic migrations, SQLite single
   file mounted from the host into `/app/data`.
-- **Scheduling** — APScheduler 3.10 in-process, five cron-style jobs:
+- **Scheduling** — APScheduler 3.10 in-process:
   daily reminder, 03:00 overnight pre-gen, 04:00 SQLite backup, weekly
   summary, and a minute tick that delivers the daily vocabulary loop at each
-  learner's own local slot times.
+  learner's own local slot times. An additional opt-in job maintains the
+  adaptive question bank.
 - **AI** — provider abstraction in `src/fluentloop/ai/`; an
   OpenAI-compatible gateway in `src/fluentloop/llm/` with task-aware
   Pro/Flash routing, JSON contract, bounded timeout/retry/fallback policy.
@@ -346,7 +362,7 @@ uv sync --extra dev          # or: pip install -e ".[dev]"
 cp .env.example .env
 # edit .env: TELEGRAM_BOT_TOKEN, TELEGRAM_API_ID, TELEGRAM_API_HASH,
 #           TELEGRAM_ALLOWED_USER_ID, AI_PROVIDER, AI keys, DB_URL, TIMEZONE
-python scripts/check_env.py  # validates non-empty + non-placeholder
+uv run python scripts/check_env.py  # validates non-empty + non-placeholder
 
 # 3. run locally (foreground, for testing)
 uv run python -m fluentloop
@@ -378,7 +394,9 @@ FluentLoop/
 │   ├── adr/                Architecture decisions (0009 reserved).
 │   ├── features/           Epic files and roadmap index.
 │   ├── runbooks/           deploy, demo data, secrets, telegram workspace.
-│   ├── curriculum/         Generated B2/B2+ lesson catalog.
+│   ├── curriculum/         B2–C1 banks, editable roadmap and offline planner.
+│   ├── research/           Sourced general-English and workplace coverage.
+│   ├── assets/             README banner and documentation illustrations.
 │   └── build-log/          Autonomous-build journal (frozen).
 ├── src/fluentloop/         Python package.
 ├── tests/                  Pytest suite.
@@ -400,6 +418,9 @@ FluentLoop/
 | [`docs/features/README.md`](docs/features/README.md) | Epic index with dependency graph and statuses. |
 | [`docs/user-guide.md`](docs/user-guide.md) | Learner-facing methodology, process map, daily workflow, and modes. |
 | [`docs/learning-plans.md`](docs/learning-plans.md) | Practical first-week, 30-day, and 12-week learning plans. |
+| [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) | Activate and edit the general/workplace plan used by Study. |
+| [`docs/research/README.md`](docs/research/README.md) | Research sources, coverage and limitations for B2–introductory C1. |
+| [`docs/runbooks/roadmap-study.md`](docs/runbooks/roadmap-study.md) | Module bank, progression rules, verification and release checks. |
 | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) | Upload-ready material formats and LLM prep prompt. |
 | [`docs/runbooks/`](docs/runbooks/) | Operational procedures — deploy, demo data, secrets, telegram workspace, curriculum seed. |
 | [`docs/testing.md`](docs/testing.md) | Standard pre-commit / pre-deploy gate. |
@@ -412,7 +433,7 @@ FluentLoop/
 
 ```bash
 uv run --extra dev pytest -q
-# Includes offline EPIC-26 persistence, content, Telegram, and operation checks.
+# Covers learning, content, persistence, Telegram routing and roadmap integration.
 ```
 
 The CI gate (`.github/workflows/ci.yml`) runs `secret_scan` →
@@ -445,7 +466,7 @@ discussion:
 - Local confidential data lives in the gitignored `secrets/` catalog
   (e.g. `secrets/fluentloop.env` is the ready-to-copy source for `.env`).
 - Lesson notes, answers, and mistakes are private learning data. They
-  may be sent to the configured AI provider (OpenAI / DeepSeek / Anthropic
+  may be sent to the configured AI provider (OpenAI, DeepSeek or Qwen
   depending on `AI_PROVIDER`). Read [`SECURITY.md`](SECURITY.md) before
   changing provider or logging behavior.
 
