@@ -14,6 +14,13 @@ git diff --check
 
 ## What the tests cover
 
+- Simple stream: pending-question recovery, atomic duplicate/stale/foreign
+  answer rejection, stop/restart, category mixing, cooldowns, small banks,
+  explicit familiar practice, and optional writing.
+- Reviewed pack: schema/content validation, all 86 records, provenance,
+  template publication and personal subscription idempotency, and level retention.
+- Simple UI and operations: originating chat/topic replies, keyboard dispatch,
+  mode changes, scheduler isolation, and recognition/production metric separation.
 - Bot foundation and Telegram workspace: command catalog, help text, forum-topic
   routing, command-menu payloads, admission gate, and state storage.
 - Material upload: UTF-8 markdown/text intake, extraction fallback, candidate
@@ -29,11 +36,13 @@ git diff --check
   chunk usage, writing/L1 metrics, mistake extinction, Article Lab probe events,
   outcome snapshots, and template-row isolation.
 - Operations: smoke message formatting with build/time/plan notes and safe
-  Telegram workspace maintenance helpers.
+  Telegram workspace maintenance helpers; verified SQLite backups including WAL.
 
 ## Live smoke
 
-After deploy, run a real Telegram smoke:
+For the owner simple pilot, follow [simple-learning.md](runbooks/simple-learning.md):
+verify `/study`, choices, unknown, stop, resume, progress, More, and optional writing.
+For the full mode, run a real Telegram smoke:
 
 1. Run `/help` and `/howto`.
 2. Confirm the Help topic has one fresh pinned guide.

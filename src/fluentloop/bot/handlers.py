@@ -17,6 +17,7 @@ from fluentloop.bot.formatting import (
 )
 from fluentloop.bot.messages import (
     HELP,
+    SIMPLE_HELP,
     candidate_summary,
     mistake_patterns,
     start_message,
@@ -101,9 +102,7 @@ from fluentloop.srs import convert_last_good_to_hard
 from fluentloop.stats import collect_stats, render_stats
 from fluentloop.users import ensure_user, format_settings, update_setting
 
-ITEM_STATUS_USAGE = (
-    "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
-)
+ITEM_STATUS_USAGE = "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
 
 
 @dataclass(frozen=True)
@@ -133,6 +132,8 @@ class BotReply:
     # The sender delivers this quiz question (poll or buttons) right after
     # the reply itself. Handlers stay Telegram-free; app.py does the sending.
     quiz_question_delivery_id: int | None = None
+    # The personal simple pilot uses a compact three-action persistent keyboard.
+    simple_keyboard: bool = False
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -140,6 +141,10 @@ def _button(text: str, data: str) -> InlineButton:
 
 
 def _settings_buttons(user: User) -> list[list[InlineButton]]:
+    from fluentloop.learning_prefs import is_simple_mode
+
+    mode_action = "advanced" if is_simple_mode(user) else "simple"
+    mode_label = "Advanced mode" if mode_action == "advanced" else "Try simple mode"
     return [
         [
             _button("B2+", "settings:level:B2+"),
@@ -195,6 +200,7 @@ def _settings_buttons(user: User) -> list[list[InlineButton]]:
             _button("20", "settings:vocab_quiz_size:20"),
         ],
         [_button("Refresh", "settings:refresh:now")],
+        [_button(mode_label, f"simple:mode:{mode_action}")],
     ]
 
 
@@ -427,10 +433,21 @@ def handle_start(
     *,
     chat_id: int | None = None,
 ) -> BotReply:
+    from fluentloop.learning_prefs import is_simple_mode
     from fluentloop.vocab_prefs import get_prefs
 
     user = ensure_user(session, telegram_user_id, settings)
     seed_concepts(session)
+    if is_simple_mode(user):
+        return BotReply(
+            start_message(
+                bool(settings.telegram_forum_group_id or settings.telegram_channel_id),
+                simple=True,
+            ),
+            user.telegram_user_id,
+            persistent_keyboard=get_prefs(user).keyboard,
+            simple_keyboard=True,
+        )
     if get_prefs(user).onboarded_at is None:
         return handle_onboarding_start(
             session, user, chat_id=chat_id if chat_id is not None else telegram_user_id
@@ -446,12 +463,28 @@ def handle_start(
     )
 
 
-def handle_help() -> BotReply:
+def handle_help(user: User | None = None) -> BotReply:
+    if user is not None:
+        from fluentloop.learning_prefs import is_simple_mode
+
+        if is_simple_mode(user):
+            return BotReply(SIMPLE_HELP)
     return BotReply(HELP)
 
 
-def handle_settings(session: Session, user: User) -> BotReply:
-    return BotReply(format_settings(user), buttons=_settings_buttons(user))
+def handle_settings(
+    session: Session,
+    user: User,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    return BotReply(
+        format_settings(user),
+        channel_id,
+        buttons=_settings_buttons(user),
+        message_thread_id=message_thread_id,
+    )
 
 
 def handle_setting_update(
@@ -529,9 +562,7 @@ def handle_add_text(session: Session, user: User, raw: str) -> BotReply:
         type_, text, meaning, tags = parse_add_payload(raw)
     except ValueError as exc:
         return BotReply(str(exc))
-    return handle_add(
-        session, user, type_=type_, text=text, meaning=meaning, tags=tags
-    )
+    return handle_add(session, user, type_=type_, text=text, meaning=meaning, tags=tags)
 
 
 def handle_upload(
@@ -650,8 +681,7 @@ def handle_candidates(session: Session, user: User, material_id: int) -> BotRepl
     lines = [f"Candidates for material #{source.id}"]
     for candidate in candidates:
         lines.append(
-            f"- #{candidate.id} [{candidate.status}] "
-            f"{candidate.type}: {candidate.text}"
+            f"- #{candidate.id} [{candidate.status}] {candidate.type}: {candidate.text}"
         )
     buttons = [
         _candidate_buttons(candidate.id)
@@ -801,9 +831,7 @@ def handle_today_menu(session: Session, user: User) -> BotReply:
     )
 
 
-def handle_words_menu(
-    session: Session, user: User, *, edit: bool = False
-) -> BotReply:
+def handle_words_menu(session: Session, user: User, *, edit: bool = False) -> BotReply:
     """Second screen: the three ways to work on the same vocabulary."""
 
     from fluentloop.srs import get_due_items
@@ -821,8 +849,7 @@ def handle_words_menu(
         f"· Due now: {due}",
         "",
         f"{bold('Show cards')} — {per_day} to read. Nothing is asked.",
-        f"{bold('Review due')} — 2-3 minutes: five recall drills, then a "
-        "cold recall.",
+        f"{bold('Review due')} — 2-3 minutes: five recall drills, then a cold recall.",
         f"{bold('Vocabulary lesson')} — the full 15-minute session.",
     ]
     return BotReply(
@@ -837,6 +864,25 @@ def handle_words_menu(
         parse_mode=HTML_PARSE_MODE,
         edit_message=edit,
     )
+
+
+def handle_today_entry(
+    session: Session,
+    user: User,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.learning_prefs import is_simple_mode
+
+    if is_simple_mode(user):
+        return handle_study(
+            session,
+            user,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+    return handle_today_menu(session, user)
 
 
 def handle_practice(
@@ -858,6 +904,302 @@ def handle_practice(
         practice_session,
         channel_id=channel_id,
         message_thread_id=message_thread_id,
+    )
+
+
+def _simple_question_reply(
+    step, user: User, *, channel_id=None, message_thread_id=None
+) -> BotReply:
+    if step.exhausted or step.question is None or step.run is None:
+        return BotReply(
+            "На сегодня новых вопросов нет. Можно повторить знакомое "
+            "или вернуться позже.",
+            channel_id or user.telegram_user_id,
+            buttons=[
+                [_button("Повторить знакомое", "simple:repeat")],
+                [_button("Ещё", "simple:menu")],
+            ],
+            message_thread_id=message_thread_id,
+            parse_mode=HTML_PARSE_MODE,
+        )
+
+    question = step.question
+    category = "Фраза" if question.get("category") == "phrase" else "Грамматика"
+    lines = [
+        bold(f"Вопрос {step.index + 1} · {category}"),
+        "",
+        html_escape(question["prompt"]),
+    ]
+    options = question.get("options") or []
+    buttons = [
+        [_button(str(option), f"simple:answer:{step.run.id}:{step.index}:{index}")]
+        for index, option in enumerate(options)
+    ]
+    buttons.append(
+        [
+            _button("Не знаю", f"simple:answer:{step.run.id}:{step.index}:unknown"),
+            _button("Хватит", f"simple:stop:{step.run.id}"),
+        ]
+    )
+    return BotReply(
+        "\n".join(lines),
+        channel_id or user.telegram_user_id,
+        buttons=buttons,
+        message_thread_id=message_thread_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_study(
+    session: Session,
+    user: User,
+    *,
+    repeat_familiar: bool = False,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.simple_learning import start_stream
+
+    return _simple_question_reply(
+        start_stream(session, user, repeat_familiar=repeat_familiar),
+        user,
+        channel_id=channel_id,
+        message_thread_id=message_thread_id,
+    )
+
+
+def _simple_summary_reply(summary, *, edit_message: bool = False) -> BotReply:
+    text = (
+        f"Готово: {summary.correct}/{summary.answered} верно. "
+        f"«Не знаю»: {summary.unknown}."
+    )
+    buttons = [
+        [_button("Учиться ещё", "simple:study")],
+        [_button("Применить письменно", f"simple:bonus:{summary.run_id}")]
+        if summary.run_id is not None
+        else [],
+    ]
+    buttons = [row for row in buttons if row]
+    return BotReply(
+        text,
+        buttons=buttons,
+        parse_mode=HTML_PARSE_MODE,
+        edit_message=edit_message,
+    )
+
+
+def handle_simple_answer(
+    session: Session,
+    user: User,
+    run_id: int,
+    index: int,
+    choice: int | None,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.simple_learning import answer_choice
+
+    result = answer_choice(session, user, run_id, index, choice)
+    if not result.accepted or result.attempt is None:
+        text = {
+            "stale": "Этот вопрос уже закрыт. Отправьте /study, чтобы продолжить.",
+            "finished": "Этот поток уже завершён. Отправьте /study, "
+            "чтобы начать снова.",
+            "unavailable": "Этот вопрос больше недоступен.",
+            "invalid_choice": "Этот вариант ответа недоступен.",
+        }.get(
+            result.reason,
+            "Не удалось сохранить ответ. Отправьте /study, чтобы продолжить.",
+        )
+        return BotReply(text, edit_message=True)
+
+    feedback = result.attempt.feedback or {}
+    answer = str(feedback.get("corrected_answer") or "")
+    if choice is None:
+        lines = [f"Ответ: {bold(html_escape(answer))}"]
+    elif result.correct:
+        lines = [f"✅ Верно — {bold(html_escape(answer))}"]
+    else:
+        lines = [f"❌ Правильный ответ: {bold(html_escape(answer))}"]
+    explanation = str(feedback.get("explanation") or "").strip()
+    if explanation:
+        lines.append(html_escape(explanation))
+    buttons = [[_button("Подробнее", f"feedback:explain:{result.attempt.id}")]]
+    if result.next_step is not None:
+        next_reply = _simple_question_reply(
+            result.next_step,
+            user,
+            channel_id=channel_id,
+            message_thread_id=message_thread_id,
+        )
+        return BotReply(
+            "\n".join(lines),
+            buttons=buttons,
+            parse_mode=HTML_PARSE_MODE,
+            edit_message=True,
+            extra_replies=(next_reply,),
+        )
+
+    summary = result.summary
+    if summary is not None:
+        lines.extend(
+            [
+                "",
+                f"Готово: {summary.correct}/{summary.answered} верно. "
+                f"«Не знаю»: {summary.unknown}.",
+            ]
+        )
+        buttons.extend(_simple_summary_reply(summary).buttons or [])
+        buttons.append([_button("Повторить знакомое", "simple:repeat")])
+    return BotReply(
+        "\n".join(lines),
+        buttons=buttons,
+        parse_mode=HTML_PARSE_MODE,
+        edit_message=True,
+    )
+
+
+def handle_simple_stop(
+    session: Session,
+    user: User,
+    run_id: int | None = None,
+    *,
+    edit_message: bool = False,
+) -> BotReply:
+    from fluentloop.simple_learning import stop_stream
+
+    return _simple_summary_reply(
+        stop_stream(session, user, run_id=run_id), edit_message=edit_message
+    )
+
+
+def handle_simple_bonus_start(
+    session: Session,
+    user: User,
+    parent_run_id: int,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.simple_learning import start_bonus
+
+    step = start_bonus(session, user, parent_run_id)
+    if step.run is None or step.question is None:
+        return BotReply("Это письменное задание уже завершено.")
+    return BotReply(
+        html_escape(step.question["prompt"])
+        + "\n\nНапиши одно предложение по-английски. Это необязательно.",
+        channel_id or user.telegram_user_id,
+        buttons=[[_button("Пропустить письмо", f"simple:bonus-skip:{step.run.id}")]],
+        message_thread_id=message_thread_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_simple_bonus_text(
+    session: Session,
+    user: User,
+    provider: AIProvider,
+    bonus_run,
+    answer: str,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.simple_learning import submit_bonus
+
+    exercise = bonus_run.exercises[0] if bonus_run.exercises else {}
+    feedback = check_answer(provider, exercise, answer)
+    result = submit_bonus(session, user, bonus_run.id, answer, feedback.model_dump())
+    if not result.accepted:
+        return BotReply(
+            "Не удалось сохранить ответ. Напиши предложение ещё раз "
+            "или нажми «Пропустить письмо»."
+        )
+    lines = [f"{bold('Оценка')}: {feedback.status.title()}."]
+    corrected = feedback.natural_answer or feedback.corrected_answer
+    if corrected:
+        lines.append(f"{bold('Лучше:')} {code(corrected)}")
+    if feedback.explanation:
+        lines.append(html_escape(feedback.explanation))
+    lines.append("Письменная практика сохранена отдельно от узнавания.")
+    return BotReply(
+        "\n".join(lines),
+        channel_id,
+        message_thread_id=message_thread_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_simple_bonus_skip(
+    session: Session, user: User, bonus_run_id: int
+) -> BotReply:
+    from fluentloop.simple_learning import skip_bonus
+
+    skip_bonus(session, user, bonus_run_id)
+    return BotReply(
+        "Письменная практика пропущена. Это не считается ошибкой.",
+        edit_message=True,
+    )
+
+
+def handle_simple_more_menu(
+    session: Session,
+    user: User,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.learning_prefs import is_simple_mode
+
+    buttons = [
+        [_button("🃏 Карточки", "words:cards"), _button("🔁 Повтор", "words:review")],
+        [
+            _button("📚 Полный урок", "today:lesson"),
+            _button("📖 Библиотека", "library:list"),
+        ],
+        [
+            _button("📤 Загрузить материал", "simple:upload"),
+            _button("⚙️ Настройки", "simple:settings"),
+        ],
+    ]
+    if is_simple_mode(user):
+        buttons.append([_button("Расширенный режим", "simple:mode:advanced")])
+    else:
+        buttons.append([_button("Простой режим", "simple:mode:simple")])
+    return BotReply(
+        "Что открыть?",
+        channel_id,
+        buttons=buttons,
+        message_thread_id=message_thread_id,
+    )
+
+
+def handle_simple_mode_change(
+    session: Session,
+    user: User,
+    mode: str,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    from fluentloop.learning_prefs import set_learning_mode
+    from fluentloop.vocab_prefs import get_prefs
+
+    set_learning_mode(session, user, mode)
+    simple = mode == "simple"
+    text = (
+        "Простой режим включён. Учебные сообщения приходят только по твоему запросу."
+        if simple
+        else "Расширенный режим включён. Прежние настройки и расписание сохранены."
+    )
+    return BotReply(
+        text,
+        channel_id,
+        message_thread_id=message_thread_id,
+        persistent_keyboard=get_prefs(user).keyboard,
+        simple_keyboard=simple,
     )
 
 
@@ -919,8 +1261,7 @@ def handle_subscribe(session: Session, user: User, template_id: int) -> BotReply
                 f"Topic: {result.plan.topic}",
                 f"Created items: {result.created_items}",
                 f"Reused items: {result.reused_items}",
-                "Open it with /lesson "
-                f"{result.plan.id}, or let /today rotate it in.",
+                f"Open it with /lesson {result.plan.id}, or let /today rotate it in.",
             ]
         )
         + note,
@@ -953,8 +1294,7 @@ def handle_publish(
     except ValueError as exc:
         return BotReply(f"Could not publish lesson: {exc}")
     return BotReply(
-        f"Published template #{plan.id}: {plan.title}. "
-        "It is now visible in /library."
+        f"Published template #{plan.id}: {plan.title}. It is now visible in /library."
     )
 
 
@@ -1060,9 +1400,7 @@ def handle_lesson(
     try:
         lesson_plan_id = int(payload)
     except ValueError:
-        return BotReply(
-            "Use /lesson <id>, /lesson random, or /lesson topic <query>."
-        )
+        return BotReply("Use /lesson <id>, /lesson random, or /lesson topic <query>.")
     plan = lesson_plan_by_id(session, user, lesson_plan_id)
     if plan is None:
         return BotReply("Lesson not found.")
@@ -1308,16 +1646,16 @@ def handle_answer(
     )
     if feedback_copy_channel_id:
         extra_replies.append(
-                BotReply(
-                    message,
-                    feedback_copy_channel_id,
-                    buttons=_attempt_buttons(
-                        attempt.id, allow_hard=feedback.status == "correct"
-                    ),
-                    message_thread_id=feedback_copy_message_thread_id,
-                    parse_mode=HTML_PARSE_MODE,
-                )
+            BotReply(
+                message,
+                feedback_copy_channel_id,
+                buttons=_attempt_buttons(
+                    attempt.id, allow_hard=feedback.status == "correct"
+                ),
+                message_thread_id=feedback_copy_message_thread_id,
+                parse_mode=HTML_PARSE_MODE,
             )
+        )
     if follow_up is not None:
         next_index, next_item = follow_up
         next_heading = "#next_prompt\n" if channel_id else ""
@@ -1560,7 +1898,14 @@ def handle_attempt_ack(session: Session, user: User, attempt_id: int) -> BotRepl
     return BotReply(f"Got it. Keeping attempt #{attempt.id} as-is.")
 
 
-def handle_feedback_explain(session: Session, user: User, attempt_id: int) -> BotReply:
+def handle_feedback_explain(
+    session: Session,
+    user: User,
+    attempt_id: int,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
     from fluentloop.db.models import PracticeAttempt, PracticeSession
 
     attempt = session.get(PracticeAttempt, attempt_id)
@@ -1571,6 +1916,8 @@ def handle_feedback_explain(session: Session, user: User, attempt_id: int) -> Bo
         return BotReply("Attempt not found.")
     return BotReply(
         render_detailed_teacher_feedback(attempt.feedback),
+        channel_id,
+        message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,
     )
 
@@ -1751,6 +2098,76 @@ def handle_stats(session: Session, user: User) -> BotReply:
     return BotReply(render_stats(collect_stats(session, user)))
 
 
+def handle_progress(
+    session: Session,
+    user: User,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    """Show simple-mode recognition and written production as separate signals."""
+
+    from datetime import UTC, datetime, timedelta
+
+    from sqlalchemy import func, select
+
+    from fluentloop.db.models import PracticeAttempt, PracticeSession
+    from fluentloop.learning_prefs import is_simple_mode
+    from fluentloop.simple_learning import CHOICE, PRODUCTION
+
+    if not is_simple_mode(user):
+        return BotReply(
+            render_stats(collect_stats(session, user)),
+            channel_id,
+            message_thread_id=message_thread_id,
+        )
+
+    rows = session.execute(
+        select(PracticeAttempt.exercise_type, PracticeAttempt.status, func.count())
+        .join(
+            PracticeSession, PracticeSession.id == PracticeAttempt.practice_session_id
+        )
+        .where(
+            PracticeSession.user_id == user.id,
+            PracticeAttempt.exercise_type.in_((CHOICE, PRODUCTION)),
+            PracticeAttempt.created_at >= datetime.now(UTC) - timedelta(days=30),
+        )
+        .group_by(PracticeAttempt.exercise_type, PracticeAttempt.status)
+    )
+    recognition_total = recognition_correct = production_total = production_correct = 0
+    for exercise_type, status, count in rows:
+        if exercise_type == CHOICE:
+            recognition_total += count
+            if status == "correct":
+                recognition_correct += count
+        else:
+            production_total += count
+            if status == "correct":
+                production_correct += count
+    return BotReply(
+        "📈 <b>Прогресс · 30 дней</b>\n"
+        f"Узнавание: {recognition_correct}/{recognition_total} верных ответов.\n"
+        f"Письменная практика: {production_correct}/{production_total} верных; "
+        "считается отдельно.\n\n"
+        "Узнавание проверяет, что ты распознаёшь; письмо — что умеешь использовать.",
+        channel_id,
+        message_thread_id=message_thread_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def handle_simple_text_guard(session: Session, user: User) -> BotReply | None:
+    """Keep arbitrary text out of the vocabulary-add path during a quiz."""
+
+    from fluentloop.simple_learning import get_active_stream
+
+    if get_active_stream(session, user) is None:
+        return None
+    return BotReply(
+        "Нажми вариант ответа или «Не знаю». Текстовый ответ здесь не сохраняется."
+    )
+
+
 def handle_mistakes(session: Session, user: User) -> BotReply:
     patterns = active_patterns(session, user.id)
     buttons = [
@@ -1790,8 +2207,7 @@ def handle_mistake_action(
             lines.append(f"   Better: {correct_example}")
         return BotReply("\n".join(lines))
     return BotReply(
-        "Use /mistakes focus <id>, /mistakes ignore <id>, "
-        "or /mistakes examples <id>."
+        "Use /mistakes focus <id>, /mistakes ignore <id>, or /mistakes examples <id>."
     )
 
 
@@ -1831,9 +2247,7 @@ def handle_items(session: Session, user: User, status: str = "active") -> BotRep
     for item in items:
         favorite = " *" if item.is_favorite else ""
         lines.append(f"- #{item.id} [{item.type}] {item.text}{favorite}")
-    buttons = [
-        _item_buttons(item.id, item.status, item.is_favorite) for item in items
-    ]
+    buttons = [_item_buttons(item.id, item.status, item.is_favorite) for item in items]
     return BotReply("\n".join(lines), buttons=buttons)
 
 
@@ -1900,8 +2314,10 @@ def _not_found_reply(session: Session, user: User, word: str, action: str) -> Bo
             f"No exact match for {code(word)}. Did you mean:\n{listing}",
             parse_mode=HTML_PARSE_MODE,
         )
-    return BotReply(f"Nothing to {action}: no item matches {code(word)}.",
-                    parse_mode=HTML_PARSE_MODE)
+    return BotReply(
+        f"Nothing to {action}: no item matches {code(word)}.",
+        parse_mode=HTML_PARSE_MODE,
+    )
 
 
 def handle_words(session: Session, user: User) -> BotReply:
@@ -2013,11 +2429,21 @@ def handle_keyboard_toggle(session: Session, user: User) -> BotReply:
     panel is one more thing in the way, so it can be switched off entirely.
     """
 
+    from fluentloop.learning_prefs import is_simple_mode
     from fluentloop.vocab_prefs import get_prefs, update_pref
 
     wanted = not get_prefs(user).keyboard
+    simple = is_simple_mode(user)
     update_pref(session, user, "keyboard", wanted)
     if wanted:
+        if simple:
+            return BotReply(
+                "Кнопки возвращены. Они сворачиваются после нажатия; "
+                "значок клавиатуры открывает их снова.\n"
+                "/keyboard скрывает кнопки.",
+                persistent_keyboard=True,
+                simple_keyboard=True,
+            )
         return BotReply(
             "Buttons are back. They collapse after each tap - the keyboard "
             "icon in the input field brings them up again.\n"
@@ -2033,16 +2459,29 @@ def handle_keyboard_toggle(session: Session, user: User) -> BotReply:
 
 
 def handle_pause(session: Session, user: User) -> BotReply:
+    from fluentloop.learning_prefs import is_simple_mode
     from fluentloop.vocab_prefs import update_pref
 
     update_pref(session, user, "paused", True)
+    if is_simple_mode(user):
+        return BotReply(
+            "В простом режиме нет автоматических сообщений. Пауза "
+            "сохранена для расширенного режима."
+        )
     return BotReply("Daily messages paused. Send /resume to turn them back on.")
 
 
 def handle_resume(session: Session, user: User) -> BotReply:
+    from fluentloop.learning_prefs import is_simple_mode
     from fluentloop.vocab_prefs import SLOTS, update_pref
 
     prefs = update_pref(session, user, "paused", False)
+    if is_simple_mode(user):
+        return BotReply(
+            "В простом режиме автоматических сообщений нет. Прежнее "
+            "расписание сохранено; переключи режим в «Ещё» или /settings, "
+            "чтобы вернуться к нему."
+        )
     slots = " / ".join(prefs.slots[slot] for slot in SLOTS)
     return BotReply(f"Daily messages on again: {slots}.")
 
@@ -2057,9 +2496,7 @@ def handle_vocab_cards(
     wanted = max(MIN_WORDS_PER_DAY, min(MAX_WORDS_PER_DAY, wanted))
     items = select_cards(session, user, count=wanted)
     if not items:
-        return BotReply(
-            "No words to show yet. Send me any word or phrase to add it."
-        )
+        return BotReply("No words to show yet. Send me any word or phrase to add it.")
     # Reading the cards is the passive half; offer the active half right here
     # rather than leaving the learner at a dead end.
     return BotReply(
@@ -2158,8 +2595,13 @@ QUICK_ACTIONS: tuple[tuple[str, str], ...] = (
     ("🎯 Quiz", "quiz"),
     ("⏹ Stop", "stop"),
 )
+SIMPLE_QUICK_ACTIONS: tuple[tuple[str, str], ...] = (
+    ("Учиться", "study"),
+    ("Прогресс", "progress"),
+    ("Ещё", "simple_menu"),
+)
 QUICK_ACTION_BY_LABEL: dict[str, str] = {
-    label: action for label, action in QUICK_ACTIONS
+    label: action for label, action in (*QUICK_ACTIONS, *SIMPLE_QUICK_ACTIONS)
 }
 
 
@@ -2181,9 +2623,7 @@ def set_add_words_state(session: Session, user: User, *, chat_id: int) -> None:
     StateStore(session).set(chat_id, user.telegram_user_id, ADD_WORDS_STATE, {})
 
 
-def handle_add_words_prompt(
-    session: Session, user: User, *, chat_id: int
-) -> BotReply:
+def handle_add_words_prompt(session: Session, user: User, *, chat_id: int) -> BotReply:
     """Arm an explicit add, so the material heuristic cannot get in the way."""
 
     set_add_words_state(session, user, chat_id=chat_id)
@@ -2192,6 +2632,8 @@ def handle_add_words_prompt(
         "Several at once: separate them with commas or new lines.\n\n"
         "cut corners, push back on, roll out",
     )
+
+
 ONBOARDING_STATE = "onboarding"
 
 TOPIC_CHOICES: tuple[tuple[str, str], ...] = (
@@ -2262,12 +2704,8 @@ def _onboarding_state(session: Session, chat_id: int, user: User):
     return StateStore(session).get(chat_id, user.telegram_user_id)
 
 
-def _save_onboarding(
-    session: Session, chat_id: int, user: User, payload: dict
-) -> None:
-    StateStore(session).set(
-        chat_id, user.telegram_user_id, ONBOARDING_STATE, payload
-    )
+def _save_onboarding(session: Session, chat_id: int, user: User, payload: dict) -> None:
+    StateStore(session).set(chat_id, user.telegram_user_id, ONBOARDING_STATE, payload)
 
 
 def _topics_reply(payload: dict, *, edit: bool = False) -> BotReply:
@@ -2304,9 +2742,7 @@ def _size_reply(*, edit: bool = False) -> BotReply:
     return BotReply(
         "📊 How many words should I put in your starter list?\n"
         "You can always add more of your own later.",
-        buttons=[
-            [_button(str(size), f"onb:size:{size}") for size in SIZE_CHOICES]
-        ],
+        buttons=[[_button(str(size), f"onb:size:{size}") for size in SIZE_CHOICES]],
         edit_message=edit,
     )
 
@@ -2315,16 +2751,13 @@ def _per_day_reply(*, edit: bool = False) -> BotReply:
     return BotReply(
         "🐢 How many words per day do you want to practice?",
         buttons=[
-            [_button(label, f"onb:perday:{value}")]
-            for value, label in PER_DAY_CHOICES
+            [_button(label, f"onb:perday:{value}")] for value, label in PER_DAY_CHOICES
         ],
         edit_message=edit,
     )
 
 
-def handle_onboarding_start(
-    session: Session, user: User, *, chat_id: int
-) -> BotReply:
+def handle_onboarding_start(session: Session, user: User, *, chat_id: int) -> BotReply:
     payload = {
         "step": "topics",
         "topics": [],
@@ -2737,7 +3170,14 @@ def handle_quiz_start(
     )
 
 
-def handle_stop(session: Session, user: User, *, chat_id: int) -> BotReply:
+def handle_stop(
+    session: Session,
+    user: User,
+    *,
+    chat_id: int,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
     """Cancel whatever is waiting for input and close the active session."""
 
     from fluentloop.bot.polls import QUIZ_SLOTS
@@ -2746,13 +3186,26 @@ def handle_stop(session: Session, user: User, *, chat_id: int) -> BotReply:
 
     StateStore(session).clear(chat_id, user.telegram_user_id)
     lines = ["⏹ Stopped. Nothing is waiting for your input."]
+    from fluentloop.simple_learning import (
+        get_active_bonus,
+        get_active_stream,
+        skip_bonus,
+    )
+
+    bonus = get_active_bonus(session, user)
+    if bonus is not None:
+        skip_bonus(session, user, bonus.id)
+        lines.append("Optional writing was skipped; it is not counted as a mistake.")
+    simple = get_active_stream(session, user)
+    if simple is not None:
+        summary = handle_simple_stop(session, user, simple.id)
+        lines.append(summary.text)
+        lines.append("/study starts a new stream.")
     current = get_in_progress_session(session, user)
     if current is not None:
         current.status = "abandoned"
         session.add(current)
-        lines.append(
-            "Today's practice session is closed — /today starts a fresh one."
-        )
+        lines.append("Today's practice session is closed — /today starts a fresh one.")
     # Quiz questions are paused rather than discarded: the learner asked the
     # bot to stop talking, not to throw away their progress. Saying nothing
     # about them would make the line above untrue.
@@ -2771,7 +3224,7 @@ def handle_stop(session: Session, user: User, *, chat_id: int) -> BotReply:
             f"{pending} quiz question(s) are paused — /quiz picks up where "
             "you left off."
         )
-    return BotReply("\n".join(lines))
+    return BotReply("\n".join(lines), channel_id, message_thread_id=message_thread_id)
 
 
 def handle_drill_start(
@@ -2918,6 +3371,8 @@ def command_catalog() -> list[str]:
         "/start",
         "/setup",
         "/today",
+        "/study",
+        "/progress",
         "/cards",
         "/review",
         "/practice",

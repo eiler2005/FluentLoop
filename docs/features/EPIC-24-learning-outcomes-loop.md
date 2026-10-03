@@ -4,6 +4,10 @@ Status: Done - implemented, deployed, and smoke validated
 
 ## Summary
 
+EPIC-26 separates recognition from production: simple button answers are counted
+as recognition and excluded from productive-use, writing, held-out production,
+and mistake-extinction evidence. Optional typed bonuses remain production.
+
 EPIC-24 turns the EPIC-22 breakthrough foundation into a measurable learning
 system. The goal is not to add more lesson formats. The goal is to prove
 whether the core loops are improving the learner's English over time.

@@ -4,6 +4,8 @@ Operational procedures for running FluentLoop on a VPS.
 
 Available:
 
+- [`simple-learning.md`](simple-learning.md) — import the reviewed question
+  bank, activate the owner pilot, verify manual practice, and roll back the mode.
 - [`deploy.md`](deploy.md) — deploy checklist and Telegram smoke message
   format with build/time/plan notes.
 - [`demo-data.md`](demo-data.md) — idempotent demo dataset for audit and smoke

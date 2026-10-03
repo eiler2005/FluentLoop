@@ -31,6 +31,11 @@ per-user progress slate.
 
 ## Scope
 
+EPIC-26 additionally publishes the reviewed `lang-lessons` question pack through
+the same template/personal-copy boundary. Its importer idempotently subscribes
+the owner pilot; personal attempts and review states are never template data.
+See [the pilot runbook](../runbooks/simple-learning.md).
+
 In:
 
 - New flags on `lesson_plans`: `is_template` (bool) and `template_of`

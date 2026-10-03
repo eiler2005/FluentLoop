@@ -1,0 +1,3297 @@
+{
+  "schema_version": 1,
+  "source": {
+    "name": "lang-lessons/errors_bank.json",
+    "sha256": "376961255dce533c5bd3c597cdb4575f5968de3b9457027eba37de42595eb243"
+  },
+  "original_bank": {
+    "meta": {
+      "audience": "Russian L1 learners",
+      "levels": [
+        "B1",
+        "B2"
+      ],
+      "note": "Канонический банк типовых ошибок. Источник для диагноста (что проверять) и генератора (шаг 4 + дриллы). build_drills.py превращает каждую ошибку в упражнение."
+    },
+    "topics": {
+      "present-perfect-vs-past-simple": {
+        "title": "Present Perfect vs Past Simple",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I have seen him yesterday",
+            "right": "I saw him yesterday",
+            "why": "есть точное «когда» (yesterday) → только Past Simple"
+          },
+          {
+            "wrong": "I have finished it 2 hours ago",
+            "right": "I finished it 2 hours ago",
+            "why": "ago = точное время → Past Simple"
+          },
+          {
+            "wrong": "Did you ever eat sushi?",
+            "right": "Have you ever eaten sushi?",
+            "why": "опыт без времени → Present Perfect (ever)"
+          },
+          {
+            "wrong": "When did you arrive? I have arrived just now",
+            "right": "I've just arrived",
+            "why": "результат сейчас (just) → Present Perfect"
+          }
+        ]
+      },
+      "present-simple-vs-continuous": {
+        "title": "Present Simple vs Continuous (+ Perfect для длительности)",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I am living here for 5 years",
+            "right": "I have lived / have been living here for 5 years",
+            "why": "«уже 5 лет» → Present Perfect (Continuous), не Present Continuous"
+          },
+          {
+            "wrong": "I am knowing the answer",
+            "right": "I know the answer",
+            "why": "state-глаголы (know, want, like, understand) не идут в Continuous"
+          },
+          {
+            "wrong": "Every day I am going to work",
+            "right": "Every day I go to work",
+            "why": "регулярное действие → Present Simple"
+          },
+          {
+            "wrong": "Look! It rains",
+            "right": "Look! It's raining",
+            "why": "сейчас, прямо в момент → Present Continuous"
+          }
+        ]
+      },
+      "future-time-clauses": {
+        "title": "Будущее в придаточных (when / if)",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "When I will come, I will call you",
+            "right": "When I come, I'll call you",
+            "why": "после when/if/before/after — настоящее время, не will"
+          },
+          {
+            "wrong": "If it will rain, we stay home",
+            "right": "If it rains, we'll stay home",
+            "why": "в if-части → Present Simple; will в главной части"
+          },
+          {
+            "wrong": "I go to London tomorrow (о плане)",
+            "right": "I'm going to London tomorrow",
+            "why": "запланированное будущее → be going to / Present Continuous"
+          }
+        ]
+      },
+      "articles-a-an-the": {
+        "title": "Артикли a / an / the",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I am student",
+            "right": "I am a student",
+            "why": "счётное в ед.ч. и впервые → нужен a/an"
+          },
+          {
+            "wrong": "The life is hard",
+            "right": "Life is hard",
+            "why": "обобщение (жизнь вообще) → без the"
+          },
+          {
+            "wrong": "I like the nature",
+            "right": "I like nature",
+            "why": "абстрактное/неисчисляемое в общем смысле → без the"
+          },
+          {
+            "wrong": "She is best teacher",
+            "right": "She is the best teacher",
+            "why": "превосходная степень → the"
+          },
+          {
+            "wrong": "I went to the Russia",
+            "right": "I went to Russia",
+            "why": "большинство стран → без the"
+          }
+        ]
+      },
+      "prepositions": {
+        "title": "Предлоги (интерференция с русским)",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "It depends from the weather",
+            "right": "It depends on the weather",
+            "why": "depend ON, не from"
+          },
+          {
+            "wrong": "I listen music",
+            "right": "I listen to music",
+            "why": "listen TO"
+          },
+          {
+            "wrong": "Please explain me this",
+            "right": "Please explain this to me",
+            "why": "explain sth TO sb"
+          },
+          {
+            "wrong": "I'm afraid from dogs",
+            "right": "I'm afraid of dogs",
+            "why": "afraid OF"
+          },
+          {
+            "wrong": "He is good in math",
+            "right": "He is good at math",
+            "why": "good AT"
+          },
+          {
+            "wrong": "I will arrive to London",
+            "right": "I will arrive in London",
+            "why": "arrive IN (город/страна), arrive AT (место)"
+          }
+        ]
+      },
+      "word-order-questions": {
+        "title": "Порядок слов и вопросы",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I very like this film",
+            "right": "I really like this film / I like it a lot",
+            "why": "very не ставится перед глаголом; нужно really / a lot"
+          },
+          {
+            "wrong": "How it looks like?",
+            "right": "What does it look like?",
+            "why": "look like → What (не How); нужен вспомогательный does"
+          },
+          {
+            "wrong": "Do you know where is the station?",
+            "right": "Do you know where the station is?",
+            "why": "косвенный вопрос → прямой порядок слов"
+          },
+          {
+            "wrong": "You can tell me the time?",
+            "right": "Can you tell me the time?",
+            "why": "вопрос → инверсия с can"
+          }
+        ]
+      },
+      "countable-uncountable": {
+        "title": "Исчисляемое / неисчисляемое",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I need some informations",
+            "right": "I need some information",
+            "why": "information неисчисляемо — без -s"
+          },
+          {
+            "wrong": "He gave me good advices",
+            "right": "He gave me good advice",
+            "why": "advice неисчисляемо"
+          },
+          {
+            "wrong": "There are much people",
+            "right": "There are many people",
+            "why": "people исчисляемо → many"
+          },
+          {
+            "wrong": "The news are bad",
+            "right": "The news is bad",
+            "why": "news = единственное число"
+          },
+          {
+            "wrong": "I have many money",
+            "right": "I have a lot of / much money",
+            "why": "money неисчисляемо → much / a lot of"
+          }
+        ]
+      },
+      "say-tell-make-do": {
+        "title": "Say / tell / make / do",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "Say me the truth",
+            "right": "Tell me the truth",
+            "why": "tell sb (кому), say sth (что)"
+          },
+          {
+            "wrong": "He said me that...",
+            "right": "He told me that...",
+            "why": "с адресатом → tell"
+          },
+          {
+            "wrong": "I did a mistake",
+            "right": "I made a mistake",
+            "why": "make a mistake"
+          },
+          {
+            "wrong": "I make sport every day",
+            "right": "I do sport / play sport every day",
+            "why": "do/play sport, не make"
+          },
+          {
+            "wrong": "Can you make a photo?",
+            "right": "Can you take a photo?",
+            "why": "take a photo"
+          }
+        ]
+      },
+      "modals": {
+        "title": "Модальные глаголы",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I must to go now",
+            "right": "I must go now",
+            "why": "после must — без to"
+          },
+          {
+            "wrong": "You mustn't come (= не обязан)",
+            "right": "You don't have to come",
+            "why": "mustn't = запрет; «не обязан» → don't have to"
+          },
+          {
+            "wrong": "I can to swim",
+            "right": "I can swim",
+            "why": "после can — без to"
+          },
+          {
+            "wrong": "Maybe I will can help",
+            "right": "Maybe I'll be able to help",
+            "why": "нет will can → be able to"
+          }
+        ]
+      },
+      "gerund-infinitive": {
+        "title": "Герундий vs инфинитив",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "I enjoy to read",
+            "right": "I enjoy reading",
+            "why": "после enjoy — герундий (-ing)"
+          },
+          {
+            "wrong": "I look forward to see you",
+            "right": "I look forward to seeing you",
+            "why": "look forward TO + герундий (to здесь предлог)"
+          },
+          {
+            "wrong": "I want reading now",
+            "right": "I want to read now",
+            "why": "после want — инфинитив с to"
+          },
+          {
+            "wrong": "I'm interested to history",
+            "right": "I'm interested in history",
+            "why": "interested IN + существительное/герундий"
+          },
+          {
+            "wrong": "I stopped to smoke (= бросил)",
+            "right": "I stopped smoking",
+            "why": "stop doing = прекратить; stop to do = остановиться, чтобы сделать"
+          }
+        ]
+      },
+      "conditionals": {
+        "title": "Условные предложения",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "If I will have time, I will help",
+            "right": "If I have time, I'll help",
+            "why": "в if-части First Conditional → Present, не will"
+          },
+          {
+            "wrong": "If I would be you, I would go",
+            "right": "If I were you, I would go",
+            "why": "Second Conditional: if + Past (were), would в главной"
+          },
+          {
+            "wrong": "If I would know, I would tell you",
+            "right": "If I knew, I would tell you",
+            "why": "would не ставится в if-часть"
+          }
+        ]
+      },
+      "collocations": {
+        "title": "Коллокации (естественность)",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "Please put attention",
+            "right": "Please pay attention",
+            "why": "pay attention"
+          },
+          {
+            "wrong": "We took a decision",
+            "right": "We made a decision",
+            "why": "make a decision"
+          },
+          {
+            "wrong": "There was a big rain",
+            "right": "There was heavy rain",
+            "why": "heavy rain, не big"
+          },
+          {
+            "wrong": "I made a mistake in the exam (об оценке)",
+            "right": "I failed the exam",
+            "why": "fail an exam"
+          },
+          {
+            "wrong": "Do a party",
+            "right": "Have / throw a party",
+            "why": "have a party"
+          }
+        ]
+      },
+      "false-friends": {
+        "title": "Ложные друзья переводчика",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "This is very actual topic (= актуальная)",
+            "right": "This is a very relevant / current topic",
+            "why": "actual = реальный/фактический, не «актуальный»"
+          },
+          {
+            "wrong": "He is very sympathetic (= симпатичный)",
+            "right": "He is very likeable / nice",
+            "why": "sympathetic = сочувствующий"
+          },
+          {
+            "wrong": "She is very accurate person (= аккуратная)",
+            "right": "She is very tidy / neat",
+            "why": "accurate = точный, не «аккуратный»"
+          },
+          {
+            "wrong": "I bought it in the magazine (= в магазине)",
+            "right": "I bought it in the shop/store",
+            "why": "magazine = журнал"
+          },
+          {
+            "wrong": "It's a comfortable time to meet",
+            "right": "It's a convenient time to meet",
+            "why": "convenient = удобно по логистике; comfortable = про уют"
+          }
+        ]
+      },
+      "phrasal-verbs-daily-high-frequency": {
+        "title": "Phrasal verbs (снять избегание)",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "I can't tolerate late people",
+            "right": "I can't put up with people being late",
+            "why": "put up with = терпеть/выносить (естественнее latinate)"
+          },
+          {
+            "wrong": "I need to understand how it works",
+            "right": "I need to figure out how it works",
+            "why": "figure out = разобраться"
+          },
+          {
+            "wrong": "Let's postpone the meeting",
+            "right": "Let's put off the meeting",
+            "why": "put off = отложить (разговорнее)"
+          },
+          {
+            "wrong": "Please continue",
+            "right": "Please carry on / keep going",
+            "why": "carry on / keep going = продолжать"
+          },
+          {
+            "wrong": "I anticipate our trip",
+            "right": "I'm looking forward to our trip",
+            "why": "look forward to = ждать с нетерпением"
+          }
+        ]
+      },
+      "discourse-linkers": {
+        "title": "Связки и дискурс",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "I like tea. Also I like coffee. Also I like juice.",
+            "right": "I like tea. I also like coffee, and juice too.",
+            "why": "also не начинает каждое предложение; варьируй (too, as well)"
+          },
+          {
+            "wrong": "It was raining but however we went out",
+            "right": "It was raining; however, we went out",
+            "why": "but и however вместе — избыточно; выбери одно"
+          },
+          {
+            "wrong": "In my opinion I think that...",
+            "right": "I think that... / In my opinion, ...",
+            "why": "«in my opinion» и «I think» дублируют — одно из двух"
+          }
+        ]
+      },
+      "word-order-adverbs": {
+        "title": "Наречия частоты (always / usually / never)",
+        "level": "B1",
+        "errors": [
+          {
+            "wrong": "I go always to the gym",
+            "right": "I always go to the gym",
+            "why": "наречие частоты — перед смысловым глаголом"
+          },
+          {
+            "wrong": "She is never late... never she is",
+            "right": "She is never late",
+            "why": "с глаголом to be — ПОСЛЕ него"
+          },
+          {
+            "wrong": "Usually I am drinking coffee",
+            "right": "I usually drink coffee",
+            "why": "always/usually + Present Simple, не Continuous"
+          },
+          {
+            "wrong": "I have wanted always this car",
+            "right": "I have always wanted this car",
+            "why": "наречие между have и V3"
+          },
+          {
+            "wrong": "Always I forget my keys",
+            "right": "I always forget my keys",
+            "why": "частоту не ставят в начало предложения"
+          }
+        ]
+      },
+      "vocabulary-money": {
+        "title": "Лексика: деньги",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "I need to pay a credit",
+            "right": "I need to pay off a loan",
+            "why": "credit ≠ кредит; заём = loan, гасить = pay off"
+          },
+          {
+            "wrong": "I have much economy",
+            "right": "I have a lot of savings",
+            "why": "economy = экономика страны; сбережения = savings"
+          },
+          {
+            "wrong": "I want to open a deposit",
+            "right": "I want to open a savings account",
+            "why": "вклад/счёт = savings account"
+          },
+          {
+            "wrong": "I spent all money for rent",
+            "right": "I spent all my money on rent",
+            "why": "spend money ON sth"
+          },
+          {
+            "wrong": "Life here is very expensive",
+            "right": "The cost of living here is very high",
+            "why": "естественнее: cost of living is high"
+          }
+        ]
+      },
+      "vocabulary-work": {
+        "title": "Лексика: работа и офис",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "I have a good work",
+            "right": "I have a good job",
+            "why": "work — деятельность (uncountable); место = job"
+          },
+          {
+            "wrong": "My chief gave me a task",
+            "right": "My boss gave me a task",
+            "why": "начальник = boss/manager; chief — не то"
+          },
+          {
+            "wrong": "I have many works to do",
+            "right": "I have a lot of work to do",
+            "why": "work неисчисляемо → a lot of work"
+          },
+          {
+            "wrong": "I want to make a career",
+            "right": "I want to build a career",
+            "why": "build a career"
+          },
+          {
+            "wrong": "I make a course to improve",
+            "right": "I take a course to improve",
+            "why": "take a course"
+          }
+        ]
+      },
+      "set-expressions-daily": {
+        "title": "Устойчивые выражения (частые ошибки)",
+        "level": "B2",
+        "errors": [
+          {
+            "wrong": "I am agree with you",
+            "right": "I agree with you",
+            "why": "agree — глагол, без be"
+          },
+          {
+            "wrong": "I have 30 years old",
+            "right": "I am 30 (years old)",
+            "why": "возраст через to be, не have"
+          },
+          {
+            "wrong": "It doesn't matter for me",
+            "right": "It doesn't matter to me",
+            "why": "matter TO sb"
+          },
+          {
+            "wrong": "I feel myself good",
+            "right": "I feel good",
+            "why": "feel без myself"
+          },
+          {
+            "wrong": "Thanks God it's Friday",
+            "right": "Thank God it's Friday",
+            "why": "Thank God (без -s)"
+          }
+        ]
+      }
+    }
+  },
+  "topics": [
+    {
+      "slug": "present-perfect-vs-past-simple",
+      "title": "Present Perfect vs Past Simple",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "present-perfect-vs-past-simple#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I have seen him yesterday",
+            "right": "I saw him yesterday",
+            "why": "есть точное «когда» (yesterday) → только Past Simple"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I have seen him yesterday",
+            "options": [
+              "I have seen him yesterday",
+              "I saw him yesterday"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "есть точное «когда» (yesterday) → только Past Simple",
+            "category": "grammar",
+            "topic": "present-perfect-vs-past-simple",
+            "level": "B1",
+            "fingerprint": "b28fcb2a7fd3bbc6f33eca14ca62849b1bce2137213f15dd3d28d41b05f6b32e",
+            "production_prompt": "Make your own sentence about a finished past event; include a finished-time expression and use Past Simple."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I saw him yesterday",
+            "meaning_en": "Choose the present perfect for life experience or a result connected to now; use the past simple with a finished time.",
+            "meaning_ru": "есть точное «когда» (yesterday) → только Past Simple",
+            "example": "I saw him yesterday"
+          }
+        },
+        {
+          "source_key": "present-perfect-vs-past-simple#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I have finished it 2 hours ago",
+            "right": "I finished it 2 hours ago",
+            "why": "ago = точное время → Past Simple"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I have finished it 2 hours ago",
+            "options": [
+              "I have finished it 2 hours ago",
+              "I finished it 2 hours ago"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "ago = точное время → Past Simple",
+            "category": "grammar",
+            "topic": "present-perfect-vs-past-simple",
+            "level": "B1",
+            "fingerprint": "bda677ea2a66307483fa4029f13187ac12af0961c66b4e6366f708195b1f4cef",
+            "production_prompt": "Make your own sentence about a finished past event; include an ago-expression and use Past Simple."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I finished it 2 hours ago",
+            "meaning_en": "Choose the present perfect for life experience or a result connected to now; use the past simple with a finished time.",
+            "meaning_ru": "ago = точное время → Past Simple",
+            "example": "I finished it 2 hours ago"
+          }
+        },
+        {
+          "source_key": "present-perfect-vs-past-simple#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "Did you ever eat sushi?",
+            "right": "Have you ever eaten sushi?",
+            "why": "опыт без времени → Present Perfect (ever)"
+          },
+          "simple_question": {
+            "prompt": "In British English and most international course materials, ask about life experience with no finished time. Choose the usual form:",
+            "options": [
+              "Did you ever eat sushi?",
+              "Have you ever eaten sushi?"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Для опыта без указанного времени обычно используют Present Perfect. Did you ever...? также встречается в американском английском.",
+            "category": "grammar",
+            "topic": "present-perfect-vs-past-simple",
+            "level": "B1",
+            "fingerprint": "798230695da17301d3f4f435746901869a02a45e31eda5dc1bf2d0011a468846",
+            "production_prompt": "Ask your own question about someone's life experience with ever; use Present Perfect."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Have you ever eaten sushi?",
+            "meaning_en": "Choose the present perfect for life experience or a result connected to now; use the past simple with a finished time.",
+            "meaning_ru": "Для опыта без указанного времени обычно используют Present Perfect. Did you ever...? также встречается в американском английском.",
+            "example": "Have you ever eaten sushi?"
+          }
+        },
+        {
+          "source_key": "present-perfect-vs-past-simple#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "When did you arrive? I have arrived just now",
+            "right": "I've just arrived",
+            "why": "результат сейчас (just) → Present Perfect"
+          },
+          "simple_question": {
+            "prompt": "You have just reached the office. Choose the natural update about a result that matters now:",
+            "options": [
+              "When did you arrive? I have arrived just now",
+              "I've just arrived"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "результат сейчас (just) → Present Perfect",
+            "category": "grammar",
+            "topic": "present-perfect-vs-past-simple",
+            "level": "B1",
+            "fingerprint": "4793112eda8f455b0cba76bb75ea8a6fac75a21c0226fd23c98240bdd2c3c453",
+            "production_prompt": "Give a short update about something that has just happened and matters now; use Present Perfect."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I've just arrived",
+            "meaning_en": "Choose the present perfect for life experience or a result connected to now; use the past simple with a finished time.",
+            "meaning_ru": "результат сейчас (just) → Present Perfect",
+            "example": "I've just arrived"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "present-simple-vs-continuous",
+      "title": "Present Simple vs Continuous (+ Perfect для длительности)",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "present-simple-vs-continuous#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I am living here for 5 years",
+            "right": "I have lived / have been living here for 5 years",
+            "why": "«уже 5 лет» → Present Perfect (Continuous), не Present Continuous"
+          },
+          "simple_question": {
+            "prompt": "You moved here five years ago and still live here. Choose the sentence describing the duration up to now:",
+            "options": [
+              "I am living here for 5 years",
+              "I have lived here for 5 years"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "«уже 5 лет» → Present Perfect (Continuous), не Present Continuous",
+            "category": "grammar",
+            "topic": "present-simple-vs-continuous",
+            "level": "B1",
+            "fingerprint": "93df0187b03ba96dfa03f06e51e9cf7278eaace0e572f0a51abf80145b898c01",
+            "production_prompt": "Say how long you have lived or worked somewhere; use Present Perfect or Present Perfect Continuous."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I have lived here for 5 years",
+            "meaning_en": "Use the present simple for habits and states, the present continuous for actions happening now, and the present perfect for duration continuing to now.",
+            "meaning_ru": "«уже 5 лет» → Present Perfect (Continuous), не Present Continuous",
+            "example": "I have lived here for 5 years"
+          }
+        },
+        {
+          "source_key": "present-simple-vs-continuous#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I am knowing the answer",
+            "right": "I know the answer",
+            "why": "state-глаголы (know, want, like, understand) не идут в Continuous"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I am knowing the answer",
+            "options": [
+              "I am knowing the answer",
+              "I know the answer"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "В этом значении know описывает состояние и обычно употребляется в Present Simple. Некоторые глаголы состояния допускают Continuous в других значениях или для временной ситуации.",
+            "category": "grammar",
+            "topic": "present-simple-vs-continuous",
+            "level": "B1",
+            "fingerprint": "327bc60e5b08fe472c2bdc4921811345a1f397e13720698950d507baa5318d72",
+            "production_prompt": "Make a sentence with a state verb such as know, like, or want; use Present Simple."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I know the answer",
+            "meaning_en": "Use the present simple for habits and states, the present continuous for actions happening now, and the present perfect for duration continuing to now.",
+            "meaning_ru": "state-глаголы (know, want, like, understand) не идут в Continuous",
+            "example": "I know the answer"
+          }
+        },
+        {
+          "source_key": "present-simple-vs-continuous#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "Every day I am going to work",
+            "right": "Every day I go to work",
+            "why": "регулярное действие → Present Simple"
+          },
+          "simple_question": {
+            "prompt": "Describe your long-term daily routine in neutral English:",
+            "options": [
+              "Every day I am going to work",
+              "Every day I go to work"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Для постоянной повседневной привычки здесь используем Present Simple. Present Continuous возможен для временной повторяющейся ситуации.",
+            "category": "grammar",
+            "topic": "present-simple-vs-continuous",
+            "level": "B1",
+            "fingerprint": "e2352359b502e23c24dc0604ca3143b35a5243e2248f1cd5d43cd48a995fdd66",
+            "production_prompt": "Describe one of your regular habits; use Present Simple."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Every day I go to work",
+            "meaning_en": "Use the present simple for habits and states, the present continuous for actions happening now, and the present perfect for duration continuing to now.",
+            "meaning_ru": "регулярное действие → Present Simple",
+            "example": "Every day I go to work"
+          }
+        },
+        {
+          "source_key": "present-simple-vs-continuous#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "Look! It rains",
+            "right": "Look! It's raining",
+            "why": "сейчас, прямо в момент → Present Continuous"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: Look! It rains",
+            "options": [
+              "Look! It rains",
+              "Look! It's raining"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "сейчас, прямо в момент → Present Continuous",
+            "category": "grammar",
+            "topic": "present-simple-vs-continuous",
+            "level": "B1",
+            "fingerprint": "1797fa57f3ceb13084a309a19a03d4dfcc9ee85f316e64caee347bb69c4db472",
+            "production_prompt": "Describe what is happening right now; use Present Continuous."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Look! It's raining",
+            "meaning_en": "Use the present simple for habits and states, the present continuous for actions happening now, and the present perfect for duration continuing to now.",
+            "meaning_ru": "сейчас, прямо в момент → Present Continuous",
+            "example": "Look! It's raining"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "future-time-clauses",
+      "title": "Будущее в придаточных (when / if)",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "future-time-clauses#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "When I will come, I will call you",
+            "right": "When I come, I'll call you",
+            "why": "после when/if/before/after — настоящее время, не will"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: When I will come, I will call you",
+            "options": [
+              "When I will come, I will call you",
+              "When I come, I'll call you"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "после when/if/before/after — настоящее время, не will",
+            "category": "grammar",
+            "topic": "future-time-clauses",
+            "level": "B1",
+            "fingerprint": "3b069d2c17a9eb4dd19df1d8c94fd8e9ccf93497dfdc486d302a7eb6009e4f92",
+            "production_prompt": "Make a sentence about a future event with when; use Present Simple after when and will in the main clause."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "When I come, I'll call you",
+            "meaning_en": "Use a present tense after when, if, before, and after for a future event; express the future plan in the main clause.",
+            "meaning_ru": "после when/if/before/after — настоящее время, не will",
+            "example": "When I come, I'll call you"
+          }
+        },
+        {
+          "source_key": "future-time-clauses#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "If it will rain, we stay home",
+            "right": "If it rains, we'll stay home",
+            "why": "в if-части → Present Simple; will в главной части"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: If it will rain, we stay home",
+            "options": [
+              "If it will rain, we stay home",
+              "If it rains, we'll stay home"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "в if-части → Present Simple; will в главной части",
+            "category": "grammar",
+            "topic": "future-time-clauses",
+            "level": "B1",
+            "fingerprint": "749eff151c5469547bcc3d3d144bf98f64b64921b39a06b49fe9a652ff101767",
+            "production_prompt": "Make a first-conditional sentence about a possible future situation; use Present Simple after if."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "If it rains, we'll stay home",
+            "meaning_en": "Use a present tense after when, if, before, and after for a future event; express the future plan in the main clause.",
+            "meaning_ru": "в if-части → Present Simple; will в главной части",
+            "example": "If it rains, we'll stay home"
+          }
+        },
+        {
+          "source_key": "future-time-clauses#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I go to London tomorrow (о плане)",
+            "right": "I'm going to London tomorrow",
+            "why": "запланированное будущее → be going to / Present Continuous"
+          },
+          "simple_question": {
+            "prompt": "You are describing your own planned trip, not quoting a timetable. Choose the natural form:",
+            "options": [
+              "I go to London tomorrow",
+              "I'm going to London tomorrow"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Для личного запланированного действия здесь естественно I'm going to. Present Simple также возможен для расписаний и программ.",
+            "category": "grammar",
+            "topic": "future-time-clauses",
+            "level": "B1",
+            "fingerprint": "a9d6542779979352810dac7fd62e5e237a8fcc896cc966f190a8a222286d15d4",
+            "production_prompt": "Say one of your own plans for tomorrow using be going to or Present Continuous."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I'm going to London tomorrow",
+            "meaning_en": "Use a present tense after when, if, before, and after for a future event; express the future plan in the main clause.",
+            "meaning_ru": "Для личного запланированного действия здесь естественно I'm going to. Present Simple также возможен для расписаний и программ.",
+            "example": "I'm going to London tomorrow"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "articles-a-an-the",
+      "title": "Артикли a / an / the",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "articles-a-an-the#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I am student",
+            "right": "I am a student",
+            "why": "счётное в ед.ч. и впервые → нужен a/an"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I am student",
+            "options": [
+              "I am student",
+              "I am a student"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "счётное в ед.ч. и впервые → нужен a/an",
+            "category": "grammar",
+            "topic": "articles-a-an-the",
+            "level": "B1",
+            "fingerprint": "2613d06c694757219dc7d498dccb63ccfd04c9b795e80ed7b58813ffb9073248",
+            "production_prompt": "Introduce your job or role with a singular countable noun; choose the needed indefinite article."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I am a student",
+            "meaning_en": "Use an article with a singular countable noun, the for a specific or superlative noun, and no article for general meanings and most country names.",
+            "meaning_ru": "счётное в ед.ч. и впервые → нужен a/an",
+            "example": "I am a student"
+          }
+        },
+        {
+          "source_key": "articles-a-an-the#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "The life is hard",
+            "right": "Life is hard",
+            "why": "обобщение (жизнь вообще) → без the"
+          },
+          "simple_question": {
+            "prompt": "You mean life in general, not a particular person's life. Choose the standard sentence:",
+            "options": [
+              "The life is hard",
+              "Life is hard"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "В общем высказывании о жизни говорят Life is hard. The life требуется, когда имеется в виду конкретная жизнь или период.",
+            "category": "grammar",
+            "topic": "articles-a-an-the",
+            "level": "B1",
+            "fingerprint": "fc6e3584d64d569726ad6ce2fee6d0933906a4b082e58301211df5f09d81bbe2",
+            "production_prompt": "Make a general statement about life without referring to one particular life."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Life is hard",
+            "meaning_en": "Use an article with a singular countable noun, the for a specific or superlative noun, and no article for general meanings and most country names.",
+            "meaning_ru": "В общем высказывании о жизни говорят Life is hard. The life требуется, когда имеется в виду конкретная жизнь или период.",
+            "example": "Life is hard"
+          }
+        },
+        {
+          "source_key": "articles-a-an-the#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I like the nature",
+            "right": "I like nature",
+            "why": "абстрактное/неисчисляемое в общем смысле → без the"
+          },
+          "simple_question": {
+            "prompt": "You mean the natural world in general. Choose the standard sentence:",
+            "options": [
+              "I like the nature",
+              "I like nature"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "При общем значении говорят nature без артикля. The nature употребляется, когда речь о конкретной природе или свойствах чего-либо.",
+            "category": "grammar",
+            "topic": "articles-a-an-the",
+            "level": "B1",
+            "fingerprint": "7ab3bbc32b5e2b684f1c555ec3ce4537f59218bc7f05597d22d2ba694a50592b",
+            "production_prompt": "Say what you like or dislike in nature in general."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I like nature",
+            "meaning_en": "Use an article with a singular countable noun, the for a specific or superlative noun, and no article for general meanings and most country names.",
+            "meaning_ru": "При общем значении говорят nature без артикля. The nature употребляется, когда речь о конкретной природе или свойствах чего-либо.",
+            "example": "I like nature"
+          }
+        },
+        {
+          "source_key": "articles-a-an-the#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "She is best teacher",
+            "right": "She is the best teacher",
+            "why": "превосходная степень → the"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: She is best teacher",
+            "options": [
+              "She is best teacher",
+              "She is the best teacher"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "превосходная степень → the",
+            "category": "grammar",
+            "topic": "articles-a-an-the",
+            "level": "B1",
+            "fingerprint": "8f947e54864715fe96b06395b3af51cd271c5549c804e4695f29aafc8062893d",
+            "production_prompt": "Describe someone using a superlative adjective and the correct article."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "She is the best teacher",
+            "meaning_en": "Use an article with a singular countable noun, the for a specific or superlative noun, and no article for general meanings and most country names.",
+            "meaning_ru": "превосходная степень → the",
+            "example": "She is the best teacher"
+          }
+        },
+        {
+          "source_key": "articles-a-an-the#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "I went to the Russia",
+            "right": "I went to Russia",
+            "why": "большинство стран → без the"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I went to the Russia",
+            "options": [
+              "I went to the Russia",
+              "I went to Russia"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "большинство стран → без the",
+            "category": "grammar",
+            "topic": "articles-a-an-the",
+            "level": "B1",
+            "fingerprint": "b8d1896cc51a4fa0dbbfa8a403d4b13af6ad12d1ed14beebc3358ad2c54a0353",
+            "production_prompt": "Make a sentence about travelling to a country that normally takes no article."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I went to Russia",
+            "meaning_en": "Use an article with a singular countable noun, the for a specific or superlative noun, and no article for general meanings and most country names.",
+            "meaning_ru": "большинство стран → без the",
+            "example": "I went to Russia"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "prepositions",
+      "title": "Предлоги (интерференция с русским)",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "prepositions#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "It depends from the weather",
+            "right": "It depends on the weather",
+            "why": "depend ON, не from"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: It depends from the weather",
+            "options": [
+              "It depends from the weather",
+              "It depends on the weather"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "depend ON, не from",
+            "category": "grammar",
+            "topic": "prepositions",
+            "level": "B1",
+            "fingerprint": "329117c469f8775a71a32d58c89cbbcdab47bb62bde94b8f23660fdf74637a66",
+            "production_prompt": "Say what something depends on; use the verb depend with its standard preposition."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "It depends on the weather",
+            "meaning_en": "Learn the standard preposition used with each verb or adjective, such as depend on, listen to, and arrive in a city.",
+            "meaning_ru": "depend ON, не from",
+            "example": "It depends on the weather"
+          }
+        },
+        {
+          "source_key": "prepositions#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I listen music",
+            "right": "I listen to music",
+            "why": "listen TO"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I listen music",
+            "options": [
+              "I listen music",
+              "I listen to music"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "listen TO",
+            "category": "grammar",
+            "topic": "prepositions",
+            "level": "B1",
+            "fingerprint": "b087938b71d66a4ef4d8c8ed9986c0f8ea977d4e19bbde582d5f005b0a2acf33",
+            "production_prompt": "Say what kind of music you listen to; include the preposition after listen."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I listen to music",
+            "meaning_en": "Learn the standard preposition used with each verb or adjective, such as depend on, listen to, and arrive in a city.",
+            "meaning_ru": "listen TO",
+            "example": "I listen to music"
+          }
+        },
+        {
+          "source_key": "prepositions#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "Please explain me this",
+            "right": "Please explain this to me",
+            "why": "explain sth TO sb"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: Please explain me this",
+            "options": [
+              "Please explain me this",
+              "Please explain this to me"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "explain sth TO sb",
+            "category": "grammar",
+            "topic": "prepositions",
+            "level": "B1",
+            "fingerprint": "cf41d2c2a09aede34dc2323f55a9cb5b8f8c7f0f9bbdb02e1625d4fd3be80c27",
+            "production_prompt": "Ask someone to explain a thing to another person; use explain something to someone."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Please explain this to me",
+            "meaning_en": "Learn the standard preposition used with each verb or adjective, such as depend on, listen to, and arrive in a city.",
+            "meaning_ru": "explain sth TO sb",
+            "example": "Please explain this to me"
+          }
+        },
+        {
+          "source_key": "prepositions#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I'm afraid from dogs",
+            "right": "I'm afraid of dogs",
+            "why": "afraid OF"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I'm afraid from dogs",
+            "options": [
+              "I'm afraid from dogs",
+              "I'm afraid of dogs"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "afraid OF",
+            "category": "grammar",
+            "topic": "prepositions",
+            "level": "B1",
+            "fingerprint": "fb310cef3d657e37a738fa1596768e0a900524e2dddc580e43760bd9c6e79cad",
+            "production_prompt": "Say which animals or situations you are afraid of."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I'm afraid of dogs",
+            "meaning_en": "Learn the standard preposition used with each verb or adjective, such as depend on, listen to, and arrive in a city.",
+            "meaning_ru": "afraid OF",
+            "example": "I'm afraid of dogs"
+          }
+        },
+        {
+          "source_key": "prepositions#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "He is good in math",
+            "right": "He is good at math",
+            "why": "good AT"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard preposition when describing mathematical ability:",
+            "options": [
+              "He is good from math",
+              "He is good at math"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "good AT",
+            "category": "grammar",
+            "topic": "prepositions",
+            "level": "B1",
+            "fingerprint": "cacec27d444e8118fbdc50613dce2f6b4607fe01f420b349c71421fc4dd37c48",
+            "production_prompt": "Say one subject or activity you are good at."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "He is good at math",
+            "meaning_en": "Learn the standard preposition used with each verb or adjective, such as depend on, listen to, and arrive in a city.",
+            "meaning_ru": "good AT",
+            "example": "He is good at math"
+          }
+        },
+        {
+          "source_key": "prepositions#5",
+          "source_index": 5,
+          "original": {
+            "wrong": "I will arrive to London",
+            "right": "I will arrive in London",
+            "why": "arrive IN (город/страна), arrive AT (место)"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I will arrive to London",
+            "options": [
+              "I will arrive to London",
+              "I will arrive in London"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "arrive IN (город/страна), arrive AT (место)",
+            "category": "grammar",
+            "topic": "prepositions",
+            "level": "B1",
+            "fingerprint": "ac515c5ece37a7ac74fab6a9dd7e60cc31d644fa56755de7b1079381190c3596",
+            "production_prompt": "Say which city you will arrive in; use the standard preposition for a city."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I will arrive in London",
+            "meaning_en": "Learn the standard preposition used with each verb or adjective, such as depend on, listen to, and arrive in a city.",
+            "meaning_ru": "arrive IN (город/страна), arrive AT (место)",
+            "example": "I will arrive in London"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "word-order-questions",
+      "title": "Порядок слов и вопросы",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "word-order-questions#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I very like this film",
+            "right": "I really like this film / I like it a lot",
+            "why": "very не ставится перед глаголом; нужно really / a lot"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I very like this film",
+            "options": [
+              "I very like this film",
+              "I really like this film / I like it a lot"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "very не ставится перед глаголом; нужно really / a lot",
+            "category": "grammar",
+            "topic": "word-order-questions",
+            "level": "B1",
+            "fingerprint": "28c12890d0581d2b8a73711ccbcd75c753b7adf9da943678ee2623812fa8f2f1",
+            "production_prompt": "Say that you like a film a lot; place really before the main verb or use a lot at the end."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I really like this film / I like it a lot",
+            "meaning_en": "Use auxiliary inversion in direct questions and statement word order inside indirect questions.",
+            "meaning_ru": "very не ставится перед глаголом; нужно really / a lot",
+            "example": "I really like this film / I like it a lot"
+          }
+        },
+        {
+          "source_key": "word-order-questions#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "How it looks like?",
+            "right": "What does it look like?",
+            "why": "look like → What (не How); нужен вспомогательный does"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: How it looks like?",
+            "options": [
+              "How it looks like?",
+              "What does it look like?"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "look like → What (не How); нужен вспомогательный does",
+            "category": "grammar",
+            "topic": "word-order-questions",
+            "level": "B1",
+            "fingerprint": "dd2cb10c13b226ccbd38ec71e6a68657860ebe96431a4829ad1dbeb136afbd87",
+            "production_prompt": "Ask what a person or place looks like; use the correct question word and auxiliary."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "What does it look like?",
+            "meaning_en": "Use auxiliary inversion in direct questions and statement word order inside indirect questions.",
+            "meaning_ru": "look like → What (не How); нужен вспомогательный does",
+            "example": "What does it look like?"
+          }
+        },
+        {
+          "source_key": "word-order-questions#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "Do you know where is the station?",
+            "right": "Do you know where the station is?",
+            "why": "косвенный вопрос → прямой порядок слов"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: Do you know where is the station?",
+            "options": [
+              "Do you know where is the station?",
+              "Do you know where the station is?"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "косвенный вопрос → прямой порядок слов",
+            "category": "grammar",
+            "topic": "word-order-questions",
+            "level": "B1",
+            "fingerprint": "d77e722c8ee9714718056836f19b739b1ab778b2a578dc546396fc248c2ffefa",
+            "production_prompt": "Ask indirectly where a place is; keep statement word order after the question word."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Do you know where the station is?",
+            "meaning_en": "Use auxiliary inversion in direct questions and statement word order inside indirect questions.",
+            "meaning_ru": "косвенный вопрос → прямой порядок слов",
+            "example": "Do you know where the station is?"
+          }
+        },
+        {
+          "source_key": "word-order-questions#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "You can tell me the time?",
+            "right": "Can you tell me the time?",
+            "why": "вопрос → инверсия с can"
+          },
+          "simple_question": {
+            "prompt": "You are making a standard polite request to a stranger. Choose the direct question:",
+            "options": [
+              "You can tell me the time?",
+              "Can you tell me the time?"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "В нейтральной вежливой просьбе задаём прямой вопрос с can перед подлежащим. В разговоре фраза с утвердительным порядком слов тоже может звучать как вопрос.",
+            "category": "grammar",
+            "topic": "word-order-questions",
+            "level": "B1",
+            "fingerprint": "0f5d606dfe6537a4204ce417ca84b5778b479360e6082e5b839f2cad6a08ca16",
+            "production_prompt": "Make a polite direct request with can; put the subject after the modal."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Can you tell me the time?",
+            "meaning_en": "Use auxiliary inversion in direct questions and statement word order inside indirect questions.",
+            "meaning_ru": "В нейтральной вежливой просьбе задаём прямой вопрос с can перед подлежащим. В разговоре фраза с утвердительным порядком слов тоже может звучать как вопрос.",
+            "example": "Can you tell me the time?"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "countable-uncountable",
+      "title": "Исчисляемое / неисчисляемое",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "countable-uncountable#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I need some informations",
+            "right": "I need some information",
+            "why": "information неисчисляемо — без -s"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I need some informations",
+            "options": [
+              "I need some informations",
+              "I need some information"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "information неисчисляемо — без -s",
+            "category": "grammar",
+            "topic": "countable-uncountable",
+            "level": "B1",
+            "fingerprint": "4d4bdba1eb4c6fd8a47dff98782851785105872d9e17e725c5a36d37959196fd",
+            "production_prompt": "Say you need some information; use the uncountable noun without a plural ending."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I need some information",
+            "meaning_en": "Match quantifiers and verb agreement to countability; information, advice, and money are uncountable, while people is plural countable.",
+            "meaning_ru": "information неисчисляемо — без -s",
+            "example": "I need some information"
+          }
+        },
+        {
+          "source_key": "countable-uncountable#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "He gave me good advices",
+            "right": "He gave me good advice",
+            "why": "advice неисчисляемо"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: He gave me good advices",
+            "options": [
+              "He gave me good advices",
+              "He gave me good advice"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "advice неисчисляемо",
+            "category": "grammar",
+            "topic": "countable-uncountable",
+            "level": "B1",
+            "fingerprint": "9079ab7349fe9637c3709a16866596451eb79cf16cc0da4a4ef2111ef64336e5",
+            "production_prompt": "Say someone gave you advice; use advice as an uncountable noun."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "He gave me good advice",
+            "meaning_en": "Match quantifiers and verb agreement to countability; information, advice, and money are uncountable, while people is plural countable.",
+            "meaning_ru": "advice неисчисляемо",
+            "example": "He gave me good advice"
+          }
+        },
+        {
+          "source_key": "countable-uncountable#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "There are much people",
+            "right": "There are many people",
+            "why": "people исчисляемо → many"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: There are much people",
+            "options": [
+              "There are much people",
+              "There are many people"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "people исчисляемо → many",
+            "category": "grammar",
+            "topic": "countable-uncountable",
+            "level": "B1",
+            "fingerprint": "7055ac5f3a5079b747bc7b6ec40e32df49459c5aaaada7209c4a1f99fc259cd7",
+            "production_prompt": "Describe a large number of people; choose a quantifier for countable plural nouns."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "There are many people",
+            "meaning_en": "Match quantifiers and verb agreement to countability; information, advice, and money are uncountable, while people is plural countable.",
+            "meaning_ru": "people исчисляемо → many",
+            "example": "There are many people"
+          }
+        },
+        {
+          "source_key": "countable-uncountable#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "The news are bad",
+            "right": "The news is bad",
+            "why": "news = единственное число"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: The news are bad",
+            "options": [
+              "The news are bad",
+              "The news is bad"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "news = единственное число",
+            "category": "grammar",
+            "topic": "countable-uncountable",
+            "level": "B1",
+            "fingerprint": "108fe77ddb44b50dd3bea3113a2d3f0d21ff6453f7b33b7d30f43c202e7ef45d",
+            "production_prompt": "Say something about news using the singular form of be."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "The news is bad",
+            "meaning_en": "Match quantifiers and verb agreement to countability; information, advice, and money are uncountable, while people is plural countable.",
+            "meaning_ru": "news = единственное число",
+            "example": "The news is bad"
+          }
+        },
+        {
+          "source_key": "countable-uncountable#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "I have many money",
+            "right": "I have a lot of / much money",
+            "why": "money неисчисляемо → much / a lot of"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I have many money",
+            "options": [
+              "I have many money",
+              "I have a lot of money"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "money неисчисляемо → much / a lot of",
+            "category": "grammar",
+            "topic": "countable-uncountable",
+            "level": "B1",
+            "fingerprint": "7815434f5c25d85f480fa0d87558137d4280790a14fe3bf9896f4613c9555c3b",
+            "production_prompt": "Say you have a lot of money; choose a quantifier for an uncountable noun."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I have a lot of money",
+            "meaning_en": "Match quantifiers and verb agreement to countability; information, advice, and money are uncountable, while people is plural countable.",
+            "meaning_ru": "money неисчисляемо → much / a lot of",
+            "example": "I have a lot of money"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "say-tell-make-do",
+      "title": "Say / tell / make / do",
+      "level": "B1",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "say-tell-make-do#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "Say me the truth",
+            "right": "Tell me the truth",
+            "why": "tell sb (кому), say sth (что)"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: Say me the truth",
+            "options": [
+              "Say me the truth",
+              "Tell me the truth"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "tell sb (кому), say sth (что)",
+            "category": "phrase",
+            "topic": "say-tell-make-do",
+            "level": "B1",
+            "fingerprint": "119a9fe10b8987d44bb7126c3585a0d5f235269859015a80847ef8485194ff3b",
+            "target_phrase": "tell me the truth"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Tell me the truth",
+            "meaning_en": "tell someone something",
+            "meaning_ru": "сказать кому-то; сообщить кому-то",
+            "example": "Tell me the truth"
+          }
+        },
+        {
+          "source_key": "say-tell-make-do#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "He said me that...",
+            "right": "He told me that...",
+            "why": "с адресатом → tell"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: He said me that...",
+            "options": [
+              "He said me that...",
+              "He told me that..."
+            ],
+            "correct_index": 1,
+            "explanation_ru": "с адресатом → tell",
+            "category": "phrase",
+            "topic": "say-tell-make-do",
+            "level": "B1",
+            "fingerprint": "34997e524aa2dad56f941f6f0d9d5f42e79ea82d03c9ee8ae0efa736533b5804",
+            "target_phrase": "tell someone that"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "He told me that...",
+            "meaning_en": "tell someone that something is true",
+            "meaning_ru": "сказать кому-то, что это так",
+            "example": "He told me that..."
+          }
+        },
+        {
+          "source_key": "say-tell-make-do#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I did a mistake",
+            "right": "I made a mistake",
+            "why": "make a mistake"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I did a mistake",
+            "options": [
+              "I did a mistake",
+              "I made a mistake"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "make a mistake",
+            "category": "phrase",
+            "topic": "say-tell-make-do",
+            "level": "B1",
+            "fingerprint": "a0a57efecf879ac446f4ca079328142c1865fb58a74827d5387c25dcdce3edd4",
+            "target_phrase": "make a mistake"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I made a mistake",
+            "meaning_en": "make a mistake",
+            "meaning_ru": "совершить ошибку",
+            "example": "I made a mistake"
+          }
+        },
+        {
+          "source_key": "say-tell-make-do#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I make sport every day",
+            "right": "I do sport / play sport every day",
+            "why": "do/play sport, не make"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I make sport every day",
+            "options": [
+              "I make sport every day",
+              "I do sport every day"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "do/play sport, не make",
+            "category": "phrase",
+            "topic": "say-tell-make-do",
+            "level": "B1",
+            "fingerprint": "4bcdc1e3bc949f3be08b2b8f36a07fba85cdad7a8458d65db98f10970bc7be26",
+            "target_phrase": "do sport"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I do sport every day",
+            "meaning_en": "do or play sport",
+            "meaning_ru": "заниматься спортом",
+            "example": "I do sport every day"
+          }
+        },
+        {
+          "source_key": "say-tell-make-do#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "Can you make a photo?",
+            "right": "Can you take a photo?",
+            "why": "take a photo"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: Can you make a photo?",
+            "options": [
+              "Can you make a photo?",
+              "Can you take a photo?"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "take a photo",
+            "category": "phrase",
+            "topic": "say-tell-make-do",
+            "level": "B1",
+            "fingerprint": "efddcb037e6d39a91e9fd14a231b3948d8b80e577c100a685b3b61742fab387f",
+            "target_phrase": "take a photo"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Can you take a photo?",
+            "meaning_en": "take a photo",
+            "meaning_ru": "сделать фотографию",
+            "example": "Can you take a photo?"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "modals",
+      "title": "Модальные глаголы",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "modals#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I must to go now",
+            "right": "I must go now",
+            "why": "после must — без to"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I must to go now",
+            "options": [
+              "I must to go now",
+              "I must go now"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "после must — без to",
+            "category": "grammar",
+            "topic": "modals",
+            "level": "B1",
+            "fingerprint": "767a5bc43a4fd2f297848a6a438dcd9aa5046db1de2aa54868ab677e9d3b13fc",
+            "production_prompt": "Say you have an obligation to leave now; use must followed by the base verb."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I must go now",
+            "meaning_en": "Use a bare infinitive after can and must; express lack of obligation with do not have to, not must not.",
+            "meaning_ru": "после must — без to",
+            "example": "I must go now"
+          }
+        },
+        {
+          "source_key": "modals#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "You mustn't come (= не обязан)",
+            "right": "You don't have to come",
+            "why": "mustn't = запрет; «не обязан» → don't have to"
+          },
+          "simple_question": {
+            "prompt": "You mean that someone is not required to come, not that they are forbidden. Choose the standard form:",
+            "options": [
+              "You mustn't come",
+              "You don't have to come"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "mustn't = запрет; «не обязан» → don't have to",
+            "category": "grammar",
+            "topic": "modals",
+            "level": "B1",
+            "fingerprint": "06a703f9fb8ba2de4276ce7a4fec2631ffc777c510468366f63f71a76126dd7e",
+            "production_prompt": "Tell someone that coming is optional, not forbidden; use don't have to."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "You don't have to come",
+            "meaning_en": "Use a bare infinitive after can and must; express lack of obligation with do not have to, not must not.",
+            "meaning_ru": "mustn't = запрет; «не обязан» → don't have to",
+            "example": "You don't have to come"
+          }
+        },
+        {
+          "source_key": "modals#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I can to swim",
+            "right": "I can swim",
+            "why": "после can — без to"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I can to swim",
+            "options": [
+              "I can to swim",
+              "I can swim"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "после can — без to",
+            "category": "grammar",
+            "topic": "modals",
+            "level": "B1",
+            "fingerprint": "61d5d7af2104add458ddf22da33a2d059661a4509908991d413f65fccc28f331",
+            "production_prompt": "Say you know how to swim; use can followed by the base verb."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I can swim",
+            "meaning_en": "Use a bare infinitive after can and must; express lack of obligation with do not have to, not must not.",
+            "meaning_ru": "после can — без to",
+            "example": "I can swim"
+          }
+        },
+        {
+          "source_key": "modals#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "Maybe I will can help",
+            "right": "Maybe I'll be able to help",
+            "why": "нет will can → be able to"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: Maybe I will can help",
+            "options": [
+              "Maybe I will can help",
+              "Maybe I'll be able to help"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "нет will can → be able to",
+            "category": "grammar",
+            "topic": "modals",
+            "level": "B1",
+            "fingerprint": "4132c173718399c21bd09d28a8065ca5f7a433162b9c385f400c1b3bd445eee9",
+            "production_prompt": "Say you may be able to help in the future; use be able to after will."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "Maybe I'll be able to help",
+            "meaning_en": "Use a bare infinitive after can and must; express lack of obligation with do not have to, not must not.",
+            "meaning_ru": "нет will can → be able to",
+            "example": "Maybe I'll be able to help"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "gerund-infinitive",
+      "title": "Герундий vs инфинитив",
+      "level": "B2",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "gerund-infinitive#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I enjoy to read",
+            "right": "I enjoy reading",
+            "why": "после enjoy — герундий (-ing)"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I enjoy to read",
+            "options": [
+              "I enjoy to read",
+              "I enjoy reading"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "после enjoy — герундий (-ing)",
+            "category": "grammar",
+            "topic": "gerund-infinitive",
+            "level": "B2",
+            "fingerprint": "ba338bd661caa961f9408dc518a22b2c7be7966eedb0aac73a76d66c8193aacf",
+            "production_prompt": "Say that you enjoy reading; use a gerund after enjoy."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I enjoy reading",
+            "meaning_en": "Choose the verb pattern required by the preceding verb or preposition; the choice can change the meaning.",
+            "meaning_ru": "после enjoy — герундий (-ing)",
+            "example": "I enjoy reading"
+          }
+        },
+        {
+          "source_key": "gerund-infinitive#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I look forward to see you",
+            "right": "I look forward to seeing you",
+            "why": "look forward TO + герундий (to здесь предлог)"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I look forward to see you",
+            "options": [
+              "I look forward to see you",
+              "I look forward to seeing you"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "look forward TO + герундий (to здесь предлог)",
+            "category": "grammar",
+            "topic": "gerund-infinitive",
+            "level": "B2",
+            "fingerprint": "d4574c986c27c6e47ef83471535a62bcdf7c51c3f45c5685452ba935c56593fa",
+            "production_prompt": "Say that you look forward to seeing someone; use a gerund after the preposition to."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I look forward to seeing you",
+            "meaning_en": "Choose the verb pattern required by the preceding verb or preposition; the choice can change the meaning.",
+            "meaning_ru": "look forward TO + герундий (to здесь предлог)",
+            "example": "I look forward to seeing you"
+          }
+        },
+        {
+          "source_key": "gerund-infinitive#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I want reading now",
+            "right": "I want to read now",
+            "why": "после want — инфинитив с to"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I want reading now",
+            "options": [
+              "I want reading now",
+              "I want to read now"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "после want — инфинитив с to",
+            "category": "grammar",
+            "topic": "gerund-infinitive",
+            "level": "B2",
+            "fingerprint": "958e8fdf43cd27a27d2e8f0977f6a36b6486ee0bbcd1d2158c5ac78eb886f299",
+            "production_prompt": "Say that you want to read now; use an infinitive after want."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I want to read now",
+            "meaning_en": "Choose the verb pattern required by the preceding verb or preposition; the choice can change the meaning.",
+            "meaning_ru": "после want — инфинитив с to",
+            "example": "I want to read now"
+          }
+        },
+        {
+          "source_key": "gerund-infinitive#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I'm interested to history",
+            "right": "I'm interested in history",
+            "why": "interested IN + существительное/герундий"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I'm interested to history",
+            "options": [
+              "I'm interested to history",
+              "I'm interested in history"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "interested IN + существительное/герундий",
+            "category": "grammar",
+            "topic": "gerund-infinitive",
+            "level": "B2",
+            "fingerprint": "832e650be96c1e7d57d1160c423a8ca6e461494dbe4e2bf6903a54118b5b8863",
+            "production_prompt": "Say that you are interested in a subject; use in before a noun or gerund."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I'm interested in history",
+            "meaning_en": "Choose the verb pattern required by the preceding verb or preposition; the choice can change the meaning.",
+            "meaning_ru": "interested IN + существительное/герундий",
+            "example": "I'm interested in history"
+          }
+        },
+        {
+          "source_key": "gerund-infinitive#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "I stopped to smoke (= бросил)",
+            "right": "I stopped smoking",
+            "why": "stop doing = прекратить; stop to do = остановиться, чтобы сделать"
+          },
+          "simple_question": {
+            "prompt": "You mean that you quit the habit for good. Choose the sentence with that meaning:",
+            "options": [
+              "I stopped to smoke",
+              "I stopped smoking"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Для значения «бросить курить» нужен герундий: stop doing. stop to do значит остановиться, чтобы закурить.",
+            "category": "grammar",
+            "topic": "gerund-infinitive",
+            "level": "B2",
+            "fingerprint": "dfe87af7cf78ef5c781274851dc02b67a47a53fb9bb09c46cfe04d104bf13638",
+            "production_prompt": "Say that you quit a habit; use stop followed by a gerund."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I stopped smoking",
+            "meaning_en": "Choose the verb pattern required by the preceding verb or preposition; the choice can change the meaning.",
+            "meaning_ru": "Для значения «бросить курить» нужен герундий: stop doing. stop to do значит остановиться, чтобы закурить.",
+            "example": "I stopped smoking"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "conditionals",
+      "title": "Условные предложения",
+      "level": "B2",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "conditionals#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "If I will have time, I will help",
+            "right": "If I have time, I'll help",
+            "why": "в if-части First Conditional → Present, не will"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: If I will have time, I will help",
+            "options": [
+              "If I will have time, I will help",
+              "If I have time, I'll help"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "в if-части First Conditional → Present, не will",
+            "category": "grammar",
+            "topic": "conditionals",
+            "level": "B2",
+            "fingerprint": "0891b27284035053dbce9e7bc45c0297295e3d16c1a7809e7cae941fb656a338",
+            "production_prompt": "Make a first-conditional sentence about a possible future event; use Present Simple in the if-clause."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "If I have time, I'll help",
+            "meaning_en": "Use a present form in a real future if-clause and a past form in a hypothetical if-clause; keep would in the result clause.",
+            "meaning_ru": "в if-части First Conditional → Present, не will",
+            "example": "If I have time, I'll help"
+          }
+        },
+        {
+          "source_key": "conditionals#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "If I would be you, I would go",
+            "right": "If I were you, I would go",
+            "why": "Second Conditional: if + Past (were), would в главной"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: If I would be you, I would go",
+            "options": [
+              "If I would be you, I would go",
+              "If I were you, I would go"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Second Conditional: if + Past (were), would в главной",
+            "category": "grammar",
+            "topic": "conditionals",
+            "level": "B2",
+            "fingerprint": "8f65e30dba8debf85e09cad963c77a4070cf98a04efd35ab932e64c6cf4ae93c",
+            "production_prompt": "Give advice with If I were you and would in the main clause."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "If I were you, I would go",
+            "meaning_en": "Use a present form in a real future if-clause and a past form in a hypothetical if-clause; keep would in the result clause.",
+            "meaning_ru": "Second Conditional: if + Past (were), would в главной",
+            "example": "If I were you, I would go"
+          }
+        },
+        {
+          "source_key": "conditionals#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "If I would know, I would tell you",
+            "right": "If I knew, I would tell you",
+            "why": "would не ставится в if-часть"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: If I would know, I would tell you",
+            "options": [
+              "If I would know, I would tell you",
+              "If I knew, I would tell you"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "would не ставится в if-часть",
+            "category": "grammar",
+            "topic": "conditionals",
+            "level": "B2",
+            "fingerprint": "92a85aaf1b28bf3d95992bc5ae9259d975a4c1bdc137a5a99b80169e8a2f5d5c",
+            "production_prompt": "Make a second-conditional sentence about something unreal now; use Past Simple in the if-clause."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "If I knew, I would tell you",
+            "meaning_en": "Use a present form in a real future if-clause and a past form in a hypothetical if-clause; keep would in the result clause.",
+            "meaning_ru": "would не ставится в if-часть",
+            "example": "If I knew, I would tell you"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "collocations",
+      "title": "Коллокации (естественность)",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "collocations#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "Please put attention",
+            "right": "Please pay attention",
+            "why": "pay attention"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: Please put attention",
+            "options": [
+              "Please put attention",
+              "Please pay attention"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "pay attention",
+            "category": "phrase",
+            "topic": "collocations",
+            "level": "B2",
+            "fingerprint": "5df39bbbc2ef6e97a9829b5bc311013abfa3c8f35219283cc149137c1b7bff58",
+            "target_phrase": "pay attention"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Please pay attention",
+            "meaning_en": "pay attention",
+            "meaning_ru": "обратить внимание",
+            "example": "Please pay attention"
+          }
+        },
+        {
+          "source_key": "collocations#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "We took a decision",
+            "right": "We made a decision",
+            "why": "make a decision"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard verb in the common phrase “___ a decision”:",
+            "options": [
+              "Please do a decision",
+              "Please make a decision"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Make a decision — распространённое нейтральное сочетание. Take a decision допустимо в британском варианте, поэтому здесь проверяется нейтральная международная формулировка.",
+            "category": "phrase",
+            "topic": "collocations",
+            "level": "B2",
+            "fingerprint": "e16fb70c49beddf9a204df08bf31f76314cce2163287b28af57b9670f01c8166",
+            "target_phrase": "make a decision"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Please make a decision",
+            "meaning_en": "make a decision",
+            "meaning_ru": "принять решение",
+            "example": "Please make a decision"
+          }
+        },
+        {
+          "source_key": "collocations#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "There was a big rain",
+            "right": "There was heavy rain",
+            "why": "heavy rain, не big"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: There was a big rain",
+            "options": [
+              "There was a big rain",
+              "There was heavy rain"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "heavy rain, не big",
+            "category": "phrase",
+            "topic": "collocations",
+            "level": "B2",
+            "fingerprint": "ec423bae9ca93638328f5c7d7a7df50521d94a9e240975e9c74074b7ee9802b4",
+            "target_phrase": "heavy rain"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "There was heavy rain",
+            "meaning_en": "heavy rain",
+            "meaning_ru": "сильный дождь",
+            "example": "There was heavy rain"
+          }
+        },
+        {
+          "source_key": "collocations#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I made a mistake in the exam (об оценке)",
+            "right": "I failed the exam",
+            "why": "fail an exam"
+          },
+          "simple_question": {
+            "prompt": "You mean that the overall result was a failure, not that you made a particular mistake during the exam. Choose the sentence:",
+            "options": [
+              "I made a mistake in the exam",
+              "I failed the exam"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Fail an exam значит не сдать экзамен. Make a mistake during an exam значит допустить конкретную ошибку; это другая ситуация.",
+            "category": "phrase",
+            "topic": "collocations",
+            "level": "B2",
+            "fingerprint": "7acf59440b519eb74061d91bfc5e93dc13192fbe8e221e832f0e2285a76dddfa",
+            "target_phrase": "fail an exam"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I failed the exam",
+            "meaning_en": "fail an exam",
+            "meaning_ru": "провалить экзамен",
+            "example": "I failed the exam"
+          }
+        },
+        {
+          "source_key": "collocations#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "Do a party",
+            "right": "Have / throw a party",
+            "why": "have a party"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: Do a party",
+            "options": [
+              "Do a party",
+              "Have a party"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "have a party",
+            "category": "phrase",
+            "topic": "collocations",
+            "level": "B2",
+            "fingerprint": "aaf99a400cf405d071e77c788ec96c165f3698480e8406408527dfdbb04c0d3d",
+            "target_phrase": "have a party"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Have a party",
+            "meaning_en": "have or throw a party",
+            "meaning_ru": "устроить вечеринку",
+            "example": "Have a party"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "false-friends",
+      "title": "Ложные друзья переводчика",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "false-friends#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "This is very actual topic (= актуальная)",
+            "right": "This is a very relevant / current topic",
+            "why": "actual = реальный/фактический, не «актуальный»"
+          },
+          "simple_question": {
+            "prompt": "You mean the topic is relevant to the current discussion, not factually real. Choose the adjective:",
+            "options": [
+              "This is a very actual topic",
+              "This is a very relevant topic"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "actual = реальный/фактический, не «актуальный»",
+            "category": "phrase",
+            "topic": "false-friends",
+            "level": "B2",
+            "fingerprint": "37810331f8a274a10a584abdbe9a933fe038a2f0f0a38783bc8085c0e886e54f",
+            "target_phrase": "a relevant topic"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "This is a very relevant topic",
+            "meaning_en": "a relevant or current topic",
+            "meaning_ru": "актуальная тема",
+            "example": "This is a very relevant topic"
+          }
+        },
+        {
+          "source_key": "false-friends#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "He is very sympathetic (= симпатичный)",
+            "right": "He is very likeable / nice",
+            "why": "sympathetic = сочувствующий"
+          },
+          "simple_question": {
+            "prompt": "You mean that people like his personality. Choose the adjective for that meaning:",
+            "options": [
+              "He is very sympathetic",
+              "He is very likeable"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "sympathetic = сочувствующий",
+            "category": "phrase",
+            "topic": "false-friends",
+            "level": "B2",
+            "fingerprint": "7d6c7f1a3e6a80d8c8edbc9a035785d925127d2cd10400c1273024d13d31279e",
+            "target_phrase": "likeable"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "He is very likeable",
+            "meaning_en": "a likeable or nice person",
+            "meaning_ru": "приятный человек",
+            "example": "He is very likeable"
+          }
+        },
+        {
+          "source_key": "false-friends#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "She is very accurate person (= аккуратная)",
+            "right": "She is very tidy / neat",
+            "why": "accurate = точный, не «аккуратный»"
+          },
+          "simple_question": {
+            "prompt": "You mean that she is neat and orderly, not that she is precise. Choose the adjective:",
+            "options": [
+              "She is a very accurate person",
+              "She is a very tidy person"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "accurate = точный, не «аккуратный»",
+            "category": "phrase",
+            "topic": "false-friends",
+            "level": "B2",
+            "fingerprint": "dd33e6233f3523875fc7bd34d9397612e002d29768f5743d5f3a7d6d547e1887",
+            "target_phrase": "tidy"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "She is a very tidy person",
+            "meaning_en": "a tidy or neat person",
+            "meaning_ru": "аккуратный человек",
+            "example": "She is a very tidy person"
+          }
+        },
+        {
+          "source_key": "false-friends#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I bought it in the magazine (= в магазине)",
+            "right": "I bought it in the shop/store",
+            "why": "magazine = журнал"
+          },
+          "simple_question": {
+            "prompt": "You bought it in a shop, a place that sells goods, not in a magazine, a publication. Choose the correct noun:",
+            "options": [
+              "I bought it in the magazine",
+              "I bought it in the shop"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "magazine = журнал",
+            "category": "phrase",
+            "topic": "false-friends",
+            "level": "B2",
+            "fingerprint": "7a23b7492500bc794e3ea5a88f61a492c2440932187ecc0da120b328c56c7a72",
+            "target_phrase": "in the shop"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I bought it in the shop",
+            "meaning_en": "buy something at a shop or store",
+            "meaning_ru": "купить что-то в магазине",
+            "example": "I bought it in the shop"
+          }
+        },
+        {
+          "source_key": "false-friends#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "It's a comfortable time to meet",
+            "right": "It's a convenient time to meet",
+            "why": "convenient = удобно по логистике; comfortable = про уют"
+          },
+          "simple_question": {
+            "prompt": "You are scheduling a meeting and mean that the time suits everyone. Choose the adjective:",
+            "options": [
+              "It's a comfortable time to meet",
+              "It's a convenient time to meet"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "convenient = удобно по логистике; comfortable = про уют",
+            "category": "phrase",
+            "topic": "false-friends",
+            "level": "B2",
+            "fingerprint": "3beb669b7892cb613b4cef5b8cc8889eedecb11d2d1e65356087f0826383feb6",
+            "target_phrase": "a convenient time"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "It's a convenient time to meet",
+            "meaning_en": "a convenient time to meet",
+            "meaning_ru": "удобное время для встречи",
+            "example": "It's a convenient time to meet"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "phrasal-verbs-daily-high-frequency",
+      "title": "Phrasal verbs (снять избегание)",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "phrasal-verbs-daily-high-frequency#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I can't tolerate late people",
+            "right": "I can't put up with people being late",
+            "why": "put up with = терпеть/выносить (естественнее latinate)"
+          },
+          "simple_question": {
+            "prompt": "Which option uses a phrasal verb to say that you cannot tolerate repeated lateness?",
+            "options": [
+              "I can't tolerate late people",
+              "I can't put up with people being late"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "put up with = терпеть/выносить (естественнее latinate). Оба варианта могут быть правильными; вопрос проверяет именно фразовый глагол и заданный оттенок значения.",
+            "category": "phrase",
+            "topic": "phrasal-verbs-daily-high-frequency",
+            "level": "B2",
+            "fingerprint": "7d0521d29589195c1f7d9cb6de200f1857a434be30a854ff2f6138e3466df630",
+            "target_phrase": "put up with"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I can't put up with people being late",
+            "meaning_en": "put up with: tolerate something",
+            "meaning_ru": "терпеть, выносить",
+            "example": "I can't put up with people being late"
+          }
+        },
+        {
+          "source_key": "phrasal-verbs-daily-high-frequency#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I need to understand how it works",
+            "right": "I need to figure out how it works",
+            "why": "figure out = разобраться"
+          },
+          "simple_question": {
+            "prompt": "Which option uses a phrasal verb meaning to work something out by thinking?",
+            "options": [
+              "I need to understand how it works",
+              "I need to figure out how it works"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "figure out = разобраться. Оба варианта могут быть правильными; вопрос проверяет именно фразовый глагол и заданный оттенок значения.",
+            "category": "phrase",
+            "topic": "phrasal-verbs-daily-high-frequency",
+            "level": "B2",
+            "fingerprint": "35b9f7bb9fc0724217a7e06d61fba7006afc27c59449882ee3768404b1c0affd",
+            "target_phrase": "figure out"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I need to figure out how it works",
+            "meaning_en": "figure out: understand by thinking",
+            "meaning_ru": "разобраться, выяснить",
+            "example": "I need to figure out how it works"
+          }
+        },
+        {
+          "source_key": "phrasal-verbs-daily-high-frequency#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "Let's postpone the meeting",
+            "right": "Let's put off the meeting",
+            "why": "put off = отложить (разговорнее)"
+          },
+          "simple_question": {
+            "prompt": "Which option uses a phrasal verb meaning to postpone a meeting?",
+            "options": [
+              "Let's postpone the meeting",
+              "Let's put off the meeting"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "put off = отложить (разговорнее). Оба варианта могут быть правильными; вопрос проверяет именно фразовый глагол и заданный оттенок значения.",
+            "category": "phrase",
+            "topic": "phrasal-verbs-daily-high-frequency",
+            "level": "B2",
+            "fingerprint": "7c3e48afe4909f14ea8288eabdad78b2b744e950569dbbf72dfca9387e841ad0",
+            "target_phrase": "put off"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Let's put off the meeting",
+            "meaning_en": "put off: postpone something",
+            "meaning_ru": "отложить",
+            "example": "Let's put off the meeting"
+          }
+        },
+        {
+          "source_key": "phrasal-verbs-daily-high-frequency#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "Please continue",
+            "right": "Please carry on / keep going",
+            "why": "carry on / keep going = продолжать"
+          },
+          "simple_question": {
+            "prompt": "Which option uses a phrasal verb meaning to continue?",
+            "options": [
+              "Please continue",
+              "Please carry on"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "carry on / keep going = продолжать. Оба варианта могут быть правильными; вопрос проверяет именно фразовый глагол и заданный оттенок значения.",
+            "category": "phrase",
+            "topic": "phrasal-verbs-daily-high-frequency",
+            "level": "B2",
+            "fingerprint": "9c630b2458efdf1f9accd0a1c14afb76512658a9a677c422ca85ea3aed65346c",
+            "target_phrase": "carry on"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Please carry on",
+            "meaning_en": "carry on: continue",
+            "meaning_ru": "продолжать",
+            "example": "Please carry on"
+          }
+        },
+        {
+          "source_key": "phrasal-verbs-daily-high-frequency#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "I anticipate our trip",
+            "right": "I'm looking forward to our trip",
+            "why": "look forward to = ждать с нетерпением"
+          },
+          "simple_question": {
+            "prompt": "Which option uses a phrasal verb to express eager, positive anticipation of the trip?",
+            "options": [
+              "I anticipate our trip",
+              "I'm looking forward to our trip"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "look forward to = ждать с нетерпением. Оба варианта могут быть правильными; вопрос проверяет именно фразовый глагол и заданный оттенок значения.",
+            "category": "phrase",
+            "topic": "phrasal-verbs-daily-high-frequency",
+            "level": "B2",
+            "fingerprint": "316c1e8694d48e3e57a57318488896c12afc3780c227b2b04c3517806766683c",
+            "target_phrase": "look forward to"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I'm looking forward to our trip",
+            "meaning_en": "look forward to: feel happy about a future event",
+            "meaning_ru": "ждать с нетерпением",
+            "example": "I'm looking forward to our trip"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "discourse-linkers",
+      "title": "Связки и дискурс",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "discourse-linkers#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I like tea. Also I like coffee. Also I like juice.",
+            "right": "I like tea. I also like coffee, and juice too.",
+            "why": "also не начинает каждое предложение; варьируй (too, as well)"
+          },
+          "simple_question": {
+            "prompt": "Choose the version that avoids repeating the same linker and reads smoothly in neutral writing:",
+            "options": [
+              "I like tea. Also I like coffee. Also I like juice.",
+              "I like tea. I also like coffee and juice."
+            ],
+            "correct_index": 1,
+            "explanation_ru": "also не начинает каждое предложение; варьируй (too, as well)",
+            "category": "phrase",
+            "topic": "discourse-linkers",
+            "level": "B2",
+            "fingerprint": "f32fb4b8654f6b007533aa23e8d9dea20fd9d2a9356ddefaae69bf57b1a93eb6",
+            "target_phrase": "also"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I like tea. I also like coffee and juice.",
+            "meaning_en": "varying linkers to avoid repetition",
+            "meaning_ru": "разнообразить связки и избегать повторов",
+            "example": "I like tea. I also like coffee and juice."
+          }
+        },
+        {
+          "source_key": "discourse-linkers#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "It was raining but however we went out",
+            "right": "It was raining; however, we went out",
+            "why": "but и however вместе — избыточно; выбери одно"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard written version that uses however without the redundant but:",
+            "options": [
+              "It was raining but however we went out",
+              "It was raining; however, we went out"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "but и however вместе — избыточно; выбери одно",
+            "category": "phrase",
+            "topic": "discourse-linkers",
+            "level": "B2",
+            "fingerprint": "3bf0f2fe4577e3055b905116d1b61f225f518474840a0e03deebc9dd479d267d",
+            "target_phrase": "however"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "It was raining; however, we went out",
+            "meaning_en": "however: show contrast without repeating but",
+            "meaning_ru": "однако; показать противопоставление без but",
+            "example": "It was raining; however, we went out"
+          }
+        },
+        {
+          "source_key": "discourse-linkers#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "In my opinion I think that...",
+            "right": "I think that... / In my opinion, ...",
+            "why": "«in my opinion» и «I think» дублируют — одно из двух"
+          },
+          "simple_question": {
+            "prompt": "Choose the version with one concise opinion marker, not two markers with the same meaning:",
+            "options": [
+              "In my opinion I think that...",
+              "I think that..."
+            ],
+            "correct_index": 1,
+            "explanation_ru": "«in my opinion» и «I think» дублируют — одно из двух",
+            "category": "phrase",
+            "topic": "discourse-linkers",
+            "level": "B2",
+            "fingerprint": "c04d433e44f942ee3001f5197460b5daa214f373f98320175f6ec9dac92e74a9",
+            "target_phrase": "I think"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I think that...",
+            "meaning_en": "use either I think or in my opinion",
+            "meaning_ru": "использовать одну вводную конструкцию без дублирования",
+            "example": "I think that..."
+          }
+        }
+      ]
+    },
+    {
+      "slug": "word-order-adverbs",
+      "title": "Наречия частоты (always / usually / never)",
+      "level": "B1",
+      "category": "grammar",
+      "records": [
+        {
+          "source_key": "word-order-adverbs#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I go always to the gym",
+            "right": "I always go to the gym",
+            "why": "наречие частоты — перед смысловым глаголом"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I go always to the gym",
+            "options": [
+              "I go always to the gym",
+              "I always go to the gym"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "наречие частоты — перед смысловым глаголом",
+            "category": "grammar",
+            "topic": "word-order-adverbs",
+            "level": "B1",
+            "fingerprint": "6076882a6e851eea404fcfc3c3e5e13fd8422a91f57d3636e90bc8a4707c6aaf",
+            "production_prompt": "Describe a regular gym habit; put always before the main verb."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I always go to the gym",
+            "meaning_en": "Place frequency adverbs before a main verb, after be, or between have and the past participle; fronting is a marked emphasis choice.",
+            "meaning_ru": "наречие частоты — перед смысловым глаголом",
+            "example": "I always go to the gym"
+          }
+        },
+        {
+          "source_key": "word-order-adverbs#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "She is never late... never she is",
+            "right": "She is never late",
+            "why": "с глаголом to be — ПОСЛЕ него"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: She is never late... never she is",
+            "options": [
+              "She is never late... never she is",
+              "She is never late"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "с глаголом to be — ПОСЛЕ него",
+            "category": "grammar",
+            "topic": "word-order-adverbs",
+            "level": "B1",
+            "fingerprint": "6eb991ce4c75d78c7b7240758f6e61874504e7904de898dc66a114dea4e764d0",
+            "production_prompt": "Say you are never late; put the frequency adverb after be."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "She is never late",
+            "meaning_en": "Place frequency adverbs before a main verb, after be, or between have and the past participle; fronting is a marked emphasis choice.",
+            "meaning_ru": "с глаголом to be — ПОСЛЕ него",
+            "example": "She is never late"
+          }
+        },
+        {
+          "source_key": "word-order-adverbs#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "Usually I am drinking coffee",
+            "right": "I usually drink coffee",
+            "why": "always/usually + Present Simple, не Continuous"
+          },
+          "simple_question": {
+            "prompt": "You are describing an everyday habit, not a temporary routine. Choose the standard form:",
+            "options": [
+              "Usually I am drinking coffee",
+              "I usually drink coffee"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Для обычной постоянной привычки здесь используем Present Simple. Always и usually также могут употребляться с Continuous, если контекст требует этого времени.",
+            "category": "grammar",
+            "topic": "word-order-adverbs",
+            "level": "B1",
+            "fingerprint": "838849fa1df5c23141f7ba52463a3bc6e73cee62f15d1cc635300efbd699ff77",
+            "production_prompt": "Describe a long-term daily coffee habit, not a temporary routine; use Present Simple."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I usually drink coffee",
+            "meaning_en": "Place frequency adverbs before a main verb, after be, or between have and the past participle; fronting is a marked emphasis choice.",
+            "meaning_ru": "always/usually + Present Simple, не Continuous",
+            "example": "I usually drink coffee"
+          }
+        },
+        {
+          "source_key": "word-order-adverbs#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I have wanted always this car",
+            "right": "I have always wanted this car",
+            "why": "наречие между have и V3"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard form for this context: I have wanted always this car",
+            "options": [
+              "I have wanted always this car",
+              "I have always wanted this car"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "наречие между have и V3",
+            "category": "grammar",
+            "topic": "word-order-adverbs",
+            "level": "B1",
+            "fingerprint": "007d6ef4166884c39f939eef5bc3e51e55f7bd10a9e81a53347e35c915d8be6f",
+            "production_prompt": "Say you have always wanted something; put always between have and the past participle."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I have always wanted this car",
+            "meaning_en": "Place frequency adverbs before a main verb, after be, or between have and the past participle; fronting is a marked emphasis choice.",
+            "meaning_ru": "наречие между have и V3",
+            "example": "I have always wanted this car"
+          }
+        },
+        {
+          "source_key": "word-order-adverbs#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "Always I forget my keys",
+            "right": "I always forget my keys",
+            "why": "частоту не ставят в начало предложения"
+          },
+          "simple_question": {
+            "prompt": "In neutral, unemphatic English, choose the usual word order:",
+            "options": [
+              "Always I forget my keys",
+              "I always forget my keys"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "В нейтральном порядке наречие частоты ставят перед смысловым глаголом. Начальная позиция возможна как маркированное усиление.",
+            "category": "grammar",
+            "topic": "word-order-adverbs",
+            "level": "B1",
+            "fingerprint": "1a5fbd5a76a93cdf46ef15b36bda896c6eef9582453cb8035f2746f0b8bcae6f",
+            "production_prompt": "Say you often forget something in neutral word order; put always before the main verb."
+          },
+          "learning_item": {
+            "type": "grammar_rule",
+            "text": "I always forget my keys",
+            "meaning_en": "Place frequency adverbs before a main verb, after be, or between have and the past participle; fronting is a marked emphasis choice.",
+            "meaning_ru": "В нейтральном порядке наречие частоты ставят перед смысловым глаголом. Начальная позиция возможна как маркированное усиление.",
+            "example": "I always forget my keys"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "vocabulary-money",
+      "title": "Лексика: деньги",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "vocabulary-money#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I need to pay a credit",
+            "right": "I need to pay off a loan",
+            "why": "credit ≠ кредит; заём = loan, гасить = pay off"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I need to pay a credit",
+            "options": [
+              "I need to pay a credit",
+              "I need to pay off a loan"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "credit ≠ кредит; заём = loan, гасить = pay off",
+            "category": "phrase",
+            "topic": "vocabulary-money",
+            "level": "B2",
+            "fingerprint": "ce4f245fe486c21e6dd2ec69a97e0c0183db453395b169862b94da2c1777ce72",
+            "target_phrase": "pay off a loan"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I need to pay off a loan",
+            "meaning_en": "pay off a loan",
+            "meaning_ru": "погасить заём",
+            "example": "I need to pay off a loan"
+          }
+        },
+        {
+          "source_key": "vocabulary-money#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I have much economy",
+            "right": "I have a lot of savings",
+            "why": "economy = экономика страны; сбережения = savings"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I have much economy",
+            "options": [
+              "I have much economy",
+              "I have a lot of savings"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "economy = экономика страны; сбережения = savings",
+            "category": "phrase",
+            "topic": "vocabulary-money",
+            "level": "B2",
+            "fingerprint": "4b26359df6479f46f5068948c6cfc8dd3baf0494c8eba025f35df3c3200ba598",
+            "target_phrase": "a lot of savings"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I have a lot of savings",
+            "meaning_en": "savings: money kept for future use",
+            "meaning_ru": "сбережения",
+            "example": "I have a lot of savings"
+          }
+        },
+        {
+          "source_key": "vocabulary-money#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I want to open a deposit",
+            "right": "I want to open a savings account",
+            "why": "вклад/счёт = savings account"
+          },
+          "simple_question": {
+            "prompt": "In everyday US English, choose the usual term for an account where savings earn interest:",
+            "options": [
+              "I want to open a deposit",
+              "I want to open a savings account"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Savings account — обычное название в американском английском. В других регионах встречается deposit account/deposit.",
+            "category": "phrase",
+            "topic": "vocabulary-money",
+            "level": "B2",
+            "fingerprint": "53bb886e223f435d2f8132d209af5a4dcd1c95313eed6dd16db20d70dd5e7c7a",
+            "target_phrase": "open a savings account"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I want to open a savings account",
+            "meaning_en": "a savings account",
+            "meaning_ru": "сберегательный счёт",
+            "example": "I want to open a savings account"
+          }
+        },
+        {
+          "source_key": "vocabulary-money#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I spent all money for rent",
+            "right": "I spent all my money on rent",
+            "why": "spend money ON sth"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I spent all money for rent",
+            "options": [
+              "I spent all money for rent",
+              "I spent all my money on rent"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "spend money ON sth",
+            "category": "phrase",
+            "topic": "vocabulary-money",
+            "level": "B2",
+            "fingerprint": "953c2b1345019a44ff33ed4e1434752974e093d9197e499a4a138612a7d765e3",
+            "target_phrase": "spend money on"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I spent all my money on rent",
+            "meaning_en": "spend money on something",
+            "meaning_ru": "тратить деньги на что-то",
+            "example": "I spent all my money on rent"
+          }
+        },
+        {
+          "source_key": "vocabulary-money#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "Life here is very expensive",
+            "right": "The cost of living here is very high",
+            "why": "естественнее: cost of living is high"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard collocation for everyday expenses such as housing, food, and necessities:",
+            "options": [
+              "The cost of life here is very high",
+              "The cost of living here is very high"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "естественнее: cost of living is high",
+            "category": "phrase",
+            "topic": "vocabulary-money",
+            "level": "B2",
+            "fingerprint": "798d33f9e8e13a03c822f84c45487f21ff0d866dd81d1082a34a469f4fb73e41",
+            "target_phrase": "cost of living"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "The cost of living here is very high",
+            "meaning_en": "the cost of living",
+            "meaning_ru": "стоимость жизни",
+            "example": "The cost of living here is very high"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "vocabulary-work",
+      "title": "Лексика: работа и офис",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "vocabulary-work#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I have a good work",
+            "right": "I have a good job",
+            "why": "work — деятельность (uncountable); место = job"
+          },
+          "simple_question": {
+            "prompt": "You mean a paid position, not a piece of high-quality work. Choose the everyday phrase:",
+            "options": [
+              "I have a good work",
+              "I have a good job"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "work — деятельность (uncountable); место = job",
+            "category": "phrase",
+            "topic": "vocabulary-work",
+            "level": "B2",
+            "fingerprint": "cac5f8e60cd10f47af0a969cbaba47d338aa6cab7a7db2d5c45c1acfaa987ebf",
+            "target_phrase": "a good job"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I have a good job",
+            "meaning_en": "a good job: a paid position",
+            "meaning_ru": "хорошая работа, должность",
+            "example": "I have a good job"
+          }
+        },
+        {
+          "source_key": "vocabulary-work#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "My chief gave me a task",
+            "right": "My boss gave me a task",
+            "why": "начальник = boss/manager; chief — не то"
+          },
+          "simple_question": {
+            "prompt": "At an ordinary company, choose the everyday word for the manager you report to:",
+            "options": [
+              "My chief gave me a task",
+              "My boss gave me a task"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "В обычной рабочей ситуации boss или manager — человек, которому вы подчиняетесь. Chief подходит для конкретной должности, например police chief.",
+            "category": "phrase",
+            "topic": "vocabulary-work",
+            "level": "B2",
+            "fingerprint": "5000b6514f731a9e703666626475e292bbfa242dd7ddf6d36c7bb9f5466904ed",
+            "target_phrase": "my boss"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "My boss gave me a task",
+            "meaning_en": "boss or manager: the person you report to",
+            "meaning_ru": "начальник, руководитель",
+            "example": "My boss gave me a task"
+          }
+        },
+        {
+          "source_key": "vocabulary-work#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "I have many works to do",
+            "right": "I have a lot of work to do",
+            "why": "work неисчисляемо → a lot of work"
+          },
+          "simple_question": {
+            "prompt": "You mean your everyday workload. Choose the natural phrase:",
+            "options": [
+              "I have many works to do",
+              "I have a lot of work to do"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "work неисчисляемо → a lot of work",
+            "category": "phrase",
+            "topic": "vocabulary-work",
+            "level": "B2",
+            "fingerprint": "d77d4536b8851ada9afa3c15e85b1d5469b1a5b119a7e8adb0c0d4ea6c1a99ce",
+            "target_phrase": "a lot of work to do"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I have a lot of work to do",
+            "meaning_en": "a lot of work: tasks or workload",
+            "meaning_ru": "много работы",
+            "example": "I have a lot of work to do"
+          }
+        },
+        {
+          "source_key": "vocabulary-work#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I want to make a career",
+            "right": "I want to build a career",
+            "why": "build a career"
+          },
+          "simple_question": {
+            "prompt": "Choose the standard collocation for developing your professional life over time:",
+            "options": [
+              "I want to do a career",
+              "I want to build a career"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "build a career",
+            "category": "phrase",
+            "topic": "vocabulary-work",
+            "level": "B2",
+            "fingerprint": "0581d36f942f9675e744966e65366d3d40b17d13531a3cdda95c6bbbdbaaf32e",
+            "target_phrase": "build a career"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I want to build a career",
+            "meaning_en": "build a career",
+            "meaning_ru": "строить карьеру",
+            "example": "I want to build a career"
+          }
+        },
+        {
+          "source_key": "vocabulary-work#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "I make a course to improve",
+            "right": "I take a course to improve",
+            "why": "take a course"
+          },
+          "simple_question": {
+            "prompt": "You are enrolling as a student to improve your skills. Choose the natural phrase:",
+            "options": [
+              "I make a course to improve",
+              "I take a course to improve"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "take a course",
+            "category": "phrase",
+            "topic": "vocabulary-work",
+            "level": "B2",
+            "fingerprint": "1819aee801cd73c1c560a39af412104c7084544516cedd5d9c8a483a59dc062e",
+            "target_phrase": "take a course"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I take a course to improve",
+            "meaning_en": "take a course",
+            "meaning_ru": "пройти курс",
+            "example": "I take a course to improve"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "set-expressions-daily",
+      "title": "Устойчивые выражения (частые ошибки)",
+      "level": "B2",
+      "category": "phrase",
+      "records": [
+        {
+          "source_key": "set-expressions-daily#0",
+          "source_index": 0,
+          "original": {
+            "wrong": "I am agree with you",
+            "right": "I agree with you",
+            "why": "agree — глагол, без be"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I am agree with you",
+            "options": [
+              "I am agree with you",
+              "I agree with you"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "agree — глагол, без be",
+            "category": "phrase",
+            "topic": "set-expressions-daily",
+            "level": "B2",
+            "fingerprint": "cdad49e5bc6980a495e304d651ae2bd80880574b9842729ae95ae9cbebba0372",
+            "target_phrase": "agree with"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I agree with you",
+            "meaning_en": "agree: have the same opinion",
+            "meaning_ru": "соглашаться",
+            "example": "I agree with you"
+          }
+        },
+        {
+          "source_key": "set-expressions-daily#1",
+          "source_index": 1,
+          "original": {
+            "wrong": "I have 30 years old",
+            "right": "I am 30 (years old)",
+            "why": "возраст через to be, не have"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: I have 30 years old",
+            "options": [
+              "I have 30 years old",
+              "I am 30 (years old)"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "возраст через to be, не have",
+            "category": "phrase",
+            "topic": "set-expressions-daily",
+            "level": "B2",
+            "fingerprint": "dafd79b035d3f8ce6d08eee692247e63a75213c4c5b2475e353ffeaf09089188",
+            "target_phrase": "be 30 years old"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I am 30 (years old)",
+            "meaning_en": "be 30 years old",
+            "meaning_ru": "быть в возрасте 30 лет",
+            "example": "I am 30 (years old)"
+          }
+        },
+        {
+          "source_key": "set-expressions-daily#2",
+          "source_index": 2,
+          "original": {
+            "wrong": "It doesn't matter for me",
+            "right": "It doesn't matter to me",
+            "why": "matter TO sb"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: It doesn't matter for me",
+            "options": [
+              "It doesn't matter for me",
+              "It doesn't matter to me"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "matter TO sb",
+            "category": "phrase",
+            "topic": "set-expressions-daily",
+            "level": "B2",
+            "fingerprint": "06635110defadaa32c6c8b8a795cce747567d8b4bfc601b4b90e5108ed12480b",
+            "target_phrase": "matter to me"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "It doesn't matter to me",
+            "meaning_en": "it does not matter to someone",
+            "meaning_ru": "кому-то всё равно; это не имеет значения для кого-то",
+            "example": "It doesn't matter to me"
+          }
+        },
+        {
+          "source_key": "set-expressions-daily#3",
+          "source_index": 3,
+          "original": {
+            "wrong": "I feel myself good",
+            "right": "I feel good",
+            "why": "feel без myself"
+          },
+          "simple_question": {
+            "prompt": "To describe your wellbeing, choose the natural phrase:",
+            "options": [
+              "I feel myself good",
+              "I feel good"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "feel без myself",
+            "category": "phrase",
+            "topic": "set-expressions-daily",
+            "level": "B2",
+            "fingerprint": "30a13157a5f53a036de4f29244923933068038915af52d7308c664bba34ebd1b",
+            "target_phrase": "feel good"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "I feel good",
+            "meaning_en": "feel good",
+            "meaning_ru": "хорошо себя чувствовать",
+            "example": "I feel good"
+          }
+        },
+        {
+          "source_key": "set-expressions-daily#4",
+          "source_index": 4,
+          "original": {
+            "wrong": "Thanks God it's Friday",
+            "right": "Thank God it's Friday",
+            "why": "Thank God (без -s)"
+          },
+          "simple_question": {
+            "prompt": "Choose the natural English phrase for this context: Thanks God it's Friday",
+            "options": [
+              "Thanks God it's Friday",
+              "Thank God it's Friday"
+            ],
+            "correct_index": 1,
+            "explanation_ru": "Thank God (без -s)",
+            "category": "phrase",
+            "topic": "set-expressions-daily",
+            "level": "B2",
+            "fingerprint": "6008c9af01f0f16c28a5c5b37e4153b18faf020847355b70a9b375e71dd27432",
+            "target_phrase": "Thank God"
+          },
+          "learning_item": {
+            "type": "expression",
+            "text": "Thank God it's Friday",
+            "meaning_en": "Thank God",
+            "meaning_ru": "слава богу",
+            "example": "Thank God it's Friday"
+          }
+        }
+      ]
+    }
+  ]
+}

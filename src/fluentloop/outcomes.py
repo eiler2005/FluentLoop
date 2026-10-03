@@ -126,8 +126,17 @@ def collect_outcome_metrics(
     current = now or datetime.now(UTC)
     period_start, period_end = _period_dates(current)
     attempts = _attempts_in_period(session, user, period_start, period_end)
+    production_attempts = [
+        attempt
+        for attempt in attempts
+        if attempt.exercise_type != "simple_choice"
+        and (attempt.feedback or {}).get("answer_modality")
+        not in {"recognition", "self_rating"}
+    ]
     answers = [
-        attempt.user_answer for attempt in attempts if attempt.user_answer.strip()
+        attempt.user_answer
+        for attempt in production_attempts
+        if attempt.user_answer.strip() and attempt.status != "skipped"
     ]
     word_count = sum(_word_count(answer) for answer in answers)
     baseline = latest_baseline(session, user)
@@ -138,16 +147,19 @@ def collect_outcome_metrics(
         "attempts": {
             "total": len(attempts),
             "production": len(answers),
+            "recognition": len(attempts) - len(production_attempts),
             "word_count": word_count,
         },
         "baseline": _baseline_metrics(baseline),
-        "held_out_retention": _held_out_retention(session, user, baseline, attempts),
+        "held_out_retention": _held_out_retention(
+            session, user, baseline, production_attempts
+        ),
         "productive_chunks": _chunk_usage(session, user, answers),
         "writing": _writing_section(answers, baseline),
-        "l1_density": _l1_density(attempts, word_count),
-        "mistake_extinction": _mistake_extinction(session, user, attempts),
+        "l1_density": _l1_density(production_attempts, word_count),
+        "mistake_extinction": _mistake_extinction(session, user, production_attempts),
         "critical_reading": _critical_reading(
-            session, user, attempts, period_start, period_end
+            session, user, production_attempts, period_start, period_end
         ),
     }
     return metrics
@@ -206,6 +218,8 @@ def render_outcome_report(metrics: dict[str, Any], *, full: bool = False) -> str
         f"Period: {metrics['period_start']} -> {metrics['period_end']}",
         f"Practice sample: {attempts['total']} attempts, "
         f"{attempts['word_count']} words",
+        f"Recognition: {attempts.get('recognition', 0)} answers; "
+        f"production: {attempts['production']} written answers",
         "",
         f"1. Held-out retention: {_rate_or_status(held, 'retention')}",
         f"   sample: {held['correct']}/{held['sample_size']} correct, "

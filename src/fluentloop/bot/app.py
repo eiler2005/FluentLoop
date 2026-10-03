@@ -59,6 +59,7 @@ from fluentloop.bot.handlers import (
     handle_pause,
     handle_poll_vote,
     handle_practice,
+    handle_progress,
     handle_publish,
     handle_quiz_answer,
     handle_quiz_start,
@@ -68,14 +69,23 @@ from fluentloop.bot.handlers import (
     handle_scene,
     handle_setting_update,
     handle_settings,
+    handle_simple_answer,
+    handle_simple_bonus_skip,
+    handle_simple_bonus_start,
+    handle_simple_bonus_text,
+    handle_simple_mode_change,
+    handle_simple_more_menu,
+    handle_simple_stop,
+    handle_simple_text_guard,
     handle_skip_all,
     handle_skip_current,
     handle_start,
     handle_stats,
     handle_stop,
+    handle_study,
     handle_subscribe,
     handle_today,
-    handle_today_menu,
+    handle_today_entry,
     handle_topics,
     handle_translate_lab,
     handle_upload,
@@ -103,9 +113,7 @@ from fluentloop.users import ensure_user
 from fluentloop.vocab_loop import looks_like_word_list
 
 LOG = logging.getLogger(__name__)
-ITEM_STATUS_USAGE = (
-    "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
-)
+ITEM_STATUS_USAGE = "Use /item archive <id>, /item suspend <id>, or /item restore <id>."
 CANDIDATE_USAGE = "Use /candidate add <id> or /candidate skip <id>."
 CHANNEL_DISCOVERY_PATH = Path("data/channel_discovery.json")
 
@@ -154,21 +162,119 @@ def _here_or_workspace(event, settings: Settings, topic: str):  # type: ignore[n
     return TelegramDestination(None, None)
 
 
+def _simple_sender_allowed(sender_id: int, settings: Settings) -> bool:
+    return (
+        settings.telegram_allowed_user_id is None
+        or sender_id == settings.telegram_allowed_user_id
+    )
+
+
+def _simple_event_authorized(
+    sender_id: int,
+    user: User,
+    settings: Settings,
+    *,
+    action: str | None = None,
+    state=None,
+) -> bool:
+    from fluentloop.learning_prefs import is_simple_mode
+
+    protected = (
+        is_simple_mode(user)
+        or action in {"/study", "/progress", "study", "progress", "simple_menu"}
+        or bool(action and action.startswith("simple:"))
+        or (state is not None and state.name == "simple_bonus")
+    )
+    return not protected or _simple_sender_allowed(sender_id, settings)
+
+
+def _incoming_forum_topic_id(event) -> int | None:  # type: ignore[no-untyped-def]
+    """Return the forum topic attached to a message or its reply target."""
+
+    reply_to = getattr(event.message, "reply_to", None)
+    topic_id = getattr(reply_to, "reply_to_top_id", None)
+    if topic_id is None:
+        topic_id = getattr(reply_to, "reply_to_msg_id", None)
+    return int(topic_id) if topic_id is not None else None
+
+
+def _simple_bonus_topic_matches(event, state, settings: Settings) -> bool:  # type: ignore[no-untyped-def]
+    thread_id = state.payload.get("message_thread_id")
+    if not _is_forum_chat(event.chat_id, settings) or thread_id is None:
+        return True
+    return _incoming_forum_topic_id(event) == int(thread_id)
+
+
+def _should_clear_simple_bonus_state(
+    state, clicked_run_id: int, active_run_id: int | None
+) -> bool:  # type: ignore[no-untyped-def]
+    return (
+        state is not None
+        and state.name == "simple_bonus"
+        and int(state.payload.get("run_id", 0)) == clicked_run_id
+        and active_run_id != clicked_run_id
+    )
+
+
+def _cancel_simple_bonus_capture(session, user: User) -> None:  # type: ignore[no-untyped-def]
+    from sqlalchemy import select
+
+    from fluentloop.db.models import BotState
+    from fluentloop.simple_learning import get_active_bonus, skip_bonus
+
+    bonus = get_active_bonus(session, user)
+    if bonus is not None:
+        skip_bonus(session, user, bonus.id)
+    states = session.scalars(
+        select(BotState).where(
+            BotState.user_id == user.telegram_user_id,
+            BotState.name == "simple_bonus",
+        )
+    )
+    for state in states:
+        session.delete(state)
+
+
+def _cancel_simple_answering(session, user: User) -> None:  # type: ignore[no-untyped-def]
+    from fluentloop.simple_learning import get_active_stream, stop_stream
+
+    _cancel_simple_bonus_capture(session, user)
+    stream = get_active_stream(session, user)
+    if stream is not None:
+        stop_stream(session, user, run_id=stream.id)
+
+
+def _active_simple_bonus_for_state(session, user: User, state):  # type: ignore[no-untyped-def]
+    if state is None or state.name != "simple_bonus":
+        return None
+    from fluentloop.simple_learning import get_active_bonus
+
+    bonus = get_active_bonus(session, user)
+    if bonus is None or bonus.id != int(state.payload.get("run_id", 0)):
+        return None
+    return bonus
+
+
+def _keyboard_action_clears_capture(action: str, state) -> bool:  # type: ignore[no-untyped-def]
+    return (
+        action != "add"
+        and state is not None
+        and state.name != "simple_bonus"
+    )
+
+
 def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
     if not reply.buttons:
         return None
     from telethon import Button
 
     return [
-        [
-            Button.inline(button.text, button.data.encode("utf-8"))
-            for button in row
-        ]
+        [Button.inline(button.text, button.data.encode("utf-8")) for button in row]
         for row in reply.buttons
     ]
 
 
-def _persistent_keyboard():  # type: ignore[no-untyped-def]
+def _persistent_keyboard(*, simple: bool = False):  # type: ignore[no-untyped-def]
     """The quick-action panel.
 
     `single_use` collapses it after a tap: on a phone four rows of buttons are
@@ -178,9 +284,10 @@ def _persistent_keyboard():  # type: ignore[no-untyped-def]
 
     from telethon import Button
 
-    from fluentloop.bot.handlers import QUICK_ACTIONS
+    from fluentloop.bot.handlers import QUICK_ACTIONS, SIMPLE_QUICK_ACTIONS
 
-    labels = [label for label, _ in QUICK_ACTIONS]
+    actions = SIMPLE_QUICK_ACTIONS if simple else QUICK_ACTIONS
+    labels = [label for label, _ in actions]
     rows = [labels[index : index + 3] for index in range(0, len(labels), 3)]
     return [
         [Button.text(label, resize=True, single_use=True) for label in row]
@@ -206,7 +313,7 @@ async def send_reply(  # type: ignore[no-untyped-def]
         message = await send_bot_api_reply(settings.telegram_bot_token, reply)
     else:
         if reply.persistent_keyboard:
-            buttons = _persistent_keyboard()
+            buttons = _persistent_keyboard(simple=reply.simple_keyboard)
         elif reply.clear_keyboard:
             buttons = _clear_keyboard()
         else:
@@ -319,6 +426,13 @@ def _material_upload_reply(reply: BotReply, event, settings: Settings) -> BotRep
     return reply
 
 
+def _start_upload_capture(session, user_id: int, event, settings: Settings) -> BotReply:  # type: ignore[no-untyped-def]
+    StateStore(session).set(
+        event.chat_id, user_id, "upload", {"type": "other"}
+    )
+    return _material_upload_reply(handle_upload_start(), event, settings)
+
+
 async def _material_text_from_event(event) -> str:  # type: ignore[no-untyped-def]
     raw_text = str(event.raw_text or "").strip()
     file = getattr(event.message, "file", None)
@@ -366,13 +480,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 await _reject_or_ignore(event, settings)
                 return
             user = ensure_user(session, telegram_user_id, settings)
+            from fluentloop.learning_prefs import is_simple_mode
+
             parts = event.raw_text.split(maxsplit=2)
             command = parts[0]
             quiz_followup_id: int | None = None
+            if not _simple_event_authorized(
+                sender_id, user, settings, action=command
+            ):
+                await _reject_or_ignore(event, settings)
+                return
             if command == "/setup":
-                reply = handle_onboarding_start(
-                    session, user, chat_id=event.chat_id
-                )
+                reply = handle_onboarding_start(session, user, chat_id=event.chat_id)
             elif command == "/start":
                 reply = handle_start(
                     session, settings, telegram_user_id, chat_id=event.chat_id
@@ -413,7 +532,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         settings,
                     )
             elif command in {"/help", "/howto"}:
-                reply = handle_help()
+                reply = handle_help(user)
                 if workspace_enabled(settings):
                     help_target = workspace_destination(settings, "help")
                     await pin_reply(
@@ -430,12 +549,35 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 count = int(parts[1]) if has_count else None
                 reply = handle_vocab_cards(session, user, count)
             elif command == "/today":
+                if (
+                    len(parts) == 1
+                    and is_simple_mode(user)
+                    and not _simple_sender_allowed(sender_id, settings)
+                ):
+                    await _reject_or_ignore(event, settings)
+                    return
+                if len(parts) == 1:
+                    if is_simple_mode(user):
+                        _cancel_simple_bonus_capture(session, user)
+                    else:
+                        _cancel_simple_answering(session, user)
                 if len(parts) >= 2 and parts[1].isdigit():
                     # /today <n> stays a shortcut for /cards <n>.
                     reply = handle_vocab_cards(session, user, int(parts[1]))
                 elif len(parts) == 1:
-                    # Bare /today asks which of the two tracks you want.
-                    reply = handle_today_menu(session, user)
+                    practice_target = _here_or_workspace(
+                        event, settings, "practice_flow"
+                    )
+                    reply = handle_today_entry(
+                        session,
+                        user,
+                        channel_id=(
+                            str(practice_target.chat_id)
+                            if practice_target.chat_id is not None
+                            else None
+                        ),
+                        message_thread_id=practice_target.message_thread_id,
+                    )
                 else:
                     practice_target = _here_or_workspace(
                         event, settings, "practice_flow"
@@ -451,6 +593,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         message_thread_id=practice_target.message_thread_id,
                     )
             elif command == "/review":
+                _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
@@ -463,8 +606,40 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     ),
                     message_thread_id=practice_target.message_thread_id,
                 )
+            elif command == "/study":
+                _cancel_simple_bonus_capture(session, user)
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
+                reply = handle_study(
+                    session,
+                    user,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+            elif command == "/progress":
+                progress_target = _here_or_workspace(event, settings, "practice_flow")
+                reply = handle_progress(
+                    session,
+                    user,
+                    channel_id=(
+                        str(progress_target.chat_id)
+                        if progress_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=progress_target.message_thread_id,
+                )
             elif command == "/practice":
                 mode = parts[1] if len(parts) >= 2 else ""
+                from fluentloop.lesson_formats import (
+                    format_for_mode,
+                    normalize_practice_mode,
+                )
+
+                if format_for_mode(normalize_practice_mode(mode)) is not None:
+                    _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
@@ -520,6 +695,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_lessons(session, user, query)
             elif command == "/lesson":
                 payload = event.raw_text.removeprefix("/lesson").strip()
+                if payload == "random" or payload.startswith(("start ", "topic ")):
+                    _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_lesson(
                     session,
@@ -565,8 +742,21 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     field, _, value = parts[2].partition(" ")
                     reply = handle_setting_update(session, user, field, value)
                 else:
-                    reply = handle_settings(session, user)
+                    settings_target = _here_or_workspace(
+                        event, settings, "practice_flow"
+                    )
+                    reply = handle_settings(
+                        session,
+                        user,
+                        channel_id=(
+                            str(settings_target.chat_id)
+                            if settings_target.chat_id is not None
+                            else None
+                        ),
+                        message_thread_id=settings_target.message_thread_id,
+                    )
             elif command == "/add":
+                _cancel_simple_bonus_capture(session, user)
                 payload = event.raw_text.removeprefix("/add").strip()
                 if payload:
                     reply = handle_add_text(session, user, payload)
@@ -577,6 +767,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         "expression | push back on | мягко возражать | meetings"
                     )
             elif command == "/upload":
+                _cancel_simple_bonus_capture(session, user)
                 upload_type = parts[1] if len(parts) >= 2 else "other"
                 if getattr(event.message, "file", None) is not None:
                     try:
@@ -735,9 +926,22 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif command == "/delete":
                 reply = handle_delete(session, user, _argument(event.raw_text))
             elif command == "/quiz":
+                _cancel_simple_answering(session, user)
                 reply = handle_quiz_start(session, user, settings=settings)
             elif command == "/stop":
-                reply = handle_stop(session, user, chat_id=event.chat_id)
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
+                reply = handle_stop(
+                    session,
+                    user,
+                    chat_id=event.chat_id,
+                    channel_id=(
+                        str(practice_target.chat_id)
+                        if practice_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=practice_target.message_thread_id,
+                )
+                _cancel_simple_bonus_capture(session, user)
             elif command == "/keyboard":
                 reply = handle_keyboard_toggle(session, user)
             elif command == "/pause":
@@ -747,7 +951,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif command == "/rules":
                 reply = handle_rules(session)
             else:
-                reply = handle_help()
+                reply = handle_help(user)
             await send_reply(client, event.chat_id, reply, settings)
             quiz_followup_id = reply.quiz_question_delivery_id
         if quiz_followup_id is not None:
@@ -773,7 +977,170 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 return
             user = ensure_user(session, telegram_user_id, settings)
             parts = raw_data.split(":", 2)
-            if raw_data in {"start_today", "today:start", "today:lesson"}:
+            simple_parts = raw_data.split(":")
+            if not _simple_event_authorized(
+                sender_id, user, settings, action=raw_data
+            ):
+                await answer_callback(event, "This is a personal FluentLoop bot.")
+                return
+            if raw_data.startswith("simple:"):
+                practice_target = _here_or_workspace(event, settings, "practice_flow")
+                channel_id = (
+                    str(practice_target.chat_id)
+                    if practice_target.chat_id is not None
+                    else None
+                )
+                thread_id = practice_target.message_thread_id
+                if raw_data == "simple:study":
+                    _cancel_simple_bonus_capture(session, user)
+                    reply = handle_study(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "Продолжаем")
+                elif raw_data == "simple:progress":
+                    reply = handle_progress(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "Прогресс")
+                elif raw_data == "simple:menu":
+                    reply = handle_simple_more_menu(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "Ещё")
+                elif raw_data == "simple:repeat":
+                    _cancel_simple_bonus_capture(session, user)
+                    reply = handle_study(
+                        session,
+                        user,
+                        repeat_familiar=True,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "Повтор")
+                elif len(simple_parts) == 5 and simple_parts[1] == "answer":
+                    try:
+                        run_id = int(simple_parts[2])
+                        index = int(simple_parts[3])
+                        choice = (
+                            None
+                            if simple_parts[4] == "unknown"
+                            else int(simple_parts[4])
+                        )
+                    except ValueError:
+                        reply = BotReply(
+                            "Этот ответ больше недоступен.", edit_message=True
+                        )
+                    else:
+                        reply = handle_simple_answer(
+                            session,
+                            user,
+                            run_id,
+                            index,
+                            choice,
+                            channel_id=channel_id,
+                            message_thread_id=thread_id,
+                        )
+                    await answer_callback(event, "Ответ сохранён")
+                elif len(simple_parts) == 3 and simple_parts[1] == "stop":
+                    try:
+                        run_id = int(simple_parts[2])
+                    except ValueError:
+                        reply = BotReply("Поток уже завершён.", edit_message=True)
+                    else:
+                        reply = handle_simple_stop(
+                            session, user, run_id, edit_message=True
+                        )
+                    await answer_callback(event, "Остановлено")
+                elif len(simple_parts) == 3 and simple_parts[1] == "bonus":
+                    try:
+                        parent_run_id = int(simple_parts[2])
+                    except ValueError:
+                        reply = BotReply("Письменное задание недоступно.")
+                    else:
+                        reply = handle_simple_bonus_start(
+                            session,
+                            user,
+                            parent_run_id,
+                            channel_id=channel_id,
+                            message_thread_id=thread_id,
+                        )
+                        from fluentloop.simple_learning import get_active_bonus
+
+                        bonus = get_active_bonus(session, user)
+                        if bonus is not None and reply.buttons:
+                            StateStore(session).set(
+                                int(reply.target_chat_id or event.chat_id),
+                                telegram_user_id,
+                                "simple_bonus",
+                                {
+                                    "run_id": bonus.id,
+                                    "message_thread_id": reply.message_thread_id,
+                                },
+                            )
+                    await answer_callback(event, "Письменная практика")
+                elif len(simple_parts) == 3 and simple_parts[1] == "bonus-skip":
+                    try:
+                        bonus_run_id = int(simple_parts[2])
+                    except ValueError:
+                        reply = BotReply(
+                            "Письменное задание недоступно.", edit_message=True
+                        )
+                    else:
+                        reply = handle_simple_bonus_skip(session, user, bonus_run_id)
+                        state_store = StateStore(session)
+                        bonus_state = state_store.get(event.chat_id, telegram_user_id)
+                        from fluentloop.simple_learning import get_active_bonus
+
+                        active_bonus = get_active_bonus(session, user)
+                        if _should_clear_simple_bonus_state(
+                            bonus_state,
+                            bonus_run_id,
+                            active_bonus.id if active_bonus is not None else None,
+                        ):
+                            state_store.clear(event.chat_id, telegram_user_id)
+                    await answer_callback(event, "Пропущено")
+                elif len(simple_parts) == 3 and simple_parts[1] == "mode":
+                    if simple_parts[2] not in {"simple", "advanced"}:
+                        reply = BotReply("Неизвестный режим.")
+                    else:
+                        if simple_parts[2] == "advanced":
+                            _cancel_simple_answering(session, user)
+                        reply = handle_simple_mode_change(
+                            session,
+                            user,
+                            simple_parts[2],
+                            channel_id=channel_id,
+                            message_thread_id=thread_id,
+                        )
+                    await answer_callback(event, "Режим сохранён")
+                elif raw_data == "simple:settings":
+                    reply = handle_settings(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "Настройки")
+                elif raw_data == "simple:upload":
+                    _cancel_simple_bonus_capture(session, user)
+                    reply = _start_upload_capture(
+                        session, telegram_user_id, event, settings
+                    )
+                    await answer_callback(event, "Материал")
+                else:
+                    reply = BotReply("Кнопка больше недоступна.")
+                    await answer_callback(event, "Недоступно")
+            elif raw_data in {"start_today", "today:start", "today:lesson"}:
+                _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_today(
                     session,
@@ -802,6 +1169,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_library_callback(session, user, parts[1], parts[2])
                 await answer_callback(event, "Library")
             elif len(parts) == 3 and parts[0] == "lesson":
+                if parts[1] in {"random", "start"}:
+                    _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_lesson_callback(
                     session,
@@ -817,6 +1186,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 await answer_callback(event, "Lesson")
             elif raw_data == "materials:start":
+                _cancel_simple_bonus_capture(session, user)
                 StateStore(session).set(
                     telegram_user_id,
                     telegram_user_id,
@@ -833,23 +1203,38 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             elif len(parts) == 3 and parts[0] == "settings":
                 field, value = parts[1], parts[2]
                 if field == "refresh":
-                    reply = handle_settings(session, user)
+                    settings_target = _here_or_workspace(
+                        event, settings, "practice_flow"
+                    )
+                    reply = handle_settings(
+                        session,
+                        user,
+                        channel_id=(
+                            str(settings_target.chat_id)
+                            if settings_target.chat_id is not None
+                            else None
+                        ),
+                        message_thread_id=settings_target.message_thread_id,
+                    )
                 else:
                     reply = handle_setting_update(session, user, field, value)
                 await answer_callback(event, "Settings updated")
-            elif len(parts) == 3 and parts[0] == "approve" and parts[1] in {
-                "all",
-                "skip",
-            }:
+            elif (
+                len(parts) == 3
+                and parts[0] == "approve"
+                and parts[1]
+                in {
+                    "all",
+                    "skip",
+                }
+            ):
                 try:
                     material_id = int(parts[2])
                 except ValueError:
                     reply = BotReply("Use /approve <material_id>.")
                 else:
                     if parts[1] == "all":
-                        reply = handle_approve_all(
-                            session, user, material_id, provider
-                        )
+                        reply = handle_approve_all(session, user, material_id, provider)
                     else:
                         reply = handle_skip_all(session, user, material_id)
                 reply = _material_upload_reply(reply, event, settings)
@@ -901,9 +1286,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     reply = BotReply(CANDIDATE_USAGE)
                 else:
                     if parts[1] == "edit":
-                        reply = handle_candidate_edit_menu(
-                            session, user, candidate_id
-                        )
+                        reply = handle_candidate_edit_menu(session, user, candidate_id)
                     else:
                         reply = handle_candidate_action(
                             session, user, parts[1], candidate_id, provider
@@ -951,6 +1334,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 reply = handle_vocab_cards(session, user)
                 await answer_callback(event, "Cards")
             elif raw_data == "words:review":
+                _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
@@ -965,6 +1349,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 await answer_callback(event, "Review")
             elif raw_data == "words:lesson":
+                _cancel_simple_answering(session, user)
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_practice(
                     session,
@@ -1025,9 +1410,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         "Use /mistakes focus <id> or /mistakes ignore <id>."
                     )
                 else:
-                    reply = handle_mistake_action(
-                        session, user, parts[1], pattern_id
-                    )
+                    reply = handle_mistake_action(session, user, parts[1], pattern_id)
                 await answer_callback(event, "Mistake pattern updated")
             elif len(parts) == 3 and parts[0] == "dispute":
                 try:
@@ -1069,7 +1452,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 except ValueError:
                     reply = BotReply("Attempt not found.")
                 else:
-                    reply = handle_feedback_explain(session, user, attempt_id)
+                    detail_target = _here_or_workspace(event, settings, "practice_flow")
+                    reply = handle_feedback_explain(
+                        session,
+                        user,
+                        attempt_id,
+                        channel_id=(
+                            str(detail_target.chat_id)
+                            if detail_target.chat_id is not None
+                            else None
+                        ),
+                        message_thread_id=detail_target.message_thread_id,
+                    )
                 await answer_callback(event, "Teacher details")
             elif raw_data.startswith("practice:confidence:"):
                 confidence_parts = raw_data.split(":", 3)
@@ -1166,20 +1560,38 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 await _reject_or_ignore(event, settings)
                 return
             user: User = ensure_user(session, telegram_user_id, settings)
+            if not _simple_event_authorized(sender_id, user, settings):
+                await _reject_or_ignore(event, settings)
+                return
             # Persistent-keyboard taps arrive as ordinary text. Dispatch them
             # before every capture path, or "🃏 Cards" gets stored as a word.
             action = quick_action_for(event.raw_text)
             if action is not None:
+                if not _simple_event_authorized(
+                    sender_id, user, settings, action=action
+                ):
+                    await _reject_or_ignore(event, settings)
+                    return
                 practice_target = _here_or_workspace(event, settings, "practice_flow")
                 channel_id = (
                     str(practice_target.chat_id)
                     if practice_target.chat_id is not None
                     else None
                 )
-                if action != "add":
-                    # Tapping anything else abandons a pending add, so the
-                    # next message is not silently swallowed as vocabulary.
-                    StateStore(session).clear(event.chat_id, telegram_user_id)
+                capture_store = StateStore(session)
+                capture_state = capture_store.get(event.chat_id, telegram_user_id)
+                if _keyboard_action_clears_capture(action, capture_state):
+                    # A keyboard action leaves ordinary text-capture modes, but
+                    # read-only actions keep the optional writing prompt armed.
+                    capture_store.clear(event.chat_id, telegram_user_id)
+                if action in {"study", "add"} and _simple_sender_allowed(
+                    sender_id, settings
+                ):
+                    _cancel_simple_bonus_capture(session, user)
+                elif (
+                    action == "quiz" or action in {"review", "lesson"}
+                ) and _simple_sender_allowed(sender_id, settings):
+                    _cancel_simple_answering(session, user)
                 if action == "add":
                     reply = handle_add_words_prompt(
                         session, user, chat_id=event.chat_id
@@ -1198,8 +1610,35 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     )
                 elif action == "quiz":
                     reply = handle_quiz_start(session, user, settings=settings)
+                elif action == "study":
+                    reply = handle_study(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=practice_target.message_thread_id,
+                    )
+                elif action == "progress":
+                    reply = handle_progress(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=practice_target.message_thread_id,
+                    )
+                elif action == "simple_menu":
+                    reply = handle_simple_more_menu(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=practice_target.message_thread_id,
+                    )
                 elif action == "stop":
-                    reply = handle_stop(session, user, chat_id=event.chat_id)
+                    reply = handle_stop(
+                        session,
+                        user,
+                        chat_id=event.chat_id,
+                        channel_id=channel_id,
+                        message_thread_id=practice_target.message_thread_id,
+                    )
                 else:
                     reply = handle_today(
                         session,
@@ -1221,6 +1660,12 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 return
             state_store = StateStore(session)
             state = state_store.get(event.chat_id, telegram_user_id)
+            if not _simple_event_authorized(
+                sender_id, user, settings, state=state
+            ):
+                await _reject_or_ignore(event, settings)
+                return
+
             if state is not None and state.name == "upload":
                 try:
                     material_text = await _material_text_from_event(event)
@@ -1241,6 +1686,41 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         )
                 state_store.clear(event.chat_id, telegram_user_id)
                 reply = _material_upload_reply(reply, event, settings)
+            elif state is not None and state.name == "simple_bonus":
+                if not _simple_sender_allowed(sender_id, settings):
+                    await _reject_or_ignore(event, settings)
+                    return
+                if not _simple_bonus_topic_matches(event, state, settings):
+                    await _reject_or_ignore(event, settings)
+                    return
+                bonus_run = _active_simple_bonus_for_state(session, user, state)
+                if bonus_run is None:
+                    state_store.clear(event.chat_id, telegram_user_id)
+                    reply = BotReply(
+                        "Письменное задание завершено. Напиши /study, чтобы продолжить."
+                    )
+                else:
+                    practice_target = _here_or_workspace(
+                        event, settings, "practice_flow"
+                    )
+                    reply = handle_simple_bonus_text(
+                        session,
+                        user,
+                        provider,
+                        bonus_run,
+                        event.raw_text,
+                        channel_id=(
+                            str(practice_target.chat_id)
+                            if practice_target.chat_id is not None
+                            else None
+                        ),
+                        message_thread_id=practice_target.message_thread_id,
+                    )
+                    current_bonus = _active_simple_bonus_for_state(
+                        session, user, state
+                    )
+                    if current_bonus is None:
+                        state_store.clear(event.chat_id, telegram_user_id)
             elif state is not None and state.name == ADD_WORDS_STATE:
                 reply = handle_vocab_add(
                     session, user, event.raw_text, settings=settings
@@ -1268,6 +1748,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 )
                 state_store.clear(event.chat_id, telegram_user_id)
                 reply = _material_upload_reply(reply, event, settings)
+            elif (simple_guard := handle_simple_text_guard(session, user)) is not None:
+                reply = simple_guard
             else:
                 feedback_target = _here_or_workspace(event, settings, "feedback")
                 next_target = _here_or_workspace(event, settings, "next_prompt")

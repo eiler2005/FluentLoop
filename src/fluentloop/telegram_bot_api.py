@@ -12,7 +12,9 @@ from fluentloop.bot.handlers import BotReply
 BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("start", "Create or load your FluentLoop profile"),
     ("setup", "Run the setup wizard: topics, vocabulary, daily pace"),
-    ("today", "Choose: word cards or the full lesson"),
+    ("today", "Start today's practice"),
+    ("study", "Continue simple practice questions"),
+    ("progress", "Show recognition and writing progress"),
     ("cards", "Show vocabulary cards right now"),
     ("review", "Review due items"),
     ("practice", "Start focused and EPIC-22 breakthrough practice modes"),
@@ -73,6 +75,23 @@ def inline_keyboard(reply: BotReply) -> dict[str, Any] | None:
     }
 
 
+def reply_keyboard(reply: BotReply) -> dict[str, Any] | None:
+    if reply.clear_keyboard:
+        return {"remove_keyboard": True}
+    if not reply.persistent_keyboard:
+        return None
+    from fluentloop.bot.handlers import QUICK_ACTIONS, SIMPLE_QUICK_ACTIONS
+
+    actions = SIMPLE_QUICK_ACTIONS if reply.simple_keyboard else QUICK_ACTIONS
+    labels = [label for label, _ in actions]
+    rows = [labels[index : index + 3] for index in range(0, len(labels), 3)]
+    return {
+        "keyboard": [[{"text": label} for label in row] for row in rows],
+        "resize_keyboard": True,
+        "one_time_keyboard": True,
+    }
+
+
 def bot_commands_payload() -> list[dict[str, str]]:
     return [
         {"command": command, "description": description}
@@ -113,7 +132,7 @@ async def send_bot_api_reply(token: str, reply: BotReply) -> SentBotApiMessage:
         )
     if reply.message_thread_id is not None:
         payload["message_thread_id"] = reply.message_thread_id
-    markup = inline_keyboard(reply)
+    markup = inline_keyboard(reply) or reply_keyboard(reply)
     if markup is not None:
         payload["reply_markup"] = markup
     parsed = await asyncio.to_thread(call_bot_api, token, "sendMessage", payload)

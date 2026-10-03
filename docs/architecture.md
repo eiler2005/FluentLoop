@@ -1,7 +1,7 @@
 # Architecture
 
 > **Status:** v0.3 — MVP foundation (EPIC-01..14), learning-engine roadmap
-> (EPIC-16..21), and EPIC-22..25 extensions are shipped. ADRs 0002-0012 are
+> (EPIC-16..21), and EPIC-22..26 extensions are implemented. ADRs 0002-0013 are
 > Accepted (0009 reserved). Schema specifics
 > for individual epics live in those epic files.
 
@@ -64,7 +64,7 @@ container:
                    └─ vocab_loop_tick (every minute, per-user local slots)
 ```
 
-Daily-loop data flow — what happens between bedtime and the morning's
+Full-mode daily-loop data flow — what happens between bedtime and the morning's
 `/today`:
 
 ```
@@ -138,6 +138,8 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
 - **A persistent reply keyboard** (Cards / Review / Lesson / My words / Add
   words / Quiz / Stop) is installed by `/start`. Taps arrive as plain text, so
   `handlers.quick_action_for` must run before every free-text capture path.
+  Simple profiles use Учиться / Прогресс / Ещё instead; the same dispatch
+  precedence and answer-in-originating-chat rule apply.
 - **Card content is filled once, off the delivery path.**
   `word_cards.enrich_item` adds a Russian gloss, an English gloss and an
   example when they are missing, at add time or via
@@ -164,6 +166,47 @@ No public ports. No webhook. No external orchestrator. Restarts are safe
 - Concurrency: one bot process writes to SQLite. Per-user rows are isolated in
   the schema, and `journal_mode = WAL` lets the backup job read while the bot
   writes.
+
+## 2.1 Simple learning stream
+
+[ADR-0013](adr/0013-simple-learning-stream.md) and
+[EPIC-26](features/EPIC-26-simple-learning-stream.md) define a manual path
+alongside the staged learning engine. `learning_prefs.py` stores the mode under
+`User.preferences_json.learning.mode`; missing or malformed settings default to
+`advanced`. Other preference namespaces are preserved. The pilot enables only
+the configured owner's profile.
+
+`simple_learning.py` reuses `PracticeSession` and `PracticeAttempt`. A session
+holds one pending exercise snapshot, a monotonic stream index, and a dedicated
+`simple_active` or `simple_bonus` status. Answer history lives in attempts rather
+than an expanding exercise list. Selection scans approved active personal items;
+templates and other users' rows are excluded. Reviewed phrase/grammar questions
+and deterministic vocabulary questions alternate when both are eligible.
+Existing cards need an English gloss, stored Russian gloss, and usable example;
+incomplete cards are skipped without model calls on the choice path.
+
+An owner/status/index compare-and-swap claims each answer. The attempt, SRS
+change, and next snapshot commit atomically. Duplicate or stale buttons cannot
+write a second attempt. Start returns the saved unanswered question, including
+after a process restart; stop completes the run, so the next start reselects.
+Simple sessions bypass the full engine's cache and in-session GIR appenders.
+Optional writing capture uses persisted chat/user/topic state and bonus ID.
+Full practice closes the open simple flow; read-only menus preserve optional
+writing. Simple-profile forum interactions authorize the actual sender before
+applying workspace routing.
+
+Normal successful recognition waits for both SRS due time and a 24-hour floor.
+An error or unknown needs five other answered fingerprints and its due time.
+Recent displayed questions are avoided when alternatives exist. Exhaustion
+offers explicit familiar practice; an early correct familiar answer leaves SRS
+unchanged. Recognition cannot graduate an item and is excluded from production
+outcomes. Optional writing is a separate linked bonus session.
+
+`lang_lessons.py` validates the shipped pack and publishes owner-curated templates
+with idempotent personal subscriptions. One question maps to one learning item;
+metadata retains the original record, level, topic, source hash, fingerprint,
+and contextual quiz overlay. Activation is an explicit apply operation; normal
+uploaded candidates still require approval. No schema migration is needed.
 
 ## 3. AI provider — OpenAI two-tier plus an OpenAI-compatible gateway
 
@@ -265,12 +308,15 @@ Current learning-engine runtime behavior:
   `PracticeSession.target_date_local`.
 - Misfire grace handles container restarts.
 - All five run in the same process as the bot (one container).
+- Simple profiles are excluded before pre-generation, reminder, vocabulary
+  delivery claims, and weekly summaries. The global backup job still runs.
 
 ## 6. Prompt structure
 
 - Legacy AI prompts live as constants in `src/fluentloop/prompts/*.py`; the
   learning-engine gateway prompts live in `src/fluentloop/llm/prompts.py`.
-  Both styles should keep explicit input/output schema references.
+  Prompts list expected fields plainly; schemas validate responses in code and
+  are never pasted into the model's user prompt.
 - Output schemas live in `src/fluentloop/ai/schemas.py` and
   `src/fluentloop/llm/schemas.py` (Pydantic). Mismatched output goes through
   bounded retry/fallback rather than crashing the Telegram flow.
@@ -357,6 +403,8 @@ No public ports — Telethon long-polls the Telegram MTProto layer.
 PRD §24 is the product-level source of truth. Key runtime entities:
 
 - `User` — one row per admitted Telegram user/profile. `preferences_json`
+  also stores `learning.mode` (`simple` or `advanced`, default `advanced`) while
+  preserving the vocabulary namespace. It
   carries the EPIC-25 daily-loop settings (slot times, pause flag, words per
   day, chosen topics/kinds/fun sets, starter size, onboarding stamp) as one
   JSON blob rather than eight columns.

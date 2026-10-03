@@ -140,8 +140,28 @@ Full docs:
 - docs/learning-plans.md: first week, 30-day, and 12-week plans
 - docs/material-upload-guide.md: simple upload examples"""
 
+SIMPLE_HELP = (
+    "FluentLoop в простом режиме\n\n"
+    "Учиться — короткий вопрос, один ответ и краткое объяснение. "
+    "Следующий вопрос появляется автоматически.\n"
+    "Не знаю — покажет правильный ответ. Хватит или /stop — завершит поток.\n"
+    "Прогресс — отдельно узнавание и письменная практика.\n"
+    "Ещё — карточки, повтор, полный урок, библиотека, загрузка и настройки.\n\n"
+    "/study продолжает или возобновляет вопросы; "
+    "/today делает то же в простом режиме.\n"
+    "/settings переключает простой и расширенный режимы."
+)
 
-def start_message(channel_enabled: bool = False) -> str:
+
+def start_message(channel_enabled: bool = False, *, simple: bool = False) -> str:
+    if simple:
+        return (
+            "FluentLoop готов.\n"
+            "Нажми «Учиться»: будут короткие вопросы по фразам и грамматике. "
+            "Выбери ответ или «Не знаю» — следующий вопрос появится сам.\n\n"
+            "«Прогресс» показывает отдельно узнавание и письменную практику. "
+            "«Ещё» открывает остальные возможности. Команды: /study, /progress, /stop."
+        )
     where = (
         "Channel mode is enabled for practice posts."
         if channel_enabled
@@ -201,9 +221,7 @@ def candidate_summary(
                 f"Use /candidates {material_id} to review the full list."
             ),
         )
-    lines.append(
-        "After approval, I'll create a lesson pool and rotate it into /today."
-    )
+    lines.append("After approval, I'll create a lesson pool and rotate it into /today.")
     lines.append(f"Send /approve {material_id} to add all pending candidates.")
     return "\n".join(lines)
 

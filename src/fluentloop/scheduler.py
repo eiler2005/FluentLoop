@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from fluentloop.config import Settings
 from fluentloop.db.models import PracticeSession, User, VocabDelivery
 from fluentloop.db.session import session_scope
+from fluentloop.learning_prefs import is_simple_mode
 from fluentloop.practice import backup_sqlite, cache_session
 from fluentloop.stats import weekly_summary
 from fluentloop.vocab_loop import local_date
@@ -44,6 +45,8 @@ def run_pre_generation(settings: Settings, session_factory: sessionmaker) -> int
     with session_scope(session_factory) as session:
         users = session.scalars(select(User)).all()
         for user in users:
+            if is_simple_mode(user):
+                continue
             # "Tomorrow" is relative to the learner's own day, not UTC.
             tomorrow = local_date(user) + timedelta(days=1)
             cache_session(session, user, target_date=tomorrow)
@@ -59,6 +62,8 @@ async def send_reminders(client: Any, session_factory: sessionmaker) -> int:
     with session_scope(session_factory) as session:
         users = session.scalars(select(User)).all()
         for user in users:
+            if is_simple_mode(user):
+                continue
             # PracticeSession.target_date_local is written in the user's
             # timezone, so the lookup has to use the same calendar.
             today = local_date(user)
@@ -105,6 +110,8 @@ async def send_weekly_summaries(client: Any, session_factory: sessionmaker) -> i
     with session_scope(session_factory) as session:
         users = session.scalars(select(User)).all()
         for user in users:
+            if is_simple_mode(user):
+                continue
             for part in split_telegram_message(weekly_summary(session, user)):
                 await client.send_message(user.telegram_user_id, part)
                 sent += 1
@@ -169,6 +176,8 @@ async def run_vocab_tick(
     with session_scope(session_factory) as session:
         users = session.scalars(select(User)).all()
         for user in users:
+            if is_simple_mode(user):
+                continue
             # Don't push to accounts the command handlers would reject anyway.
             # Seed and demo rows otherwise produce a failed delivery and a
             # Telegram traceback for every slot, every day.

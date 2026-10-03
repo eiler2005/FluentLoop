@@ -37,7 +37,7 @@ Changelog = "https://github.com/eiler2005/FluentLoop/blob/main/CHANGELOG.md"
 where = ["src"]
 
 [tool.setuptools.package-data]
-fluentloop = ["seeds/*.jsonl"]
+fluentloop = ["seeds/*.jsonl", "seeds/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

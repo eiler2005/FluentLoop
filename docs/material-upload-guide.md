@@ -38,6 +38,12 @@ My examples:
 After upload, review the candidates and approve only useful targets. Approval is
 the quality gate; uploaded text does not automatically become active practice.
 
+В простом режиме загрузка и одобрение доступны через **Ещё**. После approve
+фразы с подходящими вариантами ответа могут попасть в `/study`; материалы
+без готового choice-вопроса доступны в полных уроках. Импортированный curated
+набор lang-lessons проходит отдельную проверку формулировок и явное одобрение
+оператором; обычный `/upload` не обходит этот gate.
+
 ## 5 простых материалов для старта
 
 Это не весь каталог уроков FluentLoop. Это 5 простых **типов входных

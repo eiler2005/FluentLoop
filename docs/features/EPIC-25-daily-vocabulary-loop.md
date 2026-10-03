@@ -4,6 +4,11 @@ Status: Done - implemented, deployed, and validated in production
 
 ## Summary
 
+This delivery loop applies to advanced profiles. EPIC-26 simple profiles start
+practice manually and are skipped before automatic claims and sends. Their
+vocabulary settings stay stored and resume applying after a switch to advanced.
+Recognition in the simple stream does not apply EPIC-25 graduation rules.
+
 EPIC-25 adds a lightweight daily delivery surface on top of the existing
 learning engine. Instead of a single evening reminder that asks the learner to
 open a 15-minute session, the bot reaches out three times a day with something

@@ -7,6 +7,15 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- EPIC-26 opt-in simple mode: Учиться / Прогресс / Ещё, a manual `/study`
+  stream mixing phrases and grammar, concise feedback after each choice,
+  interruption recovery, stop summaries, and optional one-sentence writing.
+- Reviewed `lang-lessons` pack: 86 source records across 19 topics, contextual
+  question overlays, retained source levels/provenance, and idempotent template
+  publication with isolated personal copies.
+- Per-profile learning mode, success cooldowns, error spacing across runs,
+  explicit familiar practice, and atomic answer claims against stale or
+  duplicate callbacks. Simple profiles skip automatic learning deliveries.
 - EPIC-25 daily vocabulary loop: three short pushes a day in the learner's own
   timezone (morning cards, midday drill, evening quiz), an explicit `graduated`
   state for mastered items, `/setup` onboarding wizard with topic and
@@ -52,6 +61,10 @@ All notable changes to FluentLoop are recorded here. Format follows
   existing `AI_PROVIDER` switch (ADR-0010).
 
 ### Fixed
+- Deployment backups now use SQLite's online backup API and verify integrity,
+  preserving committed data still in the WAL before the release.
+- Recognition answers no longer inflate productive chunk, writing, held-out
+  production, or mistake-extinction metrics. Typed bonus answers remain production.
 - Prompts handed the model a JSON Schema, and Qwen answered with the schema's
   own envelope, so every generated card parsed as empty. Prompts now list the
   fields plainly; the gateway unwraps a nested answer as a safety net.

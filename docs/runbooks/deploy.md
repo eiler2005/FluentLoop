@@ -63,10 +63,15 @@ bash scripts/deploy.sh
 
 The deployment keeps the same lightweight shape: one Docker container, SQLite
 mounted in `data/`, Telegram bot, scheduler, and local file storage. The deploy
-script now creates a pre-migration SQLite backup when the DB exists, builds the
+script creates and integrity-checks a pre-migration SQLite backup using the
+online backup API (including committed WAL data) when the DB exists, builds the
 image, runs `alembic upgrade head`, and only then starts the bot container.
 
 ## EPIC-23 Seed Library Publish
+
+For EPIC-26 owner activation, follow [simple-learning.md](simple-learning.md).
+Deploy only a verified commit with successful CI; keep runtime secrets and
+untracked local files outside the release archive.
 
 After a deploy that includes shared-library schema or seed changes, publish the
 deterministic B2/B2+ catalog inside the running container:

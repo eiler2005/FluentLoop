@@ -16,14 +16,14 @@ notes.
   the current environment gate is still a separate ADR-0009 concern.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 25
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 26
   numbered epics plus the EPIC-16..21 roadmap overview. EPIC-01 through
   EPIC-15 mirror the PRD §28 backlog (EPIC-15 is Deferred); EPIC-16 through
-  EPIC-25 cover the post-MVP learning engine, breakthrough roadmap, shared
-  lesson library, outcomes loop, and daily vocabulary loop. See
+  EPIC-26 cover the post-MVP learning engine, breakthrough roadmap, shared
+  lesson library, outcomes loop, daily vocabulary loop, and simple stream. See
   [`docs/features/README.md`](docs/features/README.md).
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
-  + ADRs in [`docs/adr/`](docs/adr/) (0002-0012 all Accepted; 0009 reserved).
+  + ADRs in [`docs/adr/`](docs/adr/) (0002-0013 all Accepted; 0009 reserved).
 - **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
   autonomous overnight session brief and morning report. Frozen artifacts —
   read for context, do not treat as living documentation.
@@ -82,6 +82,9 @@ destructive action is high.
 
 ## Architectural invariants
 
+- **Simple mode is per profile.** Missing mode means advanced. Skip simple users
+  before automatic learning claims/sends; backups still run. Recognition is
+  distinct from production and cannot graduate items. See ADR-0013/EPIC-26.
 - **PRD §29 stays out of the PRD.** Framework, library, DB, AI provider,
   prompts, deployment — these belong in `docs/architecture.md` and ADRs, not
   in the PRD.
@@ -155,8 +158,8 @@ FluentLoop/
 │   ├── README.md                 Doc index.
 │   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
 │   ├── testing.md                Standard test gate and what tests cover.
-│   ├── adr/                      Architecture decision records (0002-0012 Accepted).
-│   ├── features/                 25 numbered epics + EPIC-16..21 overview.
+│   ├── adr/                      Architecture decision records (0002-0013 Accepted).
+│   ├── features/                 26 numbered epics + EPIC-16..21 overview.
 │   ├── user-guide.md             Learner guide and learning-loop map.
 │   ├── material-upload-guide.md  Upload formats and LLM prep prompt.
 │   ├── runbooks/                 Operational procedures.
@@ -167,9 +170,9 @@ FluentLoop/
 ├── secrets/                      Local-only confidential data (gitignored).
 ├── data/                         Runtime artifacts: SQLite, sessions, backups (gitignored).
 ├── src/fluentloop/               Python package — bot, db, ai, llm, learning engine.
-│   └── seeds/                    Shipped seed data (starter word bank JSONL).
+│   └── seeds/                    Shipped starter words and reviewed question pack.
 ├── ansible/                      Deploy playbooks (placeholder for future deployment epic).
-└── tests/                        Pytest suite (29 modules, 363+ tests).
+└── tests/                        Pytest suite; see tests/README.md.
 ```
 
 ## Verification commands
@@ -179,7 +182,7 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # 25 numbered epics + EPIC-16..21 overview
+ls docs/features/EPIC-*.md | wc -l    # 26 numbered epics + EPIC-16..21 overview
 
 # No secrets staged
 python scripts/secret_scan.py

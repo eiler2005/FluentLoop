@@ -14,8 +14,10 @@
 
 FluentLoop is an English-learning bot that lives entirely in Telegram. You can
 drop in your own lesson notes or subscribe to an owner-curated B2/B2+ seed
-lesson, then the bot turns approved targets into spaced repetition and a daily
-~15-minute, 15-20-drill practice session in a Telegram forum workspace.
+lesson, then the bot turns approved targets into spaced repetition. The simple
+pilot offers a continuous phrase-and-grammar stream: `/study`, tap an answer,
+read a short explanation, continue until `Хватит`. It runs only on request.
+Full 15-minute, 15-20-drill lessons remain available through the extra menu.
 Mistakes feed a pattern detector; recurring patterns shape future practice.
 `/baseline` and `/outcomes` show whether the learning loop is producing
 measurable progress.
@@ -28,7 +30,15 @@ shipped in a single autonomous overnight build session; EPIC-22..24 now add the
 breakthrough pedagogy, shared lesson library, and outcome-measurement layer.
 See [`docs/build-log/`](docs/build-log/) for the frozen build record.
 
-![FluentLoop Quick Start](docs/assets/fluentloop-quick-start.png)
+```mermaid
+flowchart LR
+    Start[Учиться / study] --> Question[One question]
+    Question --> Choice[Tap an answer]
+    Choice --> Feedback[Short explanation]
+    Feedback --> Question
+    Question --> Stop[Хватит: saved result]
+    Stop --> Writing[Optional one-sentence writing]
+```
 
 ## Start here if you want to learn
 
@@ -42,7 +52,26 @@ If you are here as a learner, not as a developer, read these first:
 | Prepare your own lesson notes for `/upload` | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) |
 | See lesson types and public catalogs | [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md) |
 
-The simplest path inside Telegram:
+The simple pilot starts with:
+
+```text
+/study
+tap answers until Хватит
+/progress
+```
+
+The pilot is enabled per profile, initially only for the owner. Its keyboard
+is `Учиться`, `Прогресс`, `Ещё`; the extra menu opens materials,
+cards, full lessons, and settings. No reminders, vocabulary pushes, or weekly
+reports are sent while this profile uses simple mode. A bot restart resumes
+the current question; `Хватит` completes the run and the next launch selects
+again. Familiar questions not yet due require `Повторить знакомое`.
+
+The reviewed lang-lessons pack adds 86 B1/B2 phrase and grammar questions in
+19 topic templates. Each subscriber receives isolated personal copies. See
+[`docs/runbooks/simple-learning.md`](docs/runbooks/simple-learning.md).
+
+The advanced path inside Telegram:
 
 ```text
 /setup
@@ -54,8 +83,8 @@ The simplest path inside Telegram:
 ```
 
 `/setup` runs a short wizard — topics, vocabulary kinds, list size, words per
-day — and seeds a starter list from the word bank shipped with the repo. After
-that the bot reaches out three times a day on its own:
+day — and seeds a starter list from the word bank shipped with the repo. In
+advanced mode the bot reaches out three times a day on its own:
 
 ```text
 🌅 Morning   your words with example sentences
@@ -76,7 +105,7 @@ they make you work:
 | `/cards` | 0 min | shows cards — you only read them |
 | `/review` | 2-3 min | five recall drills plus a cold-recall closer |
 | `/practice vocab` | 15 min | the full vocabulary lesson |
-| `/today` | — | asks which of the two tracks you want |
+| `/today` | — | simple profile: starts the stream; advanced profile: chooses words or lesson |
 
 `/start` installs a keyboard under the input field — Cards, Review, Lesson,
 My words, Add words, Quiz, Stop — so practice is one tap from anywhere in the
@@ -114,7 +143,7 @@ What that means in practice:
   mistakes, diplomatic, notebook, reading, writing, genre, scenario, review,
   mixed, or outcomes. This tells you what the lesson trains and where to go
   next.
-- **Daily recall.** `/today` asks you to produce English from memory. This is
+- **Daily recall.** Full lessons ask you to produce English from memory. This is
   stronger than rereading phrase lists.
 - **Layered feedback.** Feedback is split into `Errors`, `Native`, and `Why`:
   fix mistakes, sound more natural, and understand the pattern.
@@ -124,6 +153,8 @@ What that means in practice:
   explicit practice targets.
 - **Reflection.** `/reflect` and `/mentor` turn hard moments into a private
   Coach Journal.
+- **Recognition and production.** `/progress` reports choices and writing
+  separately. Correct choices do not count as productive chunk use or writing.
 - **Outcome measurement.** `/baseline` records a monthly starting point;
   `/outcomes` shows learning evidence: retention, chunk use, L1 density,
   writing metrics, mistake extinction, and reading probes.
@@ -181,14 +212,17 @@ before you start.
    └────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
-                   APScheduler (in-process, three jobs)
+                   APScheduler (in-process, five jobs)
                    ├─ Daily reminder (User.reminder_time)
                    ├─ Overnight pre-gen (PRE_GEN_HOUR=3)
-                   └─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
+                   ├─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
+                   ├─ Weekly summary (advanced profiles)
+                   └─ Vocabulary minute tick (advanced profiles)
 ```
 
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
-Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0008 Accepted).
+Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0013 Accepted;
+0009 reserved).
 Learner-facing methodology and daily workflow: [`docs/user-guide.md`](docs/user-guide.md).
 Methodology map: [`docs/learning-methodology.md`](docs/learning-methodology.md).
 Generated public lesson catalog: [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md).
@@ -198,7 +232,7 @@ Upload-ready material examples: [`docs/material-upload-guide.md`](docs/material-
 
 ## Sample session
 
-A real `/today` session, sanitized:
+An advanced lesson session, sanitized (simple mode uses `/study`):
 
 ```
 You          /today
@@ -228,7 +262,7 @@ Bot          ✅ Correct.
 
 Bot          Session done — 15/15 in 14 min.
              SRS: 9 items advanced, 3 hard, 3 new.
-             Mistake patterns: 1 promoted to confidence=high.
+             Mistake patterns: 1 candidate, confidence=low pending confirmation.
              /stats for the weekly view.
 ```
 
@@ -261,6 +295,7 @@ Bot          Session done — 15/15 in 14 min.
 | **Breakthrough roadmap** — EPIC-22 (layered feedback, sub-day SRS, lesson formats, curriculum, teacher layer, operational drills, polish) | ✅ Done |
 | **Shared lesson library** — EPIC-23 (`/library`, `/subscribe`, seed catalog templates, per-user clones) | ✅ Done |
 | **Learning outcomes loop** — EPIC-24 (`/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article probes) | ✅ Done |
+| **Simple learning pilot** — EPIC-26 (`/study`, `/progress`, manual phrase/grammar stream, optional writing, reviewed lang-lessons pack) | Implemented; per-profile opt-in |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
@@ -307,7 +342,7 @@ FluentLoop/
 ├── docs/
 │   ├── architecture.md     Tech architecture (the *how*).
 │   ├── testing.md          Standard test gate.
-│   ├── adr/                8 architecture decision records.
+│   ├── adr/                Architecture decisions (0009 reserved).
 │   ├── features/           Epic files and roadmap index.
 │   ├── runbooks/           deploy, demo data, secrets, telegram workspace.
 │   ├── curriculum/         Generated B2/B2+ lesson catalog.
@@ -344,7 +379,7 @@ FluentLoop/
 
 ```bash
 uv run --extra dev pytest -q
-# 20 modules, 121+ tests, < 30 s locally.
+# Includes offline EPIC-26 persistence, content, Telegram, and operation checks.
 ```
 
 The CI gate (`.github/workflows/ci.yml`) runs `secret_scan` →

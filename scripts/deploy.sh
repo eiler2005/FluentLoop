@@ -92,7 +92,8 @@ PRE_MIGRATION_KEEP="${PRE_MIGRATION_KEEP:-5}"
 "${ssh_cmd[@]}" "
   cd ${REMOTE_DIR}
   if [ -f data/fluentloop.sqlite ]; then
-    cp data/fluentloop.sqlite data/backups/pre-migration-\$(date +%Y%m%d-%H%M%S).sqlite
+    python3 scripts/backup_sqlite.py --source data/fluentloop.sqlite \
+      --destination data/backups/pre-migration-\$(date +%Y%m%d-%H%M%S).sqlite
     ls -1t data/backups/pre-migration-*.sqlite 2>/dev/null \
       | tail -n +\$((${PRE_MIGRATION_KEEP} + 1)) \
       | xargs -r rm -f

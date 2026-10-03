@@ -7,6 +7,9 @@
 
 ## Goal
 
+This staged path is the full learning mode. Since EPIC-26, a simple profile's
+bare `/today` opens `/study`; explicit `/lesson` and `/practice` retain this engine.
+
 Refactor `/today` so it starts a staged 15-minute English practice session
 instead of a flat list of unrelated exercises. The session should still use
 existing learning items, SRS, mistake patterns, grammar concepts, practice

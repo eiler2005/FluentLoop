@@ -45,6 +45,10 @@ purposes:
 
 What this means in practice:
 
+- Simple choice questions from the reviewed pack and existing approved cards
+  are selected and checked locally. An optional written bonus uses the existing
+  AI answer-checking path and sends its prompt and submitted sentence to the
+  configured provider. Attempts and personal progress stay in the private DB.
 - Lesson notes may contain colleague names, client names, internal project
   names, and informal commentary. All of that is transmitted to the chosen
   AI provider.

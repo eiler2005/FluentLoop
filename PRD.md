@@ -236,6 +236,10 @@ Telegram remains the primary interface for daily practice.
     timezone (morning cards, midday drill, evening quiz), an explicit
     "graduated" end state for mastered items, adding your own words by plain
     message, and a setup wizard with topic and vocabulary presets (EPIC-25).
+14. Simple learning stream: an opt-in personal pilot with one manual entry,
+    mixed phrase/grammar questions answered by buttons, concise feedback,
+    continuous practice until the learner stops, and optional written use
+    afterward (EPIC-26).
 ```
 
 ### P2 — future
@@ -695,6 +699,43 @@ for learners who want contact with the language more than once a day.
 The learner can also send any word or phrase to the bot as a plain message to
 add it, several at once separated by commas or new lines. Words added this way
 take priority over seeded content when the bot chooses what to show.
+
+### Simple learning stream (personal pilot)
+
+An admitted learner may explicitly enable a simple mode. `/study` and bare
+`/today` then start or resume one continuous stream of approved phrases and
+grammar questions. Each question has answer buttons and an "I don't know"
+action. An answer receives the correct phrase and a short Russian explanation,
+then the next question. The learner does not select a lesson format or length.
+
+"Enough" finishes the current run and shows its result. The next launch
+selects a fresh question; a restart or date change before finishing resumes
+the saved pending question. An optional "Apply it" action afterward asks for
+one written sentence. Choosing not to write is not a failure.
+
+This mode is entirely manual: no reminders, vocabulary slot pushes, weekly
+messages, or overnight lesson preparation for that profile. Explicit advanced
+commands remain available. The pilot does not change other users' profiles.
+
+The selector alternates phrases and grammar when both have eligible questions.
+Within either category, due previously seen questions precede weak questions
+and unseen questions. Correct recognition is not evidence of productive
+mastery. A successful question returns no sooner than its review deadline and
+24 hours after a normal-mode success. An incorrect or unknown answer may
+return after five other answers and when due. The last five displayed question
+fingerprints are avoided across launches when another eligible question exists;
+a small bank may revisit one only after its due and success-cooldown gates.
+When normal practice runs out, show
+the result and offer an explicit "Repeat familiar material" action; do not
+silently repeat familiar questions early or require 24 available questions.
+Correct early familiar practice does not advance the repetition schedule.
+
+The pilot bank includes all 86 reviewed `lang-lessons` records across 19 topics,
+preserving B1/B2 labels, alongside the learner's complete approved phrase cards
+(English meaning, Russian meaning, and a usable example).
+Ambiguous source pairs receive an explicit context or corrected key; source
+records and their provenance remain available. Templates and another user's
+content never enter the personal stream.
 
 ### Example daily session
 
