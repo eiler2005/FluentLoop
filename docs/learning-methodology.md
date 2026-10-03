@@ -45,6 +45,14 @@ productive chunks, writing, productive held-out retention или extinction.
 
 ## Полный режим: короткая версия
 
+Общая программа шире адаптивного банка: чтение, аудирование, письмо, речь,
+взаимодействие и медиация в личных, общественных и рабочих ситуациях.
+`/roadmap` и [редактор](curriculum/workplace-plan-guide.md) задают приоритеты
+практики; `/progress` отражает только собранные свидетельства. Общая база
+получает 60% исходного времени, бизнес и IT — дополнительные 40%.
+Изменения плана не присваивают уровень и не перенастраивают очередь вопросов.
+Методические основания и ограничения: [исследование](research/b2-c1-framework.md).
+
 ```text
 input -> lesson type -> practice mode -> exercise type -> feedback ->
 SRS/mistakes -> outcomes -> next focus

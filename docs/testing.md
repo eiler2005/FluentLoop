@@ -17,6 +17,9 @@ git diff --check
 - Simple stream: pending-question recovery, atomic duplicate/stale/foreign
   answer rejection, stop/restart, category mixing, cooldowns, small banks,
   explicit familiar practice, and optional writing.
+- Broad roadmap: strict catalogue references, portable-plan types and limits,
+  general/work retention, user isolation, safe import/export, command routing,
+  HTML escaping, generated-view freshness and unchanged assessed progress.
 - Reviewed pack: schema/content validation, all 86 records, provenance,
   template publication and personal subscription idempotency, and level retention.
 - Simple UI and operations: originating chat/topic replies, keyboard dispatch,
@@ -50,6 +53,28 @@ git diff --check
   Telegram workspace maintenance helpers; verified SQLite backups including WAL.
 
 ## Live smoke
+
+For the broad plan, open `/roadmap`, set a track and inspect a general and a
+work module. Confirm `/plan` still reports adaptive evidence. Use a rollback
+transaction for release smoke edits. Open the downloaded HTML on desktop and
+mobile widths: change time/share, search, choose stage, reorder/pause, edit notes,
+export/import JSON and reject an invalid file without losing current changes.
+`uv run python scripts/workplace_plan.py --check-render docs/curriculum` checks
+that the committed views match the source and renderer. The unit suite performs
+this check too; live browser verification complements it.
+
+The repeatable browser check uses an isolated headless Chrome profile and no
+network calls from the editor. It verifies filtering, stage selection, edits,
+pause/resume, persistence, JSON roundtrip, rejected imports, text escaping and
+mobile overflow, and saves screenshots in a temporary directory:
+
+```bash
+npm install --prefix /tmp/fluentloop-browser playwright
+NODE_PATH=/tmp/fluentloop-browser/node_modules node scripts/check_workplace_planner.cjs
+```
+
+This optional check requires Chrome; `PLANNER_BROWSER=chromium` selects a
+Playwright-installed Chromium instead. It is separate from the Python-only CI.
 
 For the owner simple pilot, follow [simple-learning.md](runbooks/simple-learning.md):
 verify `/study`, choices, unknown, stop, resume, per-topic `/progress`,

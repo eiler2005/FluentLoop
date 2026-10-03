@@ -7,6 +7,11 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- Research-backed editable B2–introductory C1 roadmap: 16 general-English and
+  32 supplementary workplace modules, 144 staged practice briefs, role tracks,
+  language coverage map, primary-source reports and editable time allocation.
+  `/roadmap` supports personal priorities; an offline planner edits order, pauses
+  and notes, with validated JSON import/export isolated from assessed progress.
 - Reviewed adaptive curriculum: 270 contextual questions across ten topics and
   thirty B2/B2+/introductory-C1 stages, with 90 reserved transfer questions and
   independent writing tasks. Owner activation is additive and idempotent.

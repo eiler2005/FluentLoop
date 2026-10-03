@@ -35,6 +35,9 @@ suite makes no real network calls.
 
 | Test module | Covers |
 |---|---|
+| `test_workplace_roadmap.py` | Strict catalogue/personal plan validation, portable exports, explicit owner CLI operations, isolated preferences and retained general foundation. |
+| `test_workplace_roadmap_ui.py` | Telegram roadmap edits, module details, origin routing, authorization, HTML safety and unchanged adaptive history. |
+| `test_roadmap_export.py` | Generated view freshness, offline embedded-data safety and complete stage tasks. |
 | `test_sqlite_backup.py` | Consistent backups of committed WAL writes, integrity verification, private file permissions, no overwrite. |
 | `test_epic26_simple_learning.py` | Persisted manual stream, atomic answers, owner isolation, cooldowns, small pools, familiar practice, bonus writing. |
 | `test_epic26_lang_lessons.py` | Reviewed pack validation, all source records, provenance, idempotent templates/clones, retained levels. |

@@ -18,6 +18,11 @@
 | [`adr/0013-simple-learning-stream.md`](adr/0013-simple-learning-stream.md) | Manual simple stream, persisted answers, cooldowns, and separate recognition metrics. |
 | [`adr/0014-adaptive-topic-progression.md`](adr/0014-adaptive-topic-progression.md) | Adaptive stages, fresh transfer, genuine writing, repair and bounded question maintenance. |
 | [`curriculum/adaptive-b2-c1.md`](curriculum/adaptive-b2-c1.md) | Ten topic plans from B2 through strong B2 to introductory C1; 270 reviewed questions. |
+| [`curriculum/workplace-plan-guide.md`](curriculum/workplace-plan-guide.md) | Start and customise the general-English programme and workplace supplements; Telegram commands, offline editor and personal JSON. |
+| [`curriculum/workplace-roadmap.md`](curriculum/workplace-roadmap.md) | Generated 48-module map with 144 stage tasks, evidence criteria and language coverage gaps. |
+| [`curriculum/workplace-planner.html`](curriculum/workplace-planner.html) | Downloadable offline visual planner: search/filter, priorities, time split, order, pauses and notes. |
+| [`research/README.md`](research/README.md) | Primary-source CEFR and general/workplace needs research. |
+| [`adr/0015-editable-workplace-roadmap.md`](adr/0015-editable-workplace-roadmap.md) | Advisory personal plans stay separate from assessed progress. |
 | [`features/`](features/) | Epic files: original MVP backlog plus learning-engine roadmap and post-MVP extensions. |
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |

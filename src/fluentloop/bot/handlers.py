@@ -1187,7 +1187,10 @@ def handle_simple_more_menu(
     from fluentloop.learning_prefs import is_simple_mode
 
     buttons = [
-        [_button("🗺 План", "simple:plan")],
+        [
+            _button("🗺 План", "simple:plan"),
+            _button("Общий план", "simple:roadmap"),
+        ],
         [_button("🃏 Карточки", "words:cards"), _button("🔁 Повтор", "words:review")],
         [
             _button("📚 Полный урок", "today:lesson"),
@@ -2365,6 +2368,7 @@ def handle_plan(
             if gaps
             else "Все текущие темы закрыты; возвращайся для повторения.",
             "Это план по сохранённым ответам, а не оценка уровня CEFR.",
+            "/roadmap — общий английский и дополнительные рабочие направления.",
         ]
     )
     study_action = "simple:study" if is_simple_mode(user) else "today:lesson"
@@ -2375,7 +2379,8 @@ def handle_plan(
             [
                 _button("Учиться", study_action),
                 _button("Прогресс", "simple:progress"),
-            ]
+            ],
+            [_button("Общий план", "simple:roadmap")],
         ],
         message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,

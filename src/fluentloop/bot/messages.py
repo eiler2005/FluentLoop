@@ -106,6 +106,7 @@ trade-offs, risks, tech debt, reports, reliability, postmortems, async updates,
 exec summaries, alignment.
 
 Useful commands:
+/roadmap - general English plan with client/IT supplements; edit track and time
 /today - choose: word cards or the full lesson
 /cards [n] - show word cards right now
 /words - your list and what is coming up
@@ -147,6 +148,8 @@ SIMPLE_HELP = (
     "Не знаю — покажет правильный ответ. Хватит или /stop — завершит поток.\n"
     "Прогресс — узнавание, письмо и шаги по темам.\n"
     "Ещё — план, карточки, повтор, полный урок, библиотека, загрузка и настройки.\n"
+    "/roadmap — общий английский и дополнения для работы; "
+    "настрой направление и время.\n"
     "Ошибка в вопросе — отметь неточный вопрос после ответа.\n\n"
     "/study продолжает или возобновляет вопросы; "
     "/today делает то же в простом режиме.\n"

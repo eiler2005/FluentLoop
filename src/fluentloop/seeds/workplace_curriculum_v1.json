@@ -1,0 +1,2837 @@
+{
+  "version": 1,
+  "title_ru": "Общий английский B2 → уверенный B2 → вводный C1 с дополнениями для клиентов и крупных технологических компаний",
+  "assumptions_ru": [
+    "Общий английский — основа во всех треках; рабочие ситуации дополняют его. Предлагаемая доля времени 60% общая основа и 40% специальная практика редактируется в индивидуальном плане.",
+    "Интерес к клиентской работе и крупным технологическим компаниям подтверждён пользователем; текущая должность, работодатель, отрасль и свежий уровень не установлены.",
+    "Каждый трек содержит все 16 общих и 32 рабочих модуля; очередность рабочих дополнений меняется. Число модулей не означает объём времени или освоение.",
+    "Название вводного C1 обозначает сложность отдельных задач, а не сертификацию общего уровня CEFR. Продвижение требует самостоятельных результатов и переноса.",
+    "Задания — авторские учебные сценарии. Ответы выполняются на английском; организации, данные и роли вымышлены либо предварительно обезличены.",
+    "Ссылки на существующие уроки показывают частичную языковую поддержку; предметный модуль не объявляется уже реализованным в боте.",
+    "Смешанный формат использует имеющуюся языковую практику и новый ручной сценарий; внешний формат требует записи или партнёра; новый сценарий без банка выполняется вручную.",
+    "Существующие 270 вопросов в 10 адаптивных темах не покрывают все профессиональные функции. Резервные задания переноса и ключи не раскрываются и не используются в подготовке.",
+    "BEC прекращён за пределами Китая; его историческая ориентация на рабочие задачи не является рекомендацией доступного повсюду экзамена.",
+    "Публичные рабочие практики компаний — источники реалистичных ситуаций, а не единая культура всех компаний или гарантия трудоустройства."
+  ],
+  "skills": {
+    "reading": "Чтение",
+    "listening": "Аудирование",
+    "writing": "Письмо",
+    "speaking": "Говорение",
+    "interaction": "Взаимодействие",
+    "mediation": "Передача и объяснение смысла",
+    "language": "Грамматика и лексика",
+    "register": "Регистр и тон"
+  },
+  "sources": [
+    {
+      "id": "bc_business",
+      "title": "Деловой английский: обзор",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/business",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "bc_writing",
+      "title": "Письменная практика B2",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/writing/b2",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "bc_reading",
+      "title": "Чтение B2",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/reading/b2",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "bc_listening",
+      "title": "Аудирование B2",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/listening/b2",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "bc_speaking",
+      "title": "Говорение B2",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/speaking/b2",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "bc_professional_podcasts",
+      "title": "Подкасты для профессионалов B2",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/business/podcasts-professionals",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "bc_project_meeting",
+      "title": "Проектная встреча C1",
+      "url": "https://learnenglish.britishcouncil.org/free-resources/listening/c1/project-management-meeting",
+      "publisher": "British Council",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "cambridge_business",
+      "title": "Деловые квалификации BEC: область и текущий статус",
+      "url": "https://www.cambridgeenglish.org/exams-and-tests/qualifications/business/",
+      "publisher": "Cambridge English",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "google_documents",
+      "title": "Структура технического документа",
+      "url": "https://developers.google.com/tech-writing/one/documents",
+      "publisher": "Google",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "google_audience",
+      "title": "Аудитория технического документа",
+      "url": "https://developers.google.com/tech-writing/one/audience",
+      "publisher": "Google",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "gitlab_communication",
+      "title": "Коммуникация в распределённой компании",
+      "url": "https://handbook.gitlab.com/handbook/communication/",
+      "publisher": "GitLab",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "gitlab_discovery",
+      "title": "Вопросы для выявления потребностей клиента",
+      "url": "https://handbook.gitlab.com/handbook/sales/qualification-questions/",
+      "publisher": "GitLab",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "atlassian_tradeoffs",
+      "title": "Компромиссы проекта",
+      "url": "https://www.atlassian.com/team-playbook/plays/trade-offs",
+      "publisher": "Atlassian",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "sec_financial",
+      "title": "Основы финансовой отчётности",
+      "url": "https://www.sec.gov/about/reports-publications/beginners-guide-financial-statements",
+      "publisher": "SEC",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "nist_ai",
+      "title": "Рамка управления рисками AI",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "publisher": "NIST",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "sre_postmortems",
+      "title": "Практика разборов инцидентов",
+      "url": "https://sre.google/workbook/postmortem-culture/",
+      "publisher": "Google SRE",
+      "accessed": "2026-10-03"
+    }
+  ],
+  "tracks": {
+    "balanced": {
+      "title_ru": "Общая основа и сбалансированные рабочие дополнения",
+      "module_ids": [
+        "identity_relationships",
+        "life_stories",
+        "housing_services",
+        "travel_culture",
+        "wellbeing_habits",
+        "learning_education",
+        "arts_reviews",
+        "news_media",
+        "society_civic",
+        "environment_choices",
+        "everyday_science",
+        "consumer_money",
+        "digital_life",
+        "ethical_dilemmas",
+        "argument_decisions",
+        "social_plans",
+        "professional_identity",
+        "async_requests",
+        "stakeholder_updates",
+        "clarification_repair",
+        "meeting_participation",
+        "meeting_facilitation",
+        "presentations_demos",
+        "persuasion_disagreement",
+        "project_kickoff",
+        "priorities_capacity",
+        "estimates_commitments",
+        "requirements_changes",
+        "client_discovery",
+        "value_proposals",
+        "commercial_negotiation",
+        "support_escalation",
+        "metrics_trends",
+        "budgets_resources",
+        "financial_case",
+        "strategy_market",
+        "career_interviews",
+        "feedback_one_to_one",
+        "delegation_coaching",
+        "intercultural_conflict",
+        "architecture_explanations",
+        "technical_documents",
+        "research_experiments",
+        "ai_automation",
+        "security_privacy",
+        "incident_handover",
+        "postmortems_improvement",
+        "change_adoption"
+      ]
+    },
+    "client_facing": {
+      "title_ru": "Общая основа и дополнения для работы с клиентами",
+      "module_ids": [
+        "identity_relationships",
+        "life_stories",
+        "housing_services",
+        "travel_culture",
+        "wellbeing_habits",
+        "learning_education",
+        "arts_reviews",
+        "news_media",
+        "society_civic",
+        "environment_choices",
+        "everyday_science",
+        "consumer_money",
+        "digital_life",
+        "ethical_dilemmas",
+        "argument_decisions",
+        "social_plans",
+        "client_discovery",
+        "value_proposals",
+        "commercial_negotiation",
+        "support_escalation",
+        "clarification_repair",
+        "async_requests",
+        "presentations_demos",
+        "stakeholder_updates",
+        "persuasion_disagreement",
+        "intercultural_conflict",
+        "metrics_trends",
+        "financial_case",
+        "professional_identity",
+        "meeting_participation",
+        "meeting_facilitation",
+        "project_kickoff",
+        "priorities_capacity",
+        "estimates_commitments",
+        "requirements_changes",
+        "budgets_resources",
+        "strategy_market",
+        "career_interviews",
+        "feedback_one_to_one",
+        "delegation_coaching",
+        "architecture_explanations",
+        "technical_documents",
+        "research_experiments",
+        "ai_automation",
+        "security_privacy",
+        "incident_handover",
+        "postmortems_improvement",
+        "change_adoption"
+      ]
+    },
+    "big_tech": {
+      "title_ru": "Общая основа и дополнения для крупных технологических компаний",
+      "module_ids": [
+        "identity_relationships",
+        "life_stories",
+        "housing_services",
+        "travel_culture",
+        "wellbeing_habits",
+        "learning_education",
+        "arts_reviews",
+        "news_media",
+        "society_civic",
+        "environment_choices",
+        "everyday_science",
+        "consumer_money",
+        "digital_life",
+        "ethical_dilemmas",
+        "argument_decisions",
+        "social_plans",
+        "async_requests",
+        "stakeholder_updates",
+        "clarification_repair",
+        "meeting_participation",
+        "meeting_facilitation",
+        "persuasion_disagreement",
+        "project_kickoff",
+        "priorities_capacity",
+        "estimates_commitments",
+        "requirements_changes",
+        "architecture_explanations",
+        "technical_documents",
+        "research_experiments",
+        "incident_handover",
+        "postmortems_improvement",
+        "security_privacy",
+        "ai_automation",
+        "professional_identity",
+        "presentations_demos",
+        "client_discovery",
+        "value_proposals",
+        "commercial_negotiation",
+        "support_escalation",
+        "metrics_trends",
+        "budgets_resources",
+        "financial_case",
+        "strategy_market",
+        "career_interviews",
+        "feedback_one_to_one",
+        "delegation_coaching",
+        "intercultural_conflict",
+        "change_adoption"
+      ]
+    }
+  },
+  "modules": [
+    {
+      "id": "identity_relationships",
+      "strand": "general",
+      "title_ru": "Личность, отношения и границы",
+      "area": "Личная жизнь",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "эмоции и отношения",
+        "вежливые просьбы"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "aspect"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Описать свой опыт и ожидания в отношениях",
+        "b2_plus": "Обсудить недопонимание и проверить намерение",
+        "c1_intro": "Объяснить чувствительное различие взглядов и восстановить контакт"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите другу о важном изменении в своей жизни и предложите встретиться.",
+        "b2_plus": "На английском: Обсудите с партнёром недопонимание из-за отменённой встречи; уточните обе версии.",
+        "c1_intro": "На английском: Напишите два сообщения о личной границе: близкому другу и новому знакомому; объясните различие тона."
+      },
+      "evidence": [
+        "Причина и ожидание выражены ясно",
+        "Уточнение не приписывает собеседнику мотивов",
+        "Тон соответствует степени близости"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "life_stories",
+      "strand": "general",
+      "title_ru": "Истории, опыт и воспоминания",
+      "area": "Личная жизнь",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "прошедшее время и вид",
+        "повествовательные связки"
+      ],
+      "adaptive_topics": [
+        "aspect",
+        "conditionals"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Связно рассказать о событии",
+        "b2_plus": "Передать последовательность, фон и последствия",
+        "c1_intro": "Выбрать перспективу рассказа и объяснить переоценку опыта"
+      },
+      "tasks": {
+        "b2": "На английском: Расскажите письменно о поездке, в которой произошло неожиданное событие.",
+        "b2_plus": "На английском: Расскажите партнёру об изменившемся плане; ответьте на вопросы о последовательности.",
+        "c1_intro": "На английском: Напишите историю о решении, которое теперь оцениваете иначе; различите прежние ожидания и нынешний вывод."
+      },
+      "evidence": [
+        "Последовательность событий восстановима",
+        "Фон отделён от главного события",
+        "Вывод связан с опытом"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "housing_services",
+      "strand": "general",
+      "title_ru": "Жильё, город и бытовые услуги",
+      "area": "Повседневные ситуации",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "артикли и определённость",
+        "косвенные вопросы"
+      ],
+      "adaptive_topics": [
+        "modals",
+        "diplomatic_communication"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Уточнить условия услуги и объяснить проблему",
+        "b2_plus": "Согласовать решение при ограничениях",
+        "c1_intro": "Сопоставить варианты и добиться ясного соглашения"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите в службу аренды о неисправности и запросите время ремонта.",
+        "b2_plus": "На английском: Разыграйте разговор с владельцем жилья: предложенное время ремонта вам не подходит.",
+        "c1_intro": "На английском: Сравните два предложения аренды по вымышленным условиям и напишите обоснованный выбор с оставшимися вопросами."
+      },
+      "evidence": [
+        "Проблема описана конкретно",
+        "Условия и срок уточнены",
+        "Итоговое действие понятно обеим сторонам"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "travel_culture",
+      "strand": "general",
+      "title_ru": "Путешествия и культурный опыт",
+      "area": "Повседневные ситуации",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "планы и условия",
+        "сравнение и описание"
+      ],
+      "adaptive_topics": [
+        "future_planning",
+        "conditionals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Организовать поездку и описать впечатление",
+        "b2_plus": "Пересогласовать план после изменения",
+        "c1_intro": "Обсудить культурное различие без обобщений"
+      },
+      "tasks": {
+        "b2": "На английском: Предложите другу маршрут поездки и объясните выбор двух мест.",
+        "b2_plus": "На английском: Обсудите с партнёром отменённый транспорт; согласуйте новый маршрут и расходы.",
+        "c1_intro": "На английском: Напишите заметку о двух разных впечатлениях от культурного события; объясните влияние ожиданий."
+      },
+      "evidence": [
+        "Ограничения маршрута учтены",
+        "Выбор имеет причины",
+        "Культурное наблюдение отделено от стереотипа"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_reading",
+        "bc_listening",
+        "bc_speaking"
+      ]
+    },
+    {
+      "id": "wellbeing_habits",
+      "strand": "general",
+      "title_ru": "Самочувствие, привычки и баланс",
+      "area": "Повседневные ситуации",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "listening",
+        "mediation"
+      ],
+      "language_focus": [
+        "привычки и изменения",
+        "совет и степень уверенности"
+      ],
+      "adaptive_topics": [
+        "aspect",
+        "modals"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Описать привычки и их влияние",
+        "b2_plus": "Сопоставить советы и личный опыт",
+        "c1_intro": "Объяснить границы обобщения о благополучии"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите знакомому о попытке изменить режим сна и о замеченных трудностях.",
+        "b2_plus": "На английском: Прослушайте выбранный учебный разговор о привычках; сравните советы и обсудите реалистичный план.",
+        "c1_intro": "На английском: Сопоставьте два предоставленных текста о цифровом отдыхе; напишите осторожный вывод для обычного читателя."
+      },
+      "evidence": [
+        "Наблюдение отделено от причинного вывода",
+        "Совет не выдаётся за медицинское заключение",
+        "Ограничение применимости названо"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_reading",
+        "bc_listening",
+        "bc_speaking"
+      ]
+    },
+    {
+      "id": "learning_education",
+      "strand": "general",
+      "title_ru": "Обучение и развитие навыка",
+      "area": "Образование",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "глагольные модели",
+        "цель и результат"
+      ],
+      "adaptive_topics": [
+        "future_planning",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить способ обучения",
+        "b2_plus": "Сравнить стратегии и пересмотреть план",
+        "c1_intro": "Синтезировать позиции об образовании"
+      },
+      "tasks": {
+        "b2": "На английском: Опишите освоение нового хобби и составьте реалистичный план практики.",
+        "b2_plus": "На английском: Обсудите с партнёром две стратегии обучения; измените план после возражения.",
+        "c1_intro": "На английском: Прочитайте два заданных мнения о дистанционном образовании и напишите рекомендацию с учётом разных учащихся."
+      },
+      "evidence": [
+        "Цель и действие связаны",
+        "Альтернатива рассмотрена содержательно",
+        "Рекомендация учитывает условия учащегося"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "arts_reviews",
+      "strand": "general",
+      "title_ru": "Книги, кино, музыка и отзывы",
+      "area": "Культура",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "оценочные сочетания",
+        "придаточные и контраст"
+      ],
+      "adaptive_topics": [
+        "information_structure",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Передать содержание и оценку",
+        "b2_plus": "Обосновать оценку примерами",
+        "c1_intro": "Написать нюансированный отзыв для выбранной аудитории"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите отзыв о вымышленном фильме по предоставленному описанию.",
+        "b2_plus": "На английском: Обсудите с партнёром две противоположные оценки книги и приведите конкретные основания.",
+        "c1_intro": "На английском: Сопоставьте два кратких отзыва о выставке и создайте собственный текст, отделив вкус от качества исполнения."
+      },
+      "evidence": [
+        "Оценка подтверждена примером",
+        "Пересказ не занимает весь ответ",
+        "Аудитория отзыва учтена"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_reading",
+        "bc_listening",
+        "bc_speaking"
+      ]
+    },
+    {
+      "id": "news_media",
+      "strand": "general",
+      "title_ru": "Новости и критическое чтение",
+      "area": "Медиа",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "mediation"
+      ],
+      "language_focus": [
+        "передача утверждений",
+        "язык уверенности"
+      ],
+      "adaptive_topics": [
+        "reporting",
+        "modals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Определить главную мысль и источник утверждения",
+        "b2_plus": "Сравнить освещение события",
+        "c1_intro": "Синтезировать сведения с оговоркой об их надёжности"
+      },
+      "tasks": {
+        "b2": "На английском: Прочитайте заданную новостную заметку; изложите факты и отдельно мнение автора.",
+        "b2_plus": "На английском: Сравните два учебных сообщения об одном событии; назовите совпадение и расхождение.",
+        "c1_intro": "На английском: Напишите краткий обзор по трём предоставленным фрагментам; отметьте неподтверждённое и вопрос для дальнейшей проверки."
+      },
+      "evidence": [
+        "Авторство утверждений сохранено",
+        "Факт и оценка различены",
+        "Неопределённость не потеряна в резюме"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "society_civic",
+      "strand": "general",
+      "title_ru": "Общество, городские решения и участие",
+      "area": "Общество",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "обобщение и кванторы",
+        "уступка и причина"
+      ],
+      "adaptive_topics": [
+        "cohesion",
+        "modals"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить общественную проблему",
+        "b2_plus": "Обсудить интересы разных групп",
+        "c1_intro": "Предложить решение с ограничениями"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите письмо городскому центру о доступности общественного пространства.",
+        "b2_plus": "На английском: Обсудите с партнёром план изменения парка: жители хотят разного использования.",
+        "c1_intro": "На английском: Подготовьте предложение для учебного общественного обсуждения; учтите две группы и возможное нежелательное последствие."
+      },
+      "evidence": [
+        "Позиции групп изложены справедливо",
+        "Решение связано с проблемой",
+        "Ограничения названы"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "environment_choices",
+      "strand": "general",
+      "title_ru": "Окружающая среда и личный выбор",
+      "area": "Общество",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "mediation"
+      ],
+      "language_focus": [
+        "условия и последствия",
+        "сравнительные конструкции"
+      ],
+      "adaptive_topics": [
+        "conditionals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить привычку и её последствия",
+        "b2_plus": "Сравнить доступные варианты",
+        "c1_intro": "Оценить спорную экологическую рекомендацию"
+      },
+      "tasks": {
+        "b2": "На английском: Опишите два способа уменьшить отходы дома и выберите удобный.",
+        "b2_plus": "На английском: Сравните варианты транспорта для вымышленной поездки по данным о времени и воздействии.",
+        "c1_intro": "На английском: Напишите взвешенный ответ на предоставленное спорное утверждение об экологичности потребления."
+      },
+      "evidence": [
+        "Сравнение использует заданные данные",
+        "Нельзя вывести больше, чем дано",
+        "Практическое ограничение учтено"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "everyday_science",
+      "strand": "general",
+      "title_ru": "Наука в повседневной жизни",
+      "area": "Наука",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "listening",
+        "mediation"
+      ],
+      "language_focus": [
+        "пассив и процессы",
+        "термин и объяснение"
+      ],
+      "adaptive_topics": [
+        "reporting",
+        "modals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить понятный научный процесс",
+        "b2_plus": "Передать объяснение неспециалисту",
+        "c1_intro": "Различить доказательство и правдоподобное предположение"
+      },
+      "tasks": {
+        "b2": "На английском: Прочитайте учебный текст о простом природном явлении и объясните его другу.",
+        "b2_plus": "На английском: Прослушайте короткое объяснение эксперимента; перескажите метод и наблюдение без терминологической перегрузки.",
+        "c1_intro": "На английском: Сопоставьте две гипотезы по предоставленным наблюдениям; напишите, какие данные нужны для выбора."
+      },
+      "evidence": [
+        "Процесс описан без пропуска важного шага",
+        "Термин объяснён простыми словами",
+        "Гипотеза отделена от результата"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_reading",
+        "bc_listening",
+        "bc_speaking"
+      ]
+    },
+    {
+      "id": "consumer_money",
+      "strand": "general",
+      "title_ru": "Покупки, деньги и потребительский выбор",
+      "area": "Повседневные ситуации",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "количество и исчисляемость",
+        "цена и условия"
+      ],
+      "adaptive_topics": [
+        "conditionals",
+        "modals"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Уточнить цену и условия покупки",
+        "b2_plus": "Обосновать выбор и запросить решение проблемы",
+        "c1_intro": "Оценить предложение с неявными ограничениями"
+      },
+      "tasks": {
+        "b2": "На английском: Сравните две учебные подписки и напишите, какая подходит вашему вымышленному бюджету.",
+        "b2_plus": "На английском: Разыграйте возврат товара: продавец предлагает другое решение.",
+        "c1_intro": "На английском: Разберите предоставленное предложение с пробным периодом и скрытыми условиями; объясните его знакомому и составьте вопросы."
+      },
+      "evidence": [
+        "Общая стоимость посчитана по заданным условиям",
+        "Срок и ограничение не потеряны",
+        "Запрос решения сформулирован конкретно"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "digital_life",
+      "strand": "general",
+      "title_ru": "Цифровая жизнь и повседневные технологии",
+      "area": "Технологии",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "инструкции и последовательность",
+        "сочетания о технологиях"
+      ],
+      "adaptive_topics": [
+        "reporting",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Описать использование сервиса",
+        "b2_plus": "Объяснить настройку и обсудить привычку",
+        "c1_intro": "Оценить пользу и нежелательные последствия"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите простую инструкцию для знакомого по вымышленному приложению.",
+        "b2_plus": "На английском: Обсудите с партнёром использование телефона вечером и согласуйте эксперимент на неделю.",
+        "c1_intro": "На английском: Сопоставьте два предоставленных текста о персонализации сервисов; напишите объяснение пользы и компромиссов для обычного пользователя."
+      },
+      "evidence": [
+        "Инструкция исполнима читателем",
+        "Польза и ограничение различены",
+        "Термины объяснены под аудиторию"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "ethical_dilemmas",
+      "strand": "general",
+      "title_ru": "Этика и сложные личные решения",
+      "area": "Общество",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "модальность и условия",
+        "оценка и оговорки"
+      ],
+      "adaptive_topics": [
+        "conditionals",
+        "modals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить позицию и её причину",
+        "b2_plus": "Признать конкурирующий аргумент",
+        "c1_intro": "Сформулировать принцип с исключениями"
+      },
+      "tasks": {
+        "b2": "На английском: Объясните своё решение в учебной дилемме о найденной чужой вещи.",
+        "b2_plus": "На английском: Обсудите с партнёром конфликт честности и сохранения дружбы; рассмотрите две альтернативы.",
+        "c1_intro": "На английском: Напишите рассуждение по вымышленной дилемме о приватности; укажите принцип, исключение и последствие каждого выбора."
+      },
+      "evidence": [
+        "Конкурирующая ценность названа",
+        "Причины не подменены эмоцией",
+        "Граница выбранного принципа объяснена"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "argument_decisions",
+      "strand": "general",
+      "title_ru": "Мнение, аргумент и принятие решений",
+      "area": "Общая коммуникация",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "логические связки",
+        "сравнение и акцент"
+      ],
+      "adaptive_topics": [
+        "cohesion",
+        "information_structure",
+        "conditionals"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Дать аргументированное мнение",
+        "b2_plus": "Сравнить варианты после возражения",
+        "c1_intro": "Синтезировать позиции и ограничить вывод"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите мнение о выборе между двумя учебными вариантами досуга.",
+        "b2_plus": "На английском: Обсудите с партнёром решение переехать в другой город; измените один аргумент после новой информации.",
+        "c1_intro": "На английском: Составьте рассуждение по двум предоставленным позициям об организации свободного времени; сформулируйте собственный ограниченный вывод."
+      },
+      "evidence": [
+        "Главный вывод ясен",
+        "Возражение рассмотрено по существу",
+        "Новая информация меняет аргумент при необходимости"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_reading",
+        "bc_writing"
+      ]
+    },
+    {
+      "id": "social_plans",
+      "strand": "general",
+      "title_ru": "Общение, планы и совместные события",
+      "area": "Личная жизнь",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "предложения и просьбы",
+        "планы и предпочтения"
+      ],
+      "adaptive_topics": [
+        "future_planning",
+        "diplomatic_communication"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Договориться о совместном событии",
+        "b2_plus": "Согласовать ограничения участников",
+        "c1_intro": "Тактично завершить сложное обсуждение"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите приглашение друзьям и предложите два варианта времени.",
+        "b2_plus": "На английском: Разыграйте планирование выходных: у участников разные бюджеты и интересы.",
+        "c1_intro": "На английском: Составьте итоговое сообщение после учебного спора о совместном путешествии; объясните согласованные условия и нерешённый вопрос."
+      },
+      "evidence": [
+        "Условия участников учтены",
+        "Предложение допускает ответ",
+        "Итог не выдаёт молчание за согласие"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_reading",
+        "bc_listening",
+        "bc_speaking"
+      ]
+    },
+    {
+      "id": "professional_identity",
+      "strand": "work",
+      "title_ru": "Роль, команда и профессиональное знакомство",
+      "area": "Рабочая коммуникация",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "лексика роли и результата",
+        "времена опыта"
+      ],
+      "adaptive_topics": [
+        "aspect"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить обязанности и проект",
+        "b2_plus": "Подстроить рассказ под коллегу и клиента",
+        "c1_intro": "Передать ценность роли и ответить на неожиданный вопрос"
+      },
+      "tasks": {
+        "b2": "На английском: Представьтесь новому коллеге и объясните цель вымышленного проекта.",
+        "b2_plus": "На английском: Объясните ту же роль клиенту без технического контекста и ответьте на уточнение.",
+        "c1_intro": "На английском: Представьтесь руководителю партнёрской команды и ответьте на неожиданный уточняющий вопрос о полномочиях; объясните границы вашей ответственности."
+      },
+      "evidence": [
+        "Роль отделена от задачи команды",
+        "Аудитории понятна польза",
+        "Граница ответственности названа"
+      ],
+      "delivery": "brief",
+      "source_ids": [
+        "bc_business"
+      ]
+    },
+    {
+      "id": "async_requests",
+      "strand": "work",
+      "title_ru": "Чат, письмо и рабочий запрос",
+      "area": "Рабочая коммуникация",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "mediation"
+      ],
+      "language_focus": [
+        "просьбы и регистр",
+        "связность краткого сообщения"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "async-slack-email-updates"
+      ],
+      "outcomes": {
+        "b2": "Попросить сведения и назвать срок",
+        "b2_plus": "Сжать переписку и напомнить без давления",
+        "c1_intro": "Перевести спорную переписку в конкретное решение"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите команде запрос недостающих данных: контекст, действие, срок.",
+        "b2_plus": "На английском: Сократите вымышленную длинную переписку до запроса и двух открытых вопросов.",
+        "c1_intro": "На английском: Напишите итог спорной ветки: что решено, чьё подтверждение нужно и когда лучше созвониться."
+      },
+      "evidence": [
+        "Запрос имеет конкретного адресата",
+        "Контекст достаточен для действия",
+        "Ожидаемый срок понятен"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "gitlab_communication"
+      ]
+    },
+    {
+      "id": "stakeholder_updates",
+      "strand": "work",
+      "title_ru": "Статус и заинтересованные стороны",
+      "area": "Рабочая коммуникация",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "время и аспект",
+        "прогноз и оговорка"
+      ],
+      "adaptive_topics": [
+        "aspect",
+        "future_planning",
+        "delivery_collocations"
+      ],
+      "library_slugs": [
+        "async-slack-email-updates",
+        "roadmap-updates-uncertainty"
+      ],
+      "outcomes": {
+        "b2": "Разделить сделанное и план",
+        "b2_plus": "Объяснить отклонение и зависимость",
+        "c1_intro": "Адаптировать статус для руководства и исполнителей"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите статус учебного проекта: результат, препятствие, следующий шаг.",
+        "b2_plus": "На английском: Объясните задержку зависимой задачи и предложите запрос другой команде.",
+        "c1_intro": "На английском: Сделайте две версии обновления по одним фактам: руководству и рабочей команде; сохраните оговорку о сроке."
+      },
+      "evidence": [
+        "Прогресс не смешан с намерением",
+        "Риск связан с воздействием",
+        "Просьба или следующий шаг явны"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "gitlab_communication"
+      ]
+    },
+    {
+      "id": "clarification_repair",
+      "strand": "work",
+      "title_ru": "Уточнение и восстановление понимания",
+      "area": "Рабочая коммуникация",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "косвенные вопросы",
+        "точность отсылок"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "information_structure"
+      ],
+      "library_slugs": [
+        "scope-clarification-requirements"
+      ],
+      "outcomes": {
+        "b2": "Уточнить термин, дату и владельца",
+        "b2_plus": "Выявить двусмысленное требование",
+        "c1_intro": "Развести трактовки без обвинения"
+      },
+      "tasks": {
+        "b2": "На английском: Составьте вопросы к неясному учебному запросу клиента и подтвердите понимание.",
+        "b2_plus": "На английском: Обсудите с партнёром требование, в котором срок и критерий результата трактуются по-разному.",
+        "c1_intro": "На английском: Напишите согласованное толкование после разногласия двух команд; укажите оставшееся предположение."
+      },
+      "evidence": [
+        "Вопрос устраняет конкретную неопределённость",
+        "Пересказ сохраняет исходные факты",
+        "Согласованное условие проверяемо"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_project_meeting"
+      ]
+    },
+    {
+      "id": "meeting_participation",
+      "strand": "work",
+      "title_ru": "Участие во встрече",
+      "area": "Встречи и влияние",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "listening",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "вступление в разговор",
+        "несогласие и перефразирование"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "disagreeing-proposing-alternatives"
+      ],
+      "outcomes": {
+        "b2": "Высказать мнение с причиной",
+        "b2_plus": "Уточнить и возразить в ходе обсуждения",
+        "c1_intro": "Связать позиции и предложить решение"
+      },
+      "tasks": {
+        "b2": "На английском: Послушайте выбранную учебную встречу; сформулируйте своё мнение и уточняющий вопрос.",
+        "b2_plus": "На английском: Разыграйте обсуждение приоритетов с партнёром; возразите и предложите альтернативу.",
+        "c1_intro": "На английском: В учебной встрече объедините две противоречивые позиции и предложите проверяемый следующий шаг."
+      },
+      "evidence": [
+        "Вклад отвечает предмету обсуждения",
+        "Есть реакция на чужой аргумент",
+        "Уточнение проверяет понимание"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_project_meeting",
+        "bc_speaking"
+      ]
+    },
+    {
+      "id": "meeting_facilitation",
+      "strand": "work",
+      "title_ru": "Ведение встречи и фиксация решений",
+      "area": "Встречи и влияние",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "ведение очередности",
+        "передача решений"
+      ],
+      "adaptive_topics": [
+        "reporting",
+        "diplomatic_communication",
+        "delivery_collocations"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Открыть встречу и распределить время",
+        "b2_plus": "Вернуть обсуждение к цели",
+        "c1_intro": "Управлять конфликтом приоритетов"
+      },
+      "tasks": {
+        "b2": "На английском: Составьте повестку учебной встречи и проведите её открытие с партнёром.",
+        "b2_plus": "На английском: Проведите сцену, в которой обсуждение уходит в сторону; подведите итог решений.",
+        "c1_intro": "На английском: Проведите обсуждение конкурирующих интересов; зафиксируйте решение, несогласие, владельца и срок."
+      },
+      "evidence": [
+        "Цель встречи ясна",
+        "Несогласие не скрыто в итоге",
+        "Действия имеют владельцев и сроки"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_project_meeting",
+        "gitlab_communication"
+      ]
+    },
+    {
+      "id": "presentations_demos",
+      "strand": "work",
+      "title_ru": "Презентация и демонстрация",
+      "area": "Встречи и влияние",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "структура выступления",
+        "выделение главной мысли"
+      ],
+      "adaptive_topics": [
+        "information_structure",
+        "cohesion",
+        "modals"
+      ],
+      "library_slugs": [
+        "executive-summaries-recommendations"
+      ],
+      "outcomes": {
+        "b2": "Показать проблему и решение",
+        "b2_plus": "Объяснить результат и ответить на вопрос",
+        "c1_intro": "Защитить рекомендацию с признанием ограничений"
+      },
+      "tasks": {
+        "b2": "На английском: Подготовьте двухминутное объяснение вымышленного сервиса: проблема, решение, пример.",
+        "b2_plus": "На английском: Проведите демонстрацию партнёру и ответьте на возражение о пользе.",
+        "c1_intro": "На английском: Представьте рекомендацию скептической аудитории и ответьте на вопросы о риске и доказательствах."
+      },
+      "evidence": [
+        "Главная мысль видна",
+        "Пример объясняет ценность",
+        "Ответ не скрывает ограничение"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_business",
+        "google_audience"
+      ]
+    },
+    {
+      "id": "persuasion_disagreement",
+      "strand": "work",
+      "title_ru": "Аргумент, несогласие и влияние",
+      "area": "Встречи и влияние",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "уступка и противопоставление",
+        "точная степень уверенности"
+      ],
+      "adaptive_topics": [
+        "cohesion",
+        "modals",
+        "diplomatic_communication"
+      ],
+      "library_slugs": [
+        "diplomatic-stakeholder-pushback",
+        "disagreeing-proposing-alternatives"
+      ],
+      "outcomes": {
+        "b2": "Сравнить два варианта",
+        "b2_plus": "Признать сильный аргумент оппонента",
+        "c1_intro": "Пересмотреть рекомендацию после новых фактов"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите рекомендацию из двух учебных вариантов с двумя основаниями.",
+        "b2_plus": "На английском: Обсудите с партнёром возражение руководителя и предложите условную альтернативу.",
+        "c1_intro": "На английском: Синтезируйте три учебные позиции; объясните, как новое ограничение меняет вашу рекомендацию."
+      },
+      "evidence": [
+        "Контраргумент рассмотрен честно",
+        "Рекомендация имеет основания",
+        "Условие пересмотра названо"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "project_kickoff",
+      "strand": "work",
+      "title_ru": "Запуск проекта и рабочий план",
+      "area": "Проект и продукт",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "цели и этапы",
+        "ответственность и зависимости"
+      ],
+      "adaptive_topics": [
+        "future_planning",
+        "delivery_collocations"
+      ],
+      "library_slugs": [
+        "cross-team-dependencies-ownership"
+      ],
+      "outcomes": {
+        "b2": "Описать этапы и ответственность",
+        "b2_plus": "Объяснить зависимости и успех",
+        "c1_intro": "Согласовать границы проекта между функциями"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите краткий план вымышленного запуска: цель, этапы, роли, сроки.",
+        "b2_plus": "На английском: Составьте план с зависимостью от другой команды и критерием результата.",
+        "c1_intro": "На английском: Подготовьте записку запуска при неполных требованиях; объясните принятые допущения и решения, которые нужно согласовать."
+      },
+      "evidence": [
+        "Цель отделена от списка работ",
+        "Зависимость имеет владельца",
+        "Критерий результата измерим"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_project_meeting"
+      ]
+    },
+    {
+      "id": "priorities_capacity",
+      "strand": "work",
+      "title_ru": "Приоритеты и рабочая загрузка",
+      "area": "Проект и продукт",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "сравнение и ранжирование",
+        "рабочие сочетания"
+      ],
+      "adaptive_topics": [
+        "delivery_collocations",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "sprint-planning-priority-negotiation",
+        "customer-feedback-feature-prioritisation"
+      ],
+      "outcomes": {
+        "b2": "Объяснить срочность и важность",
+        "b2_plus": "Сопоставить ценность и усилие",
+        "c1_intro": "Обосновать отказ через альтернативные издержки"
+      },
+      "tasks": {
+        "b2": "На английском: Расставьте три учебные задачи по порядку и объясните выбор.",
+        "b2_plus": "На английском: Обсудите с партнёром добавленную срочную задачу при неизменной загрузке.",
+        "c1_intro": "На английском: Напишите руководителю рекомендацию отложить полезную инициативу; покажите, какой результат она вытесняет."
+      },
+      "evidence": [
+        "Критерий приоритета ясен",
+        "Ограничение ресурса учтено",
+        "Отказ сопровождается вариантом действия"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "estimates_commitments",
+      "strand": "work",
+      "title_ru": "Оценки, сроки и обязательства",
+      "area": "Проект и продукт",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "будущие формы",
+        "вероятность и условия"
+      ],
+      "adaptive_topics": [
+        "future_planning",
+        "conditionals",
+        "modals"
+      ],
+      "library_slugs": [
+        "roadmap-updates-uncertainty",
+        "deadline-negotiation-pushback"
+      ],
+      "outcomes": {
+        "b2": "Назвать оценку и срок",
+        "b2_plus": "Отличить прогноз от обещания",
+        "c1_intro": "Объяснить уверенность и условия пересмотра"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите прогноз завершения учебной задачи и назовите одну зависимость.",
+        "b2_plus": "На английском: Обсудите запрос гарантировать срок при неполных данных; предложите диапазон и проверку.",
+        "c1_intro": "На английском: Составьте сообщение руководству о трёх сценариях срока; объясните условия обязательства и момент пересмотра."
+      },
+      "evidence": [
+        "Прогноз не выдан за гарантию",
+        "Условие срока явное",
+        "Следующая проверка обозначена"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "requirements_changes",
+      "strand": "work",
+      "title_ru": "Требования, изменения и приёмка",
+      "area": "Проект и продукт",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "относительные придаточные",
+        "условия и спецификация"
+      ],
+      "adaptive_topics": [
+        "information_structure",
+        "conditionals",
+        "delivery_collocations"
+      ],
+      "library_slugs": [
+        "scope-clarification-requirements",
+        "customer-feedback-feature-prioritisation"
+      ],
+      "outcomes": {
+        "b2": "Описать поведение и критерий приёмки",
+        "b2_plus": "Объяснить последствия изменения объёма",
+        "c1_intro": "Согласовать изменение при конфликте ограничений"
+      },
+      "tasks": {
+        "b2": "На английском: Перепишите учебное пожелание клиента в проверяемое требование.",
+        "b2_plus": "На английском: Ответьте клиенту на добавленное требование: влияние на объём и два варианта.",
+        "c1_intro": "На английском: Подготовьте решение об изменении после возражений продукта и инженерии; уточните уступки и критерий приёмки."
+      },
+      "evidence": [
+        "Требование проверяемо",
+        "Изменение связано с последствиями",
+        "Итог не содержит двусмысленной границы"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "client_discovery",
+      "strand": "work",
+      "title_ru": "Выявление потребностей клиента",
+      "area": "Клиентская работа",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "открытые и уточняющие вопросы",
+        "потребность и результат"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "information_structure"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Спросить о процессе и цели",
+        "b2_plus": "Уточнить последствия и критерий выбора",
+        "c1_intro": "Проверить предположение о нужном результате"
+      },
+      "tasks": {
+        "b2": "На английском: Составьте шесть вопросов новому вымышленному клиенту и резюме ожидаемой проблемы.",
+        "b2_plus": "На английском: Разыграйте разговор: клиент просит функцию, но причина запроса ещё не ясна.",
+        "c1_intro": "На английском: Проведите учебное обсуждение противоречивых требований двух представителей клиента; резюмируйте результат и непроверенные предположения."
+      },
+      "evidence": [
+        "Вопрос не навязывает ответ",
+        "Потребность отделена от решения",
+        "Клиенту предложена проверка резюме"
+      ],
+      "delivery": "brief",
+      "source_ids": [
+        "gitlab_discovery"
+      ]
+    },
+    {
+      "id": "value_proposals",
+      "strand": "work",
+      "title_ru": "Предложение и ценность для клиента",
+      "area": "Клиентская работа",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "ценность и доказательство",
+        "убеждение и оговорки"
+      ],
+      "adaptive_topics": [
+        "cohesion",
+        "conditionals",
+        "modals"
+      ],
+      "library_slugs": [
+        "executive-summaries-recommendations"
+      ],
+      "outcomes": {
+        "b2": "Связать возможность с потребностью",
+        "b2_plus": "Сравнить альтернативы и доказать пользу",
+        "c1_intro": "Составить предложение с честными границами"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите короткое предложение по учебному запросу клиента с понятной пользой.",
+        "b2_plus": "На английском: Сравните два решения для клиента по предоставленным ограничениям.",
+        "c1_intro": "На английском: Подготовьте предложение пилота с обещаемым результатом, ограничениями, способом проверки и следующим шагом."
+      },
+      "evidence": [
+        "Польза связана с задачей клиента",
+        "Утверждение поддержано данными сценария",
+        "Следующий шаг конкретен"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "gitlab_discovery"
+      ]
+    },
+    {
+      "id": "commercial_negotiation",
+      "strand": "work",
+      "title_ru": "Условия, закупки и переговоры",
+      "area": "Клиентская работа",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "условная уступка",
+        "количество и коммерческие условия"
+      ],
+      "adaptive_topics": [
+        "conditionals",
+        "diplomatic_communication"
+      ],
+      "library_slugs": [
+        "deadline-negotiation-pushback"
+      ],
+      "outcomes": {
+        "b2": "Уточнить цену, объём и срок",
+        "b2_plus": "Обменять уступку на условие",
+        "c1_intro": "Согласовать пакет условий и полномочия"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите вопросы к учебному предложению поставщика о цене и объёме.",
+        "b2_plus": "На английском: Разыграйте переговоры: скидка возможна при другом сроке и объёме.",
+        "c1_intro": "На английском: Составьте итог учебных переговоров с несколькими условными уступками; отделите согласованное от требующего полномочий."
+      },
+      "evidence": [
+        "Условие уступки сохранено",
+        "Полномочия не предполагаются",
+        "Итог отражает цену, объём и срок"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "support_escalation",
+      "strand": "work",
+      "title_ru": "Поддержка, жалоба и эскалация",
+      "area": "Клиентская работа",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "эмпатия и плохая новость",
+        "уверенность и эскалация"
+      ],
+      "adaptive_topics": [
+        "incident_communication",
+        "diplomatic_communication",
+        "modals"
+      ],
+      "library_slugs": [
+        "incident-updates-eta-caveats"
+      ],
+      "outcomes": {
+        "b2": "Признать проблему и запросить детали",
+        "b2_plus": "Сообщить плохую новость и обходной путь",
+        "c1_intro": "Сохранить доверие при неопределённом сроке"
+      },
+      "tasks": {
+        "b2": "На английском: Ответьте на учебную жалобу клиента: признание воздействия, вопросы, следующий шаг.",
+        "b2_plus": "На английском: Объясните клиенту, что исправление задерживается; предложите временное решение.",
+        "c1_intro": "На английском: Напишите два согласованных сообщения о сложной проблеме: клиенту и внутренней команде; сохраните границы известных фактов."
+      },
+      "evidence": [
+        "Воздействие признано",
+        "Гипотеза отделена от факта",
+        "Следующее обновление обозначено"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "gitlab_communication"
+      ]
+    },
+    {
+      "id": "metrics_trends",
+      "strand": "work",
+      "title_ru": "Метрики, графики и тенденции",
+      "area": "Данные и стратегия",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "сравнение и модификаторы",
+        "числа и меры"
+      ],
+      "adaptive_topics": [
+        "cohesion",
+        "modals"
+      ],
+      "library_slugs": [
+        "data-trends-business-reports"
+      ],
+      "outcomes": {
+        "b2": "Описать изменение и период",
+        "b2_plus": "Сравнить периоды и величины",
+        "c1_intro": "Объяснить ограниченность показателя"
+      },
+      "tasks": {
+        "b2": "На английском: Опишите предоставленную учебную таблицу: направление, величина, период.",
+        "b2_plus": "На английском: Сравните две группы по данным и объясните различие процентов и процентных пунктов.",
+        "c1_intro": "На английском: Напишите резюме неоднозначных метрик; укажите альтернативное объяснение и недостающие данные."
+      },
+      "evidence": [
+        "Число и период сохранены",
+        "Сравниваются сопоставимые величины",
+        "Корреляция не выдана за причинность"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_writing",
+        "sec_financial"
+      ]
+    },
+    {
+      "id": "budgets_resources",
+      "strand": "work",
+      "title_ru": "Бюджет, затраты и ресурсы",
+      "area": "Данные и стратегия",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "исчисляемость и количество",
+        "затраты и ресурсы"
+      ],
+      "adaptive_topics": [
+        "delivery_collocations",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Назвать затраты и доступный ресурс",
+        "b2_plus": "Объяснить отклонение и корректировку",
+        "c1_intro": "Обосновать перераспределение ресурсов"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите запрос бюджета по вымышленной смете и поясните основные расходы.",
+        "b2_plus": "На английском: Объясните превышение учебного бюджета; предложите две корректировки.",
+        "c1_intro": "На английском: Подготовьте рекомендацию перераспределить ресурсы между командами; учтите эффект, ограничения и возражение."
+      },
+      "evidence": [
+        "Смета совпадает с заданными цифрами",
+        "Причина отклонения конкретна",
+        "Цена альтернативы обозначена"
+      ],
+      "delivery": "brief",
+      "source_ids": [
+        "sec_financial",
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "financial_case",
+      "strand": "work",
+      "title_ru": "Финансовый результат и бизнес-обоснование",
+      "area": "Данные и стратегия",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "финансовые сочетания",
+        "условие и осторожный прогноз"
+      ],
+      "adaptive_topics": [
+        "conditionals",
+        "modals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Различить выручку, прибыль и денежный поток",
+        "b2_plus": "Сравнить варианты по учебным цифрам",
+        "c1_intro": "Объяснить чувствительность к допущениям"
+      },
+      "tasks": {
+        "b2": "На английском: Объясните простую учебную финансовую таблицу человеку без специальной подготовки.",
+        "b2_plus": "На английском: Напишите сравнение двух инициатив по заданным затратам и пользе.",
+        "c1_intro": "На английском: Подготовьте бизнес-обоснование с двумя сценариями; покажите, какое допущение сильнее всего меняет вывод."
+      },
+      "evidence": [
+        "Финансовые понятия не смешаны",
+        "Расчёт соответствует условиям",
+        "Прогноз и допущение обозначены"
+      ],
+      "delivery": "brief",
+      "source_ids": [
+        "sec_financial"
+      ]
+    },
+    {
+      "id": "strategy_market",
+      "strand": "work",
+      "title_ru": "Стратегия, рынок и цели",
+      "area": "Данные и стратегия",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "mediation"
+      ],
+      "language_focus": [
+        "результат и цель",
+        "аргумент и сценарии"
+      ],
+      "adaptive_topics": [
+        "cohesion",
+        "conditionals",
+        "delivery_collocations"
+      ],
+      "library_slugs": [
+        "executive-summaries-recommendations"
+      ],
+      "outcomes": {
+        "b2": "Описать клиента, конкурента и цель",
+        "b2_plus": "Связать инициативу с результатом",
+        "c1_intro": "Сопоставить рыночные сценарии"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите краткое описание учебного рынка и цели вымышленной компании.",
+        "b2_plus": "На английском: Сопоставьте две инициативы с измеримыми результатами и объясните приоритет.",
+        "c1_intro": "На английском: Составьте стратегическую рекомендацию по противоречивым учебным данным; поясните отвергнутую альтернативу и условие пересмотра."
+      },
+      "evidence": [
+        "Цель отделена от активности",
+        "Альтернатива рассмотрена",
+        "Условие пересмотра конкретно"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "gitlab_discovery",
+        "atlassian_tradeoffs"
+      ]
+    },
+    {
+      "id": "career_interviews",
+      "strand": "work",
+      "title_ru": "Собеседование и профессиональный опыт",
+      "area": "Люди и команда",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "повествование и опыт",
+        "результат и ответственность"
+      ],
+      "adaptive_topics": [
+        "aspect",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Описать вклад и результат",
+        "b2_plus": "Объяснить выбор и урок неудачи",
+        "c1_intro": "Обсудить ожидания без преувеличения вклада"
+      },
+      "tasks": {
+        "b2": "На английском: Подготовьте рассказ об учебном достижении: контекст, ваше действие, результат.",
+        "b2_plus": "На английском: Разыграйте интервью с вопросами о трудном решении и ошибке.",
+        "c1_intro": "На английском: Ответьте на неожиданные уточнения о личном и командном вкладе; задайте вопросы об ожиданиях роли."
+      },
+      "evidence": [
+        "Личный вклад отделён от командного",
+        "Есть конкретный результат",
+        "Урок связан с изменением действия"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "bc_business"
+      ]
+    },
+    {
+      "id": "feedback_one_to_one",
+      "strand": "work",
+      "title_ru": "Обратная связь и разговор один на один",
+      "area": "Люди и команда",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "наблюдение и оценка",
+        "смягчение критики"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "modals"
+      ],
+      "library_slugs": [
+        "performance-feedback-diplomacy"
+      ],
+      "outcomes": {
+        "b2": "Описать наблюдение и просьбу",
+        "b2_plus": "Дать и принять трудную обратную связь",
+        "c1_intro": "Согласовать изменение при разных взглядах"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите коллеге учебную обратную связь: наблюдение, влияние, просьба.",
+        "b2_plus": "На английском: Разыграйте разговор, в котором получатель не согласен с оценкой.",
+        "c1_intro": "На английском: Проведите обсуждение двух трактовок проблемы; согласуйте наблюдаемое изменение и последующую проверку."
+      },
+      "evidence": [
+        "Наблюдение не подменено ярлыком",
+        "Просьба выполнима",
+        "Понимание получателя проверено"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_professional_podcasts"
+      ]
+    },
+    {
+      "id": "delegation_coaching",
+      "strand": "work",
+      "title_ru": "Делегирование и развитие сотрудника",
+      "area": "Люди и команда",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "обязанность и полномочия",
+        "вопросы и поддержка"
+      ],
+      "adaptive_topics": [
+        "modals",
+        "delivery_collocations",
+        "diplomatic_communication"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Поручить работу и назвать срок",
+        "b2_plus": "Согласовать самостоятельность и поддержку",
+        "c1_intro": "Адаптировать помощь и ответственность"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите поручение вымышленному коллеге с результатом и сроком.",
+        "b2_plus": "На английском: Обсудите с партнёром границы самостоятельности и момент обращения за помощью.",
+        "c1_intro": "На английском: Разыграйте разговор о повторяющейся трудности; задайте вопросы, согласуйте развитие и способ проверки без микроконтроля."
+      },
+      "evidence": [
+        "Результат и полномочия явны",
+        "Поддержка не снимает ответственность",
+        "Проверка согласована"
+      ],
+      "delivery": "brief",
+      "source_ids": [
+        "bc_professional_podcasts"
+      ]
+    },
+    {
+      "id": "intercultural_conflict",
+      "strand": "work",
+      "title_ru": "Конфликт и международная команда",
+      "area": "Люди и команда",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "отношения и границы",
+        "регистр и намерение"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "disagreeing-proposing-alternatives"
+      ],
+      "outcomes": {
+        "b2": "Уточнить намерение и обозначить неудобство",
+        "b2_plus": "Обсудить разные нормы общения",
+        "c1_intro": "Посредничать между стилями работы"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите коллеге о неудобном времени встреч и предложите вариант.",
+        "b2_plus": "На английском: Разыграйте недопонимание из-за прямого тона сообщения; уточните ожидания без национальных стереотипов.",
+        "c1_intro": "На английском: Проведите учебное посредничество двух коллег с разными нормами ответа; составьте соглашение с исключением для срочных случаев."
+      },
+      "evidence": [
+        "Стиль не приравнен к мотиву",
+        "Обе позиции отражены",
+        "Рабочая норма и исключение ясны"
+      ],
+      "delivery": "external",
+      "source_ids": [
+        "gitlab_communication",
+        "google_audience"
+      ]
+    },
+    {
+      "id": "architecture_explanations",
+      "strand": "work",
+      "title_ru": "Объяснение системы и архитектурного выбора",
+      "area": "IT и технологии",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "процессы и пассив",
+        "сравнение и условия"
+      ],
+      "adaptive_topics": [
+        "reporting",
+        "conditionals",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "architecture-tradeoffs-recommendations",
+        "performance-latency-reliability",
+        "technical-debt-refactoring-rationale"
+      ],
+      "outcomes": {
+        "b2": "Объяснить компоненты и поток данных",
+        "b2_plus": "Сравнить решения и компромиссы",
+        "c1_intro": "Адаптировать объяснение последствий аудитории"
+      },
+      "tasks": {
+        "b2": "На английском: Объясните словами учебную схему сервиса и назначение трёх компонентов.",
+        "b2_plus": "На английском: Напишите сравнение двух вариантов по надёжности и стоимости из условий сценария.",
+        "c1_intro": "На английском: Подготовьте две версии рекомендации: инженерам и руководству; сохраните допущения, компромисс и критерий проверки."
+      },
+      "evidence": [
+        "Причина выбора ясна",
+        "Термины адаптированы к аудитории",
+        "Компромисс и допущение сохранены"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "google_documents",
+        "google_audience"
+      ]
+    },
+    {
+      "id": "technical_documents",
+      "strand": "work",
+      "title_ru": "Технический документ и рабочая передача",
+      "area": "IT и технологии",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "инструкции и глагольные модели",
+        "отсылки и точность"
+      ],
+      "adaptive_topics": [
+        "information_structure",
+        "reporting",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "reporting-verbs-workplace-opinions"
+      ],
+      "outcomes": {
+        "b2": "Дать воспроизводимые шаги",
+        "b2_plus": "Устранить неясные отсылки",
+        "c1_intro": "Синтезировать замечания другой команды"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите описание учебного дефекта: шаги, ожидаемое и наблюдаемое поведение.",
+        "b2_plus": "На английском: Перепишите неясную инструкцию для новой команды и ответьте на замечание проверяющего.",
+        "c1_intro": "На английском: Согласуйте противоречивые учебные замечания к документу; напишите итог с объяснением выбора структуры."
+      },
+      "evidence": [
+        "Шаги воспроизводимы",
+        "Отсылки однозначны",
+        "Читателю хватает исходного контекста"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "google_documents"
+      ]
+    },
+    {
+      "id": "research_experiments",
+      "strand": "work",
+      "title_ru": "Данные, исследование и эксперимент",
+      "area": "IT и технологии",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "доказательство и оговорки",
+        "причина и альтернатива"
+      ],
+      "adaptive_topics": [
+        "modals",
+        "cohesion",
+        "conditionals"
+      ],
+      "library_slugs": [
+        "data-trends-business-reports"
+      ],
+      "outcomes": {
+        "b2": "Назвать вопрос, метод и наблюдение",
+        "b2_plus": "Обсудить качество данных",
+        "c1_intro": "Оценить предел обобщения"
+      },
+      "tasks": {
+        "b2": "На английском: Резюмируйте предоставленный учебный эксперимент: вопрос, способ проверки, наблюдение.",
+        "b2_plus": "На английском: Сравните два объяснения результата и предложите недостающую проверку.",
+        "c1_intro": "На английском: Напишите рекомендацию по противоречивым результатам эксперимента; укажите предел обобщения и следующий тест."
+      },
+      "evidence": [
+        "Метод отделён от результата",
+        "Альтернативная причина учтена",
+        "Следующий тест отвечает неопределённости"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_listening",
+        "google_documents"
+      ]
+    },
+    {
+      "id": "ai_automation",
+      "strand": "work",
+      "title_ru": "AI и автоматизация в работе",
+      "area": "IT и технологии",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "польза и риск",
+        "точная уверенность"
+      ],
+      "adaptive_topics": [
+        "modals",
+        "conditionals",
+        "cohesion"
+      ],
+      "library_slugs": [],
+      "outcomes": {
+        "b2": "Объяснить применение и ограничение",
+        "b2_plus": "Согласовать метрику и человеческую проверку",
+        "c1_intro": "Оценить противоречивые результаты пилота"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите предложение учебного AI-пилота с задачей и одним ограничением.",
+        "b2_plus": "На английском: Обсудите с партнёром риск ошибочного результата; согласуйте проверку и владельца.",
+        "c1_intro": "На английском: Подготовьте решение по учебному пилоту, где скорость выросла, а качество неоднозначно; определите границы использования и дополнительные данные."
+      },
+      "evidence": [
+        "Польза связана с задачей",
+        "Ограничение и проверка конкретны",
+        "Ответственность за решение определена"
+      ],
+      "delivery": "brief",
+      "source_ids": [
+        "nist_ai"
+      ]
+    },
+    {
+      "id": "security_privacy",
+      "strand": "work",
+      "title_ru": "Риски, безопасность и приватность",
+      "area": "Риск и изменения",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction"
+      ],
+      "language_focus": [
+        "модальность риска",
+        "пассив и ответственность"
+      ],
+      "adaptive_topics": [
+        "modals",
+        "reporting",
+        "conditionals"
+      ],
+      "library_slugs": [
+        "security-privacy-risk-communication",
+        "risk-mitigation-conditionals"
+      ],
+      "outcomes": {
+        "b2": "Описать риск и меру",
+        "b2_plus": "Различить вероятность и тяжесть",
+        "c1_intro": "Объяснить конфликт защиты и удобства"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите учебную запись риска: событие, возможное воздействие, мера.",
+        "b2_plus": "На английском: Объясните риск доступа неспециалисту и уточните остаточную неопределённость.",
+        "c1_intro": "На английском: Составьте рекомендацию по вымышленному выбору удобства и защиты; определите владельца решения и оставшийся риск."
+      },
+      "evidence": [
+        "Вероятность не смешана с воздействием",
+        "Мера связана с риском",
+        "Остаточное ограничение названо"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "nist_ai"
+      ]
+    },
+    {
+      "id": "incident_handover",
+      "strand": "work",
+      "title_ru": "Инцидент и оперативная передача",
+      "area": "Риск и изменения",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register"
+      ],
+      "language_focus": [
+        "инцидентные сочетания",
+        "время и уверенность"
+      ],
+      "adaptive_topics": [
+        "incident_communication",
+        "aspect",
+        "modals"
+      ],
+      "library_slugs": [
+        "incident-updates-eta-caveats"
+      ],
+      "outcomes": {
+        "b2": "Назвать воздействие и следующий шаг",
+        "b2_plus": "Разделить симптом и гипотезу",
+        "c1_intro": "Передать управление разным аудиториям"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите обновление об учебном сбое: воздействие, известное, действие, следующая проверка.",
+        "b2_plus": "На английском: Подготовьте передачу смены: проверенные гипотезы, временная мера, открытые вопросы.",
+        "c1_intro": "На английском: Сделайте сообщения для клиента и новой дежурной команды по одним фактам; обозначьте неопределённый срок восстановления."
+      },
+      "evidence": [
+        "Факты отделены от гипотез",
+        "Передача сохраняет незавершённые действия",
+        "Время следующего сообщения ясно"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "sre_postmortems"
+      ]
+    },
+    {
+      "id": "postmortems_improvement",
+      "strand": "work",
+      "title_ru": "Разбор, ретроспектива и улучшение",
+      "area": "Риск и изменения",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "mediation"
+      ],
+      "language_focus": [
+        "прошедшее время и пассив",
+        "причинная атрибуция"
+      ],
+      "adaptive_topics": [
+        "aspect",
+        "reporting",
+        "incident_communication",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "postmortems-lessons-learned"
+      ],
+      "outcomes": {
+        "b2": "Описать последовательность и урок",
+        "b2_plus": "Назвать факторы и действия",
+        "c1_intro": "Сопоставить причинные объяснения"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите краткий разбор вымышленного сбоя по заданной последовательности.",
+        "b2_plus": "На английском: Дополните разбор способствовавшими факторами и действиями с владельцами.",
+        "c1_intro": "На английском: Сопоставьте две версии причины учебного сбоя; составьте нейтральный итог и проверяемый план предотвращения."
+      },
+      "evidence": [
+        "Хронология не противоречит фактам",
+        "Причина не подменена обвинением",
+        "Действие имеет владельца и проверку"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "sre_postmortems"
+      ]
+    },
+    {
+      "id": "change_adoption",
+      "strand": "work",
+      "title_ru": "Изменения и принятие нового процесса",
+      "area": "Риск и изменения",
+      "skills": [
+        "reading",
+        "writing",
+        "language",
+        "register",
+        "speaking",
+        "interaction",
+        "mediation"
+      ],
+      "language_focus": [
+        "изменения и процесс",
+        "передача мнений и уступки"
+      ],
+      "adaptive_topics": [
+        "reporting",
+        "future_planning",
+        "cohesion"
+      ],
+      "library_slugs": [
+        "roadmap-updates-uncertainty"
+      ],
+      "outcomes": {
+        "b2": "Объяснить причину и порядок",
+        "b2_plus": "Ответить на опасения",
+        "c1_intro": "Скорректировать план по обратной связи"
+      },
+      "tasks": {
+        "b2": "На английском: Напишите объявление об учебном изменении процесса: причина, действие, срок.",
+        "b2_plus": "На английском: Обсудите с партнёром опасения пользователей и уточните поддержку.",
+        "c1_intro": "На английском: Синтезируйте противоречивую учебную обратную связь от трёх групп; предложите обновлённый план внедрения и его проверку."
+      },
+      "evidence": [
+        "Изменение связано с причиной",
+        "Обратная связь влияет на план",
+        "Действие получателя понятно"
+      ],
+      "delivery": "mixed",
+      "source_ids": [
+        "bc_professional_podcasts",
+        "gitlab_communication"
+      ]
+    }
+  ],
+  "language_map": [
+    {
+      "id": "time_aspect",
+      "title_ru": "Время, вид и повествование",
+      "b2_focus": "Завершённое событие, текущий результат, длительность, привычки и фон истории",
+      "c1_focus": "Смена перспективы, последовательность, предварительная оценка и будущее в прошлом",
+      "module_ids": [
+        "life_stories",
+        "identity_relationships",
+        "wellbeing_habits",
+        "stakeholder_updates",
+        "postmortems_improvement"
+      ],
+      "adaptive_topics": [
+        "aspect"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "future_forms",
+      "title_ru": "Будущее, планы и прогнозы",
+      "b2_focus": "Намерение, договорённость, срок и завершение к моменту",
+      "c1_focus": "Условный прогноз, диапазон уверенности и ограниченное обязательство",
+      "module_ids": [
+        "social_plans",
+        "travel_culture",
+        "learning_education",
+        "estimates_commitments",
+        "change_adoption"
+      ],
+      "adaptive_topics": [
+        "future_planning"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "conditional_reasoning",
+      "title_ru": "Условия и контрфактическое рассуждение",
+      "b2_focus": "Реальные условия, воображаемая альтернатива и прошлое сожаление",
+      "c1_focus": "Смешанное условие, формальная инверсия и точная граница зависимости",
+      "module_ids": [
+        "life_stories",
+        "ethical_dilemmas",
+        "environment_choices",
+        "commercial_negotiation",
+        "financial_case"
+      ],
+      "adaptive_topics": [
+        "conditionals"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "modal_meaning",
+      "title_ru": "Модальность, обязанность и уверенность",
+      "b2_focus": "Разрешение, совет, обязанность и вывод по данным",
+      "c1_focus": "Объём доказательства, прошлая оценка и дипломатичная критика",
+      "module_ids": [
+        "wellbeing_habits",
+        "housing_services",
+        "news_media",
+        "security_privacy",
+        "ai_automation"
+      ],
+      "adaptive_topics": [
+        "modals"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "reporting_passive",
+      "title_ru": "Передача речи, пассив и процессы",
+      "b2_focus": "Переданные утверждения и вопросы, источник мнения, описание процесса",
+      "c1_focus": "Точные модели глаголов сообщения, приписывание утверждения и формальная рекомендация",
+      "module_ids": [
+        "news_media",
+        "everyday_science",
+        "technical_documents",
+        "meeting_facilitation",
+        "postmortems_improvement"
+      ],
+      "adaptive_topics": [
+        "reporting"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "information_focus",
+      "title_ru": "Уточнение, придаточные и фокус",
+      "b2_focus": "Определительные придаточные, однозначные отсылки и выделение нужного факта",
+      "c1_focus": "Сокращённые придаточные, контрастный фокус и инверсия по коммуникативной необходимости",
+      "module_ids": [
+        "arts_reviews",
+        "clarification_repair",
+        "requirements_changes",
+        "architecture_explanations"
+      ],
+      "adaptive_topics": [
+        "information_structure"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "cohesion_argument",
+      "title_ru": "Связность, причина, контраст и аргумент",
+      "b2_focus": "Причина, следствие, цель, уступка и логичный абзац",
+      "c1_focus": "Ранжирование аргументов, корректирующее уточнение и ограничения вывода",
+      "module_ids": [
+        "argument_decisions",
+        "society_civic",
+        "environment_choices",
+        "persuasion_disagreement",
+        "strategy_market"
+      ],
+      "adaptive_topics": [
+        "cohesion"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "diplomacy_register",
+      "title_ru": "Дипломатия, отношения и регистр",
+      "b2_focus": "Просьба, уточнение, совет и уважительное несогласие",
+      "c1_focus": "Чувствительное возражение, границы полномочий и смена тона под аудиторию",
+      "module_ids": [
+        "identity_relationships",
+        "social_plans",
+        "housing_services",
+        "feedback_one_to_one",
+        "intercultural_conflict"
+      ],
+      "adaptive_topics": [
+        "diplomatic_communication"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "delivery_lexis",
+      "title_ru": "Рабочие сочетания о результате и ответственности",
+      "b2_focus": "Срок, решение, приоритет, владелец и объём",
+      "c1_focus": "Альтернативные издержки, выход работы и конечный эффект, условная выгода",
+      "module_ids": [
+        "project_kickoff",
+        "priorities_capacity",
+        "estimates_commitments",
+        "budgets_resources",
+        "delegation_coaching"
+      ],
+      "adaptive_topics": [
+        "delivery_collocations"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "incident_lexis",
+      "title_ru": "Инцидент, воздействие и оперативная передача",
+      "b2_focus": "Воздействие, исследование, восстановление и следующее действие",
+      "c1_focus": "Причинная атрибуция, взаимодействующие факторы и соразмерная уверенность",
+      "module_ids": [
+        "support_escalation",
+        "incident_handover",
+        "postmortems_improvement"
+      ],
+      "adaptive_topics": [
+        "incident_communication"
+      ],
+      "coverage": "partial"
+    },
+    {
+      "id": "articles_quantifiers",
+      "title_ru": "Артикли, определённость, количество и исчисляемость",
+      "b2_focus": "Выбор артикля по контексту; счётные и несчётные слова; точные кванторы",
+      "c1_focus": "Обобщение и ограничение группы; абстрактное существительное; нюанс количества",
+      "module_ids": [
+        "housing_services",
+        "consumer_money",
+        "society_civic",
+        "budgets_resources",
+        "metrics_trends"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "verb_patterns",
+      "title_ru": "Глагольные модели: инфинитив и герундий",
+      "b2_focus": "Модель после глагола и предлога; разница значений; управление дополнением",
+      "c1_focus": "Перестройка сообщения с сохранением смысла; сложные модели рекомендации и отношения",
+      "module_ids": [
+        "learning_education",
+        "wellbeing_habits",
+        "ethical_dilemmas",
+        "technical_documents",
+        "feedback_one_to_one"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "questions_response",
+      "title_ru": "Вопросы, уточнения и короткие ответы",
+      "b2_focus": "Прямой и косвенный вопрос; порядок слов; уточнение и подтверждение",
+      "c1_focus": "Ненаводящие вопросы, переформулирование и обнаружение скрытого предположения",
+      "module_ids": [
+        "housing_services",
+        "social_plans",
+        "client_discovery",
+        "clarification_repair",
+        "career_interviews"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "comparison_degree",
+      "title_ru": "Сравнение, степень и ранжирование",
+      "b2_focus": "Сравнительная форма, равенство и модификаторы разницы",
+      "c1_focus": "Взвешенное сравнение нескольких критериев; точное ограничение превосходства",
+      "module_ids": [
+        "consumer_money",
+        "travel_culture",
+        "environment_choices",
+        "metrics_trends",
+        "priorities_capacity"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "prepositions_phrasal",
+      "title_ru": "Предлоги, фразовые глаголы и управление",
+      "b2_focus": "Типичные предлоги времени, места и зависимости; распространённые фразовые глаголы в быту",
+      "c1_focus": "Оттенок фразового глагола, нейтральная замена и точное управление в разных регистрах",
+      "module_ids": [
+        "housing_services",
+        "travel_culture",
+        "digital_life",
+        "async_requests",
+        "project_kickoff"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "general_collocations",
+      "title_ru": "Общие сочетания, устойчивые выражения и активный словарь",
+      "b2_focus": "Естественные сочетания о чувствах, опыте, досуге, обучении и повседневных действиях",
+      "c1_focus": "Точная замена кальки, ограничения синонимов и выбор выражения под ситуацию",
+      "module_ids": [
+        "identity_relationships",
+        "life_stories",
+        "arts_reviews",
+        "learning_education",
+        "social_plans"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "wordformation_spelling",
+      "title_ru": "Словообразование и орфография",
+      "b2_focus": "Семейства слов, приставки, суффиксы, типичные написания и часть речи",
+      "c1_focus": "Выбор производного слова по регистру; проверка формы и ударения при расширении словаря",
+      "module_ids": [
+        "learning_education",
+        "news_media",
+        "everyday_science",
+        "arts_reviews",
+        "research_experiments"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "agreement_sentence",
+      "title_ru": "Согласование и устройство предложения",
+      "b2_focus": "Подлежащее и сказуемое; местоименная отсылка; граница предложения и пунктуация",
+      "c1_focus": "Управление длинной группой существительного и несколькими придаточными без потери ясности",
+      "module_ids": [
+        "life_stories",
+        "arts_reviews",
+        "technical_documents",
+        "financial_case",
+        "value_proposals"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "nounphrases_reference",
+      "title_ru": "Именные группы и точность отсылок",
+      "b2_focus": "Определители, порядок описания и однозначное местоимение",
+      "c1_focus": "Плотная именная группа, номинализация и выбор между компактностью и ясностью",
+      "module_ids": [
+        "housing_services",
+        "everyday_science",
+        "requirements_changes",
+        "technical_documents",
+        "architecture_explanations"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "pronunciation_prosody",
+      "title_ru": "Произношение, просодия и понятность речи",
+      "b2_focus": "Ударение слова и фразы, смысловое членение, окончания, понятное произнесение чисел",
+      "c1_focus": "Пауза, контрастное ударение и интонация оговорки; адаптация темпа с сохранением естественности",
+      "module_ids": [
+        "life_stories",
+        "travel_culture",
+        "social_plans",
+        "presentations_demos",
+        "meeting_participation"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "listening_repair",
+      "title_ru": "Аудирование и восстановление понимания",
+      "b2_focus": "Главная мысль, подробности, смысловые блоки и запрос повтора",
+      "c1_focus": "Несколько говорящих, неполная артикуляция, позиция и оговорка; проверка услышанного",
+      "module_ids": [
+        "wellbeing_habits",
+        "arts_reviews",
+        "everyday_science",
+        "meeting_participation",
+        "career_interviews"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "reading_critical",
+      "title_ru": "Стратегии чтения и критическое понимание",
+      "b2_focus": "Главная мысль, детали, вывод из контекста и позиция автора",
+      "c1_focus": "Синтез нескольких источников, подразумеваемое ограничение и проверка противоречия",
+      "module_ids": [
+        "news_media",
+        "society_civic",
+        "everyday_science",
+        "strategy_market",
+        "research_experiments"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "genre_writing",
+      "title_ru": "Жанры, абзац и самостоятельное редактирование",
+      "b2_focus": "Личное и деловое письмо, отзыв, рассказ, объяснение и краткий аргумент",
+      "c1_focus": "Резюме, предложение и синтез с точным регистром; сокращение без потери смысла",
+      "module_ids": [
+        "life_stories",
+        "arts_reviews",
+        "argument_decisions",
+        "async_requests",
+        "value_proposals"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "mediation_summary",
+      "title_ru": "Передача смысла и объяснение другой аудитории",
+      "b2_focus": "Пересказ ключевой мысли своими словами без искажения",
+      "c1_focus": "Синтез разных позиций и перевод сложного содержания в доступное объяснение",
+      "module_ids": [
+        "news_media",
+        "everyday_science",
+        "digital_life",
+        "architecture_explanations",
+        "stakeholder_updates"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "interaction_turns",
+      "title_ru": "Взаимодействие и управление разговором",
+      "b2_focus": "Вступление, вопрос, ответ, уточнение и подтверждение договорённости",
+      "c1_focus": "Работа с перебиванием и несогласием; соединение позиций и завершение решения",
+      "module_ids": [
+        "identity_relationships",
+        "social_plans",
+        "meeting_facilitation",
+        "commercial_negotiation",
+        "intercultural_conflict"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    },
+    {
+      "id": "idioms_register",
+      "title_ru": "Разговорный язык, идиоматичность и уместность",
+      "b2_focus": "Распространённые разговорные выражения и их нейтральные аналоги",
+      "c1_focus": "Распознавание идиомы, юмора и намёка; ясная формулировка для международной аудитории",
+      "module_ids": [
+        "identity_relationships",
+        "arts_reviews",
+        "travel_culture",
+        "professional_identity",
+        "intercultural_conflict"
+      ],
+      "adaptive_topics": [],
+      "coverage": "planned"
+    }
+  ]
+}

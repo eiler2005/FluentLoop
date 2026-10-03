@@ -243,7 +243,11 @@ Telegram remains the primary interface for daily practice.
 15. Adaptive simple learning: topic-specific B2/B2+ difficulty, unseen transfer
     checks, written-use evidence, topic progress, and introductory C1 unlocked
     after strong B2 coverage; automatic improvement of exercises for approved
-    material (EPIC-27).
+     material (EPIC-27).
+16. Research-backed workplace learning roadmap: broad B2 through introductory
+    C1 coverage, editable personal priorities and study time, concrete workplace
+    tasks, and an honest distinction between available bot practice and external
+    or planned activities (EPIC-28).
 ```
 
 ### P2 — future
@@ -763,6 +767,24 @@ approved curriculum items when the bank lacks suitable practice or unseen
 transfer questions. New variants must pass content checks and retain their
 topic, difficulty, role, and provenance. Invalid or ambiguous output cannot
 enter the stream. This does not approve new concepts from uploaded materials.
+
+### Editable workplace roadmap
+
+General English remains the foundation, including personal, public and learning
+contexts; client-facing and large-technology workplace practice is supplementary.
+The learner can inspect a broader general/business/IT roadmap alongside adaptive topic
+progress, choose role priorities and weekly study time, reorder or pause modules,
+and keep personal notes. A portable plan can be edited visually and imported or
+exported without changing answer history. Each module describes B2, strong B2 and
+introductory C1 outcomes, a practical deliverable, evidence criteria and resources.
+Reading, listening, writing, spoken interaction, online interaction, mediation,
+language control and register remain visible in the coverage map. Existing bot
+support, external practice and remaining content work are labelled explicitly.
+
+Planning and self-reported completion do not grant mastery, unlock adaptive C1,
+or activate unapproved learning items. The ten-topic adaptive gate remains a
+local curriculum milestone. The wider roadmap is an editable learning programme,
+not a guarantee of complete language coverage or CEFR certification.
 
 ### Example daily session
 

@@ -45,6 +45,11 @@ purposes:
 
 What this means in practice:
 
+- The offline roadmap editor makes no network requests. Its public syllabus
+  contains no learner data; personal order and notes stay in browser storage or
+  downloaded JSON until explicitly imported. CLI exports use mode 600. Personal
+  exports belong outside tracked files, preferably under `data/`. Roadmap
+  settings/notes are not sent to AI providers and cannot grant assessed mastery.
 - Simple choice questions from the reviewed pack and existing approved cards
   are selected and checked locally. An optional written bonus uses the existing
   AI answer-checking path and sends its prompt and submitted sentence to the

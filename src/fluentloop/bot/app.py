@@ -102,6 +102,7 @@ from fluentloop.bot.handlers import (
     quick_action_for,
 )
 from fluentloop.bot.polls import send_quiz_question
+from fluentloop.bot.roadmap import handle_roadmap, handle_roadmap_callback
 from fluentloop.bot.state import StateStore
 from fluentloop.channel import record_channel_discovery
 from fluentloop.config import Settings
@@ -183,8 +184,15 @@ def _simple_event_authorized(
 
     protected = (
         is_simple_mode(user)
-        or action in {
-            "/study", "/progress", "/plan", "study", "progress", "simple_menu"
+        or action
+        in {
+            "/study",
+            "/progress",
+            "/plan",
+            "/roadmap",
+            "study",
+            "progress",
+            "simple_menu",
         }
         or bool(action and action.startswith("simple:"))
         or (state is not None and state.name == "simple_bonus")
@@ -635,6 +643,19 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     ),
                     message_thread_id=progress_target.message_thread_id,
                 )
+            elif command == "/roadmap":
+                plan_target = _here_or_workspace(event, settings, "practice_flow")
+                reply = handle_roadmap(
+                    session,
+                    user,
+                    _argument(event.raw_text),
+                    channel_id=(
+                        str(plan_target.chat_id)
+                        if plan_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=plan_target.message_thread_id,
+                )
             elif command == "/plan":
                 plan_target = _here_or_workspace(event, settings, "practice_flow")
                 reply = handle_plan(
@@ -1007,7 +1028,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     else None
                 )
                 thread_id = practice_target.message_thread_id
-                if raw_data == "simple:study":
+                if raw_data == "simple:roadmap" or raw_data.startswith(
+                    "simple:roadmap:"
+                ):
+                    reply = handle_roadmap_callback(
+                        session,
+                        user,
+                        raw_data,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "Общий план")
+                elif raw_data == "simple:study":
                     _cancel_simple_bonus_capture(session, user)
                     reply = handle_study(
                         session,

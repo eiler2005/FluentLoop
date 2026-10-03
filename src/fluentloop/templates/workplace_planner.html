@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>__TITLE__ · FluentLoop</title>
+<style>
+:root{color-scheme:light;--paper:#f5f4ec;--ink:#243d35;--muted:#53675f;--line:#d6dfd5;--green:#315d47;--accent:#e5edcb}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1240px;margin:auto;padding:28px}header{padding:32px 0 28px;border-bottom:1px solid var(--line)}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:750;color:var(--green)}h1{font-size:clamp(32px,5vw,58px);line-height:1.06;letter-spacing:-.035em;max-width:850px;margin:16px 0}h2{font-size:24px;line-height:1.25}h3{font-size:18px;margin:12px 0}
+p{max-width:830px}.muted,small{color:var(--muted)}a{color:var(--green);text-underline-offset:3px}button,input,select,textarea{font:inherit}button,select,input{min-height:44px}button{border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);padding:8px 14px;cursor:pointer}button:hover{background:var(--accent)}button:disabled{opacity:.45;cursor:default}.primary{background:var(--green);color:white;border-color:var(--green)}.primary:hover{background:#244936}input,select,textarea{max-width:100%;border:1px solid #aab9ae;border-radius:8px;background:#fff;padding:9px;color:var(--ink)}textarea{width:100%;min-height:96px;resize:vertical}label{display:grid;gap:7px;font-size:14px;font-weight:650}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #bd811b;outline-offset:3px}
+.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;padding:25px 0}.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.panel{padding:22px;background:white;border:1px solid var(--line);border-radius:16px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.number{font-size:30px;font-weight:750;letter-spacing:-.03em}.split{height:8px;display:flex;border-radius:8px;overflow:hidden;background:#cdd9e4;margin:18px 0}.split span{background:var(--green)}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin:24px 0 16px}.workspace{display:grid;grid-template-columns:minmax(250px,360px) minmax(0,1fr);gap:20px;align-items:start}.modules{display:grid;gap:9px;max-height:850px;overflow:auto;padding:3px}.module{display:block;width:100%;text-align:left;padding:14px 16px;border-radius:12px}.module strong{display:block;font-size:15px}.module small{display:block;font-size:12px;margin-top:3px}.module[aria-pressed=true]{background:var(--accent);border-color:var(--green)}.tag{display:inline-block;font-size:12px;padding:3px 9px;border-radius:20px;background:#edf2e5;margin:0 5px 7px 0}.task{padding:18px;background:#f0f4e9;border-left:3px solid var(--green);border-radius:0 10px 10px 0}.detail p,.detail li{overflow-wrap:anywhere}.detail ul{padding-left:22px}.detail .toolbar{margin:20px 0}.source-list{font-size:14px}.status{min-height:28px;font-size:14px;color:var(--green);margin:12px 0}.error{color:#a62a26}.coverage{margin-top:30px}details{margin:10px 0;padding:16px;border:1px solid var(--line);border-radius:12px}summary{cursor:pointer;font-weight:650}.foot{margin:36px 0;font-size:14px;color:var(--muted)}[hidden]{display:none!important}
+.controls>label,.filters>label,.summary>.panel{min-width:0}input,select{width:100%;min-width:0}.summary p{overflow-wrap:anywhere}
+@media(max-width:760px){main{padding:16px}.controls,.filters{grid-template-columns:1fr 1fr}.controls label:first-child,.filters label:first-child{grid-column:1/-1}.workspace{grid-template-columns:1fr}.modules{max-height:300px}.summary{gap:10px}.panel{padding:16px}.number{font-size:24px}header{padding-top:12px}}
+@media print{button,.controls,.filters,.modules,.toolbar,.status,textarea{display:none!important}.workspace{display:block}body{background:white}.panel{break-inside:avoid}main{max-width:none}.summary{display:block}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">FluentLoop / Learning map</div><h1>Общий английский.<br>Больше возможностей в работе.</h1>
+<p>Путь от B2 к уверенному B2+ и первым задачам C1. Общая база остаётся в центре; клиенты и большие технологические компании — дополнительные направления.</p>
+<p class="muted">Выбери приоритеты и ритм, открой модуль, выполни конкретное задание. Это личный план: отметки и настройки не меняют подтверждённый прогресс в боте.</p></header>
+<section aria-label="Настройки плана">
+<div class="controls"><label>Дополнительный фокус<select id="track"></select></label><label>Минут в неделю<input id="minutes" type="number" min="30" max="1200" step="10"></label><label>Общий английский, %<input id="share" type="number" min="20" max="90" step="5"></label></div>
+<div class="toolbar"><button id="export" class="primary">Скачать мой план · JSON</button><button id="import">Открыть мой план</button><input id="file" type="file" accept=".json,application/json" hidden><button id="reset">Вернуть исходный план</button><a href="https://github.com/eiler2005/FluentLoop/blob/main/docs/curriculum/workplace-plan-guide.md" target="_blank" rel="noopener noreferrer">Как перенести в бота</a></div>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+<small>Изменения сохраняются в этом браузере, если он разрешает локальное хранение. Скачай JSON для надёжной копии. Этот файл ничего не отправляет в сеть; импорт в бота — отдельный шаг.</small>
+<div class="split" aria-hidden="true"><span id="bar"></span></div>
+<div class="summary"><div class="panel"><div class="eyebrow">Общий английский</div><div class="number" id="general-time"></div><p id="general-focus"></p></div><div class="panel"><div class="eyebrow">Дополнение / работа</div><div class="number" id="work-time"></div><p id="work-focus"></p></div></div>
+</section>
+<section aria-label="Учебные модули">
+<div class="filters"><label>Поиск тем<input id="search" type="search" placeholder="Например: путешествия, переговоры"></label><label>Направление<select id="strand"><option value="all">Все темы</option><option value="general">Общий английский</option><option value="work">Работа</option></select></label><label>Навык<select id="skill"><option value="all">Все навыки</option></select></label><label>Ступень задания<select id="stage"><option value="b2">B2</option><option value="b2_plus">B2+</option><option value="c1_intro">C1 intro</option></select></label></div>
+<p id="count" class="muted"></p><div class="workspace"><nav id="modules" class="modules" aria-label="Выбрать модуль"></nav><article id="detail" class="panel detail" aria-live="polite"></article></div>
+</section>
+<section class="coverage"><h2>Языковая база и покрытие</h2><p>Все задания ниже — авторский учебный план. Связь с одной из 10 адаптивных тем означает частичную языковую поддержку, а не готовый курс или доказанное освоение модуля. Устную речь и аудирование тренируем вне текстового бота.</p><div id="language-map"></div></section>
+<section><h2>На чём основан план</h2><ul id="sources" class="source-list"></ul></section>
+<footer class="foot">Уровни заданий — учебные ориентиры. C1 в редакторе можно просматривать для планирования; доступ к контрольным вопросам в /study по-прежнему зависит от сохранённых ответов. План не является экзаменом CEFR и не обещает уровень к конкретной дате.</footer>
+</main>
+<script id="catalog-data" type="application/json">__CATALOG_JSON__</script>
+<script id="default-data" type="application/json">__DEFAULT_PLAN_JSON__</script>
+<script>
+'use strict';
+const catalog=JSON.parse(document.getElementById('catalog-data').textContent);
+const initial=JSON.parse(document.getElementById('default-data').textContent);
+const topicTitles=__TOPIC_LABELS_JSON__;
+const lessonTitles=__LESSON_LABELS_JSON__;
+const byId=new Map(catalog.modules.map(m=>[m.id,m]));
+const sourceById=new Map(catalog.sources.map(s=>[s.id,s]));
+const storageKey='fluentloop.workplace-plan.v1';
+const $=id=>document.getElementById(id);
+const clone=value=>JSON.parse(JSON.stringify(value));
+const isObject=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+let plan=clone(initial),selected=plan.order[0];
+function parsePlanJson(text){
+  const parsed=JSON.parse(text),stack=[];
+  const tokens=text.match(/"(?:\\.|[^"\\])*"|[{}\[\],:]|true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/g)||[];
+  for(const lexeme of tokens){const top=stack.at(-1);if(lexeme==='{')stack.push({object:true,key:true,seen:new Set()});else if(lexeme==='[')stack.push({object:false});else if(lexeme==='}'||lexeme===']')stack.pop();else if(lexeme===','&&top?.object)top.key=true;else if(lexeme===':'&&top?.object)top.key=false;else if(lexeme.startsWith('"')&&top?.object&&top.key){const key=JSON.parse(lexeme);if(top.seen.has(key))throw Error('JSON содержит повторное поле.');top.seen.add(key);top.key=false;}}
+  return parsed;
+}
+function tell(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
+function validatePlan(value){
+  const keys=['version','track','weekly_minutes','general_share','order','paused','focus','notes'];
+  if(!isObject(value)||Object.keys(value).length!==keys.length||!keys.every(k=>Object.hasOwn(value,k)))throw Error('Неверный формат плана. Нужен экспорт FluentLoop версии 1.');
+  if(value.version!==1||typeof value.track!=='string'||!Object.hasOwn(catalog.tracks,value.track))throw Error('Неизвестная версия или направление.');
+  if(!Number.isInteger(value.weekly_minutes)||value.weekly_minutes<30||value.weekly_minutes>1200)throw Error('Укажи от 30 до 1200 минут в неделю.');
+  if(!Number.isInteger(value.general_share)||value.general_share<20||value.general_share>90)throw Error('Доля общего английского: от 20 до 90%.');
+  if(!Array.isArray(value.order)||value.order.length!==byId.size||new Set(value.order).size!==byId.size||!value.order.every(id=>byId.has(id)))throw Error('План должен содержать все модули ровно по одному разу.');
+  if(!Array.isArray(value.paused)||new Set(value.paused).size!==value.paused.length||!value.paused.every(id=>byId.has(id)))throw Error('Неизвестный или повторный модуль на паузе.');
+  for(const strand of ['general','work'])if(!value.order.some(id=>byId.get(id).strand===strand&&!value.paused.includes(id)))throw Error('Оставь хотя бы одну активную тему в каждом направлении.');
+  if(value.focus!==null&&(!byId.has(value.focus)||value.paused.includes(value.focus)))throw Error('Текущий фокус должен быть активным модулем.');
+  if(!isObject(value.notes)||Object.entries(value.notes).some(([id,note])=>!byId.has(id)||typeof note!=='string'||Array.from(note).length>1000||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(note)||Array.from(note).some(c=>c.codePointAt(0)>=0xD800&&c.codePointAt(0)<=0xDFFF)))throw Error('Заметка: до 1000 символов, без управляющих символов, только для существующей темы.');
+  return clone(value);
+}
+function persist(){try{localStorage.setItem(storageKey,JSON.stringify(plan));tell('Сохранено в этом браузере. Для переноса скачай JSON.');}catch{tell('Браузер не разрешил сохранение. Скачай JSON, чтобы не потерять изменения.',true);}}
+function change(edit){const next=clone(plan);try{edit(next);plan=validatePlan(next);persist();render();}catch(error){tell(error.message,true);renderControls();}}
+function element(tag,text,className){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;}
+function link(title,url){const node=element('a',title);node.href=url;node.target='_blank';node.rel='noopener noreferrer';return node;}
+function button(title,action){const node=element('button',title);node.type='button';node.addEventListener('click',action);return node;}
+function focusFor(strand){return plan.focus&&byId.get(plan.focus).strand===strand?byId.get(plan.focus):byId.get(plan.order.find(id=>byId.get(id).strand===strand&&!plan.paused.includes(id)));}
+function renderControls(){$('track').value=plan.track;$('minutes').value=plan.weekly_minutes;$('share').value=plan.general_share;}
+function render(){
+  renderControls();const general=Math.floor(plan.weekly_minutes*plan.general_share/100);
+  $('bar').style.width=plan.general_share+'%';$('general-time').textContent=general+' мин / нед';$('work-time').textContent=(plan.weekly_minutes-general)+' мин / нед';
+  $('general-focus').textContent='Следующая тема: '+focusFor('general').title_ru;$('work-focus').textContent='Следующая тема: '+focusFor('work').title_ru;
+  const query=$('search').value.trim().toLocaleLowerCase();
+  const visible=plan.order.map(id=>byId.get(id)).filter(m=>($('strand').value==='all'||m.strand===$('strand').value)&&($('skill').value==='all'||m.skills.includes($('skill').value))&&JSON.stringify([m.title_ru,m.area,m.language_focus]).toLocaleLowerCase().includes(query));
+  $('count').textContent='Показано '+visible.length+' из '+byId.size+' модулей · '+plan.paused.length+' на паузе';
+  if(!visible.some(m=>m.id===selected))selected=visible[0]?.id;
+  $('modules').replaceChildren();for(const m of visible){const node=button('',()=>{selected=m.id;render();});node.className='module';node.setAttribute('aria-pressed',String(selected===m.id));node.append(element('strong',m.title_ru),element('small',(m.strand==='general'?'Общий английский':'Дополнение · работа')+(plan.paused.includes(m.id)?' · пауза':'')+(plan.focus===m.id?' · фокус':'')));$('modules').append(node);}
+  renderDetail();
+}
+function renderDetail(){
+  const root=$('detail');root.replaceChildren();if(!selected){root.append(element('p','По этим условиям тем нет. Измени поиск или фильтр.'));return;}
+  const m=byId.get(selected),stage=$('stage').value;root.append(element('div',m.area,'eyebrow'),element('h2',m.title_ru));
+  const tags=element('div');for(const key of m.skills)tags.append(element('span',catalog.skills[key],'tag'));root.append(tags);
+  root.append(element('h3','Результат · '+$('stage').selectedOptions[0].textContent),element('p',m.outcomes[stage]),element('p',m.tasks[stage],'task'));
+  root.append(element('h3','Проверка результата'));const evidence=element('ul');for(const item of m.evidence)evidence.append(element('li',item));root.append(evidence);
+  root.append(element('p','Языковой фокус: '+m.language_focus.join('; ')));
+  const delivery={mixed:'Частичная поддержка в боте + самостоятельное задание.',external:'Внешняя практика: аудио, речь или собеседник.',brief:'Самостоятельное задание готово; отдельного банка вопросов в боте пока нет.'};
+  root.append(element('p',delivery[m.delivery],'muted'));
+  if(m.adaptive_topics.length)root.append(element('p','Связанные темы /study: '+m.adaptive_topics.map(id=>topicTitles[id]).join(', ')+'. Это языковая связь, а не оценка освоения модуля.','muted'));
+  if(m.library_slugs.length)root.append(element('p','Ищи в /library: '+m.library_slugs.map(id=>lessonTitles[id]).join(', ')+'. Подписка проверяется в боте.','muted'));
+  const resources=element('ul');for(const id of m.source_ids){const s=sourceById.get(id),li=element('li');li.append(link(s.title,s.url));resources.append(li);}root.append(resources);
+  const actions=element('div',undefined,'toolbar');
+  actions.append(button(plan.focus===m.id?'Убрать фокус':'Сделать фокусом',()=>change(p=>{p.paused=p.paused.filter(id=>id!==m.id);p.focus=p.focus===m.id?null:m.id;})));
+  actions.append(button(plan.paused.includes(m.id)?'Вернуть в план':'Поставить на паузу',()=>change(p=>{if(p.paused.includes(m.id))p.paused=p.paused.filter(id=>id!==m.id);else{p.paused.push(m.id);if(p.focus===m.id)p.focus=null;}})));
+  for(const [title,delta] of [['Выше ↑',-1],['Ниже ↓',1]]){const node=button(title,()=>change(p=>{const i=p.order.indexOf(m.id),j=i+delta;[p.order[i],p.order[j]]=[p.order[j],p.order[i]];}));const index=plan.order.indexOf(m.id);node.disabled=index+delta<0||index+delta>=plan.order.length;actions.append(node);}root.append(actions);
+  const label=element('label','Мои заметки и изменения задания');const note=element('textarea');note.value=plan.notes[m.id]||'';note.maxLength=1000;note.addEventListener('change',()=>change(p=>{if(note.value)p.notes[m.id]=note.value;else delete p.notes[m.id];}));label.append(note);root.append(label,element('small','Заметки остаются на твоём устройстве и попадут в скачанный JSON. Не сохраняй личный файл в публичный репозиторий.'));
+}
+const trackLabels={balanced:'Баланс · общая база + разные темы',client_facing:'Клиенты · с общей базой',big_tech:'Big Tech · с общей базой'};
+for(const [id,track] of Object.entries(catalog.tracks)){$('track').append(new Option(trackLabels[id]||track.title_ru,id));}
+for(const [id,label] of Object.entries(catalog.skills)){$('skill').append(new Option(label,id));}
+for(const item of catalog.language_map){const row=element('details');row.append(element('summary',item.title_ru+' · '+(item.coverage==='partial'?'частичное покрытие':'банк запланирован')),element('p','B2: '+item.b2_focus),element('p','C1 intro: '+item.c1_focus),element('p','Модули: '+item.module_ids.map(id=>byId.get(id).title_ru).join('; ')));$('language-map').append(row);}
+for(const source of catalog.sources){const item=element('li');item.append(link(source.title,source.url),document.createTextNode(' — '+source.publisher+' · проверено '+source.accessed));$('sources').append(item);}
+$('track').addEventListener('change',()=>change(p=>{p.track=$('track').value;p.order=[...catalog.tracks[p.track].module_ids];}));
+$('minutes').addEventListener('change',()=>change(p=>{p.weekly_minutes=Number($('minutes').value);}));
+$('share').addEventListener('change',()=>change(p=>{p.general_share=Number($('share').value);}));
+for(const id of ['search','strand','skill','stage'])$(id).addEventListener(id==='search'?'input':'change',render);
+$('export').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(plan,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),a=element('a');a.href=url;a.download='fluentloop-my-plan.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);tell('План скачан. Импорт в бота выполняется отдельно — инструкция рядом.');});
+$('import').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',async()=>{const file=$('file').files[0];if(!file)return;try{if(file.size>262144)throw Error('Файл плана слишком большой: максимум 256 КБ.');const next=validatePlan(parsePlanJson(await file.text()));plan=next;selected=plan.focus||plan.order[0];persist();render();}catch(error){tell('План не изменён. '+error.message,true);}finally{$('file').value='';}});
+$('reset').addEventListener('click',()=>{if(confirm('Вернуть исходные настройки в этом браузере? Скачай текущий план, если хочешь сохранить его.')){plan=clone(initial);selected=plan.order[0];persist();render();}});
+try{const stored=localStorage.getItem(storageKey);if(stored){plan=validatePlan(parsePlanJson(stored));selected=plan.focus||plan.order[0];tell('Открыт твой локальный план.');}else tell('Выбери ритм и дополнительные темы. Общая база уже включена.');}catch{tell('Сохранённый план недоступен или не подходит к каталогу. Показан исходный; старый файл не перезаписан.',true);}
+render();
+</script>
+</body></html>

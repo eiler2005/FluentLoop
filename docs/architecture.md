@@ -1,7 +1,7 @@
 # Architecture
 
 > **Status:** v0.3 — MVP foundation (EPIC-01..14), learning-engine roadmap
-> (EPIC-16..21), and EPIC-22..26 extensions are implemented. ADRs 0002-0013 are
+> (EPIC-16..21), and EPIC-22..28 extensions are implemented. ADRs 0002-0015 are
 > Accepted (0009 reserved). Schema specifics
 > for individual epics live in those epic files.
 
@@ -27,6 +27,17 @@ decisions as ADRs in [`adr/`](adr/).
   help/smoke messages.
 
 ## At a glance
+
+The general/workplace roadmap (ADR-0015, EPIC-28) is an advisory layer.
+`workplace_roadmap.py` validates public catalogue references and portable plans;
+`User.preferences_json.workplace_plan` contains only private planning preferences.
+`bot/roadmap.py` provides `/roadmap`, and `roadmap_export.py` renders a generated
+Markdown map and standalone HTML editor from the packaged public seed. No new
+schema, scheduler, provider call or active learning item is introduced. The
+editor's browser storage is independent of Telegram; applying an exported JSON
+requires the explicit owner CLI. Reordering modules does not change the adaptive
+selector or its ten-topic C1 evidence gate. All tracks retain general English,
+with a default 60/40 general/work time allocation.
 
 Component view — every box is one Python module set inside a single Docker
 container:

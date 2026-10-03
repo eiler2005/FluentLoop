@@ -16,14 +16,14 @@ notes.
   the current environment gate is still a separate ADR-0009 concern.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 27
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 28
   numbered epics plus the EPIC-16..21 roadmap overview. EPIC-01 through
   EPIC-15 mirror the PRD §28 backlog (EPIC-15 is Deferred); EPIC-16 through
-  EPIC-27 cover the post-MVP learning engine, breakthrough roadmap, shared
+  EPIC-28 cover the post-MVP learning engine, breakthrough roadmap, shared
   lesson library, outcomes loop, daily vocabulary loop, and adaptive stream. See
   [`docs/features/README.md`](docs/features/README.md).
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
-  + ADRs in [`docs/adr/`](docs/adr/) (0002-0014 all Accepted; 0009 reserved).
+  + ADRs in [`docs/adr/`](docs/adr/) (0002-0015 all Accepted; 0009 reserved).
 - **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
   autonomous overnight session brief and morning report. Frozen artifacts —
   read for context, do not treat as living documentation.
@@ -82,6 +82,10 @@ destructive action is high.
 
 ## Architectural invariants
 
+- **Roadmaps are advisory.** General English remains the foundation; workplace
+  tracks supplement it. `preferences_json.workplace_plan` cannot change mastery,
+  adaptive gates or active targets. Keep private exports out of git; regenerate
+  public views from the seed after edits. See ADR-0015/EPIC-28.
 - **Simple mode is per profile.** Missing mode means advanced. Skip simple users
   before automatic learning claims/sends; backups still run. Recognition is
   distinct from production and cannot graduate items. See ADR-0013/EPIC-26.
@@ -162,8 +166,8 @@ FluentLoop/
 │   ├── README.md                 Doc index.
 │   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
 │   ├── testing.md                Standard test gate and what tests cover.
-│   ├── adr/                      Architecture decision records (0002-0014 Accepted).
-│   ├── features/                 27 numbered epics + EPIC-16..21 overview.
+│   ├── adr/                      Architecture decision records (0002-0015 Accepted).
+│   ├── features/                 28 numbered epics + EPIC-16..21 overview.
 │   ├── user-guide.md             Learner guide and learning-loop map.
 │   ├── material-upload-guide.md  Upload formats and LLM prep prompt.
 │   ├── runbooks/                 Operational procedures.
@@ -186,7 +190,7 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # 27 numbered epics + EPIC-16..21 overview
+ls docs/features/EPIC-*.md | wc -l    # 28 numbered epics + EPIC-16..21 overview
 
 # No secrets staged
 python scripts/secret_scan.py

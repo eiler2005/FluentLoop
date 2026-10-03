@@ -83,6 +83,16 @@ application determine progression. Opted-in background maintenance generates and
 independently reviews bounded variants of approved targets; see the
 [activation and maintenance runbook](docs/runbooks/adaptive-learning.md).
 
+The [editable general/workplace programme](docs/curriculum/workplace-plan-guide.md)
+adds 16 general-English modules and 32 optional areas of workplace focus, each
+with B2/B2+/introductory-C1 tasks. General English receives 60% of the default
+time budget; client work and large-technology companies are supplementary tracks.
+Use `/roadmap` for the plan and common edits, or download and open the
+[offline visual planner](docs/curriculum/workplace-planner.html) to reorder
+topics, pause them, add notes and export a personal JSON plan. These are practice
+briefs and priorities; they do not change assessed mastery or the `/study` queue.
+The [research reports](docs/research/README.md) explain sources and coverage gaps.
+
 The advanced path inside Telegram:
 
 ```text
