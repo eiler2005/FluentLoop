@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from typing import Literal
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class ExtractedItem(BaseModel):
@@ -68,7 +70,7 @@ class GenerationResult(BaseModel):
 class AnswerFeedback(BaseModel):
     # Provider-set provenance; model output and fallback cannot establish it.
     genuine_evaluation: bool = False
-    status: str
+    status: Literal["correct", "partial", "incorrect"]
     corrected_answer: str = ""
     natural_answer: str = ""
     explanation: str = ""
@@ -90,6 +92,19 @@ class AnswerFeedback(BaseModel):
     should_create_mistake_event: bool = False
     should_create_or_update_mistake_pattern: bool = False
     suggested_candidates: list[ExtractedItem] = Field(default_factory=list)
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def normalize_verdict(cls, value: object) -> object:
+        if isinstance(value, str):
+            verdict = value.strip().lower()
+            return {
+                "pass": "correct",
+                "passed": "correct",
+                "fail": "incorrect",
+                "failed": "incorrect",
+            }.get(verdict, verdict)
+        return value
 
 
 class NativeRewriteFeedback(BaseModel):

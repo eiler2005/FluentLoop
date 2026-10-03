@@ -187,6 +187,39 @@ def test_outcomes_reports_insufficient_data_without_fake_progress(
     assert db_session.scalar(select(LearningMetricSnapshot)) is not None
 
 
+def test_external_reports_are_neither_recognition_nor_productive_evidence(
+    db_session, settings
+) -> None:
+    user = ensure_user(db_session, 123456789, settings)
+    now = datetime.now(UTC)
+    baseline = collect_outcome_metrics(db_session, user, now=now)
+    _attempt(
+        db_session,
+        user,
+        at=now,
+        answer="Self-reported external practice",
+        status="reported",
+        target_ids=[],
+        feedback={"answer_modality": "self_report"},
+        prompt="Critical reading and speaking outside the bot",
+        exercise_type="roadmap_external",
+    )
+    metrics = collect_outcome_metrics(db_session, user, now=now)
+    assert metrics["attempts"] == {
+        "total": 1,
+        "production": 0,
+        "recognition": 0,
+        "self_reports": 1,
+        "word_count": 0,
+    }
+    for key in (
+        "held_out_retention", "productive_chunks", "writing", "l1_density",
+        "mistake_extinction", "critical_reading",
+    ):
+        assert metrics[key] == baseline[key]
+    assert "1 self-reports (unassessed)" in handle_outcomes(db_session, user).text
+
+
 def _attempt(
     db_session,
     user,

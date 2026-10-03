@@ -20,7 +20,7 @@ p{max-width:830px}.muted,small{color:var(--muted)}a{color:var(--green);text-unde
 <body><main>
 <header><div class="eyebrow">FluentLoop / Learning map</div><h1>Общий английский.<br>Больше возможностей в работе.</h1>
 <p>Путь от B2 к уверенному B2+ и первым задачам C1. Общая база остаётся в центре; клиенты и большие технологические компании — дополнительные направления.</p>
-<p class="muted">Выбери приоритеты и ритм, открой модуль, выполни конкретное задание. Это личный план: отметки и настройки не меняют подтверждённый прогресс в боте.</p></header>
+<p class="muted">После переноса плана в бота кнопка «Учиться» учитывает долю общей базы, порядок, фокус и паузы. Здесь — приоритеты и большие самостоятельные задания; текущие результаты остаются в боте.</p></header>
 <section aria-label="Настройки плана">
 <div class="controls"><label>Дополнительный фокус<select id="track"></select></label><label>Минут в неделю<input id="minutes" type="number" min="30" max="1200" step="10"></label><label>Общий английский, %<input id="share" type="number" min="20" max="90" step="5"></label></div>
 <div class="toolbar"><button id="export" class="primary">Скачать мой план · JSON</button><button id="import">Открыть мой план</button><input id="file" type="file" accept=".json,application/json" hidden><button id="reset">Вернуть исходный план</button><a href="https://github.com/eiler2005/FluentLoop/blob/main/docs/curriculum/workplace-plan-guide.md" target="_blank" rel="noopener noreferrer">Как перенести в бота</a></div>
@@ -33,9 +33,9 @@ p{max-width:830px}.muted,small{color:var(--muted)}a{color:var(--green);text-unde
 <div class="filters"><label>Поиск тем<input id="search" type="search" placeholder="Например: путешествия, переговоры"></label><label>Направление<select id="strand"><option value="all">Все темы</option><option value="general">Общий английский</option><option value="work">Работа</option></select></label><label>Навык<select id="skill"><option value="all">Все навыки</option></select></label><label>Ступень задания<select id="stage"><option value="b2">B2</option><option value="b2_plus">B2+</option><option value="c1_intro">C1 intro</option></select></label></div>
 <p id="count" class="muted"></p><div class="workspace"><nav id="modules" class="modules" aria-label="Выбрать модуль"></nav><article id="detail" class="panel detail" aria-live="polite"></article></div>
 </section>
-<section class="coverage"><h2>Языковая база и покрытие</h2><p>Все задания ниже — авторский учебный план. Связь с одной из 10 адаптивных тем означает частичную языковую поддержку, а не готовый курс или доказанное освоение модуля. Устную речь и аудирование тренируем вне текстового бота.</p><div id="language-map"></div></section>
+<section class="coverage"><h2>Языковая база и покрытие</h2><p>Все 48 модулей подключены к «Учиться»: по вопросу и двум коротким письменным ситуациям на ступень. Большие задания ниже расширяют эту практику. Связь с одной из 10 адаптивных тем означает частичное покрытие навыка. Устную речь и аудирование тренируем вне текстового бота.</p><div id="language-map"></div></section>
 <section><h2>На чём основан план</h2><ul id="sources" class="source-list"></ul></section>
-<footer class="foot">Уровни заданий — учебные ориентиры. C1 в редакторе можно просматривать для планирования; доступ к контрольным вопросам в /study по-прежнему зависит от сохранённых ответов. План не является экзаменом CEFR и не обещает уровень к конкретной дате.</footer>
+<footer class="foot">Доля общей базы определяет распределение отвеченных вопросов в /study; минуты — ориентир для недели. При нехватке доступных вопросов доля может временно отличаться. C1 здесь можно просматривать, но в боте нужны независимые письменные результаты и прежний языковой порог. План не является экзаменом CEFR и не обещает уровень к дате.</footer>
 </main>
 <script id="catalog-data" type="application/json">__CATALOG_JSON__</script>
 <script id="default-data" type="application/json">__DEFAULT_PLAN_JSON__</script>
@@ -82,7 +82,7 @@ function renderControls(){$('track').value=plan.track;$('minutes').value=plan.we
 function render(){
   renderControls();const general=Math.floor(plan.weekly_minutes*plan.general_share/100);
   $('bar').style.width=plan.general_share+'%';$('general-time').textContent=general+' мин / нед';$('work-time').textContent=(plan.weekly_minutes-general)+' мин / нед';
-  $('general-focus').textContent='Следующая тема: '+focusFor('general').title_ru;$('work-focus').textContent='Следующая тема: '+focusFor('work').title_ru;
+  $('general-focus').textContent='Приоритет: '+focusFor('general').title_ru;$('work-focus').textContent='Приоритет: '+focusFor('work').title_ru;
   const query=$('search').value.trim().toLocaleLowerCase();
   const visible=plan.order.map(id=>byId.get(id)).filter(m=>($('strand').value==='all'||m.strand===$('strand').value)&&($('skill').value==='all'||m.skills.includes($('skill').value))&&JSON.stringify([m.title_ru,m.area,m.language_focus]).toLocaleLowerCase().includes(query));
   $('count').textContent='Показано '+visible.length+' из '+byId.size+' модулей · '+plan.paused.length+' на паузе';
@@ -97,7 +97,7 @@ function renderDetail(){
   root.append(element('h3','Результат · '+$('stage').selectedOptions[0].textContent),element('p',m.outcomes[stage]),element('p',m.tasks[stage],'task'));
   root.append(element('h3','Проверка результата'));const evidence=element('ul');for(const item of m.evidence)evidence.append(element('li',item));root.append(evidence);
   root.append(element('p','Языковой фокус: '+m.language_focus.join('; ')));
-  const delivery={mixed:'Частичная поддержка в боте + самостоятельное задание.',external:'Внешняя практика: аудио, речь или собеседник.',brief:'Самостоятельное задание готово; отдельного банка вопросов в боте пока нет.'};
+  const delivery={mixed:'Вопрос и короткое письмо в боте + самостоятельный сценарий.',external:'Вопрос и короткое письмо в боте; аудио и речь — внешняя практика.',brief:'Вопрос и короткое письмо в боте + большой самостоятельный сценарий.'};
   root.append(element('p',delivery[m.delivery],'muted'));
   if(m.adaptive_topics.length)root.append(element('p','Связанные темы /study: '+m.adaptive_topics.map(id=>topicTitles[id]).join(', ')+'. Это языковая связь, а не оценка освоения модуля.','muted'));
   if(m.library_slugs.length)root.append(element('p','Ищи в /library: '+m.library_slugs.map(id=>lessonTitles[id]).join(', ')+'. Подписка проверяется в боте.','muted'));

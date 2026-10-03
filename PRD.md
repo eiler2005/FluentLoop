@@ -248,6 +248,10 @@ Telegram remains the primary interface for daily practice.
     C1 coverage, editable personal priorities and study time, concrete workplace
     tasks, and an honest distinction between available bot practice and external
     or planned activities (EPIC-28).
+17. Executable roadmap in the Study stream: the learner's general/work balance,
+    priorities, module order and pauses select real practice; module evidence,
+    optional written application and external practice are visible separately
+    from the existing adaptive language gate (EPIC-29).
 ```
 
 ### P2 — future
@@ -785,6 +789,24 @@ Planning and self-reported completion do not grant mastery, unlock adaptive C1,
 or activate unapproved learning items. The ten-topic adaptive gate remains a
 local curriculum milestone. The wider roadmap is an editable learning programme,
 not a guarantee of complete language coverage or CEFR certification.
+
+### Study follows the personal plan
+
+The Study button applies the roadmap to actual practice. Every module provides
+contextual choice practice and optional independent written use. General-English
+questions use personal/public/educational contexts; workplace practice supplements
+them. The general/work share guides selection, while priority, order, pauses,
+spaced review and recent answers determine the next eligible module. The stream
+keeps serving the existing adaptive language curriculum so its evidence gate can
+still be completed. Pending questions resume intact after restarts or plan edits;
+the next selection uses the latest plan.
+
+Module practice and checked written application are recorded separately. Repeated
+clicks, skipped tasks, unverified feedback and self-reported external activity
+cannot establish mastery. B2+ requires successful independent written applications
+in different situations on different days; introductory C1 also respects the
+existing ten-topic language gate. Listening and speaking tasks link to external
+resources and are explicitly self-reported, never automatically scored as speech.
 
 ### Example daily session
 

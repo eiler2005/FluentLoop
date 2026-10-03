@@ -20,6 +20,13 @@ git diff --check
 - Broad roadmap: strict catalogue references, portable-plan types and limits,
   general/work retention, user isolation, safe import/export, command routing,
   HTML escaping, generated-view freshness and unchanged assessed progress.
+- Roadmap Study: all 48 modules and 144 stages/questions, actual 60/40 and 90/10
+  selection, focus/order/pauses, pending recovery, language interleaving, cooldowns,
+  genuine independent spaced writing, reused/copy rejection, retained C1 gate,
+  self-report separation, personal quarantine and owner/duplicate callback checks.
+- Answer feedback: canonical verdicts and legacy aliases, rejected unknown
+  statuses, provider-controlled provenance, and writing prompts that preserve
+  the supplied level, general/workplace context and task requirements.
 - Reviewed pack: schema/content validation, all 86 records, provenance,
   template publication and personal subscription idempotency, and level retention.
 - Simple UI and operations: originating chat/topic replies, keyboard dispatch,
@@ -62,6 +69,12 @@ export/import JSON and reject an invalid file without losing current changes.
 `uv run python scripts/workplace_plan.py --check-render docs/curriculum` checks
 that the committed views match the source and renderer. The unit suite performs
 this check too; live browser verification complements it.
+
+For the integrated Study flow, use [roadmap-study.md](runbooks/roadmap-study.md):
+verify the saved plan actually selects a module, answer once, reject the duplicate,
+inspect writing and external actions, change the plan while a question is pending,
+and verify resume. Run server-side handler smoke in a rolled-back transaction;
+never retain artificial learner progress or send unsolicited test messages.
 
 The repeatable browser check uses an isolated headless Chrome profile and no
 network calls from the editor. It verifies filtering, stage selection, edits,

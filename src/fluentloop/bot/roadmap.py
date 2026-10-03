@@ -1,4 +1,4 @@
-"""Personal syllabus controls; independent from assessed adaptive progress."""
+"""Personal Study selection controls, separate from assessed adaptive progress."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from fluentloop.adaptive_learning import TOPIC_TITLES
 from fluentloop.bot.handlers import BotReply, InlineButton
 from fluentloop.curriculum_b2 import CURRICULUM_LESSONS
 from fluentloop.db.models import User
+from fluentloop.roadmap_export import DELIVERY as DELIVERY_LABELS
 from fluentloop.workplace_roadmap import (
     get_plan,
     load_curriculum,
@@ -18,13 +19,9 @@ from fluentloop.workplace_roadmap import (
 )
 
 STAGE_LABELS = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}
-DELIVERY_LABELS = {
-    "mixed": "часть практики доступна в боте; часть — вне бота",
-    "external": "внешняя практика: аудирование или живое общение",
-    "brief": "учебный бриф; отдельного банка вопросов пока нет",
-}
 USAGE = (
     "/roadmap — общий план\n"
+    "/roadmap activate — подключить план к «Учиться»\n"
     "/roadmap track balanced|client_facing|big_tech\n"
     "/roadmap time 150 — минут в неделю (30–1200)\n"
     "/roadmap general 60 — доля общего английского (20–90%)\n"
@@ -103,14 +100,20 @@ def handle_roadmap(
     message_thread_id: int | None = None,
     catalog: dict | None = None,
 ) -> BotReply:
-    """Inspect or edit only this user's advisory plan, never start practice."""
+    """Inspect or edit only this user's Study plan, never start practice."""
+
+    from fluentloop.roadmap_study import enabled, module_progress
 
     try:
         pack = load_curriculum() if catalog is None else catalog
         plan = get_plan(user, pack)
         parts = argument.split()
         action = parts[0] if parts else ""
-        if action in {"track", "time", "general", "focus", "pause", "resume"}:
+        if action == "activate":
+            if len(parts) != 1:
+                raise ValueError("unexpected value")
+            plan = update_plan(session, user, "time", plan["weekly_minutes"], pack)
+        elif action in {"track", "time", "general", "focus", "pause", "resume"}:
             if len(parts) != 2:
                 raise ValueError("missing value")
             value = int(parts[1]) if action in {"time", "general"} else parts[1]
@@ -171,8 +174,28 @@ def handle_roadmap(
                 ]
             )
             lines.append(
-                "Бриф C1 можно изучать; задания потока открываются по правилам /plan."
+                "Бриф C1 можно изучать; задания C1 открываются после B2+ модуля "
+                "и устойчивого B2+ по всем десяти языковым темам /plan."
             )
+            if enabled(user):
+                progress = next(
+                    row
+                    for row in module_progress(session, user)
+                    if row["module_id"] == module_id
+                )
+                lines.extend(
+                    [
+                        "",
+                        f"Текущая ступень: {STAGE_LABELS[progress['stage']]}. "
+                        f"Узнавание: {progress['recognition_correct']}; "
+                        "самостоятельное письмо: "
+                        f"{len(progress['writing_variants'])}/2.",
+                        f"Внешних отметок: {progress['external_reports']} "
+                        "(со слов пользователя).",
+                        "Рост ступени: верный вопрос + два самостоятельных письменных "
+                        "задания в разных ситуациях на разных днях с интервалом ≥24 ч.",
+                    ]
+                )
             paused = module_id in plan["paused"]
             buttons = _buttons(
                 [
@@ -239,6 +262,17 @@ def handle_roadmap(
             "Общий английский остаётся основой; работа с клиентами и IT дополняют его.",
             "Чтение, письмо, аудирование, разговор и медиация входят в план.",
             "Аудирование и живой разговор требуют внешней практики.",
+            (
+                "План подключён к «Учиться»: доля общего английского, порядок, "
+                "фокус и паузы влияют на следующий вопрос. "
+                "Уже открытый вопрос сохраняется."
+                if enabled(user)
+                else "Нажмите «Подключить план» или измените настройку, "
+                "чтобы «Учиться» "
+                "подбирало вопросы по этому плану."
+            ),
+            "Проценты распределяют вопросы; минуты — ориентир нагрузки, "
+            "не измеренное время.",
             "Это план занятий, а не оценка уровня CEFR. "
             "/plan показывает текущие свидетельства; его правила C1 сохранены.",
             "",
@@ -270,6 +304,9 @@ def handle_roadmap(
             ("Рабочие модули", "simple:roadmap:list:work"),
         ],
         [("Текущий прогресс", "simple:plan")],
+        [("Учиться", "simple:study")]
+        if enabled(user)
+        else [("Подключить план", "simple:roadmap:activate")],
     )
     return _reply(text, channel_id, message_thread_id, buttons)
 

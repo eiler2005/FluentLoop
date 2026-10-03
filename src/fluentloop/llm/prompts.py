@@ -22,6 +22,20 @@ def user_prompt(
     if task == LLMTask.MATERIAL_EXTRACTION:
         return _material_extraction_prompt(payload)
     instruction = _task_instruction(task, payload)
+    if task == LLMTask.ANSWER_CHECK:
+        return (
+            f"Task: {task.value}\n"
+            f"Instruction: {instruction}\n"
+            f"Payload: {payload!r}\n"
+            "Return one flat JSON object. The required key is status. "
+            "Include populated teaching fields from this list; omitted optional "
+            "fields use their defaults:\n"
+            f"{_field_lines(schema, excluded={'genuine_evaluation'})}\n"
+            'Unused text fields must be "", lists [], objects {}, and booleans '
+            "false, never null. Only confidence_rating may be null. "
+            "Do not return genuine_evaluation; verification provenance is set "
+            "by the provider. Return field values, not a description or envelope."
+        )
     # Never hand over the JSON Schema itself. Models mirror its shape and
     # answer with {"description": ..., "properties": {...}} instead of the
     # instance; describing the fields plainly avoids the whole class of bug.
@@ -36,9 +50,11 @@ def user_prompt(
     )
 
 
-def _field_lines(schema: type[BaseModel]) -> str:
+def _field_lines(schema: type[BaseModel], *, excluded: set[str] | None = None) -> str:
     lines = []
     for name, field in schema.model_fields.items():
+        if name in (excluded or set()):
+            continue
         annotation = getattr(field.annotation, "__name__", str(field.annotation))
         lines.append(f"  {name}: {annotation}")
     return "\n".join(lines)
@@ -116,9 +132,21 @@ def _task_instruction(task: LLMTask, payload: dict[str, Any]) -> str:
         )
     if task == LLMTask.ANSWER_CHECK:
         return (
-            "Check the answer as a concise teacher. Return verdict plus corrected "
-            "answer, what was wrong, why, one practical rule, better variants, "
-            "and a tiny micro-drill if useful."
+            "Independently check the learner's answer against the actual prompt, "
+            "supplied facts, meaning, register and target construction. Set status "
+            "to exactly correct, partial or incorrect. correct means the task is "
+            "completed with accurate meaning and appropriate English; partial "
+            "means a relevant attempted solution needs a specific correction; "
+            "incorrect means off-topic, not completed, wrong meaning or missing "
+            "required target use. A fluent but unrelated answer is incorrect. "
+            "expected_answer may describe a construction or rubric rather than "
+            "a literal sentence: accept valid independent wording, never require "
+            "copying the reference. Preserve the supplied general/personal or "
+            "workplace context and requested stage/level. Do not require a "
+            "workplace setting or C1 wording for a general B2 task. Optional style "
+            "upgrades do not make an already valid answer incorrect. Give concise "
+            "feedback, a correction only when needed, one practical rule and a "
+            "tiny micro-drill if useful. Evaluate text only, not speech or listening."
         )
     if task == LLMTask.TONE_FEEDBACK:
         return (

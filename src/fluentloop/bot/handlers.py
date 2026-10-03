@@ -134,6 +134,8 @@ class BotReply:
     quiz_question_delivery_id: int | None = None
     # The personal simple pilot uses a compact three-action persistent keyboard.
     simple_keyboard: bool = False
+    # Let callback routing cancel a writing capture only after an accepted choice.
+    simple_choice_accepted: bool = False
 
 
 def _button(text: str, data: str) -> InlineButton:
@@ -925,14 +927,42 @@ def _simple_question_reply(
 
     question = step.question
     category = "Фраза" if question.get("category") == "phrase" else "Грамматика"
+    roadmap = question.get("roadmap")
+    if isinstance(roadmap, dict):
+        strand = (
+            "Общий английский"
+            if roadmap.get("strand") == "general"
+            else "Рабочее дополнение"
+        )
+        stage = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}.get(
+            roadmap.get("stage"), "B2"
+        )
+        category = f"{strand} · {stage}"
     lines = [
         bold(f"Вопрос {step.index + 1} · {category}"),
         "",
         html_escape(question["prompt"]),
     ]
+    if isinstance(roadmap, dict):
+        lines.insert(1, html_escape(str(question.get("module_title_ru") or "")))
+    if question.get("selection_fallback"):
+        lines.append(
+            "Доступные вопросы другой части плана: к выбранной вернёмся позже."
+        )
     options = question.get("options") or []
+    if isinstance(roadmap, dict):
+        lines.append("")
+        lines.extend(
+            f"{bold(chr(65 + index) + '.')} {html_escape(str(option))}"
+            for index, option in enumerate(options)
+        )
     buttons = [
-        [_button(str(option), f"simple:answer:{step.run.id}:{step.index}:{index}")]
+        [
+            _button(
+                chr(65 + index) if isinstance(roadmap, dict) else str(option),
+                f"simple:answer:{step.run.id}:{step.index}:{index}",
+            )
+        ]
         for index, option in enumerate(options)
     ]
     buttons.append(
@@ -1029,6 +1059,21 @@ def handle_simple_answer(
         [_button("Подробнее", f"feedback:explain:{result.attempt.id}")],
         [_button("Ошибка в вопросе", f"simple:issue:{run_id}:{index}")],
     ]
+    if isinstance((feedback.get("question") or {}).get("roadmap"), dict):
+        buttons.extend(
+            [
+                [
+                    _button(
+                        "Применить письменно", f"simple:module_write:{run_id}:{index}"
+                    )
+                ],
+                [
+                    _button(
+                        "Практика вне бота", f"simple:module_external:{run_id}:{index}"
+                    )
+                ],
+            ]
+        )
     if result.next_step is not None:
         next_reply = _simple_question_reply(
             result.next_step,
@@ -1042,6 +1087,7 @@ def handle_simple_answer(
             parse_mode=HTML_PARSE_MODE,
             edit_message=True,
             extra_replies=(next_reply,),
+            simple_choice_accepted=True,
         )
 
     summary = result.summary
@@ -1060,6 +1106,7 @@ def handle_simple_answer(
         buttons=buttons,
         parse_mode=HTML_PARSE_MODE,
         edit_message=True,
+        simple_choice_accepted=True,
     )
 
 
@@ -1086,8 +1133,13 @@ def handle_simple_issue(
     """Quarantine an answered personal question reported by its learner."""
 
     from fluentloop.question_quality import report_question_issue
+    from fluentloop.roadmap_study import answered_module_question, report_module_issue
 
-    reported = report_question_issue(session, user, run_id, index)
+    reported = (
+        report_module_issue(session, user, run_id, index)
+        if answered_module_question(session, user, run_id, index) is not None
+        else report_question_issue(session, user, run_id, index)
+    )
     text = (
         "Вопрос отмечен для проверки; он временно исключён."
         if reported
@@ -1101,17 +1153,23 @@ def handle_simple_bonus_start(
     user: User,
     parent_run_id: int,
     *,
+    module_index: int | None = None,
     channel_id: str | None = None,
     message_thread_id: int | None = None,
 ) -> BotReply:
     from fluentloop.simple_learning import start_bonus
 
-    step = start_bonus(session, user, parent_run_id)
+    if module_index is None:
+        step = start_bonus(session, user, parent_run_id)
+    else:
+        from fluentloop.roadmap_study import start_module_bonus
+
+        step = start_module_bonus(session, user, parent_run_id, module_index)
     if step.run is None or step.question is None:
         return BotReply("Это письменное задание уже завершено.")
     writing_hint = (
         "Ответь по-английски по заданию выше. Это необязательно."
-        if step.question.get("adaptive")
+        if step.question.get("adaptive") or step.question.get("roadmap")
         else "Напиши одно предложение по-английски. Это необязательно."
     )
     return BotReply(
@@ -1136,6 +1194,12 @@ def handle_simple_bonus_text(
     from fluentloop.simple_learning import submit_bonus
 
     exercise = bonus_run.exercises[0] if bonus_run.exercises else {}
+    if exercise.get("roadmap") and len(answer) > 10000:
+        return BotReply(
+            "Ответ слишком длинный. Сократи его до 10 000 символов.",
+            channel_id,
+            message_thread_id=message_thread_id,
+        )
     feedback = check_answer(provider, exercise, answer)
     result = submit_bonus(session, user, bonus_run.id, answer, feedback.model_dump())
     if not result.accepted:
@@ -1143,11 +1207,14 @@ def handle_simple_bonus_text(
             "Не удалось сохранить ответ. Напиши предложение ещё раз "
             "или нажми «Пропустить письмо»."
         )
-    if exercise.get("adaptive") and not getattr(feedback, "genuine_evaluation", False):
+    if (exercise.get("adaptive") or exercise.get("roadmap")) and not getattr(
+        feedback, "genuine_evaluation", False
+    ):
         return BotReply(
             "Письмо сохранено; проверка сейчас недоступна и в освоение темы "
             "не засчитана.",
             channel_id,
+            buttons=[[_button("Продолжить учиться", "simple:study")]],
             message_thread_id=message_thread_id,
         )
     lines = [f"{bold('Оценка')}: {result.attempt.status.title()}."]
@@ -1157,9 +1224,20 @@ def handle_simple_bonus_text(
     if feedback.explanation:
         lines.append(html_escape(feedback.explanation))
     lines.append("Письменная практика сохранена отдельно от узнавания.")
+    if exercise.get("roadmap"):
+        if not (result.attempt.feedback or {}).get("independent_production"):
+            lines.append(
+                "Повтор или копия образца не засчитывается "
+                "как самостоятельное применение."
+            )
+        lines.append(
+            "Для следующей ступени нужны два разных самостоятельных задания "
+            "с интервалом ≥24 ч."
+        )
     return BotReply(
         "\n".join(lines),
         channel_id,
+        buttons=[[_button("Продолжить учиться", "simple:study")]],
         message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,
     )
@@ -1175,6 +1253,117 @@ def handle_simple_bonus_skip(
         "Письменная практика пропущена. Это не считается ошибкой.",
         edit_message=True,
     )
+
+
+def handle_module_external(
+    session: Session,
+    user: User,
+    parent_run_id: int,
+    index: int,
+    *,
+    report: bool = False,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    """Offer an owned answered module's external brief, with honest self-report."""
+
+    from fluentloop.bot.roadmap import _reply
+    from fluentloop.roadmap_study import (
+        answered_module_question,
+        record_module_external,
+    )
+
+    question = answered_module_question(session, user, parent_run_id, index)
+    if question is None:
+        return BotReply("Это задание недоступно.", edit_message=True)
+    if report:
+        recorded = record_module_external(session, user, parent_run_id, index)
+        return BotReply(
+            "Отмечено со слов пользователя. "
+            "Бот не оценивал аудирование или устную речь."
+            if recorded
+            else "Эта практика уже отмечена или недоступна.",
+            channel_id,
+            buttons=[[_button("Продолжить учиться", "simple:study")]],
+            message_thread_id=message_thread_id,
+            edit_message=True,
+        )
+    lines = [
+        f"Практика вне бота · {question.get('module_title_ru', '')}",
+        str(
+            question.get("module_task")
+            or "Выберите материал по теме и обсудите его с собеседником."
+        ),
+        "",
+        "Эту часть выполняйте с подходящим внешним материалом или собеседником. "
+        "Кнопка ниже сохраняет только вашу отметку о выполнении; "
+        "она не повышает ступень и не подтверждает навык речи или аудирования.",
+        "",
+        "Ресурсы:",
+        *(
+            f"• {resource['title']}: {resource['url']}"
+            for resource in question.get("module_resources", [])
+        ),
+    ]
+    return _reply(
+        "\n".join(lines),
+        channel_id,
+        message_thread_id,
+        [
+            [
+                _button(
+                    "Отметить выполнение",
+                    f"simple:module_report:{parent_run_id}:{index}",
+                )
+            ],
+            [_button("Продолжить учиться", "simple:study")],
+        ],
+    )
+
+
+def _module_progress_reply(
+    session: Session, user: User, *, channel_id=None, message_thread_id=None
+) -> BotReply | None:
+    from fluentloop.bot.roadmap import _reply
+    from fluentloop.roadmap_study import enabled, module_progress
+    from fluentloop.workplace_roadmap import get_plan
+
+    if not enabled(user):
+        return None
+    modules = module_progress(session, user)
+    attempted = [
+        row
+        for row in modules
+        if row["recognition_attempts"]
+        or row["writing_attempts"]
+        or row["external_reports"]
+        or row["completed_stages"]
+    ]
+    focus = get_plan(user)["focus"]
+    attempted.sort(key=lambda row: (row["module_id"] != focus, -row["last_attempt_id"]))
+    lines = [
+        "Модули личного плана · весь период",
+        f"Начаты: {len(attempted)}/{len(modules)}. Подробнее: /roadmap module ID.",
+    ]
+    actions = {
+        "recognition": "вопрос по теме",
+        "writing": "своё письмо",
+        "spacing": "новое применение через ≥24 ч",
+        "language_gate": "закрепить 10 языковых тем",
+        "practice": "поддерживать навык",
+    }
+    for row in attempted[:5]:
+        stage = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}[row["stage"]]
+        lines.append(
+            f"• {row['title_ru']} · {stage}: узнавание {row['recognition_correct']}, "
+            f"самостоятельное письмо {len(row['writing_variants'])}/2 "
+            f"→ {actions.get(row['next_action'], 'практика')}."
+        )
+    lines.append(
+        "Внешние отметки учитываются отдельно и не подтверждают освоение. "
+        "Это не оценка CEFR."
+    )
+    return _reply("\n".join(lines), channel_id, message_thread_id)
 
 
 def handle_simple_more_menu(
@@ -2277,6 +2466,9 @@ def handle_progress(
             )
             + f"→ {status}"
         )
+    module_reply = _module_progress_reply(
+        session, user, channel_id=channel_id, message_thread_id=message_thread_id
+    )
     return BotReply(
         "📈 <b>Прогресс · 30 дней</b>\n"
         f"Узнавание: {recognition_correct}/{recognition_total} верных ответов.\n"
@@ -2296,6 +2488,7 @@ def handle_progress(
         channel_id,
         message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,
+        extra_replies=(module_reply,) if module_reply is not None else (),
     )
 
 

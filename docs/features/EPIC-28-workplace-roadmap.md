@@ -4,6 +4,10 @@
 **PRD references:** §6 P1, §14 Editable workplace roadmap  
 **ADR:** [ADR-0015](../adr/0015-editable-workplace-roadmap.md)
 
+**Follow-up:** [EPIC-29](EPIC-29-roadmap-driven-study.md) connects this plan to
+actual Study questions and module writing. The delivered notes below describe
+the original EPIC-28 release; its advisory-only selector limit is superseded.
+
 ## Scope
 
 Research official CEFR, language assessment and workplace learning sources;

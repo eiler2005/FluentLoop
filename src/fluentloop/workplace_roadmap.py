@@ -1,4 +1,4 @@
-"""Validated, advisory learning plans, isolated from assessed adaptive progress."""
+"""Validated learning preferences, separate from assessed evidence."""
 
 from __future__ import annotations
 
@@ -373,7 +373,7 @@ def update_plan(
 def plan_outline(
     plan: dict[str, Any], catalog: dict[str, Any] | None = None
 ) -> dict[str, Any]:
-    """Allocate advisory time; no schedule, selector or assessed state changes."""
+    """Show suggested time and priorities; this read does not change evidence."""
     pack = _catalog(catalog)
     valid = validate_plan(plan, pack)
     modules = {module["id"]: module for module in pack["modules"]}

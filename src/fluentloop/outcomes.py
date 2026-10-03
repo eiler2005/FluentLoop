@@ -126,9 +126,16 @@ def collect_outcome_metrics(
     current = now or datetime.now(UTC)
     period_start, period_end = _period_dates(current)
     attempts = _attempts_in_period(session, user, period_start, period_end)
-    production_attempts = [
+    self_reports = [
         attempt
         for attempt in attempts
+        if attempt.exercise_type == "roadmap_external"
+        or (attempt.feedback or {}).get("answer_modality") == "self_report"
+    ]
+    assessed_attempts = [attempt for attempt in attempts if attempt not in self_reports]
+    production_attempts = [
+        attempt
+        for attempt in assessed_attempts
         if attempt.exercise_type != "simple_choice"
         and (attempt.feedback or {}).get("answer_modality")
         not in {"recognition", "self_rating"}
@@ -147,7 +154,8 @@ def collect_outcome_metrics(
         "attempts": {
             "total": len(attempts),
             "production": len(answers),
-            "recognition": len(attempts) - len(production_attempts),
+            "recognition": len(assessed_attempts) - len(production_attempts),
+            "self_reports": len(self_reports),
             "word_count": word_count,
         },
         "baseline": _baseline_metrics(baseline),
@@ -220,6 +228,8 @@ def render_outcome_report(metrics: dict[str, Any], *, full: bool = False) -> str
         f"{attempts['word_count']} words",
         f"Recognition: {attempts.get('recognition', 0)} answers; "
         f"production: {attempts['production']} written answers",
+        f"External practice: {attempts.get('self_reports', 0)} "
+        "self-reports (unassessed)",
         "",
         f"1. Held-out retention: {_rate_or_status(held, 'retention')}",
         f"   sample: {held['correct']}/{held['sample_size']} correct, "

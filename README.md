@@ -1,6 +1,6 @@
 # FluentLoop
 
-> Telegram bot for English learning. B2+/C1- focus, business and IT context,
+> Telegram bot for B2–introductory C1 English: a general foundation with business and IT supplements,
 > text-only MVP, shared seed lesson library, measurable outcomes loop, single Docker container on a VPS.
 
 [![CI](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml/badge.svg)](https://github.com/eiler2005/FluentLoop/actions/workflows/ci.yml)
@@ -36,8 +36,10 @@ flowchart LR
     Question --> Choice[Tap an answer]
     Choice --> Feedback[Short explanation]
     Feedback --> Question
+    Feedback --> Writing[Optional short writing]
+    Writing --> Question
     Question --> Stop[Хватит: saved result]
-    Stop --> Writing[Optional short writing]
+    Stop --> Writing
 ```
 
 ## Start here if you want to learn
@@ -89,8 +91,16 @@ with B2/B2+/introductory-C1 tasks. General English receives 60% of the default
 time budget; client work and large-technology companies are supplementary tracks.
 Use `/roadmap` for the plan and common edits, or download and open the
 [offline visual planner](docs/curriculum/workplace-planner.html) to reorder
-topics, pause them, add notes and export a personal JSON plan. These are practice
-briefs and priorities; they do not change assessed mastery or the `/study` queue.
+topics, pause them, add notes and export a personal JSON plan. With a saved plan,
+**Учиться /study follows that plan**: 144 additional contextual questions and
+288 short writing situations cover all 48 modules and three stages. The default
+60/40 split balances answered questions; weekly minutes remain a suggested
+workload. Focus, order and pauses affect subsequent selection, while an already
+displayed question resumes unchanged. Two independent, genuinely checked written
+applications on different days support each module's progression; choices and
+external practice reports are counted separately. Introductory C1 also requires
+the existing ten-topic language gate. See the
+[Study integration runbook](docs/runbooks/roadmap-study.md).
 The [research reports](docs/research/README.md) explain sources and coverage gaps.
 
 The advanced path inside Telegram:
@@ -243,7 +253,7 @@ before you start.
 ```
 
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
-Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0013 Accepted;
+Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0016 Accepted;
 0009 reserved).
 Learner-facing methodology and daily workflow: [`docs/user-guide.md`](docs/user-guide.md).
 Methodology map: [`docs/learning-methodology.md`](docs/learning-methodology.md).
@@ -318,6 +328,7 @@ Bot          Session done — 15/15 in 14 min.
 | **Shared lesson library** — EPIC-23 (`/library`, `/subscribe`, seed catalog templates, per-user clones) | ✅ Done |
 | **Learning outcomes loop** — EPIC-24 (`/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article probes) | ✅ Done |
 | **Simple learning pilot** — EPIC-26 (`/study`, `/progress`, manual phrase/grammar stream, optional writing, reviewed lang-lessons pack) | Implemented; per-profile opt-in |
+| **Adaptive learning and personal programme** — EPIC-27..29 (B2–C1 language evidence, editable general/workplace plan, module questions and independent writing inside `/study`) | Implemented; saved plan activates module selection |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:

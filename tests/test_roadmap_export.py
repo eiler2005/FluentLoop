@@ -71,5 +71,5 @@ def test_every_module_stage_and_coverage_gap_is_published():
     for row in catalog["language_map"]:
         assert row["title_ru"] in markdown
         assert row["b2_focus"] in markdown
-    assert "не меняет адаптивную очередь" in markdown
+    assert "управляет подбором /study" in markdown
     assert "Общий английский — основа" in markdown

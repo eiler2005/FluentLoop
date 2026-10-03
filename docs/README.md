@@ -22,13 +22,15 @@
 | [`curriculum/workplace-roadmap.md`](curriculum/workplace-roadmap.md) | Generated 48-module map with 144 stage tasks, evidence criteria and language coverage gaps. |
 | [`curriculum/workplace-planner.html`](curriculum/workplace-planner.html) | Downloadable offline visual planner: search/filter, priorities, time split, order, pauses and notes. |
 | [`research/README.md`](research/README.md) | Primary-source CEFR and general/workplace needs research. |
-| [`adr/0015-editable-workplace-roadmap.md`](adr/0015-editable-workplace-roadmap.md) | Advisory personal plans stay separate from assessed progress. |
+| [`adr/0015-editable-workplace-roadmap.md`](adr/0015-editable-workplace-roadmap.md) | Portable private plans; selection decision amended by ADR-0016. |
+| [`adr/0016-roadmap-driven-study.md`](adr/0016-roadmap-driven-study.md) | Personal plan drives module selection; genuine module evidence and external reports remain distinct. |
 | [`features/`](features/) | Epic files: original MVP backlog plus learning-engine roadmap and post-MVP extensions. |
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 | [`runbooks/deploy.md`](runbooks/deploy.md) | Deploy checklist and Telegram smoke message format. |
 | [`runbooks/simple-learning.md`](runbooks/simple-learning.md) | Reviewed bank import, owner pilot activation, checks, and rollback. |
 | [`runbooks/adaptive-learning.md`](runbooks/adaptive-learning.md) | Adaptive curriculum activation, maintenance limits, owner opt-out, smoke and rollback. |
+| [`runbooks/roadmap-study.md`](runbooks/roadmap-study.md) | Activate plan-driven Study, inspect evidence, validate the module bank and release safely. |
 | [`lesson-catalog/lang-lessons.md`](lesson-catalog/lang-lessons.md) | Reviewed 86-question phrase/grammar bank and source provenance. |
 | [`runbooks/curriculum-seed.md`](runbooks/curriculum-seed.md) | Populate the deterministic 20-lesson B2/B2+ curriculum seed. |
 | [`runbooks/telegram-workspace.md`](runbooks/telegram-workspace.md) | Refresh pinned help, command menu, and safe Telegram cleanup. |

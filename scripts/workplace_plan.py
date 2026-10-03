@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate/export an advisory plan; apply only to the configured admitted pilot."""
+"""Validate/export a Study plan; apply only to the configured admitted pilot."""
 
 from __future__ import annotations
 
@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
 
-    action = "Applied to configured pilot" if args.apply else "Validated advisory plan"
+    action = "Applied to configured pilot" if args.apply else "Validated personal plan"
     print(
         f"{action}: modules={len(catalog['modules'])} track={plan['track']} "
         f"weekly_minutes={plan['weekly_minutes']} "

@@ -1,7 +1,7 @@
 # Architecture
 
 > **Status:** v0.3 — MVP foundation (EPIC-01..14), learning-engine roadmap
-> (EPIC-16..21), and EPIC-22..28 extensions are implemented. ADRs 0002-0015 are
+> (EPIC-16..21), and EPIC-22..29 extensions are implemented. ADRs 0002-0016 are
 > Accepted (0009 reserved). Schema specifics
 > for individual epics live in those epic files.
 
@@ -28,16 +28,36 @@ decisions as ADRs in [`adr/`](adr/).
 
 ## At a glance
 
-The general/workplace roadmap (ADR-0015, EPIC-28) is an advisory layer.
+The general/workplace roadmap (ADR-0015/0016, EPIC-28/29) drives Study for
+profiles with an explicitly saved, valid personal plan.
 `workplace_roadmap.py` validates public catalogue references and portable plans;
 `User.preferences_json.workplace_plan` contains only private planning preferences.
 `bot/roadmap.py` provides `/roadmap`, and `roadmap_export.py` renders a generated
-Markdown map and standalone HTML editor from the packaged public seed. No new
-schema, scheduler, provider call or active learning item is introduced. The
+Markdown map and standalone HTML editor from the packaged public seed. The
 editor's browser storage is independent of Telegram; applying an exported JSON
-requires the explicit owner CLI. Reordering modules does not change the adaptive
-selector or its ten-topic C1 evidence gate. All tracks retain general English,
-with a default 60/40 general/work time allocation.
+requires the explicit owner CLI. `roadmap_study.py` selects from a separate
+144-question module pack, balancing general/work answered practice units at
+60/40 by default and interleaving existing language practice in work slots.
+Order, focus and pauses affect the next selection; the pending immutable
+snapshot resumes unchanged. Weekly minutes are advisory, not measured time.
+
+Module snapshots and attempt feedback contain module/stage/variant evidence in
+existing sessions; no schema or active-target migration is needed. Optional
+writing uses the existing genuine answer checker and BONUS capture. Two distinct
+independent correct writing situations on local dates at least 24 hours apart,
+plus recognition, advance a module. C1 additionally retains the ten-topic
+adaptive gate. Model rewrites, reused answers, fallback checks and external
+self-reports cannot supply writing evidence. External reports have a separate
+modality and idempotent per-user claim. Module issue reports quarantine only
+that user's question; the existing automatic variant maintainer does not
+rewrite the public module pack. See [the runbook](runbooks/roadmap-study.md).
+
+Answer-check verdicts are validated as `correct`, `partial` or `incorrect`.
+Compatibility aliases `pass`/`passed` and `fail`/`failed` normalize to those
+values; unknown verdicts fail validation and cannot become verified evidence.
+The checker prompt preserves the supplied stage and situation, evaluates task
+completion and permits omitted optional fields. Evaluation provenance remains
+provider-controlled; model output cannot turn a fallback into a genuine check.
 
 Component view — every box is one Python module set inside a single Docker
 container:

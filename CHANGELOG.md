@@ -7,6 +7,12 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- Personal roadmap execution inside **Учиться /study**: 144 contextual questions
+  and 288 optional writing situations across all 48 general/workplace modules.
+  General/work allocation, focus, order and pauses drive subsequent selection;
+  pending questions resume intact. Module progression requires genuine independent
+  spaced writing and preserves the ten-topic C1 gate. External activity reports
+  are separate from assessment. No schema migration or learning pushes.
 - Research-backed editable B2–introductory C1 roadmap: 16 general-English and
   32 supplementary workplace modules, 144 staged practice briefs, role tracks,
   language coverage map, primary-source reports and editable time allocation.
@@ -76,6 +82,11 @@ All notable changes to FluentLoop are recorded here. Format follows
   existing `AI_PROVIDER` switch (ADR-0010).
 
 ### Fixed
+- Genuine AI answer-check verdicts such as `pass` now normalize to the canonical
+  `correct` status; unknown verdicts remain unverified. Writing checks retain the
+  exercise's level, context and task requirements.
+- External practice self-reports are counted separately and no longer inflate
+  assessed production, recognition or writing-volume metrics.
 - Deployment backups now use SQLite's online backup API and verify integrity,
   preserving committed data still in the WAL before the release.
 - Recognition answers no longer inflate productive chunk, writing, held-out

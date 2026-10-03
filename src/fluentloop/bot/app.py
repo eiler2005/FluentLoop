@@ -52,6 +52,7 @@ from fluentloop.bot.handlers import (
     handle_mentor,
     handle_mistake_action,
     handle_mistakes,
+    handle_module_external,
     handle_more,
     handle_onboarding_callback,
     handle_onboarding_start,
@@ -1105,6 +1106,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             channel_id=channel_id,
                             message_thread_id=thread_id,
                         )
+                        if reply.simple_choice_accepted:
+                            _cancel_simple_bonus_capture(session, user)
                     await answer_callback(event, "Ответ сохранён")
                 elif len(simple_parts) == 4 and simple_parts[1] == "issue":
                     try:
@@ -1125,9 +1128,34 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             session, user, run_id, edit_message=True
                         )
                     await answer_callback(event, "Остановлено")
-                elif len(simple_parts) == 3 and simple_parts[1] == "bonus":
+                elif len(simple_parts) == 4 and simple_parts[1] in {
+                    "module_external",
+                    "module_report",
+                }:
                     try:
                         parent_run_id = int(simple_parts[2])
+                        module_index = int(simple_parts[3])
+                    except ValueError:
+                        reply = BotReply("Это задание недоступно.", edit_message=True)
+                    else:
+                        reply = handle_module_external(
+                            session,
+                            user,
+                            parent_run_id,
+                            module_index,
+                            report=simple_parts[1] == "module_report",
+                            channel_id=channel_id,
+                            message_thread_id=thread_id,
+                        )
+                    await answer_callback(event, "Внешняя практика")
+                elif (len(simple_parts) == 3 and simple_parts[1] == "bonus") or (
+                    len(simple_parts) == 4 and simple_parts[1] == "module_write"
+                ):
+                    try:
+                        parent_run_id = int(simple_parts[2])
+                        module_index = (
+                            int(simple_parts[3]) if len(simple_parts) == 4 else None
+                        )
                     except ValueError:
                         reply = BotReply("Письменное задание недоступно.")
                     else:
@@ -1135,6 +1163,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             session,
                             user,
                             parent_run_id,
+                            module_index=module_index,
                             channel_id=channel_id,
                             message_thread_id=thread_id,
                         )

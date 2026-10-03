@@ -3,6 +3,10 @@
 **Status:** Accepted  
 **Date:** 2026-10-03
 
+**Amendment:** [ADR-0016](0016-roadmap-driven-study.md) supersedes the advisory-only
+selection decision by connecting approved module practice to Study. Private-plan
+isolation, portability and separation from language mastery remain in force.
+
 ## Context
 
 The ten-topic adaptive bank covers selected language targets. The requested

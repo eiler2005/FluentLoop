@@ -259,7 +259,7 @@ def _item_questions(session: Session, user: User, item: LearningItem) -> list[di
     ]
 
 
-def _choose_question(
+def _choose_bank_question(
     session: Session,
     user: User,
     *,
@@ -398,6 +398,54 @@ def _choose_question(
         if candidates[category]:
             return min(candidates[category], key=lambda candidate: candidate[0])[1]
     return None
+
+
+def _choose_question(
+    session: Session,
+    user: User,
+    *,
+    now: datetime,
+    repeat_familiar: bool,
+    previous_category: str | None = None,
+) -> dict | None:
+    from fluentloop.roadmap_study import choose_question, enabled
+
+    planned = enabled(user)
+    if planned:
+        previous_bank = session.scalar(
+            select(PracticeAttempt)
+            .join(PracticeSession)
+            .where(
+                PracticeSession.user_id == user.id,
+                PracticeAttempt.exercise_type == CHOICE,
+                func.json_extract(PracticeAttempt.feedback, "$.roadmap").is_(None),
+            )
+            .order_by(PracticeAttempt.id.desc())
+            .limit(1)
+        )
+        # Module categories do not participate in language-bank alternation.
+        previous_category = (
+            (previous_bank.feedback or {}).get("category", "grammar")
+            if previous_bank is not None
+            else "grammar"
+        )
+    bank = _choose_bank_question(
+        session,
+        user,
+        now=now,
+        repeat_familiar=repeat_familiar,
+        previous_category=previous_category,
+    )
+    if not planned:
+        return bank
+    return choose_question(
+        session,
+        user,
+        now=now,
+        repeat_familiar=repeat_familiar,
+        bank_question=bank,
+        recent=_recent_displayed(session, user, _history(session, user)),
+    )
 
 
 def _saved_question(
@@ -605,6 +653,15 @@ def answer_choice(
             "question": question,
             **(question.get("adaptive_evidence") or {}),
         }
+        for key in (
+            "roadmap",
+            "strand",
+            "selection_source",
+            "selection_fallback",
+            "allocation_share",
+        ):
+            if key in question:
+                feedback[key] = question[key]
         attempt = PracticeAttempt(
             practice_session_id=run.id,
             exercise_index=index,
@@ -701,7 +758,7 @@ def start_bonus(
         question = _snapshot(run)
         if (question or {}).get("metadata", {}).get(
             "parent_simple_session_id"
-        ) == parent_run_id:
+        ) == parent_run_id and not (question or {}).get("roadmap"):
             return SimpleStep(run, question if run.status == BONUS else None)
     active = get_active_bonus(session, user)
     if active is not None:
@@ -733,6 +790,20 @@ def start_bonus(
         if contract and (contract["topic_id"], contract["stage"]) in needed:
             question = candidate_question
             break
+    if question.get("roadmap"):
+        from fluentloop.roadmap_study import start_module_bonus
+
+        parent_index = next(
+            (
+                attempt.exercise_index
+                for attempt in attempts
+                if (attempt.feedback or {}).get("question") == question
+            ),
+            None,
+        )
+        if parent_index is None:
+            return SimpleStep(None, None)
+        return start_module_bonus(session, user, parent_run_id, parent_index, now=now)
     example = question["options"][question["correct_index"]]
     item = session.scalar(
         select(LearningItem).where(
@@ -804,6 +875,8 @@ def submit_bonus(
     *,
     now: datetime | None = None,
 ) -> SimpleAnswer:
+    if not isinstance(answer, str) or len(answer) > 10000:
+        return SimpleAnswer(False, "invalid_answer")
     run = _owned_run(session, user, bonus_run_id)
     if run is None or run.status != BONUS or not answer.strip():
         return SimpleAnswer(False, "unavailable")
@@ -825,14 +898,21 @@ def submit_bonus(
             "fingerprint": question.get("source_fingerprint"),
             "independent_production": independent_production(answer, question),
         }
+        if question.get("roadmap"):
+            from fluentloop.roadmap_study import module_feedback_metadata
+
+            saved_feedback.update(
+                module_feedback_metadata(session, user, question, answer)
+            )
         status = str(feedback.get("status") or "unchecked")
-        if (
-            adaptive_metadata(question)
-            and feedback.get("genuine_evaluation") is not True
-        ):
+        if (adaptive_metadata(question) or question.get("roadmap")) and feedback.get(
+            "genuine_evaluation"
+        ) is not True:
             status = "unchecked"
         saved_feedback["status"] = status
-        if status in {"correct", "partial", "incorrect"}:
+        if status in {"correct", "partial", "incorrect"} and not question.get(
+            "roadmap"
+        ):
             owned_ids = []
             for item_id in question["target_learning_item_ids"]:
                 item = session.scalar(

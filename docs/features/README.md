@@ -40,6 +40,7 @@ phrase/grammar stream and reviewed reference bank.
 | 26 | [simple-learning-stream](EPIC-26-simple-learning-stream.md) | Done | Manual per-profile stream, concise feedback, resumable questions, optional writing, recognition metrics, reviewed 86-question bank, and owner pilot. |
 | 27 | [adaptive-topic-progression](EPIC-27-adaptive-topic-progression.md) | Done | Per-topic B2/C1 roadmap, delayed fresh transfer, genuine writing evidence, 270-question curriculum and bounded bank improvement. |
 | 28 | [workplace-roadmap](EPIC-28-workplace-roadmap.md) | Done | General-English foundation with client/business/Big Tech supplements, sourced research, editable offline and Telegram plan. |
+| 29 | [roadmap-driven-study](EPIC-29-roadmap-driven-study.md) | Done | Actual module practice under Учиться, weighted general/work selection, independent written evidence and external self-reports. |
 
 ## Dependency graph
 

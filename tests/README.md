@@ -35,6 +35,9 @@ suite makes no real network calls.
 
 | Test module | Covers |
 |---|---|
+| `test_answer_feedback_contract.py` | Canonical verdicts, conservative legacy aliases, unknown-verdict rejection, provider-controlled provenance and contextual writing instructions. |
+| `test_roadmap_study.py` | Module pack validation, real weighted selection, focus/pauses/resume, spaced genuine independent writing, C1 gate, self-reports, personal quarantine and owned atomic actions. |
+| `test_roadmap_study_ui.py` | Module question/feedback controls, optional writing capture, external reports, progress, origin routing and stale/foreign actions. |
 | `test_workplace_roadmap.py` | Strict catalogue/personal plan validation, portable exports, explicit owner CLI operations, isolated preferences and retained general foundation. |
 | `test_workplace_roadmap_ui.py` | Telegram roadmap edits, module details, origin routing, authorization, HTML safety and unchanged adaptive history. |
 | `test_roadmap_export.py` | Generated view freshness, offline embedded-data safety and complete stage tasks. |
