@@ -82,8 +82,10 @@ def create_lesson_plan_from_source(
         list(items) if items is not None else _items_for_source(session, user, source)
     )
     draft = _draft_lesson_plan(provider, user, source, linked_items)
-    topic = draft.topic.strip() if draft and draft.topic.strip() else _infer_topic(
-        source, linked_items
+    topic = (
+        draft.topic.strip()
+        if draft and draft.topic.strip()
+        else _infer_topic(source, linked_items)
     )
     plan = LessonPlan(
         user_id=user.id,
@@ -221,6 +223,7 @@ def available_lesson_plan(session: Session, user: User) -> LessonPlan | None:
             LessonPlan.user_id == user.id,
             LessonPlan.is_template.is_(False),
             LessonPlan.status.in_(("active", "draft")),
+            ~LessonPlan.tags_json.contains("adaptive_curriculum:v1"),
         )
         .order_by(LessonPlan.status.asc(), LessonPlan.updated_at.desc())
         .limit(1)
@@ -265,15 +268,17 @@ def lesson_plan_by_id(
     return plan
 
 
-def find_lesson_plan(
-    session: Session, user: User, query: str
-) -> LessonPlan | None:
+def find_lesson_plan(session: Session, user: User, query: str) -> LessonPlan | None:
     matches = active_lesson_plans(session, user, query=query, limit=10)
     return matches[0] if matches else None
 
 
 def random_lesson_plan(session: Session, user: User) -> LessonPlan | None:
-    plans = active_lesson_plans(session, user, limit=100)
+    plans = [
+        plan
+        for plan in active_lesson_plans(session, user, limit=100)
+        if "adaptive_curriculum:v1" not in (plan.tags_json or [])
+    ]
     return random.choice(plans) if plans else None
 
 

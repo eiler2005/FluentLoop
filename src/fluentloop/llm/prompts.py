@@ -69,6 +69,31 @@ def _material_extraction_prompt(payload: dict[str, Any]) -> str:
 
 
 def _task_instruction(task: LLMTask, payload: dict[str, Any]) -> str:
+    if task == LLMTask.QUESTION_VARIANT:
+        return (
+            "Create ONE fresh English multiple-choice question for the supplied "
+            "already-approved target, topic, stage and role. Use a substantially "
+            "different situation and sentence, not names/numbers substitution. "
+            "There must be exactly one defensible answer in the explicit context. "
+            "Return prompt, options (3 or 4 plausible English choices), correct_index "
+            "(zero-based), explanation_ru (concise accurate Russian teaching), and "
+            "production_prompt (ask for an original English sentence in another "
+            "situation using this target). The source may contain a reported flaw: "
+            "reason independently and do not inherit its key blindly. Do not add "
+            "new learning targets. Never reuse supplied excluded situations."
+        )
+    if task == LLMTask.QUESTION_REVIEW:
+        return (
+            "Independently solve and audit this English question. The answer key "
+            "has deliberately been withheld. Return correct_index, unambiguous "
+            "(exactly one contextually correct option), target_aligned (same "
+            "approved construction/meaning), level_appropriate, explanation_correct "
+            "(Russian explanation matches the independently solved answer), and "
+            "novel_context (different reasoning situation from the excluded "
+            "questions, not cosmetic substitutions). Any uncertainty means false. "
+            "Do not approve merely because a question looks grammatical. Evaluate "
+            "production_prompt too: it must ask for genuinely independent use."
+        )
     if task == LLMTask.MATERIAL_EXTRACTION:
         material_type = payload.get("type", "other")
         if material_type in {"word_list", "expression_list"}:

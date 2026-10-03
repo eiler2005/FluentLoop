@@ -68,7 +68,7 @@ def task_profile(
     material_type: str = "",
 ) -> LLMProfile:
     provider = provider_config(settings)
-    if task == LLMTask.SEED_LESSON_PLAN:
+    if task in {LLMTask.SEED_LESSON_PLAN, LLMTask.QUESTION_REVIEW}:
         return LLMProfile(
             provider.planner,
             thinking=provider.reasoning_effort is not None,

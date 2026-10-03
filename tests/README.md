@@ -29,8 +29,9 @@ The full standard gate (lint + tests + smoke checks) lives in
 ## Coverage map
 
 Tests are organized by epic, with a few cross-cutting modules for tooling.
-Every module exercises the real SQLAlchemy schema against an in-memory SQLite
-and stubs the Telegram client and AI providers — no real network calls.
+Database tests exercise the real SQLAlchemy schema with isolated in-memory or
+temporary-file SQLite databases. Telegram and AI providers are stubbed; the
+suite makes no real network calls.
 
 | Test module | Covers |
 |---|---|
@@ -38,6 +39,11 @@ and stubs the Telegram client and AI providers — no real network calls.
 | `test_epic26_simple_learning.py` | Persisted manual stream, atomic answers, owner isolation, cooldowns, small pools, familiar practice, bonus writing. |
 | `test_epic26_lang_lessons.py` | Reviewed pack validation, all source records, provenance, idempotent templates/clones, retained levels. |
 | `test_epic26_simple_commands.py` | Simple commands, mode-specific keyboard and replies, origin routing, callback feedback, stop/progress. |
+| `test_adaptive_ui.py` | Per-topic progress and plan, private routing, legacy compatibility, question reports, hidden transfer keys, and unverified writing status. |
+| `test_epic27_adaptive_learning.py` | Multi-day mastery, held-out exposure, stage/global gates, repair, genuine independent writing and real-pack progression. |
+| `test_adaptive_curriculum.py` | All 270 questions, hashes/targets, 30 stages, idempotent import, preserved personal fields and explicit pilot opt-in. |
+| `test_epic27_question_quality.py` | Generation/review failures, validation, quarantine, legacy repair, local-day concurrency, limits and private-context exclusion. |
+| `test_epic27_holdout_isolation.py` | General cards, quizzes, lessons and evaluation cannot expose reserved adaptive questions. |
 | `test_epic26_operations.py` | Preferences, scheduler skips, advanced-mode regression, recognition versus production outcomes. |
 | `test_epic01_foundation.py` | Bot startup, config loader, Telegram allowed-user gate, command catalog, logging masking. |
 | `test_epic02_05_users_learning.py` | User profile + settings flow; LearningItem CRUD, status changes, duplicate handling. |

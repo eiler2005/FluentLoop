@@ -49,6 +49,11 @@ What this means in practice:
   are selected and checked locally. An optional written bonus uses the existing
   AI answer-checking path and sends its prompt and submitted sentence to the
   configured provider. Attempts and personal progress stay in the private DB.
+- Bounded simple-bank expansion sends curated question prompts, choices, and
+  target constructions to the configured provider to draft and independently
+  check new variants. Raw learner answers are not sent in those prompts. A
+  reported question is excluded from that learner's selection while its report
+  remains in the private DB.
 - Lesson notes may contain colleague names, client names, internal project
   names, and informal commentary. All of that is transmitted to the chosen
   AI provider.

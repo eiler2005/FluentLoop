@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.db.models import LearningItem, User
+from fluentloop.learning import general_practice_item_filter
 
 
 @dataclass(frozen=True)
@@ -27,6 +28,7 @@ def select_held_out_items(
                 LearningItem.user_id == user.id,
                 LearningItem.status == "active",
                 LearningItem.is_template.is_(False),
+                general_practice_item_filter(),
             )
             .order_by(LearningItem.id.asc())
             .limit(limit * 10)

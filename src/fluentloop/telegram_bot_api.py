@@ -15,6 +15,7 @@ BOT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("today", "Start today's practice"),
     ("study", "Continue simple practice questions"),
     ("progress", "Show recognition and writing progress"),
+    ("plan", "Show your next topic and learning roadmap"),
     ("cards", "Show vocabulary cards right now"),
     ("review", "Review due items"),
     ("practice", "Start focused and EPIC-22 breakthrough practice modes"),

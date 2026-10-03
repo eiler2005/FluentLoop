@@ -18,6 +18,13 @@ ITEM_STATUSES = {"active", "archived", "suspended", "graduated"}
 USER_ADDED_PRIORITY = 10
 
 
+def general_practice_item_filter():
+    """Reserve the adaptive curriculum for its stage/held-out-aware selector."""
+    return func.json_extract(
+        LearningItem.metadata_json, "$.simple_question.adaptive"
+    ).is_(None)
+
+
 def create_learning_item(
     session: Session,
     user: User,
@@ -109,7 +116,11 @@ def active_items(session: Session, user_id: int) -> list[LearningItem]:
     return list(
         session.scalars(
             select(LearningItem)
-            .where(LearningItem.user_id == user_id, LearningItem.status == "active")
+            .where(
+                LearningItem.user_id == user_id,
+                LearningItem.status == "active",
+                general_practice_item_filter(),
+            )
             .order_by(LearningItem.created_at)
         )
     )

@@ -13,6 +13,13 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
+from fluentloop.adaptive_learning import (
+    adaptive_metadata,
+    curriculum_progress,
+    displayed_fingerprints,
+    eligible_question,
+    independent_production,
+)
 from fluentloop.ai.schemas import AnswerFeedback
 from fluentloop.db.models import (
     LearningItem,
@@ -184,8 +191,14 @@ def _recent_displayed(
     return {entry[-1] for entry in ordered[:RECENT_COUNT]}
 
 
-def _question_for_item(session: Session, user: User, item: LearningItem) -> dict | None:
-    raw = (item.metadata_json or {}).get("simple_question")
+def _question_for_item(
+    session: Session, user: User, item: LearningItem, raw_override: dict | None = None
+) -> dict | None:
+    raw = (
+        raw_override
+        if raw_override is not None
+        else (item.metadata_json or {}).get("simple_question")
+    )
     if isinstance(raw, dict):
         question = dict(raw)
     elif item.type in PHRASE_TYPES:
@@ -230,6 +243,22 @@ def _question_for_item(session: Session, user: User, item: LearningItem) -> dict
     return question
 
 
+def _item_questions(session: Session, user: User, item: LearningItem) -> list[dict]:
+    primary = _question_for_item(session, user, item)
+    questions = [primary] if primary is not None else []
+    for variant in (item.metadata_json or {}).get("simple_question_variants") or []:
+        if isinstance(variant, dict):
+            question = _question_for_item(session, user, item, variant)
+            if question is not None:
+                questions.append(question)
+    quality = (item.metadata_json or {}).get("question_quality") or {}
+    return [
+        question
+        for question in questions
+        if (quality.get(question["fingerprint"]) or {}).get("status") != "quarantined"
+    ]
+
+
 def _choose_question(
     session: Session,
     user: User,
@@ -239,6 +268,9 @@ def _choose_question(
     previous_category: str | None = None,
 ) -> dict | None:
     history = _history(session, user)
+    adaptive_progress = curriculum_progress(session, user, now=now)
+    adaptive_topics = {entry.topic_id: entry for entry in adaptive_progress.topics}
+    seen = displayed_fingerprints(session, user)
     if previous_category is None:
         latest = session.scalar(
             select(PracticeSession)
@@ -266,7 +298,7 @@ def _choose_question(
         )
     }
     candidates: dict[str, list[tuple[tuple, dict]]] = {"phrase": [], "grammar": []}
-    for item in session.scalars(
+    items = session.scalars(
         select(LearningItem)
         .where(
             LearningItem.user_id == user.id,
@@ -274,13 +306,27 @@ def _choose_question(
             LearningItem.is_template.is_(False),
         )
         .order_by(LearningItem.id)
+    )
+    for item, question in (
+        (candidate_item, candidate_question)
+        for candidate_item in items
+        for candidate_question in _item_questions(session, user, candidate_item)
     ):
-        question = _question_for_item(session, user, item)
-        if question is None:
+        if not eligible_question(
+            question, adaptive_progress, seen, now=now, repeat_familiar=repeat_familiar
+        ):
             continue
+        contract = adaptive_metadata(question)
+        if contract is not None:
+            question["adaptive_evidence"] = {
+                "adaptive": contract,
+                "first_exposure": question["fingerprint"] not in seen,
+                "transfer_eligible": contract["role"] == "transfer",
+            }
         fingerprint = question["fingerprint"]
         records = by_fingerprint.get(fingerprint, [])
         state = states.get(item.id)
+        # Variant review history belongs to the question, not a sibling's SRS.
         due_at = _now(state.due_at) if state is not None else now
         eligible_records = [
             record
@@ -290,6 +336,12 @@ def _choose_question(
             or (record[1].feedback or {}).get("srs_applied")
         ]
         last = eligible_records[-1][1] if eligible_records else None
+        if contract is not None:
+            due_at = (
+                _now(last.created_at) + SUCCESS_COOLDOWN
+                if last is not None and last.status == "correct"
+                else now
+            )
         successes = [
             attempt
             for _, attempt in records
@@ -328,6 +380,12 @@ def _choose_question(
             priority, weak, last_seen = 2, False, datetime.min.replace(tzinfo=UTC)
         rank = (
             fingerprint in recent,
+            0 if contract and adaptive_topics[contract["topic_id"]].repair else 1,
+            0 if contract and contract["role"] == "transfer" else 1,
+            0
+            if contract
+            and contract["stage"] == adaptive_topics[contract["topic_id"]].stage
+            else 1,
             priority,
             not weak,
             -item.priority,
@@ -545,6 +603,7 @@ def answer_choice(
             "explanation": question.get("explanation_ru", ""),
             "displayed_at": (question.get("metadata") or {}).get("displayed_at"),
             "question": question,
+            **(question.get("adaptive_evidence") or {}),
         }
         attempt = PracticeAttempt(
             practice_session_id=run.id,
@@ -662,6 +721,18 @@ def start_bonus(
         if attempts
         else parent_question
     )
+    progress = curriculum_progress(session, user, now=_now(now))
+    needed = {
+        (entry.topic_id, entry.stage)
+        for entry in progress.topics
+        if entry.next_action == "production"
+    }
+    for candidate in attempts:
+        candidate_question = (candidate.feedback or {}).get("question") or {}
+        contract = adaptive_metadata(candidate_question)
+        if contract and (contract["topic_id"], contract["stage"]) in needed:
+            question = candidate_question
+            break
     example = question["options"][question["correct_index"]]
     item = session.scalar(
         select(LearningItem).where(
@@ -671,7 +742,13 @@ def start_bonus(
         )
     )
     target = str(
-        question.get("target_phrase") or (item.text if item is not None else example)
+        question.get("target_phrase")
+        or (
+            question.get("target_construction")
+            if question.get("category") == "grammar"
+            else None
+        )
+        or (item.text if item is not None else example)
     )
     if question.get("category") == "grammar":
         prompt = (
@@ -686,12 +763,24 @@ def start_bonus(
         "exercise_type": PRODUCTION,
         "prompt": prompt,
         "expected_answer": target,
-        "explanation": "Use the target in your own sentence.",
+        "source_example": example,
+        "source_fingerprint": question["fingerprint"],
+        "target_construction": question.get("target_construction", ""),
+        **({"adaptive": question["adaptive"]} if adaptive_metadata(question) else {}),
+        "explanation": (
+            "Evaluate original workplace writing against the requested phrase or "
+            "grammar construction, meaning, and task instructions. Accept correct "
+            "independent situations; the reference example is not an exact answer "
+            "to reproduce. The expected answer names the target, not required text."
+        ),
         "target_learning_item_ids": question["target_learning_item_ids"],
         "metadata": {
             "mode": "simple",
             "stream_index": 0,
             "parent_simple_session_id": parent.id,
+            "selection_mode": (question.get("metadata") or {}).get(
+                "selection_mode", "normal"
+            ),
         },
     }
     run = PracticeSession(
@@ -731,8 +820,18 @@ def submit_bonus(
             "parent_simple_session_id": question["metadata"][
                 "parent_simple_session_id"
             ],
+            "selection_mode": question["metadata"].get("selection_mode", "normal"),
+            "adaptive": adaptive_metadata(question),
+            "fingerprint": question.get("source_fingerprint"),
+            "independent_production": independent_production(answer, question),
         }
         status = str(feedback.get("status") or "unchecked")
+        if (
+            adaptive_metadata(question)
+            and feedback.get("genuine_evaluation") is not True
+        ):
+            status = "unchecked"
+        saved_feedback["status"] = status
         if status in {"correct", "partial", "incorrect"}:
             owned_ids = []
             for item_id in question["target_learning_item_ids"]:

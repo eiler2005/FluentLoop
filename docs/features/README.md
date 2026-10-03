@@ -38,6 +38,7 @@ phrase/grammar stream and reviewed reference bank.
 | 24 | [learning-outcomes-loop](EPIC-24-learning-outcomes-loop.md) | Done | Measurement-first layer: `/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article/Critical Reading probes; deployed and smoke validated. |
 | 25 | [daily-vocabulary-loop](EPIC-25-daily-vocabulary-loop.md) | Done | Three daily pushes in the learner's timezone (cards, drill, quiz poll), item graduation, `/setup` wizard, in-repo starter word bank, own words by plain message, Qwen provider (ADR-0010/0011/0012). |
 | 26 | [simple-learning-stream](EPIC-26-simple-learning-stream.md) | Done | Manual per-profile stream, concise feedback, resumable questions, optional writing, recognition metrics, reviewed 86-question bank, and owner pilot. |
+| 27 | [adaptive-topic-progression](EPIC-27-adaptive-topic-progression.md) | Done | Per-topic B2/C1 roadmap, delayed fresh transfer, genuine writing evidence, 270-question curriculum and bounded bank improvement. |
 
 ## Dependency graph
 

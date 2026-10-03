@@ -677,7 +677,7 @@ class OpenAIProvider(AIProvider):
         if task == "epic_10_check_answer":
             return AnswerFeedback.model_validate_json(
                 response.choices[0].message.content or "{}"
-            )
+            ).model_copy(update={"genuine_evaluation": True})
         if task == "epic_22_native_rewrite":
             return NativeRewriteFeedback.model_validate_json(
                 response.choices[0].message.content or "{}"
@@ -812,13 +812,21 @@ class DeepSeekProvider(AIProvider):
                     self.provider_name,
                 ),
             )
-            return self.gateway.run_json(
+            genuine = True
+
+            def unverified_fallback() -> Validated:
+                nonlocal genuine
+                genuine = False
+                return self.stub.light_call(task, payload)
+
+            result = self.gateway.run_json(
                 LLMTask.ANSWER_CHECK,
                 payload,
                 AnswerFeedback,
                 model=profile.model,
-                fallback=lambda: self.stub.light_call(task, payload),
+                fallback=unverified_fallback,
             )
+            return result.model_copy(update={"genuine_evaluation": genuine})
         if task == "epic_22_native_rewrite":
             profile = task_profile(
                 LLMTask.TONE_FEEDBACK,

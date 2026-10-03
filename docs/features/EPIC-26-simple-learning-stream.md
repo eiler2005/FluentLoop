@@ -4,6 +4,10 @@
 **PRD references:** §5.2, §6 P1, §13, §14
 **ADR:** [ADR-0013](../adr/0013-simple-learning-stream.md)
 
+Adaptive topic stages, genuine production evidence and opted-in bank maintenance
+extend this release in [EPIC-27](EPIC-27-adaptive-topic-progression.md). The
+manual question flow remains unchanged; background maintenance sends no messages.
+
 ## Goal
 
 Provide one manual entrance to an ongoing phrase/grammar stream for the owner's

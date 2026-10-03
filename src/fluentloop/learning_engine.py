@@ -359,12 +359,16 @@ def _filter_scored_items_for_mode(
 def _scored_items_for_lesson_plan(
     session: Session, plan: object | None
 ) -> list[ScoredLearningItem]:
+    from fluentloop.adaptive_learning import is_adaptive_item
+
     if plan is None:
         return []
     scored: list[ScoredLearningItem] = []
     recent_ids = _recent_practiced_item_ids(session, getattr(plan, "user_id", 0))
     due_ids = {item.id for item in get_due_items(session, getattr(plan, "user_id", 0))}
     for index, item in enumerate(lesson_items(session, plan)):
+        if is_adaptive_item(item):
+            continue
         score = 180 - index
         reasons = ["lesson_plan", "teacher_priority"]
         if item.id in due_ids:

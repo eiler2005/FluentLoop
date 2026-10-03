@@ -7,6 +7,16 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- Reviewed adaptive curriculum: 270 contextual questions across ten topics and
+  thirty B2/B2+/introductory-C1 stages, with 90 reserved transfer questions and
+  independent writing tasks. Owner activation is additive and idempotent.
+- Adaptive per-topic roadmap from B2 through B2+ to introductory C1:
+  `/progress` shows practice, transfer, and writing evidence, while `/plan`
+  points to the next topic and gap without claiming CEFR certification.
+  Answered questions can be flagged for review and excluded from that learner's
+  stream; bounded bank growth uses separately checked variants of approved
+  topics. Generic lesson and word previews hide adaptive answer keys; writing
+  saved without a genuine evaluation remains unscored.
 - EPIC-26 opt-in simple mode: Учиться / Прогресс / Ещё, a manual `/study`
   stream mixing phrases and grammar, concise feedback after each choice,
   interruption recovery, stop summaries, and optional one-sentence writing.

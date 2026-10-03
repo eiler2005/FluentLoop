@@ -37,7 +37,7 @@ flowchart LR
     Choice --> Feedback[Short explanation]
     Feedback --> Question
     Question --> Stop[Хватит: saved result]
-    Stop --> Writing[Optional one-sentence writing]
+    Stop --> Writing[Optional short writing]
 ```
 
 ## Start here if you want to learn
@@ -58,18 +58,30 @@ The simple pilot starts with:
 /study
 tap answers until Хватит
 /progress
+/plan
 ```
 
 The pilot is enabled per profile, initially only for the owner. Its keyboard
-is `Учиться`, `Прогресс`, `Ещё`; the extra menu opens materials,
+is `Учиться`, `Прогресс`, `Ещё`; the extra menu opens the personal plan, materials,
 cards, full lessons, and settings. No reminders, vocabulary pushes, or weekly
 reports are sent while this profile uses simple mode. A bot restart resumes
 the current question; `Хватит` completes the run and the next launch selects
 again. Familiar questions not yet due require `Повторить знакомое`.
 
+`/progress` separates recognition, fresh-context transfer, and writing by
+topic. `/plan` shows the next B2 → B2+ → introductory C1 step; these are
+practice indicators, not a CEFR certification. A learner can flag an answered
+question for review, which excludes that personal question from selection.
+
 The reviewed lang-lessons pack adds 86 B1/B2 phrase and grammar questions in
 19 topic templates. Each subscriber receives isolated personal copies. See
 [`docs/runbooks/simple-learning.md`](docs/runbooks/simple-learning.md).
+The [adaptive B2–C1 curriculum](docs/curriculum/adaptive-b2-c1.md) adds another
+270 questions across ten topics and thirty stage plans, including 90 reserved
+transfer questions. Spaced practice, fresh-context checks and genuine written
+application determine progression. Opted-in background maintenance generates and
+independently reviews bounded variants of approved targets; see the
+[activation and maintenance runbook](docs/runbooks/adaptive-learning.md).
 
 The advanced path inside Telegram:
 

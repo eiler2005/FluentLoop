@@ -4,6 +4,8 @@ Operational procedures for running FluentLoop on a VPS.
 
 Available:
 
+- [`adaptive-learning.md`](adaptive-learning.md) — B2/C1 curriculum activation,
+  mastery gates, automatic question maintenance, limits, smoke and rollback.
 - [`simple-learning.md`](simple-learning.md) — import the reviewed question
   bank, activate the owner pilot, verify manual practice, and roll back the mode.
 - [`deploy.md`](deploy.md) — deploy checklist and Telegram smoke message

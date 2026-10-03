@@ -56,12 +56,13 @@ container:
    └────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
-                   APScheduler (in-process, five jobs)
+                   APScheduler (in-process, six jobs)
                    ├─ Daily reminder (User.reminder_time)
                    ├─ Overnight pre-gen (PRE_GEN_HOUR=3)
                    ├─ Daily SQLite backup (BACKUP_HOUR=4, 14d retention)
                    ├─ Weekly summary (Sun 18:00)
-                   └─ vocab_loop_tick (every minute, per-user local slots)
+                   ├─ vocab_loop_tick (every minute, per-user local slots)
+                   └─ adaptive_question_bank (hourly :17, opted-in daily budget)
 ```
 
 Full-mode daily-loop data flow — what happens between bedtime and the morning's
@@ -201,6 +202,32 @@ Recent displayed questions are avoided when alternatives exist. Exhaustion
 offers explicit familiar practice; an early correct familiar answer leaves SRS
 unchanged. Recognition cannot graduate an item and is excluded from production
 outcomes. Optional writing is a separate linked bonus session.
+
+[ADR-0014](adr/0014-adaptive-topic-progression.md) adds topic evidence replay in
+`adaptive_learning.py`: versioned question snapshots carry the topic, stage,
+practice/transfer role, and variant. Five distinct practice successes, at least
+80% recent accuracy, two local dates spanning 24 hours, and delayed unseen
+transfer unlock the next stage. Strong B2 additionally requires independently
+checked writing. All ten topics must reach strong B2 before introductory C1.
+Familiar repeats, legacy answers, copied writing, and quarantined questions do
+not establish mastery. Two distinct recent failures trigger topic repair.
+Generic cards, quizzes, lessons, previews and evaluation pools exclude adaptive
+items to preserve the unseen transfer pool; `/study` owns their selection.
+
+`question_quality.py` repairs or extends curated approved personal targets.
+An hourly coroutine runs maintenance in a worker thread, without Telegram pushes
+or model calls on answer callbacks. A committed per-profile local-day claim
+allows at most two candidates daily; each item has at most 12 generated variants,
+and each profile at most 120. Network work happens outside database transactions.
+Local validation rejects malformed keys, language mismatches and near duplicates.
+A separate planner-model call solves each candidate without its answer key and
+reviews ambiguity, target, level, explanation and context novelty. Failed reviews
+publish nothing. Learner reports quarantine that personal question and remove
+its evidence from mastery; repeated errors request review rather than silently
+changing the key. Verified replacements preserve original content and attempt
+history. `learning.adaptive_auto_expand` opts in explicitly; the owner importer
+sets it. Legacy reviewed questions may be repaired without gaining adaptive
+mastery metadata. Private uploaded cards are not sent to this maintenance path.
 
 `lang_lessons.py` validates the shipped pack and publishes owner-curated templates
 with idempotent personal subscriptions. One question maps to one learning item;

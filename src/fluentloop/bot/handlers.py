@@ -6,6 +6,7 @@ from pathlib import Path
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from fluentloop.adaptive_learning import is_adaptive_item
 from fluentloop.ai.provider import AIProvider
 from fluentloop.bot.formatting import (
     HTML_PARSE_MODE,
@@ -67,7 +68,6 @@ from fluentloop.lesson_plans import (
     lesson_items,
     lesson_plan_by_id,
     lesson_pool_size,
-    lesson_topic_groups,
     random_lesson_plan,
 )
 from fluentloop.lesson_types import format_target_mix, lesson_type_for_plan
@@ -1025,7 +1025,10 @@ def handle_simple_answer(
     explanation = str(feedback.get("explanation") or "").strip()
     if explanation:
         lines.append(html_escape(explanation))
-    buttons = [[_button("Подробнее", f"feedback:explain:{result.attempt.id}")]]
+    buttons = [
+        [_button("Подробнее", f"feedback:explain:{result.attempt.id}")],
+        [_button("Ошибка в вопросе", f"simple:issue:{run_id}:{index}")],
+    ]
     if result.next_step is not None:
         next_reply = _simple_question_reply(
             result.next_step,
@@ -1074,6 +1077,25 @@ def handle_simple_stop(
     )
 
 
+def handle_simple_issue(
+    session: Session,
+    user: User,
+    run_id: int,
+    index: int,
+) -> BotReply:
+    """Quarantine an answered personal question reported by its learner."""
+
+    from fluentloop.question_quality import report_question_issue
+
+    reported = report_question_issue(session, user, run_id, index)
+    text = (
+        "Вопрос отмечен для проверки; он временно исключён."
+        if reported
+        else "Этот вопрос уже отмечен или недоступен."
+    )
+    return BotReply(text, edit_message=True)
+
+
 def handle_simple_bonus_start(
     session: Session,
     user: User,
@@ -1087,9 +1109,13 @@ def handle_simple_bonus_start(
     step = start_bonus(session, user, parent_run_id)
     if step.run is None or step.question is None:
         return BotReply("Это письменное задание уже завершено.")
+    writing_hint = (
+        "Ответь по-английски по заданию выше. Это необязательно."
+        if step.question.get("adaptive")
+        else "Напиши одно предложение по-английски. Это необязательно."
+    )
     return BotReply(
-        html_escape(step.question["prompt"])
-        + "\n\nНапиши одно предложение по-английски. Это необязательно.",
+        html_escape(step.question["prompt"]) + "\n\n" + writing_hint,
         channel_id or user.telegram_user_id,
         buttons=[[_button("Пропустить письмо", f"simple:bonus-skip:{step.run.id}")]],
         message_thread_id=message_thread_id,
@@ -1117,7 +1143,14 @@ def handle_simple_bonus_text(
             "Не удалось сохранить ответ. Напиши предложение ещё раз "
             "или нажми «Пропустить письмо»."
         )
-    lines = [f"{bold('Оценка')}: {feedback.status.title()}."]
+    if exercise.get("adaptive") and not getattr(feedback, "genuine_evaluation", False):
+        return BotReply(
+            "Письмо сохранено; проверка сейчас недоступна и в освоение темы "
+            "не засчитана.",
+            channel_id,
+            message_thread_id=message_thread_id,
+        )
+    lines = [f"{bold('Оценка')}: {result.attempt.status.title()}."]
     corrected = feedback.natural_answer or feedback.corrected_answer
     if corrected:
         lines.append(f"{bold('Лучше:')} {code(corrected)}")
@@ -1154,6 +1187,7 @@ def handle_simple_more_menu(
     from fluentloop.learning_prefs import is_simple_mode
 
     buttons = [
+        [_button("🗺 План", "simple:plan")],
         [_button("🃏 Карточки", "words:cards"), _button("🔁 Повтор", "words:review")],
         [
             _button("📚 Полный урок", "today:lesson"),
@@ -1203,6 +1237,26 @@ def handle_simple_mode_change(
     )
 
 
+def _is_adaptive_plan(session: Session, plan, items=None) -> bool:
+    return (
+        "adaptive_curriculum:v1" in (plan.tags_json or [])
+        or getattr(plan, "format", "") == "adaptive_questions"
+        or any(
+            is_adaptive_item(item)
+            for item in (lesson_items(session, plan) if items is None else items)
+        )
+    )
+
+
+def _adaptive_plan_title(plan) -> str:
+    from fluentloop.adaptive_learning import TOPIC_TITLES
+
+    for tag in plan.tags_json or []:
+        if tag.startswith("topic:") and tag[6:] in TOPIC_TITLES:
+            return TOPIC_TITLES[tag[6:]] + " · B2 → C1 intro"
+    return "Adaptive curriculum"
+
+
 def handle_library(session: Session, user: User, query: str = "") -> BotReply:
     templates = library_templates(session, query=query, limit=20)
     if not templates:
@@ -1216,11 +1270,14 @@ def handle_library(session: Session, user: User, query: str = "") -> BotReply:
     buttons: list[list[InlineButton]] = []
     for template in templates:
         items = lesson_items(session, template)
+        adaptive = _is_adaptive_plan(session, template, items)
         lesson_type = lesson_type_for_plan(template, items)
         pool_size = lesson_pool_size(session, template)
+        title = _adaptive_plan_title(template) if adaptive else template.title
+        topic = "See /plan" if adaptive else template.topic
         lines.append(
-            f"#{template.id} {html_escape(template.title)} - "
-            f"{html_escape(template.topic)} - "
+            f"#{template.id} {html_escape(title)} - "
+            f"{html_escape(topic)} - "
             f"{html_escape(lesson_type.title)} - pool {pool_size}"
         )
         buttons.append(
@@ -1253,12 +1310,15 @@ def handle_subscribe(session: Session, user: User, template_id: int) -> BotReply
             "\nRepeated subscription is allowed: I reused your existing item bank "
             "where it already matched this template."
         )
+    adaptive = _is_adaptive_plan(session, result.plan)
+    title = _adaptive_plan_title(result.plan) if adaptive else result.plan.title
+    topic = "See /plan" if adaptive else result.plan.topic
     return BotReply(
         "\n".join(
             [
                 f"Subscribed to template #{template_id}.",
-                f"LessonPlan #{result.plan.id}: {result.plan.title}",
-                f"Topic: {result.plan.topic}",
+                f"LessonPlan #{result.plan.id}: {title}",
+                f"Topic: {topic}",
                 f"Created items: {result.created_items}",
                 f"Reused items: {result.reused_items}",
                 f"Open it with /lesson {result.plan.id}, or let /today rotate it in.",
@@ -1316,7 +1376,18 @@ def handle_library_callback(
 
 
 def handle_topics(session: Session, user: User) -> BotReply:
-    groups = lesson_topic_groups(session, user)
+    from collections import Counter
+
+    counts: Counter[str] = Counter()
+    for plan in active_lesson_plans(session, user, limit=500):
+        if _is_adaptive_plan(session, plan):
+            counts[_adaptive_plan_title(plan)] += 1
+            continue
+        tags = list(plan.tags_json or [])
+        areas = [tag for tag in tags if not tag.startswith("curriculum:")]
+        for label in areas[:3] or [plan.topic]:
+            counts[label] += 1
+    groups = sorted(counts.items(), key=lambda row: (-row[1], row[0].casefold()))
     if not groups:
         return BotReply("No active lesson topics yet. Seed or upload lessons first.")
     lines = [bold("Topics")]
@@ -1341,11 +1412,14 @@ def handle_lessons(session: Session, user: User, query: str = "") -> BotReply:
     buttons: list[list[InlineButton]] = []
     for plan in plans:
         items = lesson_items(session, plan)
+        adaptive = _is_adaptive_plan(session, plan, items)
         lesson_type = lesson_type_for_plan(plan, items)
         pool_size = lesson_pool_size(session, plan)
+        title = _adaptive_plan_title(plan) if adaptive else plan.title
+        topic = "See /plan" if adaptive else plan.topic
         lines.append(
-            f"#{plan.id} {html_escape(plan.title)} - "
-            f"{html_escape(plan.topic)} - "
+            f"#{plan.id} {html_escape(title)} - "
+            f"{html_escape(topic)} - "
             f"{html_escape(lesson_type.title)} - pool {pool_size}"
         )
         buttons.append(
@@ -1463,6 +1537,13 @@ def _start_lesson_reply(
     channel_id: str | None = None,
     message_thread_id: int | None = None,
 ) -> BotReply:
+    if _is_adaptive_plan(session, plan):
+        return BotReply(
+            "Этот план открывается через /study: задания идут по этапам. "
+            "Текущая тема и следующий шаг — в /plan.",
+            channel_id or user.telegram_user_id,
+            message_thread_id=message_thread_id,
+        )
     practice_session = start_explicit_session(
         session, user, mode="lesson", lesson_plan=plan
     )
@@ -1511,23 +1592,32 @@ def _practice_session_reply(
 
 def _lesson_details_reply(session: Session, plan) -> BotReply:
     items = lesson_items(session, plan)
+    visible_items = [item for item in items if not is_adaptive_item(item)]
+    adaptive = _is_adaptive_plan(session, plan, items)
     lesson_type = lesson_type_for_plan(plan, items)
     chunks = [
-        item.text for item in items if item.type in {"word", "expression", "chunk"}
+        item.text
+        for item in visible_items
+        if item.type in {"word", "expression", "chunk"}
     ][:8]
-    grammar = [item.text for item in items if item.type == "grammar_rule"][:6]
-    mistakes = [item.text for item in items if item.type == "mistake_pattern"][:5]
+    grammar = [item.text for item in visible_items if item.type == "grammar_rule"][:6]
+    mistakes = [item.text for item in visible_items if item.type == "mistake_pattern"][
+        :5
+    ]
     lines = [
         f"{bold('Lesson')} #{plan.id}",
-        labeled("Title", plan.title),
-        labeled("Topic", plan.topic),
-        labeled("Goal", plan.goal),
+        labeled("Title", _adaptive_plan_title(plan) if adaptive else plan.title),
+        labeled("Topic", "See /plan" if adaptive else plan.topic),
+        labeled(
+            "Goal",
+            "Practice this topic in the simple stream." if adaptive else plan.goal,
+        ),
         labeled("Lesson type", lesson_type.title),
         labeled("What you train", lesson_type.goal),
-        labeled("Target mix", format_target_mix(items)),
+        labeled("Target mix", format_target_mix(visible_items)),
         labeled("Format", getattr(plan, "format", "lesson")),
     ]
-    if plan.language_focus_json:
+    if plan.language_focus_json and not adaptive:
         lines.append(labeled("Language focus", ", ".join(plan.language_focus_json[:8])))
     if chunks:
         lines.append(labeled("Target chunks", ", ".join(chunks)))
@@ -1548,22 +1638,33 @@ def _lesson_details_reply(session: Session, plan) -> BotReply:
 
 def _template_details_reply(session: Session, template) -> BotReply:
     items = lesson_items(session, template)
+    visible_items = [item for item in items if not is_adaptive_item(item)]
+    adaptive = _is_adaptive_plan(session, template, items)
     lesson_type = lesson_type_for_plan(template, items)
     chunks = [
-        item.text for item in items if item.type in {"word", "expression", "chunk"}
+        item.text
+        for item in visible_items
+        if item.type in {"word", "expression", "chunk"}
     ][:8]
-    grammar = [item.text for item in items if item.type == "grammar_rule"][:6]
-    mistakes = [item.text for item in items if item.type == "mistake_pattern"][:5]
+    grammar = [item.text for item in visible_items if item.type == "grammar_rule"][:6]
+    mistakes = [item.text for item in visible_items if item.type == "mistake_pattern"][
+        :5
+    ]
     lines = [
         f"{bold('Shared library lesson')} #{template.id}",
-        labeled("Title", template.title),
-        labeled("Topic", template.topic),
-        labeled("Goal", template.goal),
+        labeled(
+            "Title", _adaptive_plan_title(template) if adaptive else template.title
+        ),
+        labeled("Topic", "See /plan" if adaptive else template.topic),
+        labeled(
+            "Goal",
+            "Practice this topic in the simple stream." if adaptive else template.goal,
+        ),
         labeled("Lesson type", lesson_type.title),
         labeled("What you train", lesson_type.goal),
-        labeled("Target mix", format_target_mix(items)),
+        labeled("Target mix", format_target_mix(visible_items)),
     ]
-    if template.language_focus_json:
+    if template.language_focus_json and not adaptive:
         lines.append(
             labeled("Language focus", ", ".join(template.language_focus_json[:8]))
         )
@@ -2144,13 +2245,126 @@ def handle_progress(
             production_total += count
             if status == "correct":
                 production_correct += count
+    from fluentloop.adaptive_learning import curriculum_progress
+
+    curriculum = curriculum_progress(session, user)
+    topic_lines = []
+    for topic in curriculum.topics:
+        stage = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}[topic.stage]
+        status = _curriculum_action(topic.next_action)
+        accuracy = (
+            f", точность {topic.practice_accuracy:.0%}"
+            if topic.practice_successes
+            else ""
+        )
+        topic_lines.append(
+            f"• {html_escape(topic.title)} · {stage}: "
+            f"практика {topic.practice_successes}/{topic.practice_required}{accuracy}, "
+            f"перенос {topic.transfer_successes}/{topic.transfer_required}, "
+            + (
+                f"письмо {topic.production_successes}/{topic.production_required} "
+                if topic.production_required
+                else "письмо на следующей ступени "
+            )
+            + f"→ {status}"
+        )
     return BotReply(
         "📈 <b>Прогресс · 30 дней</b>\n"
         f"Узнавание: {recognition_correct}/{recognition_total} верных ответов.\n"
         f"Письменная практика: {production_correct}/{production_total} верных; "
         "считается отдельно.\n\n"
-        "Узнавание проверяет, что ты распознаёшь; письмо — что умеешь использовать.",
+        "Узнавание проверяет, что ты распознаёшь; письмо — что умеешь использовать.\n\n"
+        f"<b>Темы · весь период · B2 → B2+ → C1 intro</b>\n"
+        + "\n".join(topic_lines)
+        + "\n\nЭто ориентиры по упражнениям, а не подтверждение уровня CEFR. "
+        "Следующий шаг: /plan.",
         channel_id,
+        message_thread_id=message_thread_id,
+        parse_mode=HTML_PARSE_MODE,
+    )
+
+
+def _curriculum_action(action: str) -> str:
+    return {
+        "practice": "практика",
+        "spaced_practice": "повтор позже",
+        "transfer_wait": "новый контекст позже",
+        "transfer": "новый контекст",
+        "production": "своё предложение",
+        "c1_locked": "C1 пока закрыт",
+        "maintain": "поддерживать",
+    }.get(action, "практика")
+
+
+def handle_plan(
+    session: Session,
+    user: User,
+    *,
+    channel_id: str | None = None,
+    message_thread_id: int | None = None,
+) -> BotReply:
+    """Show the next personal curriculum step without starting a session."""
+
+    from fluentloop.adaptive_learning import curriculum_progress
+    from fluentloop.learning_prefs import is_simple_mode
+
+    progress = curriculum_progress(session, user)
+    focus = next((topic for topic in progress.topics if topic.repair), None)
+    focus = focus or next(
+        (
+            topic
+            for topic in progress.topics
+            if not topic.mastered
+            and topic.next_action in {"practice", "transfer", "production"}
+        ),
+        None,
+    )
+    focus = focus or next(
+        (topic for topic in progress.topics if not topic.mastered), None
+    )
+    lines = [
+        "🗺 <b>План обучения</b>",
+        f"B2/B2+: устойчивые темы {progress.strong_b2_topics}/{progress.total_topics}.",
+        "B2+: закрепление и перенос в новом контексте по каждой теме.",
+        (
+            "C1 intro: открыт для новых заданий."
+            if progress.c1_unlocked
+            else "C1 intro: откроется после устойчивого B2+ по всем темам."
+        ),
+    ]
+    if focus is not None:
+        focus_stage = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}[
+            focus.stage
+        ]
+        lines.extend(
+            [
+                "",
+                f"Следующая тема: <b>{html_escape(focus.title)}</b> ({focus_stage}).",
+                f"Следующий шаг: {_curriculum_action(focus.next_action)}.",
+            ]
+        )
+    gaps = ", ".join(
+        html_escape(topic.title) for topic in progress.topics if not topic.mastered
+    )
+    lines.extend(
+        [
+            "",
+            "Пробелы: " + gaps[:700]
+            if gaps
+            else "Все текущие темы закрыты; возвращайся для повторения.",
+            "Это план по сохранённым ответам, а не оценка уровня CEFR.",
+        ]
+    )
+    study_action = "simple:study" if is_simple_mode(user) else "today:lesson"
+    return BotReply(
+        "\n".join(lines),
+        channel_id,
+        buttons=[
+            [
+                _button("Учиться", study_action),
+                _button("Прогресс", "simple:progress"),
+            ]
+        ],
         message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,
     )
@@ -2212,7 +2426,9 @@ def handle_mistake_action(
 
 
 def handle_favorites(session: Session, user: User) -> BotReply:
-    items = favorite_items(session, user.id)
+    items = [
+        item for item in favorite_items(session, user.id) if not is_adaptive_item(item)
+    ]
     if not items:
         return BotReply("No favorites yet.")
     buttons = [[_favorite_button(item.id, item.is_favorite)] for item in items]
@@ -2226,7 +2442,7 @@ def handle_favorite_toggle(session: Session, user: User, item_id: int) -> BotRep
     from fluentloop.db.models import LearningItem
 
     item = session.get(LearningItem, item_id)
-    if item is None or item.user_id != user.id:
+    if item is None or item.user_id != user.id or is_adaptive_item(item):
         return BotReply("Learning item not found.")
     toggle_favorite(session, item)
     marker = "favorite" if item.is_favorite else "not favorite"
@@ -2238,7 +2454,11 @@ def handle_favorite_toggle(session: Session, user: User, item_id: int) -> BotRep
 
 def handle_items(session: Session, user: User, status: str = "active") -> BotReply:
     try:
-        items = list_items(session, user.id, status=status, limit=20)
+        items = [
+            item
+            for item in list_items(session, user.id, status=status, limit=50)
+            if not is_adaptive_item(item)
+        ][:20]
     except ValueError as exc:
         return BotReply(f"Could not list items: {exc}")
     if not items:
@@ -2257,7 +2477,7 @@ def handle_item_status(
     from fluentloop.db.models import LearningItem
 
     item = session.get(LearningItem, item_id)
-    if item is None or item.user_id != user.id:
+    if item is None or item.user_id != user.id or is_adaptive_item(item):
         return BotReply("Learning item not found.")
     target = {
         "archive": "archived",
@@ -2288,7 +2508,7 @@ def _find_item_by_text(
     if exclude_graduated:
         stmt = stmt.where(LearningItem.status != "graduated")
     matches = list(session.scalars(stmt.order_by(LearningItem.created_at)))
-    return matches[0] if matches else None
+    return next((item for item in matches if not is_adaptive_item(item)), None)
 
 
 def _near_matches(
@@ -2303,7 +2523,7 @@ def _near_matches(
         .order_by(LearningItem.created_at)
         .limit(limit)
     )
-    return [row.text for row in rows]
+    return [row.text for row in rows if not is_adaptive_item(row)]
 
 
 def _not_found_reply(session: Session, user: User, word: str, action: str) -> BotReply:
@@ -2340,6 +2560,8 @@ def handle_words(session: Session, user: User) -> BotReply:
         lines.append("")
         lines.append(bold("Coming up"))
         for item in upcoming:
+            if is_adaptive_item(item):
+                continue
             marker = " ⭐" if item.is_favorite else ""
             mine = " (yours)" if item.priority > 0 else ""
             lines.append(f"- {html_escape(item.text)}{marker}{mine}")
@@ -3373,6 +3595,7 @@ def command_catalog() -> list[str]:
         "/today",
         "/study",
         "/progress",
+        "/plan",
         "/cards",
         "/review",
         "/practice",

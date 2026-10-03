@@ -239,7 +239,11 @@ Telegram remains the primary interface for daily practice.
 14. Simple learning stream: an opt-in personal pilot with one manual entry,
     mixed phrase/grammar questions answered by buttons, concise feedback,
     continuous practice until the learner stops, and optional written use
-    afterward (EPIC-26).
+     afterward (EPIC-26).
+15. Adaptive simple learning: topic-specific B2/B2+ difficulty, unseen transfer
+    checks, written-use evidence, topic progress, and introductory C1 unlocked
+    after strong B2 coverage; automatic improvement of exercises for approved
+    material (EPIC-27).
 ```
 
 ### P2 — future
@@ -736,6 +740,29 @@ preserving B1/B2 labels, alongside the learner's complete approved phrase cards
 Ambiguous source pairs receive an explicit context or corrected key; source
 records and their provenance remain available. Templates and another user's
 content never enter the personal stream.
+
+### Adaptive topic progression
+
+The simple stream develops each curriculum topic separately: B2 practice,
+more demanding B2+ contexts, then introductory C1. Progress is based on distinct
+successful questions practiced on different days, rather than repeated clicks
+on one familiar question. An unseen question in a new situation checks transfer.
+Written use is required before a topic is shown as strong B2; choosing to skip
+writing is allowed and leaves that evidence incomplete. Introductory C1 opens
+only after all topics in the supported curriculum have strong B2 evidence.
+This is curriculum progress, not a certified CEFR assessment.
+
+Progress shows each topic's current difficulty, recognition, transfer, written
+use, and the next missing evidence. Familiar repetition and legacy answers do
+not invent mastery. Repeated difficulty returns the topic to focused practice;
+one isolated error does not erase established progress. Due review and earlier
+foundation material remain available within the stream.
+
+The bot automatically supplies fresh contexts and exercise variants for already
+approved curriculum items when the bank lacks suitable practice or unseen
+transfer questions. New variants must pass content checks and retain their
+topic, difficulty, role, and provenance. Invalid or ambiguous output cannot
+enter the stream. This does not approve new concepts from uploaded materials.
 
 ### Example daily session
 

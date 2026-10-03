@@ -123,12 +123,15 @@ def select_distractors(
 ) -> list[str]:
     """Pick plausible wrong answers from the learner's own items."""
 
+    from fluentloop.learning import general_practice_item_filter
+
     candidates = session.scalars(
         select(LearningItem).where(
             LearningItem.user_id == user.id,
             LearningItem.id != item.id,
             LearningItem.type == item.type,
             LearningItem.status.in_(("active", "graduated")),
+            general_practice_item_filter(),
         )
     ).all()
 

@@ -125,5 +125,5 @@ def test_scheduler_job_count_is_current(docs, settings) -> None:
     factory = make_session_factory(make_engine("sqlite:///:memory:"))
     scheduler = build_scheduler(settings, factory, client=_Client())
 
-    assert len(scheduler.get_jobs()) == 5
-    assert "five jobs" in docs["arch"]
+    assert len(scheduler.get_jobs()) == 6
+    assert "six jobs" in docs["arch"]

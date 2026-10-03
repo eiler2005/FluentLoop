@@ -19,6 +19,7 @@ Lightweight ADRs. One file per significant decision. Numbered sequentially.
 | [0011](0011-native-telegram-quiz-polls.md) | Native Telegram quiz polls over Telethon raw API | Accepted (2026-08-17) |
 | [0012](0012-per-user-slot-dispatcher.md) | Per-user slot dispatcher for the daily vocabulary loop | Accepted (2026-08-17) |
 | [0013](0013-simple-learning-stream.md) | Manual simple learning stream using existing practice storage | Accepted (2026-10-03) |
+| [0014](0014-adaptive-topic-progression.md) | Topic mastery, delayed transfer, B2/C1 progression and reviewed variants | Accepted (2026-10-03) |
 
 ## Conventions
 

@@ -57,6 +57,7 @@ from fluentloop.bot.handlers import (
     handle_onboarding_start,
     handle_outcomes,
     handle_pause,
+    handle_plan,
     handle_poll_vote,
     handle_practice,
     handle_progress,
@@ -73,6 +74,7 @@ from fluentloop.bot.handlers import (
     handle_simple_bonus_skip,
     handle_simple_bonus_start,
     handle_simple_bonus_text,
+    handle_simple_issue,
     handle_simple_mode_change,
     handle_simple_more_menu,
     handle_simple_stop,
@@ -181,7 +183,9 @@ def _simple_event_authorized(
 
     protected = (
         is_simple_mode(user)
-        or action in {"/study", "/progress", "study", "progress", "simple_menu"}
+        or action in {
+            "/study", "/progress", "/plan", "study", "progress", "simple_menu"
+        }
         or bool(action and action.startswith("simple:"))
         or (state is not None and state.name == "simple_bonus")
     )
@@ -631,6 +635,18 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                     ),
                     message_thread_id=progress_target.message_thread_id,
                 )
+            elif command == "/plan":
+                plan_target = _here_or_workspace(event, settings, "practice_flow")
+                reply = handle_plan(
+                    session,
+                    user,
+                    channel_id=(
+                        str(plan_target.chat_id)
+                        if plan_target.chat_id is not None
+                        else None
+                    ),
+                    message_thread_id=plan_target.message_thread_id,
+                )
             elif command == "/practice":
                 mode = parts[1] if len(parts) >= 2 else ""
                 from fluentloop.lesson_formats import (
@@ -1008,6 +1024,14 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         message_thread_id=thread_id,
                     )
                     await answer_callback(event, "Прогресс")
+                elif raw_data == "simple:plan":
+                    reply = handle_plan(
+                        session,
+                        user,
+                        channel_id=channel_id,
+                        message_thread_id=thread_id,
+                    )
+                    await answer_callback(event, "План")
                 elif raw_data == "simple:menu":
                     reply = handle_simple_more_menu(
                         session,
@@ -1050,6 +1074,15 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                             message_thread_id=thread_id,
                         )
                     await answer_callback(event, "Ответ сохранён")
+                elif len(simple_parts) == 4 and simple_parts[1] == "issue":
+                    try:
+                        run_id = int(simple_parts[2])
+                        index = int(simple_parts[3])
+                    except ValueError:
+                        reply = BotReply("Этот вопрос недоступен.", edit_message=True)
+                    else:
+                        reply = handle_simple_issue(session, user, run_id, index)
+                    await answer_callback(event, "Отмечено")
                 elif len(simple_parts) == 3 and simple_parts[1] == "stop":
                     try:
                         run_id = int(simple_parts[2])

@@ -147,6 +147,38 @@ def test_material_extraction_falls_back_from_pro_to_flash(tmp_path) -> None:
     assert gateway.models == ["deepseek-v4-pro", "deepseek-v4-flash"]
 
 
+def test_answer_evaluation_provenance_distinguishes_actual_call_and_fallback(tmp_path):
+    provider = DeepSeekProvider(
+        api_key="",
+        base_url="https://api.deepseek.com",
+        model="deepseek-v4-flash",
+        timeout_seconds=10,
+        max_retries=0,
+        usage_path=tmp_path / "usage.jsonl",
+    )
+    payload = {"expected_answer": "push back on", "answer": "We push back on this."}
+    fallback = provider.light_call("epic_10_check_answer", payload)
+    assert fallback.status == "correct"
+    assert fallback.genuine_evaluation is False
+    provider.gateway = DeepSeekGateway(
+        api_key="test-key",
+        client=FakeClient([{"status": "correct", "genuine_evaluation": False}]),
+        usage_path=tmp_path / "usage.jsonl",
+        max_retries=0,
+    )
+    actual = provider.light_call("epic_10_check_answer", payload)
+    assert actual.genuine_evaluation is True
+    provider.gateway = DeepSeekGateway(
+        api_key="test-key",
+        client=FakeClient([RuntimeError("unavailable")]),
+        usage_path=tmp_path / "usage.jsonl",
+        max_retries=0,
+    )
+    failed = provider.light_call("epic_10_check_answer", payload)
+    assert failed.status == "correct"
+    assert failed.genuine_evaluation is False
+
+
 def test_deepseek_gateway_retries_transient_failure(tmp_path) -> None:
     client = FakeClient(
         [

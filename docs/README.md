@@ -3,7 +3,7 @@
 | File | Purpose |
 |---|---|
 | [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |
-| [`user-guide.md`](user-guide.md) | Bilingual learner guide: methodology, daily process, practice modes, outcome measurement, and visual process maps. |
+| [`user-guide.md`](user-guide.md) | Bilingual learner guide: simple stream, per-topic `/progress`, personal `/plan`, practice modes, and outcomes. |
 | [`learning-methodology.md`](learning-methodology.md) | Learner-facing method: input -> lesson type -> practice mode -> exercise -> feedback -> SRS/mistakes -> outcomes. |
 | [`learning-plans.md`](learning-plans.md) | Practical first-week, 30-day, and 12-week learner plans using `/baseline`, `/today`, focused practice modes, and `/outcomes`. |
 | [`material-upload-guide.md`](material-upload-guide.md) | User-facing cookbook for preparing lesson notes, feedback, articles, transcripts, and LLM-assisted upload material. |
@@ -16,11 +16,14 @@
 | [`adr/0007-deepseek-llm-gateway.md`](adr/0007-deepseek-llm-gateway.md) | DeepSeek gateway and task-aware model routing. |
 | [`adr/0008-shared-lesson-library.md`](adr/0008-shared-lesson-library.md) | Accepted shared lesson library clone model. |
 | [`adr/0013-simple-learning-stream.md`](adr/0013-simple-learning-stream.md) | Manual simple stream, persisted answers, cooldowns, and separate recognition metrics. |
+| [`adr/0014-adaptive-topic-progression.md`](adr/0014-adaptive-topic-progression.md) | Adaptive stages, fresh transfer, genuine writing, repair and bounded question maintenance. |
+| [`curriculum/adaptive-b2-c1.md`](curriculum/adaptive-b2-c1.md) | Ten topic plans from B2 through strong B2 to introductory C1; 270 reviewed questions. |
 | [`features/`](features/) | Epic files: original MVP backlog plus learning-engine roadmap and post-MVP extensions. |
 | [`features/README.md`](features/README.md) | Epic index, dependency graph, suggested order. |
 | [`runbooks/`](runbooks/) | Operational procedures: deploy, demo data, backups, secret handling. |
 | [`runbooks/deploy.md`](runbooks/deploy.md) | Deploy checklist and Telegram smoke message format. |
 | [`runbooks/simple-learning.md`](runbooks/simple-learning.md) | Reviewed bank import, owner pilot activation, checks, and rollback. |
+| [`runbooks/adaptive-learning.md`](runbooks/adaptive-learning.md) | Adaptive curriculum activation, maintenance limits, owner opt-out, smoke and rollback. |
 | [`lesson-catalog/lang-lessons.md`](lesson-catalog/lang-lessons.md) | Reviewed 86-question phrase/grammar bank and source provenance. |
 | [`runbooks/curriculum-seed.md`](runbooks/curriculum-seed.md) | Populate the deterministic 20-lesson B2/B2+ curriculum seed. |
 | [`runbooks/telegram-workspace.md`](runbooks/telegram-workspace.md) | Refresh pinned help, command menu, and safe Telegram cleanup. |

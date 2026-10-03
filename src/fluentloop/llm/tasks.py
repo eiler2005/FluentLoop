@@ -12,4 +12,5 @@ class LLMTask(StrEnum):
     TONE_FEEDBACK = "tone_feedback"
     QUIZ_DISTRACTORS = "quiz_distractors"
     WORD_CARD = "word_card"
-
+    QUESTION_VARIANT = "question_variant"
+    QUESTION_REVIEW = "question_review"

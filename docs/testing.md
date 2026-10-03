@@ -21,6 +21,17 @@ git diff --check
   template publication and personal subscription idempotency, and level retention.
 - Simple UI and operations: originating chat/topic replies, keyboard dispatch,
   mode changes, scheduler isolation, and recognition/production metric separation.
+- Adaptive UI: per-topic `/progress`, personal `/plan`, CEFR wording, Telegram
+  message length, advanced-mode compatibility, owner-scoped issue reports,
+  hidden transfer keys in generic previews, and unverified writing status.
+- Adaptive engine: distinct spaced evidence, 80% readiness, delayed fresh
+  transfer, per-topic repair, global ten-topic C1 gate, cross-user isolation,
+  genuine model-evaluated independent writing and duplicate callback handling.
+- Advanced curriculum: all 270 records and thirty topic stages, content hashes,
+  source provenance, preserved legacy pack and idempotent personal subscriptions.
+- Question maintenance: blind independent review, invalid/near-duplicate rejection,
+  provider failure, per-local-day concurrent claims, item caps, legacy repair,
+  issue quarantine, and exclusion of private uploaded content from model payloads.
 - Bot foundation and Telegram workspace: command catalog, help text, forum-topic
   routing, command-menu payloads, admission gate, and state storage.
 - Material upload: UTF-8 markdown/text intake, extraction fallback, candidate
@@ -41,7 +52,12 @@ git diff --check
 ## Live smoke
 
 For the owner simple pilot, follow [simple-learning.md](runbooks/simple-learning.md):
-verify `/study`, choices, unknown, stop, resume, progress, More, and optional writing.
+verify `/study`, choices, unknown, stop, resume, per-topic `/progress`,
+**Ещё → План**, question issue reporting, and optional writing.
+For the adaptive curriculum and bounded maintenance, follow
+[adaptive-learning.md](runbooks/adaptive-learning.md). Live profile smoke uses a
+rollback transaction; authored model checks use isolated test data and do not
+create learner evidence.
 For the full mode, run a real Telegram smoke:
 
 1. Run `/help` and `/howto`.

@@ -66,6 +66,8 @@ class GenerationResult(BaseModel):
 
 
 class AnswerFeedback(BaseModel):
+    # Provider-set provenance; model output and fallback cannot establish it.
+    genuine_evaluation: bool = False
     status: str
     corrected_answer: str = ""
     natural_answer: str = ""

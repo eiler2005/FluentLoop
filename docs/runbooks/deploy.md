@@ -70,6 +70,10 @@ image, runs `alembic upgrade head`, and only then starts the bot container.
 ## EPIC-23 Seed Library Publish
 
 For EPIC-26 owner activation, follow [simple-learning.md](simple-learning.md).
+For EPIC-27 curriculum activation and bank maintenance, follow
+[adaptive-learning.md](adaptive-learning.md). Build before stopping the old
+container, then stop it before backing up and importing adaptive items: an old
+selector must not run against newly imported reserved transfer questions.
 Deploy only a verified commit with successful CI; keep runtime secrets and
 untracked local files outside the release archive.
 

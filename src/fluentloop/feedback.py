@@ -31,14 +31,21 @@ def build_answer_check_payload(exercise: dict, answer: str) -> dict:
     task_type = exercise.get("exercise_type")
     metadata = exercise.get("metadata")
     metadata = metadata if isinstance(metadata, dict) else {}
+    adaptive = exercise.get("adaptive") or {}
     return {
-        "stage": exercise.get("stage") or metadata.get("stage", ""),
+        "stage": exercise.get("stage")
+        or adaptive.get("stage")
+        or metadata.get("stage", ""),
         "exercise_type": task_type,
         "prompt": exercise.get("prompt", ""),
         "expected_answer": exercise.get("expected_answer", ""),
         "hint": exercise.get("hint", ""),
         "explanation": exercise.get("explanation", ""),
-        "topic": exercise.get("topic") or metadata.get("topic", ""),
+        "topic": exercise.get("topic")
+        or adaptive.get("topic_id")
+        or metadata.get("topic", ""),
+        "target_construction": exercise.get("target_construction", ""),
+        "reference_example": exercise.get("source_example", ""),
         "lesson_goal": exercise.get("lesson_goal") or metadata.get("lesson_goal", ""),
         "confidence_rating": metadata.get("confidence_rating"),
         "answer": answer,

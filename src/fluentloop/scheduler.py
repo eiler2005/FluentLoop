@@ -336,8 +336,21 @@ def build_scheduler(
     *,
     client: Any | None = None,
 ) -> AsyncIOScheduler:
+    from fluentloop.question_quality import maintain_question_bank
+
     timezone = pytz.timezone(settings.timezone)
     scheduler = AsyncIOScheduler(timezone=timezone)
+    scheduler.add_job(
+        maintain_question_bank,
+        "cron",
+        minute=17,
+        args=[settings, session_factory],
+        id="adaptive_question_bank",
+        replace_existing=True,
+        misfire_grace_time=1800,
+        coalesce=True,
+        max_instances=1,
+    )
     scheduler.add_job(
         run_backup,
         "cron",

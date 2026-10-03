@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fluentloop.db.models import LearningItem, ReviewState
+from fluentloop.learning import general_practice_item_filter
 
 RESULTS = {"Again", "Hard", "Good", "Easy"}
 SECOND = 1.0 / 86_400.0
@@ -152,6 +153,7 @@ def get_due_items(
             LearningItem.user_id == user_id,
             LearningItem.status == "active",
             ReviewState.due_at <= due_soon,
+            general_practice_item_filter(),
         )
         .order_by(
             LearningItem.priority.desc(),
