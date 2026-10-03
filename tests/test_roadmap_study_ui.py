@@ -19,6 +19,7 @@ from fluentloop.bot.handlers import (
     handle_simple_bonus_start,
     handle_simple_bonus_text,
     handle_simple_issue,
+    handle_simple_stop,
     handle_study,
 )
 from fluentloop.bot.roadmap import handle_roadmap
@@ -77,6 +78,23 @@ def test_module_question_feedback_and_next_question_preserve_origin(
     stale = handle_simple_answer(db_session, learner, step.run.id, 0, 0)
     assert "уже закрыт" in stale.text
     assert not any("module_write" in action for action in _actions(stale))
+
+
+def test_stop_shows_session_plan_snapshot_and_navigation(db_session, learner):
+    step, _ = _answer(db_session, learner)
+
+    summary = handle_simple_stop(db_session, learner, step.run.id)
+
+    assert "занятие завершено" in summary.text
+    assert "Результат сессии: 1/1 верно" in summary.text
+    assert "Точность сессии: 100%" in summary.text
+    assert "По личному плану в этой сессии" in summary.text
+    assert "Общий английский: 1/1 верно" in summary.text
+    assert step.question["module_title_ru"] in summary.text
+    assert "не является оценкой уровня CEFR" in summary.text
+    assert {"simple:study", "simple:progress", "simple:plan"}.issubset(
+        _actions(summary)
+    )
 
 
 def test_all_module_options_are_readable_in_body_with_compact_safe_buttons(learner):

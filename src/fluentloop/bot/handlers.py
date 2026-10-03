@@ -998,20 +998,102 @@ def handle_study(
     )
 
 
-def _simple_summary_reply(summary, *, edit_message: bool = False) -> BotReply:
-    text = (
-        f"Готово: {summary.correct}/{summary.answered} верно. "
-        f"«Не знаю»: {summary.unknown}."
+def _simple_summary_reply(
+    session: Session, user: User, summary, *, edit_message: bool = False
+) -> BotReply:
+    """Close a Study run with a small, actionable progress snapshot.
+
+    The full evidence view remains available through /progress.  The summary
+    deliberately describes only answers from this run, so stopping a session
+    never implies that a topic or a CEFR level was completed.
+    """
+
+    lines = [
+        "🏁 <b>Готово — занятие завершено</b>",
+        f"Результат сессии: {summary.correct}/{summary.answered} верно; "
+        f"«Не знаю»: {summary.unknown}.",
+    ]
+    if summary.answered:
+        lines.append(f"Точность сессии: {summary.correct / summary.answered:.0%}.")
+
+    if summary.run_id is not None:
+        from fluentloop.db.models import PracticeAttempt
+
+        attempts = list(
+            session.scalars(
+                select(PracticeAttempt).where(
+                    PracticeAttempt.practice_session_id == summary.run_id,
+                    PracticeAttempt.exercise_type == "simple_choice",
+                )
+            )
+        )
+        roadmap_ids = []
+        strands = {"general": [0, 0], "work": [0, 0]}
+        for attempt in attempts:
+            roadmap = (attempt.feedback or {}).get("roadmap") or {}
+            identifier = roadmap.get("module_id")
+            strand = roadmap.get("strand")
+            if not isinstance(identifier, str) or strand not in strands:
+                continue
+            if identifier not in roadmap_ids:
+                roadmap_ids.append(identifier)
+            strands[strand][1] += 1
+            strands[strand][0] += attempt.status == "correct"
+        strand_lines = [
+            f"{label}: {correct}/{total} верно"
+            for key, label in (
+                ("general", "Общий английский"),
+                ("work", "Рабочие темы"),
+            )
+            for correct, total in [strands[key]]
+            if total
+        ]
+        if strand_lines:
+            lines.extend(["", "<b>По личному плану в этой сессии</b>", *strand_lines])
+            from fluentloop.roadmap_study import module_progress
+
+            progress = {
+                row["module_id"]: row for row in module_progress(session, user)
+            }
+            actions = {
+                "recognition": "ответить на вопрос по теме",
+                "writing": "написать свой короткий ответ",
+                "spacing": "вернуться к новому применению через ≥24 ч",
+                "language_gate": "закрепить языковые темы для C1",
+                "practice": "поддерживать навык",
+            }
+            for identifier in roadmap_ids[:3]:
+                row = progress.get(identifier)
+                if row is None:
+                    continue
+                stage = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}[
+                    row["stage"]
+                ]
+                lines.append(
+                    f"• {html_escape(row['title_ru'])} · {stage}: "
+                    f"дальше — {actions.get(row['next_action'], 'практика')}."
+                )
+            if len(roadmap_ids) > 3:
+                lines.append(f"Ещё тем в сессии: {len(roadmap_ids) - 3}.")
+
+    lines.extend(
+        [
+            "",
+            "Открой «Прогресс» для всех тем и доказательств; «План» покажет "
+            "следующий языковой шаг.",
+            "Итог отражает эту сессию и не является оценкой уровня CEFR.",
+        ]
     )
     buttons = [
         [_button("Учиться ещё", "simple:study")],
+        [_button("Прогресс", "simple:progress"), _button("План", "simple:plan")],
         [_button("Применить письменно", f"simple:bonus:{summary.run_id}")]
         if summary.run_id is not None
         else [],
     ]
     buttons = [row for row in buttons if row]
     return BotReply(
-        text,
+        "\n".join(lines),
         buttons=buttons,
         parse_mode=HTML_PARSE_MODE,
         edit_message=edit_message,
@@ -1099,7 +1181,7 @@ def handle_simple_answer(
                 f"«Не знаю»: {summary.unknown}.",
             ]
         )
-        buttons.extend(_simple_summary_reply(summary).buttons or [])
+        buttons.extend(_simple_summary_reply(session, user, summary).buttons or [])
         buttons.append([_button("Повторить знакомое", "simple:repeat")])
     return BotReply(
         "\n".join(lines),
@@ -1120,7 +1202,10 @@ def handle_simple_stop(
     from fluentloop.simple_learning import stop_stream
 
     return _simple_summary_reply(
-        stop_stream(session, user, run_id=run_id), edit_message=edit_message
+        session,
+        user,
+        stop_stream(session, user, run_id=run_id),
+        edit_message=edit_message,
     )
 
 

@@ -808,6 +808,10 @@ replaced. The owner may explicitly apply the new allocation to their profile.
 The published programme explains topics, a flexible weekly rhythm, selection
 and evidence through readable diagrams. A small introductory-C1 extension adds
 new written situations in selected work modules without bypassing level gates.
+When a learner ends a Study stream, its result shows the current session's
+accuracy, its general/work allocation and the next action for the modules used
+there; it links directly to the complete Progress and Plan views. The session
+summary must state that it is not a CEFR assessment.
 
 Module practice and checked written application are recorded separately. Repeated
 clicks, skipped tasks, unverified feedback and self-reported external activity

@@ -65,8 +65,11 @@ In the owner's private chat or original forum topic:
    advances once.
 4. Interrupt an unanswered question and run `/study` again: it resumes. A
    container restart also resumes that persisted question.
-5. Хватит or `/stop` completes the run and shows a summary. The next launch
-   reselects. Optional writing accepts one sentence; skip leaves SRS unchanged.
+5. Хватит or `/stop` completes the run and shows its result and accuracy. For
+   roadmap questions it also shows the general/work split, up to three affected
+   modules with their next action, and Прогресс / План buttons. Confirm it never
+   calls that a CEFR result. The next launch reselects. Optional writing accepts
+   one sentence; skip leaves SRS unchanged.
 6. `/progress` distinguishes recognition and writing. Ещё exposes cards,
    review, full lessons, library, upload, and settings. `/today 5` still shows cards.
 7. With no eligible normal questions, the summary offers Повторить знакомое.

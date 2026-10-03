@@ -44,6 +44,12 @@ without losing the pending choice; stale callbacks cannot interrupt capture.
 The editor, quick start, methodology, architecture and operational runbook now
 describe the actual Study integration. No schema migration is required.
 
+When **Хватит** ends a Study stream, the bot shows a compact result for that
+session: correct answers, accuracy, general/work allocation and up to three
+affected modules with their next evidence action. **Прогресс** and **План** are
+available directly from this result. The copy explicitly keeps the summary out
+of CEFR assessment; the complete evidence remains in the separate views.
+
 ## Verification
 
 ### Programme update
