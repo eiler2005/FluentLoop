@@ -1344,6 +1344,14 @@
             {
               "variant_id": "b",
               "prompt": "Write 2-4 sentences to a client steering group. Delivery remains on track, but one specialist is unavailable and backup capacity is limited; distinguish present status from increased risk."
+            },
+            {
+              "variant_id": "c",
+              "prompt": "Write 2-4 sentences to an executive sponsor. A migration still meets its planned date, but the team has used its spare testing capacity to address a supplier defect. Explain the reduced margin and request a decision on scope if another defect appears, without presenting a delay as certain."
+            },
+            {
+              "variant_id": "d",
+              "prompt": "Write 2-4 sentences to a client programme board. A regional rollout remains achievable because an experienced engineer is covering two teams, leaving no cover for absence. Report the forecast with its changed exposure and propose a contingency that needs the board's approval."
             }
           ],
           "resource_ids": []
@@ -2196,6 +2204,14 @@
             {
               "variant_id": "b",
               "prompt": "Write 2-4 sentences to a supplier. You accept a later delivery for one shipment, while the standard deadline remains for future shipments; clarify the limited waiver."
+            },
+            {
+              "variant_id": "c",
+              "prompt": "Write 2-4 sentences to a client procurement lead. You can waive an onboarding fee for the first regional launch if the client signs this month; the usual fee applies to later regions. Define the conditional exception while leaving future commercial discussions open."
+            },
+            {
+              "variant_id": "d",
+              "prompt": "Write 2-4 sentences to a platform vendor. You can accept a shorter notice period for this pilot because a fallback service is ready, while the standard notice period must remain for production renewals. Clarify the pilot-only concession without implying that future exceptions are forbidden."
             }
           ],
           "resource_ids": []
@@ -2267,6 +2283,14 @@
             {
               "variant_id": "b",
               "prompt": "Write 2-4 sentences to an engineering lead. Intermittent timeouts persist after two temporary fixes; escalate the need for a named investigation owner and an evidence-based plan."
+            },
+            {
+              "variant_id": "c",
+              "prompt": "Write 2-4 sentences to an account director. A client's payroll exports have failed twice after temporary recovery, and the next payroll run is tomorrow; the cause and permanent recovery time are unknown. Request a named technical owner, a verified fallback check and a client update by noon without assigning blame or promising a fix."
+            },
+            {
+              "variant_id": "d",
+              "prompt": "Write 2-4 sentences to a service lead. Two teams have redirected a recurring integration failure to each other, and a manual workaround is nearing its capacity limit. Escalate the need for one coordinating owner, evidence from both teams and an agreed update time while keeping the unresolved cause explicit."
             }
           ],
           "resource_ids": []
@@ -2551,6 +2575,14 @@
             {
               "variant_id": "b",
               "prompt": "Write 2-4 sentences for a planning document. Rapid user growth is possible, while moderate growth is the base case; distinguish the scenarios and one capacity implication."
+            },
+            {
+              "variant_id": "c",
+              "prompt": "Write 2-4 sentences for an executive decision brief. Steady renewals are the base forecast, but a competitor's planned launch could increase customer departures; its pricing is still unknown. Recommend a proportionate contingency and state what new evidence should trigger it without treating the downside as the expected outcome."
+            },
+            {
+              "variant_id": "d",
+              "prompt": "Write 2-4 sentences to a technology leadership group. Current demand supports one regional service, while an unsigned partnership could double usage within a quarter. Separate the central capacity plan from the expansion scenario and propose a decision trigger that does not assume the partnership will close."
             }
           ],
           "resource_ids": []
@@ -2906,6 +2938,14 @@
             {
               "variant_id": "b",
               "prompt": "Write 2-4 sentences to a programme lead. A shared service reduces duplication if teams can accept the same release schedule; explain the condition and a situation where the advantage may weaken."
+            },
+            {
+              "variant_id": "c",
+              "prompt": "Write 2-4 sentences for a system-design review. A cached catalogue improves response times while clients can tolerate updates appearing up to five minutes later; checkout prices must always come from the authoritative service. State the boundary of your recommendation and the requirement that would make you revisit it."
+            },
+            {
+              "variant_id": "d",
+              "prompt": "Write 2-4 sentences to a platform steering group. A shared event pipeline lowers operating effort while participating teams can accept a common retention period, but one prospective team needs substantially longer retention. Explain the assumption behind the shared design and a condition for considering a separate path without declaring that separation is already necessary."
             }
           ],
           "resource_ids": []
@@ -3261,6 +3301,14 @@
             {
               "variant_id": "b",
               "prompt": "Write 2-4 sentences to a stakeholder. Traffic rose shortly before the queue stalled, but resource data is incomplete; describe the known sequence without declaring a root cause."
+            },
+            {
+              "variant_id": "c",
+              "prompt": "Write 2-4 sentences for an incident handover. Login errors rose five minutes after a certificate rotation and a routing update; rollback of the routing update restored service, but the certificate change has not been tested independently. Give the incoming responder the useful chronology and a next evidence check without treating recovery as proof of one root cause."
+            },
+            {
+              "variant_id": "d",
+              "prompt": "Write 2-4 sentences to an incoming on-call engineer. A batch backlog appeared shortly after both a traffic surge and a worker-limit change, and adding workers reduced the backlog; detailed usage data for the first ten minutes is missing. Separate observations from the competing hypotheses and specify what evidence should be collected next."
             }
           ],
           "resource_ids": []

@@ -32,6 +32,9 @@ def test_committed_views_match_validated_source_and_renderer():
     assert (directory / "workplace-planner.html").read_text() == (
         render_roadmap_html(catalog)
     )
+    published_plan = json.loads((directory / "client-work-plan.json").read_text())
+    assert validate_plan(published_plan, catalog) == default_plan(catalog)
+    assert published_plan["notes"] == {}
 
 
 def test_editor_embeds_portable_default_without_network_or_answer_keys():
@@ -41,7 +44,8 @@ def test_editor_embeds_portable_default_without_network_or_answer_keys():
     plan = _embedded(html, "default-data")
     assert embedded == catalog
     assert validate_plan(plan, embedded) == default_plan(catalog)
-    assert plan["general_share"] == 60
+    assert plan["general_share"] == 30
+    assert plan["track"] == "client_facing"
     assert "<script src=" not in html
     assert "fetch(" not in html
     assert "XMLHttpRequest" not in html

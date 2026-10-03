@@ -13,6 +13,7 @@ and technology situations as supplements.
 [![Telethon 1.36](https://img.shields.io/badge/telethon-1.36-2ca5e0.svg)](https://docs.telethon.dev/)
 [![Status](https://img.shields.io/badge/status-MVP%20shipped-success.svg)](docs/features/README.md)
 
+[Программа и схемы обучения](docs/curriculum/learning-programme.md) ·
 [Start learning](#start-here-if-you-want-to-learn) ·
 [Personal plan](docs/curriculum/workplace-plan-guide.md) ·
 [Visual planner](docs/curriculum/workplace-planner.html) ·
@@ -27,9 +28,10 @@ until **Хватит**. Optional short writing lets you apply what you learned.
 Simple mode runs on request and resumes an unfinished question after a restart.
 
 A saved personal plan connects this stream to **48 modules: 16 general-English
-and 32 workplace supplements**, with **144 contextual questions and 288 writing
-situations** across B2, B2+ and introductory C1. The default balance is 60%
-general practice and 40% work/language practice. Edit priorities, order and
+and 32 workplace supplements**, with **144 contextual questions and 300 writing
+situations** across B2, B2+ and introductory C1. The new recommended balance is 70%
+client, business, technology and supporting language practice, and 30% general English.
+Existing saved plans keep their settings until explicitly edited. Edit priorities, order and
 pauses in Telegram or the offline planner; future questions follow your plan.
 
 Progress separates correct choices, fresh-context transfer and independently
@@ -62,10 +64,12 @@ If you are here as a learner, not as a developer, read these first:
 
 | What you need | Where to look |
 |---|---|
+| See what to learn and how progression works | [Programme, diagrams and a flexible 12-week plan](docs/curriculum/learning-programme.md) |
 | Understand what FluentLoop does | [`docs/user-guide.md`](docs/user-guide.md) |
 | Understand the learning methodology | [`docs/learning-methodology.md`](docs/learning-methodology.md) |
 | Start this week without thinking too much | [`docs/learning-plans.md`](docs/learning-plans.md) |
-| Set up the plan that drives Учиться | [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) |
+| Set up the plan that drives Учиться | [`docs/curriculum/learning-programme.md`](docs/curriculum/learning-programme.md) | Russian visual guide: 70/30 programme, module sequence, learning loop and progression. |
+| [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) |
 | Edit priorities, order and notes visually | [Download and open the offline planner](docs/curriculum/workplace-planner.html) |
 | Prepare your own lesson notes for `/upload` | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) |
 | See lesson types and public catalogs | [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md) |
@@ -109,14 +113,14 @@ independently reviews bounded variants of approved targets; see the
 
 The [editable general/workplace programme](docs/curriculum/workplace-plan-guide.md)
 adds 16 general-English modules and 32 optional areas of workplace focus, each
-with B2/B2+/introductory-C1 tasks. General English receives 60% of default
+with B2/B2+/introductory-C1 tasks. General English receives 30% of default
 answered practice units; client work and large-technology companies are supplementary tracks.
 Use `/roadmap` for the plan and common edits, or download and open the
 [offline visual planner](docs/curriculum/workplace-planner.html) to reorder
 topics, pause them, add notes and export a personal JSON plan. With a saved plan,
 **Учиться /study follows that plan**: 144 additional contextual questions and
-288 short writing situations cover all 48 modules and three stages. The default
-60/40 split balances answered questions; weekly minutes remain a suggested
+300 short writing situations cover all 48 modules and three stages. The default
+30/70 general/work split balances answered questions; weekly minutes remain a suggested
 workload. Focus, order and pauses affect subsequent selection, while an already
 displayed question resumes unchanged. Two independent, genuinely checked written
 applications in distinct situations, on different local dates at least 24 hours
@@ -124,6 +128,8 @@ apart, plus correct recognition, support each module's progression; choices and
 external practice reports are counted separately. Introductory C1 also requires
 the existing ten-topic language gate. See the
 [Study integration runbook](docs/runbooks/roadmap-study.md).
+Six work modules include two additional C1 writing situations each: negotiation,
+escalation, stakeholder updates, strategy, architecture and incident handover.
 The [research reports](docs/research/README.md) explain sources and coverage gaps.
 
 ### Advanced lessons and vocabulary
@@ -418,6 +424,7 @@ FluentLoop/
 | [`docs/features/README.md`](docs/features/README.md) | Epic index with dependency graph and statuses. |
 | [`docs/user-guide.md`](docs/user-guide.md) | Learner-facing methodology, process map, daily workflow, and modes. |
 | [`docs/learning-plans.md`](docs/learning-plans.md) | Practical first-week, 30-day, and 12-week learning plans. |
+| [`docs/curriculum/learning-programme.md`](docs/curriculum/learning-programme.md) | Russian visual guide: 70/30 programme, module sequence, learning loop and progression. |
 | [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) | Activate and edit the general/workplace plan used by Study. |
 | [`docs/research/README.md`](docs/research/README.md) | Research sources, coverage and limitations for B2–introductory C1. |
 | [`docs/runbooks/roadmap-study.md`](docs/runbooks/roadmap-study.md) | Module bank, progression rules, verification and release checks. |

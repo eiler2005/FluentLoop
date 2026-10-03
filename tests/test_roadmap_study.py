@@ -88,7 +88,9 @@ def pack(monkeypatch):
 @pytest.fixture
 def learner(db_session, settings, pack):
     user = ensure_user(db_session, 123456789, settings)
-    save_plan(db_session, user, default_plan())
+    plan = default_plan()
+    plan["general_share"] = 60
+    save_plan(db_session, user, plan)
     return user
 
 
@@ -138,6 +140,21 @@ def test_actual_general_work_allocation_and_restart(db_session, learner, share, 
         resumed = start_stream(db_session, learner, now=NOW)
         assert resumed.question == step.question
     assert strands.count("general") == share // 10
+
+
+def test_new_default_plan_delivers_thirty_general_seventy_work(db_session, learner):
+    plan = default_plan()
+    assert plan["track"] == "client_facing"
+    assert plan["general_share"] == 30
+    save_plan(db_session, learner, plan)
+    step = start_stream(db_session, learner, now=NOW)
+    strands = []
+    for _ in range(20):
+        assert step.question["allocation_share"] == 30
+        strands.append(step.question["strand"])
+        step = right(db_session, learner, step).next_step
+    assert strands.count("general") == 6
+    assert strands.count("work") == 14
 
 
 def test_focus_pause_order_and_pending_snapshot(db_session, learner):
@@ -379,6 +396,157 @@ def test_shipped_pack_covers_all_modules_and_stages():
     pack = load_question_pack()
     assert len(pack["modules"]) == 48
     assert sum(len(module["stages"]) for module in pack["modules"]) == 144
+    assert (
+        sum(
+            len(question["production_prompts"])
+            for module in pack["modules"]
+            for question in module["stages"].values()
+        )
+        == 300
+    )
+    assert {
+        module["module_id"]
+        for module in pack["modules"]
+        if len(module["stages"]["c1_intro"]["production_prompts"]) == 4
+    } == {
+        "commercial_negotiation",
+        "support_escalation",
+        "stakeholder_updates",
+        "strategy_market",
+        "architecture_explanations",
+        "incident_handover",
+    }
+
+
+@pytest.mark.parametrize(
+    "stage,variants",
+    [
+        ("b2", "abcd"),
+        ("b2_plus", "abcd"),
+        ("c1_intro", "abc"),
+        ("c1_intro", "abcde"),
+        ("c1_intro", "abcc"),
+        ("c1_intro", "abce"),
+        ("c1_intro", "ac"),
+    ],
+)
+def test_pack_rejects_invalid_stage_variant_sets(pack, stage, variants):
+    question = pack["modules"][0]["stages"][stage]
+    question["production_prompts"] = [
+        {"variant_id": variant, "prompt": f"Independent situation {index}."}
+        for index, variant in enumerate(variants)
+    ]
+    with pytest.raises(ValueError):
+        validate_question_pack(pack)
+
+
+def c1_question(session, learner, monkeypatch):
+    update_plan(session, learner, "focus", "identity_relationships")
+    first = start_stream(session, learner, now=NOW)
+    right(session, learner, first)
+    write(session, learner, first, WRITING_A, NOW)
+    day1 = NOW + timedelta(days=1)
+    write(session, learner, first, WRITING_B, day1)
+    stop_stream(session, learner)
+    second = start_stream(session, learner, now=day1)
+    assert second.question["roadmap"]["stage"] == "b2_plus"
+    right(session, learner, second, day1)
+    write(
+        session,
+        learner,
+        second,
+        "The swimming club reopened after repairs to its damaged roof.",
+        day1,
+    )
+    day2 = day1 + timedelta(days=1)
+    write(
+        session,
+        learner,
+        second,
+        "We booked a mountain cabin because the city hotels were expensive.",
+        day2,
+    )
+    assert progress(session, learner, now=day2)["next_action"] == "language_gate"
+    monkeypatch.setattr(
+        "fluentloop.roadmap_study.curriculum_progress",
+        lambda *args, **kwargs: SimpleNamespace(c1_unlocked=True),
+    )
+    stop_stream(session, learner)
+    update_plan(session, learner, "general_share", 90)
+    step = start_stream(session, learner, now=day2)
+    assert step.question["roadmap"]["stage"] == "c1_intro"
+    assert step.question["roadmap"]["module_id"] == "identity_relationships"
+    return step, day2
+
+
+@pytest.mark.parametrize("spaced_pair", [False, True])
+def test_extra_c1_writing_is_reachable_without_requiring_all_four(
+    db_session, learner, pack, monkeypatch, spaced_pair
+):
+    prompts = pack["modules"][0]["stages"]["c1_intro"]["production_prompts"]
+    prompts.extend(
+        [
+            {"variant_id": "c", "prompt": "Explain a household compromise in English."},
+            {"variant_id": "d", "prompt": "Explain a study decision in English."},
+        ]
+    )
+    validate_question_pack(pack)
+    step, current = c1_question(db_session, learner, monkeypatch)
+    right(db_session, learner, step, current)
+    answers = [
+        "My aunt leads a hiking group through the forest each summer.",
+        "The community theatre postponed its festival because tickets sold slowly.",
+        "We agreed to alternate kitchen duties after discussing our daily routines.",
+        "This evening course provides access to specialist tutors near my home.",
+    ]
+    for index, (variant, answer) in enumerate(zip("abcd", answers, strict=True)):
+        when = current + timedelta(days=int(index >= (1 if spaced_pair else 2)))
+        bonus, result = write(db_session, learner, step, answer, when)
+        assert bonus.question["roadmap"]["production_variant_id"] == variant
+        assert result.attempt.feedback["independent_production"]
+        state = progress(db_session, learner, now=when)
+        assert ("c1_intro" in state["completed_stages"]) == (
+            index >= (1 if spaced_pair else 2)
+        )
+    assert state["writing_variants"] == list("abcd")
+
+
+def test_old_two_variant_c1_snapshots_resume_after_pack_expansion(
+    db_session, learner, pack, monkeypatch
+):
+    step, current = c1_question(db_session, learner, monkeypatch)
+    original = deepcopy(step.question)
+    prompts = pack["modules"][0]["stages"]["c1_intro"]["production_prompts"]
+    prompts.extend(
+        [
+            {"variant_id": "c", "prompt": "Explain a household compromise in English."},
+            {"variant_id": "d", "prompt": "Explain a study decision in English."},
+        ]
+    )
+    validate_question_pack(pack)
+    db_session.commit()
+    db_session.expire_all()
+    assert start_stream(db_session, learner, now=current).question == original
+    right(db_session, learner, step, current)
+    bonus = start_module_bonus(
+        db_session, learner, step.run.id, step.index, now=current
+    )
+    db_session.commit()
+    db_session.expire_all()
+    resumed = start_module_bonus(
+        db_session, learner, step.run.id, step.index, now=current
+    )
+    assert resumed.run.id == bonus.run.id
+    assert resumed.question == bonus.question
+    assert resumed.question["roadmap"]["production_variant_id"] == "a"
+    assert (
+        len(
+            answered_module_question(db_session, learner, step.run.id, step.index)[
+                "production_prompts"
+            ]
+        )
+        == 2
+    )
 
 
 @pytest.mark.parametrize("stage", ["b2", "b2_plus", "c1_intro"])

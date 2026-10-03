@@ -92,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
                 expected = {
                     "workplace-roadmap.md": render_roadmap_markdown(catalog),
                     "workplace-planner.html": render_roadmap_html(catalog),
+                    "client-work-plan.json": json.dumps(
+                        default_plan(catalog), ensure_ascii=False, indent=2
+                    ) + "\n",
                 }
                 for name, content in expected.items():
                     path = args.check_render / name

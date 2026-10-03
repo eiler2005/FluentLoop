@@ -189,6 +189,7 @@ def test_external_activity_is_owned_idempotent_and_separate_from_mastery(
 def test_plan_edit_keeps_pending_question_but_changes_following_module(
     db_session, learner
 ):
+    update_plan(db_session, learner, "general_share", 60)
     step = start_stream(db_session, learner)
     current_module = step.question["roadmap"]["module_id"]
     target = next(

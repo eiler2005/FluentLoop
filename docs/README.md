@@ -1,5 +1,10 @@
 # Documentation index
 
+**Начни здесь: [программа 70/30 и схемы обучения](curriculum/learning-programme.md).**
+Что учить, как работает «Учиться», как растёт сложность и где менять план.
+[Редактируемый исходный план JSON](curriculum/client-work-plan.json) можно скачать
+и открыть в офлайн-планировщике; он не содержит личных заметок.
+
 | File | Purpose |
 |---|---|
 | [`architecture.md`](architecture.md) | Tech architecture: framework, libraries, DB, scheduler, AI providers, deployment, learning-engine runtime notes. |

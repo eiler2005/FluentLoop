@@ -79,7 +79,7 @@ def validate_question_pack(data: dict, catalog: dict | None = None) -> dict:
             STAGES
         ):
             raise ValueError("Every question module requires three stages")
-        for question in module["stages"].values():
+        for stage, question in module["stages"].items():
             if not isinstance(question, dict) or set(question) != fields:
                 raise ValueError("Invalid roadmap question fields")
             for field in ("prompt", "explanation_ru", "target_construction"):
@@ -99,15 +99,17 @@ def validate_question_pack(data: dict, catalog: dict | None = None) -> dict:
             ):
                 raise ValueError("Invalid roadmap answer options")
             prompts = question["production_prompts"]
-            if not isinstance(prompts, list) or len(prompts) != 2:
-                raise ValueError("Two writing situations are required")
+            allowed_counts = {2, 4} if stage == "c1_intro" else {2}
+            if not isinstance(prompts, list) or len(prompts) not in allowed_counts:
+                raise ValueError("Two writing situations, or four at C1, are required")
+            expected_variants = set("abcd"[: len(prompts)])
             variants, texts = set(), set()
             for prompt in prompts:
                 if (
                     not isinstance(prompt, dict)
                     or set(prompt) != {"variant_id", "prompt"}
                     or not isinstance(prompt["variant_id"], str)
-                    or prompt["variant_id"] not in {"a", "b"}
+                    or prompt["variant_id"] not in expected_variants
                     or prompt["variant_id"] in variants
                     or not isinstance(prompt["prompt"], str)
                     or not prompt["prompt"].strip()
@@ -440,7 +442,7 @@ def start_module_bonus(
     ]
     credited = {a.feedback["roadmap"].get("production_variant_id") for a in records}
     prompts = question["production_prompts"]
-    # Once both situations are correct, revisit the first until spacing is present.
+    # Prefer fresh situations; revisit the first only after every one is credited.
     prompt = next((p for p in prompts if p["variant_id"] not in credited), prompts[0])
     current = _utc(now or datetime.now(UTC))
     exercise = {

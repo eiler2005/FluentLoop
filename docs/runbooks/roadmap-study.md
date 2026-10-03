@@ -13,16 +13,29 @@ does not opt a profile in. A missing or invalid plan keeps the prior selector.
 Admission, simple-mode delivery rules and automatic-message suppression stay as
 described in [simple-learning.md](simple-learning.md).
 
-The packaged bank has 144 module questions and 288 short writing situations:
-48 modules × B2/B2+/introductory C1 × one choice and two written variants. There
+The programme update recommends 30% general and 70% work for new plans. To
+change an existing owner plan, first export it privately with
+`scripts/workplace_plan.py --export-pilot data/plan-before-update.json`. Then
+use `/roadmap general 30` in the owner's Telegram chat, or change only
+`general_share` in that exported JSON and apply it with the documented
+`--profile ... --apply --pilot` CLI. Do not replace a private export with the
+public starter JSON if the owner already has notes, pauses or a custom order.
+Verify other profile preferences, pending questions and assessment counts remain
+unchanged. The release applies this explicit owner update; existing plans for
+other profiles are not migrated.
+
+The packaged bank has 144 module questions and 300 short writing situations:
+48 modules × three stages × one choice and at least two written variants, plus
+twelve extra C1 situations across six work modules. There
 is no DB import for this bank. Existing 270 adaptive and 86 reference questions
 remain separate approved language practice. New module questions carry no
 LearningItem target IDs; module evidence cannot graduate unrelated cards.
 
 Personal plan controls:
 
-- `general_share` balances answered choice questions, normally 60% general and
-  40% work. Existing language questions consume work slots. Work modules and
+- `general_share` balances answered choice questions, now 30% general and
+  70% work for new plans. Saved plans retain their chosen ratio. Existing language
+  questions consume work slots. Work modules and
   language practice interleave when both are available.
   A changed ratio uses evidence tagged with that ratio, avoiding catch-up debt
   from questions answered under a different allocation.
@@ -69,9 +82,18 @@ The public programme and larger practice briefs are in
 `src/fluentloop/seeds/workplace_curriculum_v1.json`; choice keys, explanations
 and short writing scenarios are in `roadmap_question_pack_v1.json` beside it.
 Keep module IDs stable. Each stage has exactly three choices, a single correct
-index, a Russian explanation, a meaningful English target and two distinct
-self-contained English writing situations (`a`, `b`). General scenarios must
+index, a Russian explanation, a meaningful English target and distinct
+self-contained English writing situations: `a`, `b` on all stages; selected C1
+stages may use the complete `a`, `b`, `c`, `d` set. Two independent spaced successes
+remain the evidence threshold, not all four variants. General scenarios must
 remain general, not a workplace question relabelled as general English.
+
+The public renderer also writes `docs/curriculum/client-work-plan.json`, a
+portable default plan with no private notes. The hand-edited programme and
+diagrams are in `docs/curriculum/learning-programme.md`; research and its source
+limits are in `docs/research/curriculum-benchmark-2026-10.md`. They are not
+overwritten by regeneration. The 36 expanded public briefs are separate from
+the reserved transfer bank and from the 300 short assessed writing situations.
 
 ```bash
 uv run python scripts/workplace_plan.py --render docs/curriculum

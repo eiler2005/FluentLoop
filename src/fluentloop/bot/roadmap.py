@@ -24,7 +24,7 @@ USAGE = (
     "/roadmap activate — подключить план к «Учиться»\n"
     "/roadmap track balanced|client_facing|big_tech\n"
     "/roadmap time 150 — минут в неделю (30–1200)\n"
-    "/roadmap general 60 — доля общего английского (20–90%)\n"
+    "/roadmap general 30 — 30% общего / 70% работы (диапазон 20–90%)\n"
     "/roadmap list [general|work]\n"
     "/roadmap module ID [b2|b2_plus|c1_intro]\n"
     "/roadmap focus ID · /roadmap pause ID · /roadmap resume ID"

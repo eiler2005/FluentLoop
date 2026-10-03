@@ -201,7 +201,7 @@ def test_save_preserves_other_preferences_and_other_profiles(
     db_session.expire(owner)
     stored = get_plan(owner, catalog)
     assert stored["notes"]["work_client"].startswith("Literal")
-    assert stored["order"] == catalog["tracks"]["balanced"]["module_ids"]
+    assert stored["order"] == catalog["tracks"]["client_facing"]["module_ids"]
     stored["paused"].append("work_client")
     assert get_plan(owner, catalog)["paused"] == []
 
@@ -219,22 +219,38 @@ def test_invalid_import_leaves_entire_preferences_unchanged(db_session, owner, c
     assert owner.preferences_json == before
 
 
-def test_defaults_are_separate_and_foundation_gets_majority(owner, catalog):
+def test_defaults_are_separate_and_work_gets_seventy_percent(owner, catalog):
     first = get_plan(owner, catalog)
     first["notes"]["general_reading"] = "Only in returned copy"
     assert "workplace_plan" not in owner.preferences_json
     assert get_plan(owner, catalog)["notes"] == {}
     outline = plan_outline(first, catalog)
-    assert outline["general_minutes"] == 90
-    assert outline["work_minutes"] == 60
-    assert outline["general_focus"]["id"] == "general_reading"
-    assert outline["work_focus"]["id"] == "work_client"
+    assert outline["general_minutes"] == 45
+    assert outline["work_minutes"] == 105
+    assert first["track"] == "client_facing"
+    assert outline["general_focus"]["id"] == "general_writing"
+    assert outline["work_focus"]["id"] == "work_tech"
 
 
 def test_note_bound_counts_unicode_codepoints(catalog):
     plan = default_plan(catalog)
     plan["notes"] = {"general_reading": "📖" * 1000}
     assert validate_plan(plan, catalog)["notes"] == plan["notes"]
+
+
+def test_new_recommendation_does_not_replace_saved_plan(db_session, owner, catalog):
+    previous = default_plan(catalog)
+    previous.update(
+        track="balanced", general_share=60, weekly_minutes=200,
+        order=list(catalog["tracks"]["balanced"]["module_ids"]),
+        paused=["general_writing"], focus="work_client",
+        notes={"work_client": "Keep my existing plan"},
+    )
+    save_plan(db_session, owner, previous, catalog)
+    assert default_plan(catalog)["general_share"] == 30
+    assert get_plan(owner, catalog) == previous
+    changed = update_plan(db_session, owner, "general_share", 30, catalog)
+    assert changed == {**previous, "general_share": 30}
 
 
 def test_updates_keep_notes_pauses_focus_and_mode(db_session, owner, catalog):
@@ -262,7 +278,7 @@ def test_updates_keep_notes_pauses_focus_and_mode(db_session, owner, catalog):
 
 def test_outline_follows_order_and_focus_in_each_strand(catalog):
     plan = default_plan(catalog)
-    plan["order"].reverse()
+    plan["order"] = list(reversed(catalog["tracks"]["balanced"]["module_ids"]))
     plan["focus"] = "work_client"
     outline = plan_outline(plan, catalog)
     assert outline["general_focus"]["id"] == "general_writing"
@@ -472,7 +488,7 @@ def test_shipped_catalog_has_general_and_workplace_coverage():
     assert sum(module["strand"] == "general" for module in catalog["modules"]) == 16
     assert len(catalog["language_map"]) >= 10
     outline = plan_outline(default_plan(catalog), catalog)
-    assert outline["general_minutes"] > outline["work_minutes"]
+    assert (outline["general_minutes"], outline["work_minutes"]) == (45, 105)
 
 
 def test_cli_shipped_default_requires_no_profile_or_settings(monkeypatch, capsys):
@@ -480,4 +496,4 @@ def test_cli_shipped_default_requires_no_profile_or_settings(monkeypatch, capsys
         "fluentloop.config.get_settings", lambda: pytest.fail("DB read")
     )
     assert _cli().main([]) == 0
-    assert "modules=48 track=balanced" in capsys.readouterr().out
+    assert "modules=48 track=client_facing" in capsys.readouterr().out

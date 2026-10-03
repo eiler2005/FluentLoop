@@ -37,6 +37,29 @@ portable-plan validation and separation from assessed language progress remain.
   user's explicit instruction. Personal imports/notes cannot inject answer keys,
   bypass stage gates or approve arbitrary uploaded learning items.
 
+## Programme amendment — 2026-10-03
+
+- New or missing plans recommend the client-facing track with 70% workplace and
+  30% general practice (`general_share=30`). General English remains part of the
+  programme; the existing language bank is counted in workplace practice units.
+  Saved plans retain their chosen track, allocation and other preferences. The
+  explicitly requested owner deployment updates that owner's ratio only,
+  preserving module order, focus, notes, pauses and weekly time. No schema change
+  is needed.
+- B2 and B2+ keep exactly two authored writing situations (`a`, `b`). Selected
+  introductory C1 modules may carry four (`a`, `b`, `c`, `d`) to offer additional
+  client and technology contexts. The original identifiers and texts remain
+  stable. Packs must contain exactly the two- or four-variant set at C1; duplicate,
+  unknown or partial variant sets fail validation.
+- Additional situations increase practice breadth; the evidence requirement
+  remains recognition plus any two distinct independently checked applications
+  on different local dates at least 24 hours apart. They do not require four
+  successful responses or weaken the ten-topic C1 language gate. Writing chooses
+  the next uncredited situation before revisiting one for spacing.
+- Existing immutable two-situation question and writing snapshots remain valid
+  and resume with their saved content. Extra variants become available through
+  future question snapshots; neither pending questions nor prior evidence change.
+
 ## Verification
 
 Test weighted selection, order/focus/pauses, all modules/stages, source isolation,

@@ -37,9 +37,12 @@ Markdown map and standalone HTML editor from the packaged public seed. The
 editor's browser storage is independent of Telegram; applying an exported JSON
 requires the explicit owner CLI. `roadmap_study.py` selects from a separate
 144-question module pack, balancing general/work answered practice units at
-60/40 by default and interleaving existing language practice in work slots.
+30/70 general/work for new plans and interleaving existing language practice in work slots.
 Order, focus and pauses affect the next selection; the pending immutable
 snapshot resumes unchanged. Weekly minutes are advisory, not measured time.
+
+Existing saved plans retain their allocation, order, notes and pauses. The owner
+may explicitly switch to the new recommendation; defaults are not a bulk migration.
 
 Module snapshots and attempt feedback contain module/stage/variant evidence in
 existing sessions; no schema or active-target migration is needed. Optional

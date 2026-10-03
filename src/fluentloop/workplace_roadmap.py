@@ -263,10 +263,10 @@ def default_plan(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
     pack = _catalog(catalog)
     return {
         "version": 1,
-        "track": "balanced",
+        "track": "client_facing",
         "weekly_minutes": 150,
-        "general_share": 60,
-        "order": list(pack["tracks"]["balanced"]["module_ids"]),
+        "general_share": 30,
+        "order": list(pack["tracks"]["client_facing"]["module_ids"]),
         "paused": [],
         "focus": None,
         "notes": {},

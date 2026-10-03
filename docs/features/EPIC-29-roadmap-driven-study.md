@@ -26,7 +26,7 @@ personal scheduling and module evidence. Keep the familiar one-question flow.
 ## Delivered
 
 `roadmap_study.py` reads a separate reviewed pack containing 144 contextual
-questions and 288 self-contained short writing situations. Explicitly saved
+questions and 300 self-contained short writing situations. Explicitly saved
 plans enable selection; merely opening the plan does not change a profile.
 General/work allocation uses answered practice units, with language questions
 interleaved and both phrase and grammar categories retained. Changed ratios
@@ -45,6 +45,23 @@ The editor, quick start, methodology, architecture and operational runbook now
 describe the actual Study integration. No schema migration is required.
 
 ## Verification
+
+### Programme update
+
+New plans recommend 70% workplace/supporting language practice and 30% general
+English, with the client-facing track. Saved plans are preserved. The owner can
+explicitly apply the ratio without resetting notes, pauses or evidence.
+Six work modules have two additional C1 situations each (12 total); the stage
+gate still needs two independently correct, spaced variants, not all four.
+See [the programme and diagrams](../curriculum/learning-programme.md) and
+[the comparative research](../research/curriculum-benchmark-2026-10.md).
+
+The comparison covers 23 primary sources. Thirty-six public briefs in 12 modules
+now supply facts, audience, constraints and output criteria. Four programme
+diagrams were rendered and visually reviewed. The update gate passed **706 tests**,
+Ruff, offline-editor browser checks, app construction and generated-view checks.
+
+### Initial integration verification
 
 - Full local gate: **658 tests passed**; Ruff, app construction, generated-view
   freshness and diff checks passed. Eight existing Alembic deprecation warnings.

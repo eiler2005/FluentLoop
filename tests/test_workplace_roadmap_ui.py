@@ -26,14 +26,38 @@ def _text(reply):
     return "\n".join(page.text for page in (reply, *reply.extra_replies))
 
 
+@pytest.mark.parametrize("stage", ["b2", "b2_plus", "c1_intro"])
+@pytest.mark.parametrize("module_id", [
+    "client_discovery", "value_proposals", "requirements_changes",
+    "commercial_negotiation", "support_escalation", "stakeholder_updates",
+    "metrics_trends", "architecture_explanations", "meeting_facilitation",
+    "news_media", "argument_decisions", "digital_life",
+])
+def test_expanded_case_briefs_are_readable_without_starting_assessment(
+    db_session, settings, stage, module_id
+):
+    from html import unescape
+
+    user = ensure_user(db_session, 123456789, settings)
+    before = deepcopy(user.preferences_json)
+    module = next(m for m in load_curriculum()["modules"] if m["id"] == module_id)
+    reply = handle_roadmap(db_session, user, f"module {module_id} {stage}")
+    assert module["tasks"][stage] in unescape(_text(reply))
+    for page in (reply, *reply.extra_replies):
+        assert len(page.text.encode("utf-16-le")) // 2 <= 4096
+    assert user.preferences_json == before
+    assert db_session.scalar(select(PracticeSession)) is None
+    assert db_session.scalar(select(LearningItem)) is None
+
+
 def test_roadmap_retains_general_base_and_does_not_start_practice(db_session, settings):
     user = ensure_user(db_session, 123456789, settings)
     before = deepcopy(user.preferences_json)
     reply = handle_roadmap(db_session, user)
 
-    assert "Общий английский: 60%" in reply.text
-    assert "Основа: 90 мин" in reply.text
-    assert "Дополнения: 60 мин" in reply.text
+    assert "Общий английский: 30%" in reply.text
+    assert "Основа: 45 мин" in reply.text
+    assert "Дополнения: 105 мин" in reply.text
     assert "внешней практики" in reply.text
     assert "CEFR" in reply.text
     assert user.preferences_json == before
@@ -63,7 +87,7 @@ def test_roadmap_edits_are_personal_and_preserve_unrelated_settings(
     )
     assert user.preferences_json["unrelated"] == {"keep": True}
     assert other.preferences_json == other_before
-    assert get_plan(other)["track"] == "balanced"
+    assert get_plan(other)["track"] == "client_facing"
     module_id = plan["order"][0]
     handle_roadmap(db_session, user, f"focus {module_id}")
     assert get_plan(user)["focus"] == module_id

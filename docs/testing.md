@@ -20,7 +20,7 @@ git diff --check
 - Broad roadmap: strict catalogue references, portable-plan types and limits,
   general/work retention, user isolation, safe import/export, command routing,
   HTML escaping, generated-view freshness and unchanged assessed progress.
-- Roadmap Study: all 48 modules and 144 stages/questions, actual 60/40 and 90/10
+- Roadmap Study: all 48 modules and 144 stages/questions, actual 30/70, 60/40 and 90/10
   selection, focus/order/pauses, pending recovery, language interleaving, cooldowns,
   genuine independent spaced writing, reused/copy rejection, retained C1 gate,
   self-report separation, personal quarantine and owner/duplicate callback checks.

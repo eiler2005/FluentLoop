@@ -801,6 +801,14 @@ keeps serving the existing adaptive language curriculum so its evidence gate can
 still be completed. Pending questions resume intact after restarts or plan edits;
 the next selection uses the latest plan.
 
+The current recommended programme allocates 70% to client-facing, business,
+technology and supporting language practice, and 30% to general English.
+New plans use the client-facing track; existing saved plans are not silently
+replaced. The owner may explicitly apply the new allocation to their profile.
+The published programme explains topics, a flexible weekly rhythm, selection
+and evidence through readable diagrams. A small introductory-C1 extension adds
+new written situations in selected work modules without bypassing level gates.
+
 Module practice and checked written application are recorded separately. Repeated
 clicks, skipped tasks, unverified feedback and self-reported external activity
 cannot establish mastery. B2+ requires successful independent written applications

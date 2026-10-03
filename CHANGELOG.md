@@ -7,6 +7,17 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- Visual learning programme with GitHub diagrams, a flexible 12-week client and
+  technology pathway, an editable public plan and a source-backed comparison
+  with established business/general-English programmes.
+- Twelve additional introductory-C1 writing situations for negotiation,
+  escalation, stakeholder updates, strategy, architecture and incident handover.
+  The roadmap bank now contains 144 questions and 300 writing situations.
+- Thirty-six revised public case briefs across nine workplace and three general
+  modules: supplied fictional facts, audience, output, constraints and criteria.
+- New-plan recommendation: 70% work and supporting language practice, 30% general
+  English, client-facing track. Existing saved plans retain their preferences;
+  changing the owner's plan is an explicit release action.
 - Personal roadmap execution inside **Учиться /study**: 144 contextual questions
   and 288 optional writing situations across all 48 general/workplace modules.
   General/work allocation, focus, order and pauses drive subsequent selection;

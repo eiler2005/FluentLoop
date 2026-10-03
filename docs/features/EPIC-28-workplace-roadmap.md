@@ -31,7 +31,8 @@ personal plan and practical task ladder with honest delivery and evidence labels
 
 - Two primary-source research reports and an authored 48-module catalogue:
   16 general, 32 supplementary work modules, 144 stage tasks, 26 language-map
-  entries and three complete tracks. The default time split is 60/40, editable.
+  entries and three complete tracks. The initial time split was 60/40; the
+  current new-plan recommendation is 30% general / 70% work, editable (EPIC-29).
 - `/roadmap` view and personal controls; offline responsive editor with filtering,
   stage tasks, ordering, pauses, notes and portable JSON. An explicit owner CLI
   validates/applies imports and exports the current private plan.
