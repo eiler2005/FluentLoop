@@ -63,7 +63,19 @@ answer races, forum sender isolation, topic-bound writing, stale bonus buttons,
 reused curated cards, and committed-WAL backup verification. Packaging includes
 the reviewed JSON bank in wheels.
 
-The root agent completes documentation, local tests and the secret gate, then
-the explicitly requested commit/push, successful CI, verified backup,
-deployment, and owner-only pilot activation. Sub-agents do not perform release
-operations.
+## Deployment validation
+
+On 2026-10-03, release `aa20a29` was pushed to `main` and passed
+[CI](https://github.com/eiler2005/FluentLoop/actions/runs/37109237752).
+The exact commit was deployed with the existing runtime environment preserved.
+A consistent pre-release SQLite backup passed integrity verification, and the
+container is healthy with Telegram connected and no startup errors.
+
+The owner pilot has 19 subscribed plans and 86 personal question fingerprints,
+retaining B1/B2 levels. Other profiles retain their mode. Reapplying the importer
+created zero templates, items, or personal plans. Live-database handler smoke
+verified resume, duplicate rejection, stop, optional bonus skip, progress, More,
+Help, and private-chat routing in a rollback transaction; attempt counts stayed
+unchanged. Telegram API reachability, command-menu updates, and delivery of the
+owner's three-button keyboard were confirmed. Real learner button taps and typed
+AI feedback remain learner actions; automated tests cover those handlers offline.
