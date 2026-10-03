@@ -108,7 +108,7 @@ def test_all_module_options_are_readable_in_body_with_compact_safe_buttons(learn
             reply = _simple_question_reply(
                 SimpleStep(SimpleNamespace(id=1), question), learner
             )
-            assert [row[0].text for row in reply.buttons[:3]] == ["A", "B", "C"]
+            assert [button.text for button in reply.buttons[0]] == ["A", "B", "C"]
             assert all(
                 escape(option, quote=False) in reply.text for option in raw["options"]
             )
@@ -119,6 +119,20 @@ def test_all_module_options_are_readable_in_body_with_compact_safe_buttons(learn
             )
             assert "&lt;client&gt; &amp;" in escaped.text
             assert "<client>" not in escaped.text
+
+    legacy = {
+        "category": "phrase",
+        "prompt": "Request an update with a clear, courteous deadline.",
+        "options": [
+            "Could you send the updated estimate by Thursday afternoon?",
+            "Could you send an estimate when convenient, we need it soon?",
+        ],
+        "correct_index": 0,
+    }
+    reply = _simple_question_reply(SimpleStep(SimpleNamespace(id=1), legacy), learner)
+    assert [button.text for button in reply.buttons[0]] == ["A", "B"]
+    assert "<b>Выбери вариант:</b>" in reply.text
+    assert all(option in reply.text for option in legacy["options"])
 
 
 def test_module_writing_fallback_remains_unchecked_and_pending_resumes(

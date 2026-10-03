@@ -950,20 +950,27 @@ def _simple_question_reply(
             "Доступные вопросы другой части плана: к выбранной вернёмся позже."
         )
     options = question.get("options") or []
-    if isinstance(roadmap, dict):
-        lines.append("")
-        lines.extend(
-            f"{bold(chr(65 + index) + '.')} {html_escape(str(option))}"
-            for index, option in enumerate(options)
-        )
+    # Telegram truncates long inline-button labels on narrow screens.  Keep the
+    # complete answer text in the message and use fixed A/B/C controls for every
+    # question, not only roadmap modules.
+    lines.extend(
+        [
+            "",
+            "<b>Выбери вариант:</b>",
+            *(
+                f"{bold(chr(65 + index) + '.')} {html_escape(str(option))}"
+                for index, option in enumerate(options)
+            ),
+        ]
+    )
     buttons = [
         [
             _button(
-                chr(65 + index) if isinstance(roadmap, dict) else str(option),
+                chr(65 + index),
                 f"simple:answer:{step.run.id}:{step.index}:{index}",
             )
+            for index, _option in enumerate(options)
         ]
-        for index, option in enumerate(options)
     ]
     buttons.append(
         [

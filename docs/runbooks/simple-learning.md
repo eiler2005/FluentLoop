@@ -58,7 +58,9 @@ Repeat the import and confirm it creates no additional templates or clones.
 In the owner's private chat or original forum topic:
 
 1. `/start` installs Учиться / Прогресс / Ещё. `/study` and bare `/today` show
-   one English question, choices, Не знаю, and Хватит.
+   one English question, full A/B/C choice text in the message, compact A/B/C
+   buttons, Не знаю, and Хватит. Long option labels must never be placed on
+   Telegram buttons.
 2. Answer one choice. The old question becomes short feedback with a Russian
    explanation and Подробнее; the next question appears in the same chat/topic.
 3. An old button cannot create another answer. Не знаю reveals the answer and
