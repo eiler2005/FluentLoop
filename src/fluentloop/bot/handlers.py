@@ -2236,12 +2236,18 @@ def handle_progress(
         .group_by(PracticeAttempt.exercise_type, PracticeAttempt.status)
     )
     recognition_total = recognition_correct = production_total = production_correct = 0
+    production_unchecked = 0
     for exercise_type, status, count in rows:
         if exercise_type == CHOICE:
             recognition_total += count
             if status == "correct":
                 recognition_correct += count
         else:
+            if status == "unchecked":
+                production_unchecked += count
+                continue
+            if status == "disputed":
+                continue
             production_total += count
             if status == "correct":
                 production_correct += count
@@ -2272,9 +2278,15 @@ def handle_progress(
         "📈 <b>Прогресс · 30 дней</b>\n"
         f"Узнавание: {recognition_correct}/{recognition_total} верных ответов.\n"
         f"Письменная практика: {production_correct}/{production_total} верных; "
-        "считается отдельно.\n\n"
+        "считается отдельно.\n"
+        + (
+            f"Без оценки: {production_unchecked}; в точность письма не включены.\n"
+            if production_unchecked
+            else ""
+        )
+        + "\n"
         "Узнавание проверяет, что ты распознаёшь; письмо — что умеешь использовать.\n\n"
-        f"<b>Темы · весь период · B2 → B2+ → C1 intro</b>\n"
+        "<b>Темы · весь период · B2 → B2+ → C1 intro</b>\n"
         + "\n".join(topic_lines)
         + "\n\nЭто ориентиры по упражнениям, а не подтверждение уровня CEFR. "
         "Следующий шаг: /plan.",

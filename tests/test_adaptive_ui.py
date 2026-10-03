@@ -298,3 +298,38 @@ def test_tagged_empty_adaptive_plan_keeps_safe_topic_and_blocks_generic_start(
     assert "B2 → C1 intro" in details.text
     assert "/study" in handle_lesson(db_session, user, f"start {plan.id}").text
     assert db_session.scalar(select(PracticeSession)) is None
+
+
+def test_unchecked_writing_does_not_reduce_progress_accuracy(db_session, settings):
+    from datetime import date
+
+    from fluentloop.db.models import PracticeAttempt
+    from fluentloop.simple_learning import PRODUCTION
+
+    user = ensure_user(db_session, 123456789, settings)
+    set_learning_mode(db_session, user, "simple")
+    run = PracticeSession(
+        user_id=user.id,
+        target_date_local=date.today(),
+        status="completed",
+        exercises=[],
+    )
+    db_session.add(run)
+    db_session.flush()
+    for index, status in enumerate(("correct", "unchecked", "disputed")):
+        db_session.add(
+            PracticeAttempt(
+                practice_session_id=run.id,
+                exercise_index=index,
+                exercise_type=PRODUCTION,
+                target_learning_item_ids=[],
+                prompt="Write independently.",
+                user_answer="We had completed testing before the audit began.",
+                status=status,
+                feedback={},
+            )
+        )
+    db_session.flush()
+    reply = handle_progress(db_session, user)
+    assert "Письменная практика: 1/1 верных" in reply.text
+    assert "Без оценки: 1" in reply.text

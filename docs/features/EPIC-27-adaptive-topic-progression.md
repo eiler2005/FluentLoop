@@ -34,7 +34,7 @@ written use, and open introductory C1 after complete strong B2 coverage.
 
 ## Validation
 
-On 2026-10-03, the full suite passed: 481 tests, with eight existing Alembic
+On 2026-10-03, the full suite passed: 482 tests, with eight existing Alembic
 deprecation warnings. Ruff, application construction, both bank dry runs and
 diff checks passed. The new bank contains 270 questions, 180 practice and 90
 reserved transfer, with thirty topic-stage plans. Independent semantic review
@@ -54,3 +54,16 @@ learner history.
 Activation and rollback: [adaptive-learning runbook](../runbooks/adaptive-learning.md).
 The curriculum stage labels are editorial learning targets, not validated CEFR
 certification.
+
+## Owner deployment
+
+Initial release `d615ef6` passed [CI](https://github.com/eiler2005/FluentLoop/actions/runs/37113929041)
+and was deployed on 2026-10-03 after a consistent backup with the old runtime
+stopped before import. The pilot has ten new plans and 270 adaptive questions,
+with the 86 legacy questions retained; no other profile changed mode. Telegram
+connected without startup errors. A live-database rollback smoke verified
+start/resume, answer, duplicate rejection, stop, topic progress and plan without
+changing attempt counts. Reapplying the importer created zero items/plans.
+Introductory C1 remains locked until the pilot supplies the required evidence.
+The follow-up progress check also excludes unchecked and disputed writing from
+accuracy and displays unevaluated writing separately.
