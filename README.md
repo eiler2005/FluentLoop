@@ -46,17 +46,9 @@ controlled and runs in one Docker container with SQLite and a configurable AI
 provider. See [the architecture](docs/architecture.md) and
 [the historical build record](docs/build-log/).
 
-```mermaid
-flowchart LR
-    Start[Учиться / study] --> Question[One question]
-    Question --> Choice[Tap an answer]
-    Choice --> Feedback[Short explanation]
-    Feedback --> Question
-    Feedback --> Writing[Optional short writing]
-    Writing --> Question
-    Question --> Stop[Хватит: saved result]
-    Stop --> Writing
-```
+[![FluentLoop plan-driven Study loop: saved 30/70 plan chooses one readable question; answer, feedback, optional writing and session result preserve distinct learning signals](docs/assets/fluentloop-daily-study-flow.png)](docs/diagrams/daily-study-flow.html)
+
+[Open the full plan-driven Study loop](docs/diagrams/daily-study-flow.html) · [SVG source](docs/diagrams/daily-study-flow.svg)
 
 ## Start here if you want to learn
 
@@ -254,20 +246,9 @@ before you start.
 
 ## Architecture at a glance
 
-```mermaid
-flowchart TD
-    Telegram[Telegram: private chat or forum] --> Bot[Bot handlers and persistent state]
-    Bot --> Study[Simple learning stream]
-    Study --> Roadmap[Personal roadmap and module evidence]
-    Study --> Adaptive[Adaptive language topics and transfer]
-    Bot --> Lessons[Materials, shared lessons and practice]
-    Roadmap --> DB[(SQLite)]
-    Adaptive --> DB
-    Lessons --> DB
-    Study --> AI[Configured AI provider and validated feedback]
-    Lessons --> AI
-    Scheduler[APScheduler: backups and mode-aware jobs] --> DB
-```
+[![FluentLoop production architecture: Telegram reaches a small bot runtime with roadmap-based Study, content, configured AI, jobs and an isolated SQLite learner record](docs/assets/fluentloop-architecture-overview.png)](docs/diagrams/architecture-overview.html)
+
+[Open the full current architecture diagram](docs/diagrams/architecture-overview.html) · [SVG source](docs/diagrams/architecture-overview.svg)
 
 Simple profiles receive no automatic learning messages. Scheduled vocabulary,
 reminders and summaries serve advanced profiles; backups remain enabled.
@@ -401,6 +382,7 @@ FluentLoop/
 │   ├── features/           Epic files and roadmap index.
 │   ├── runbooks/           deploy, demo data, secrets, telegram workspace.
 │   ├── curriculum/         B2–C1 banks, editable roadmap and offline planner.
+│   ├── diagrams/           Standalone HTML/SVG diagrams used in this README.
 │   ├── research/           Sourced general-English and workplace coverage.
 │   ├── assets/             README banner and documentation illustrations.
 │   └── build-log/          Autonomous-build journal (frozen).
@@ -426,6 +408,7 @@ FluentLoop/
 | [`docs/learning-plans.md`](docs/learning-plans.md) | Practical first-week, 30-day, and 12-week learning plans. |
 | [`docs/curriculum/learning-programme.md`](docs/curriculum/learning-programme.md) | Russian visual guide: 70/30 programme, module sequence, learning loop and progression. |
 | [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) | Activate and edit the general/workplace plan used by Study. |
+| [`docs/diagrams/`](docs/diagrams/) | Standalone HTML/SVG views of the current plan-driven Study loop and production architecture shown above. |
 | [`docs/research/README.md`](docs/research/README.md) | Research sources, coverage and limitations for B2–introductory C1. |
 | [`docs/runbooks/roadmap-study.md`](docs/runbooks/roadmap-study.md) | Module bank, progression rules, verification and release checks. |
 | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) | Upload-ready material formats and LLM prep prompt. |

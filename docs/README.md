@@ -28,6 +28,7 @@
 | [`curriculum/workplace-planner.html`](curriculum/workplace-planner.html) | Downloadable offline visual planner: search/filter, priorities, time split, order, pauses and notes. |
 | [`curriculum/study-flow-diagram.html`](curriculum/study-flow-diagram.html) | Visual process map of the daily Study flow: learner actions, bot decisions, session completion and progress. |
 | [`curriculum/evidence-gate-diagram.html`](curriculum/evidence-gate-diagram.html) | Visual map of the independent evidence needed for module stages and introductory C1 access. |
+| [`diagrams/`](diagrams/) | Standalone branded HTML/SVG diagrams used in the root README: the current plan-driven Study loop and production architecture. |
 | [`research/README.md`](research/README.md) | Primary-source CEFR and general/workplace needs research. |
 | [`adr/0015-editable-workplace-roadmap.md`](adr/0015-editable-workplace-roadmap.md) | Portable private plans; selection decision amended by ADR-0016. |
 | [`adr/0016-roadmap-driven-study.md`](adr/0016-roadmap-driven-study.md) | Personal plan drives module selection; genuine module evidence and external reports remain distinct. |
