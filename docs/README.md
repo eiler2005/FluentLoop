@@ -26,6 +26,8 @@
 | [`curriculum/workplace-plan-guide.md`](curriculum/workplace-plan-guide.md) | Start and customise the general-English programme and workplace supplements; Telegram commands, offline editor and personal JSON. |
 | [`curriculum/workplace-roadmap.md`](curriculum/workplace-roadmap.md) | Generated 48-module map with 144 stage tasks, evidence criteria and language coverage gaps. |
 | [`curriculum/workplace-planner.html`](curriculum/workplace-planner.html) | Downloadable offline visual planner: search/filter, priorities, time split, order, pauses and notes. |
+| [`curriculum/study-flow-diagram.html`](curriculum/study-flow-diagram.html) | Visual process map of the daily Study flow: learner actions, bot decisions, session completion and progress. |
+| [`curriculum/evidence-gate-diagram.html`](curriculum/evidence-gate-diagram.html) | Visual map of the independent evidence needed for module stages and introductory C1 access. |
 | [`research/README.md`](research/README.md) | Primary-source CEFR and general/workplace needs research. |
 | [`adr/0015-editable-workplace-roadmap.md`](adr/0015-editable-workplace-roadmap.md) | Portable private plans; selection decision amended by ADR-0016. |
 | [`adr/0016-roadmap-driven-study.md`](adr/0016-roadmap-driven-study.md) | Personal plan drives module selection; genuine module evidence and external reports remain distinct. |

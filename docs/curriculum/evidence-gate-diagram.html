@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FluentLoop — доказательства роста модуля</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Noto+Serif:wght@400&display=swap" rel="stylesheet">
+    <style>
+      :root { --paper:#f7fbf4; --paper-2:#edf6e8; --ink:#20312b; --muted:#4d6558; --soft:#718577; --rule:#d2dfcd; --accent:#5aa94b; --accent-tint:rgba(90,169,75,.12); }
+      * { box-sizing: border-box; }
+      body { margin:0; background:var(--paper); color:var(--ink); font-family:Geist,Arial,sans-serif; }
+      main { max-width:1480px; margin:0 auto; padding:40px 28px 52px; }
+      .eyebrow { color:var(--accent); font:500 11px/1.2 "Geist Mono",monospace; letter-spacing:.14em; text-transform:uppercase; }
+      h1 { margin:10px 0 8px; font:400 48px/.95 "Instrument Serif","Noto Serif",serif; letter-spacing:-.03em; }
+      .lede { max-width:760px; margin:0 0 28px; color:var(--muted); font-size:16px; line-height:1.5; }
+      .figure-wrap { overflow-x:auto; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+      svg { display:block; min-width:1360px; width:100%; height:auto; }
+      .note { margin:18px 0 0; color:var(--muted); font-size:14px; line-height:1.5; }
+      .note strong { color:var(--ink); }
+      @media (max-width:640px) { main { padding:26px 16px 38px; } h1 { font-size:38px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">FluentLoop · evidence lifecycle</div>
+      <h1>Как модуль получает право на следующий уровень</h1>
+      <p class="lede">Кнопочный ответ открывает путь, но не подтверждает навык сам по себе. Одна и та же доказательная петля работает на B2 и B2+; вводный C1 добавляет общий языковой порог.</p>
+      <div class="figure-wrap">
+        <svg viewBox="0 0 1360 488" role="img" aria-labelledby="evidence-gate-title evidence-gate-desc">
+          <title id="evidence-gate-title">Доказательства роста модуля FluentLoop</title>
+          <desc id="evidence-gate-desc">Схема показывает, что правильное узнавание и два независимых письменных ответа в разные дни открывают следующий этап модуля; C1 дополнительно требует устойчивого B2+ по десяти языковым темам.</desc>
+          <defs>
+            <marker id="evidence-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4d6558"/></marker>
+            <marker id="evidence-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#5aa94b"/></marker>
+          </defs>
+          <rect width="1360" height="488" fill="#f7fbf4"/>
+          <rect x="0" y="0" width="1360" height="48" fill="#edf6e8"/>
+          <text x="24" y="30" fill="#718577" font-family="Geist Mono, monospace" font-size="10" font-weight="500" letter-spacing="1.5">ОДИН МОДУЛЬ · ПОВТОРЯЕТСЯ ДЛЯ B2 И B2+</text>
+
+          <text x="80" y="100" fill="#718577" font-family="Geist Mono, monospace" font-size="9" letter-spacing=".8">ОСНОВНАЯ ПЕТЛЯ ДОКАЗАТЕЛЬСТВ</text>
+
+          <!-- Transitions are drawn before state boxes. -->
+          <line x1="238" y1="186" x2="290" y2="186" stroke="#4d6558" stroke-width="1.2" marker-end="url(#evidence-arrow)"/>
+          <rect x="238" y="148" width="52" height="16" fill="#f7fbf4"/>
+          <text x="264" y="160" text-anchor="middle" fill="#718577" font-family="Geist Mono, monospace" font-size="8">ВЕРНО</text>
+          <line x1="438" y1="186" x2="490" y2="186" stroke="#4d6558" stroke-width="1.2" marker-end="url(#evidence-arrow)"/>
+          <rect x="434" y="148" width="60" height="16" fill="#f7fbf4"/>
+          <text x="464" y="160" text-anchor="middle" fill="#718577" font-family="Geist Mono, monospace" font-size="8">ПРОЙДЕНО</text>
+          <line x1="638" y1="186" x2="690" y2="186" stroke="#4d6558" stroke-width="1.2" marker-end="url(#evidence-arrow)"/>
+          <rect x="642" y="148" width="44" height="16" fill="#f7fbf4"/>
+          <text x="664" y="160" text-anchor="middle" fill="#718577" font-family="Geist Mono, monospace" font-size="8">≥24 Ч</text>
+          <line x1="838" y1="186" x2="890" y2="186" stroke="#5aa94b" stroke-width="1.4" marker-end="url(#evidence-arrow-accent)"/>
+          <rect x="834" y="148" width="60" height="16" fill="#f7fbf4"/>
+          <text x="864" y="160" text-anchor="middle" fill="#5aa94b" font-family="Geist Mono, monospace" font-size="8">ПРОЙДЕНО</text>
+          <line x1="1038" y1="186" x2="1090" y2="186" stroke="#4d6558" stroke-width="1.2" marker-end="url(#evidence-arrow)"/>
+          <rect x="1032" y="148" width="64" height="16" fill="#f7fbf4"/>
+          <text x="1064" y="160" text-anchor="middle" fill="#718577" font-family="Geist Mono, monospace" font-size="8">ОТКРЫТЬ</text>
+
+          <path d="M 1164 234 V 296 Q 1164 304 1172 304 H 1224" fill="none" stroke="#4d6558" stroke-width="1.2" marker-end="url(#evidence-arrow)"/>
+          <rect x="1176" y="260" width="68" height="16" fill="#f7fbf4"/>
+          <text x="1210" y="272" text-anchor="middle" fill="#718577" font-family="Geist Mono, monospace" font-size="8">B2+ ГОТОВ</text>
+          <path d="M 776 384 H 1224" fill="none" stroke="#4d6558" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#evidence-arrow)"/>
+          <rect x="970" y="354" width="72" height="16" fill="#f7fbf4"/>
+          <text x="1006" y="366" text-anchor="middle" fill="#718577" font-family="Geist Mono, monospace" font-size="8">ВСЕ 10 ТЕМ</text>
+
+          <circle cx="76" cy="186" r="6" fill="#20312b"/>
+          <line x1="82" y1="186" x2="90" y2="186" stroke="#4d6558" stroke-width="1.2" marker-end="url(#evidence-arrow)"/>
+
+          <g>
+            <rect x="90" y="138" width="148" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+            <text x="106" y="164" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Текущий этап</text>
+            <text x="106" y="185" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">B2 или B2+</text>
+            <text x="106" y="207" fill="#718577" font-family="Geist, sans-serif" font-size="10">вопрос с вариантами</text>
+          </g>
+          <g>
+            <rect x="290" y="138" width="148" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+            <text x="306" y="164" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Узнавание</text>
+            <text x="306" y="185" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">правильный ответ</text>
+            <text x="306" y="207" fill="#718577" font-family="Geist, sans-serif" font-size="10">не в режиме «знакомое»</text>
+          </g>
+          <g>
+            <rect x="490" y="138" width="148" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+            <text x="506" y="164" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Письмо A</text>
+            <text x="506" y="185" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">своя ситуация</text>
+            <text x="506" y="207" fill="#718577" font-family="Geist, sans-serif" font-size="10">независимо проверена</text>
+          </g>
+          <g>
+            <rect x="690" y="138" width="148" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+            <text x="706" y="164" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Интервал</text>
+            <text x="706" y="185" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">другая местная дата</text>
+            <text x="706" y="207" fill="#718577" font-family="Geist, sans-serif" font-size="10">минимум 24 часа</text>
+          </g>
+          <g>
+            <rect x="890" y="138" width="148" height="96" rx="8" fill="#eef8eb" stroke="#5aa94b" stroke-width="1.4"/>
+            <text x="906" y="164" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Письмо B</text>
+            <text x="906" y="185" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">другая формулировка</text>
+            <text x="906" y="207" fill="#4d6558" font-family="Geist, sans-serif" font-size="10">не копия ответа A</text>
+          </g>
+          <g>
+            <rect x="1090" y="138" width="148" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+            <text x="1106" y="164" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Следующий этап</text>
+            <text x="1106" y="185" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">модуль переходит</text>
+            <text x="1106" y="207" fill="#718577" font-family="Geist, sans-serif" font-size="10">B2 → B2+ → C1</text>
+          </g>
+
+          <rect x="560" y="320" width="216" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+          <text x="580" y="348" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Общий языковой порог</text>
+          <text x="580" y="371" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">10 адаптивных тем</text>
+          <text x="580" y="393" fill="#718577" font-family="Geist, sans-serif" font-size="10">должны быть устойчивы на B2+</text>
+          <g>
+            <rect x="1224" y="320" width="112" height="96" rx="8" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
+            <text x="1240" y="348" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">C1 intro</text>
+            <text x="1240" y="371" fill="#4d6558" font-family="Geist, sans-serif" font-size="11">новые задания</text>
+            <text x="1240" y="393" fill="#718577" font-family="Geist, sans-serif" font-size="10">сложнее контекст</text>
+          </g>
+          <circle cx="1352" cy="368" r="8" fill="none" stroke="#20312b" stroke-width="1.2"/>
+          <circle cx="1352" cy="368" r="5" fill="#20312b"/>
+
+          <text x="80" y="460" fill="#4d6558" font-family="Geist, sans-serif" font-size="12">Самоотметка о внешней практике, повторный клик и непроверенный ответ не заменяют эти условия.</text>
+        </svg>
+      </div>
+      <p class="note"><strong>Граница схемы:</strong> переход по модулю — ориентир доказательств внутри FluentLoop, а не подтверждение уровня CEFR или оценка речи и аудирования.</p>
+    </main>
+  </body>
+</html>
