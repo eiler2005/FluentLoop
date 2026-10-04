@@ -70,6 +70,34 @@ If you are here as a learner, not as a developer, read these first:
 | Prepare your own lesson notes for `/upload` | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) |
 | See lesson types and public catalogs | [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md) |
 
+<details>
+<summary>Preview the vocabulary bank and personal planner</summary>
+
+**Words and expressions.** Search the public bank by expression, context or
+task stage. Each sense includes its meaning, example, grammar frame, register,
+plain alternative and writing tasks.
+
+![English-language preview of the offline lexical bank, showing push back on, its meaning, grammar frame and original writing tasks](docs/assets/lexical-bank-preview.png)
+
+[Read the bank on GitHub](docs/curriculum/lexical-bank.md) ·
+[Download the searchable HTML](https://github.com/eiler2005/FluentLoop/raw/refs/heads/main/docs/curriculum/lexical-bank.html)
+
+**Personal planner.** Edit your weekly workload and the general/work/lexical
+allocation, then choose module priorities, focus and pauses. Export JSON and
+follow the [plan guide](docs/curriculum/workplace-plan-guide.md) to import it
+into Telegram; edits in the offline page stay local until imported.
+
+![English-language preview of the offline planner, showing the 30/40/30 allocation and a suggested 45/60/45-minute weekly workload](docs/assets/workplace-planner-preview.png)
+
+[Download the planner HTML](https://github.com/eiler2005/FluentLoop/raw/refs/heads/main/docs/curriculum/workplace-planner.html) ·
+[Read the plan guide](docs/curriculum/workplace-plan-guide.md)
+
+These static previews use English labels for this README. The downloadable
+tools currently use a Russian interface. Save each HTML file and open it in a
+browser to use its controls.
+
+</details>
+
 For an admitted profile in simple mode, start with:
 
 ```text
