@@ -1,7 +1,8 @@
 # Architecture
 
 > **Status:** v0.3 — MVP foundation (EPIC-01..14), learning-engine roadmap
-> (EPIC-16..21), and EPIC-22..29 extensions are implemented. ADRs 0002-0016 are
+> (EPIC-16..21), and EPIC-22..29 extensions are implemented; EPIC-30 lexical
+> integration is undergoing release verification. ADRs 0002-0017 are
 > Accepted (0009 reserved). Schema specifics
 > for individual epics live in those epic files.
 
@@ -36,13 +37,19 @@ profiles with an explicitly saved, valid personal plan.
 Markdown map and standalone HTML editor from the packaged public seed. The
 editor's browser storage is independent of Telegram; applying an exported JSON
 requires the explicit owner CLI. `roadmap_study.py` selects from a separate
-144-question module pack, balancing general/work answered practice units at
-30/70 general/work for new plans and interleaving existing language practice in work slots.
+144-question module pack and the reviewed lexical bank. ADR-0017 allocates normal
+answered questions to three disjoint buckets: 30% general, 40% work, 30% lexical
+for new plans. Existing language practice is interleaved in work slots.
+Lexical snapshots keep their truthful contextual strand but count only in the
+lexical bucket; writing and familiar practice do not count toward allocation.
 Order, focus and pauses affect the next selection; the pending immutable
 snapshot resumes unchanged. Weekly minutes are advisory, not measured time.
 
 Existing saved plans retain their allocation, order, notes and pauses. The owner
 may explicitly switch to the new recommendation; defaults are not a bulk migration.
+Version-1 plans without `lexical_share` normalise to zero. Plan validation accepts
+20–90 general and 0–60 lexical, with their sum at most 90; work is the remainder.
+Allocation edits begin a new cohort and retain previous evidence.
 
 Module snapshots and attempt feedback contain module/stage/variant evidence in
 existing sessions; no schema or active-target migration is needed. Optional
@@ -54,6 +61,31 @@ self-reports cannot supply writing evidence. External reports have a separate
 modality and idempotent per-user claim. Module issue reports quarantine only
 that user's question; the existing automatic variant maintainer does not
 rewrite the public module pack. See [the runbook](runbooks/roadmap-study.md).
+
+`lexical_learning.py` validates and selects packaged sense-level entries from
+`seeds/workplace_lexicon_v1.json`. Each entry carries stable sense/question IDs,
+Russian and English meanings, original example, grammar frame, register, plain
+alternative and source attribution. Two recognition variants and two production
+situations distinguish contexts. New and due-review phases share lexical slots
+and alternate when both are eligible. Active module references, plan focus,
+order, pauses and the existing C1 gate bound availability; explicit fallback
+annotations explain when the requested pool is unavailable.
+
+Lexical attempts reuse `PracticeSession`/`PracticeAttempt` and BONUS capture;
+no active LearningItems or schema changes are needed. Successful sense retrieval
+waits 24 hours and a different local date; failure waits five other normal
+answers. Cooldowns apply across sibling variants. Two different successful
+recognition variants with that spacing establish recognized status. Two different
+genuinely checked independent writings with the same spacing establish a local
+independent-use milestone. Copied examples, choices, prior answers, model rewrites,
+unchecked fallback and familiar practice do not count. Lexical milestones do not
+advance module or adaptive mastery. Per-user sense quarantine preserves the public
+bank and removes that sense from future selection and credited milestones.
+The production prompt supplies the target expression: independent use means
+independently authored guided application, not uncued spontaneous retrieval.
+Stage labels express editorial curriculum placement rather than calibrated CEFR.
+See [ADR-0017](adr/0017-plan-driven-lexical-learning.md) and
+[the lexical runbook](runbooks/lexical-learning.md).
 
 Answer-check verdicts are validated as `correct`, `partial` or `incorrect`.
 Compatibility aliases `pass`/`passed` and `fail`/`failed` normalize to those

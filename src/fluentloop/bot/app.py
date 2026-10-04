@@ -269,11 +269,7 @@ def _active_simple_bonus_for_state(session, user: User, state):  # type: ignore[
 
 
 def _keyboard_action_clears_capture(action: str, state) -> bool:  # type: ignore[no-untyped-def]
-    return (
-        action != "add"
-        and state is not None
-        and state.name != "simple_bonus"
-    )
+    return action != "add" and state is not None and state.name != "simple_bonus"
 
 
 def _telethon_buttons(reply: BotReply):  # type: ignore[no-untyped-def]
@@ -440,9 +436,7 @@ def _material_upload_reply(reply: BotReply, event, settings: Settings) -> BotRep
 
 
 def _start_upload_capture(session, user_id: int, event, settings: Settings) -> BotReply:  # type: ignore[no-untyped-def]
-    StateStore(session).set(
-        event.chat_id, user_id, "upload", {"type": "other"}
-    )
+    StateStore(session).set(event.chat_id, user_id, "upload", {"type": "other"})
     return _material_upload_reply(handle_upload_start(), event, settings)
 
 
@@ -498,9 +492,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             parts = event.raw_text.split(maxsplit=2)
             command = parts[0]
             quiz_followup_id: int | None = None
-            if not _simple_event_authorized(
-                sender_id, user, settings, action=command
-            ):
+            if not _simple_event_authorized(sender_id, user, settings, action=command):
                 await _reject_or_ignore(event, settings)
                 return
             if command == "/setup":
@@ -1016,9 +1008,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
             user = ensure_user(session, telegram_user_id, settings)
             parts = raw_data.split(":", 2)
             simple_parts = raw_data.split(":")
-            if not _simple_event_authorized(
-                sender_id, user, settings, action=raw_data
-            ):
+            if not _simple_event_authorized(sender_id, user, settings, action=raw_data):
                 await answer_callback(event, "This is a personal FluentLoop bot.")
                 return
             if raw_data.startswith("simple:"):
@@ -1149,7 +1139,8 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         )
                     await answer_callback(event, "Внешняя практика")
                 elif (len(simple_parts) == 3 and simple_parts[1] == "bonus") or (
-                    len(simple_parts) == 4 and simple_parts[1] == "module_write"
+                    len(simple_parts) == 4
+                    and simple_parts[1] in {"module_write", "lexical_write"}
                 ):
                     try:
                         parent_run_id = int(simple_parts[2])
@@ -1754,9 +1745,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                 return
             state_store = StateStore(session)
             state = state_store.get(event.chat_id, telegram_user_id)
-            if not _simple_event_authorized(
-                sender_id, user, settings, state=state
-            ):
+            if not _simple_event_authorized(sender_id, user, settings, state=state):
                 await _reject_or_ignore(event, settings)
                 return
 
@@ -1810,9 +1799,7 @@ async def run_bot(settings: Settings, session_factory: sessionmaker) -> None:
                         ),
                         message_thread_id=practice_target.message_thread_id,
                     )
-                    current_bonus = _active_simple_bonus_for_state(
-                        session, user, state
-                    )
+                    current_bonus = _active_simple_bonus_for_state(session, user, state)
                     if current_bonus is None:
                         state_store.clear(event.chat_id, telegram_user_id)
             elif state is not None and state.name == ADD_WORDS_STATE:

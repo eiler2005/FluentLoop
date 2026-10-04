@@ -24,7 +24,8 @@ USAGE = (
     "/roadmap activate — подключить план к «Учиться»\n"
     "/roadmap track balanced|client_facing|big_tech\n"
     "/roadmap time 150 — минут в неделю (30–1200)\n"
-    "/roadmap general 30 — 30% общего / 70% работы (диапазон 20–90%)\n"
+    "/roadmap general 30 — 30% общего (20–90%)\n"
+    "/roadmap lexical 30 — 30% слов и выражений (0–60%); работа — остаток\n"
     "/roadmap list [general|work]\n"
     "/roadmap module ID [b2|b2_plus|c1_intro]\n"
     "/roadmap focus ID · /roadmap pause ID · /roadmap resume ID"
@@ -113,14 +114,26 @@ def handle_roadmap(
             if len(parts) != 1:
                 raise ValueError("unexpected value")
             plan = update_plan(session, user, "time", plan["weekly_minutes"], pack)
-        elif action in {"track", "time", "general", "focus", "pause", "resume"}:
+        elif action in {
+            "track",
+            "time",
+            "general",
+            "lexical",
+            "focus",
+            "pause",
+            "resume",
+        }:
             if len(parts) != 2:
                 raise ValueError("missing value")
-            value = int(parts[1]) if action in {"time", "general"} else parts[1]
+            value = (
+                int(parts[1]) if action in {"time", "general", "lexical"} else parts[1]
+            )
             plan = update_plan(
                 session,
                 user,
-                "general_share" if action == "general" else action,
+                {"general": "general_share", "lexical": "lexical_share"}.get(
+                    action, action
+                ),
                 value,
                 pack,
             )
@@ -258,6 +271,12 @@ def handle_roadmap(
             f"Общий английский: {plan['general_share']}%.",
             f"Основа: {outline['general_minutes']} мин — {general['title_ru']}",
             f"Дополнения: {outline['work_minutes']} мин — {work['title_ru']}",
+            f"Слова и выражения: {plan['lexical_share']}% вопросов "
+            f"(ориентир {outline['lexical_minutes']} мин).",
+            "Лексическая доля включает новые выражения и повторение. "
+            f"Распределение: {plan['general_share']}% общих / "
+            f"{100 - plan['general_share'] - plan['lexical_share']}% рабочих / "
+            f"{plan['lexical_share']}% лексических вопросов.",
             "",
             "Общий английский остаётся основой; работа с клиентами и IT дополняют его.",
             "Чтение, письмо, аудирование, разговор и медиация входят в план.",
@@ -304,6 +323,7 @@ def handle_roadmap(
             ("Рабочие модули", "simple:roadmap:list:work"),
         ],
         [("Текущий прогресс", "simple:plan")],
+        [("Слова и выражения · 30%", "simple:roadmap:lexical:30")],
         [("Учиться", "simple:study")]
         if enabled(user)
         else [("Подключить план", "simple:roadmap:activate")],

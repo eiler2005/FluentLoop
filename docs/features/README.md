@@ -6,7 +6,9 @@ through EPIC-21 extend the learning engine; EPIC-22 adds the breakthrough
 learning loop; EPIC-23 adds the shared seed lesson library, lesson-type layer,
 and generated public catalog; EPIC-24 adds the measurable learning-outcomes
 layer; EPIC-25 adds the daily vocabulary loop; EPIC-26 adds the manual simple
-phrase/grammar stream and reviewed reference bank.
+phrase/grammar stream and reviewed reference bank. EPIC-27..29 add adaptive
+evidence and the editable programme that drives Study; EPIC-30 adds new lexical
+senses and spaced retrieval as a separate allocation bucket.
 
 ## Epic index
 
@@ -41,6 +43,7 @@ phrase/grammar stream and reviewed reference bank.
 | 27 | [adaptive-topic-progression](EPIC-27-adaptive-topic-progression.md) | Done | Per-topic B2/C1 roadmap, delayed fresh transfer, genuine writing evidence, 270-question curriculum and bounded bank improvement. |
 | 28 | [workplace-roadmap](EPIC-28-workplace-roadmap.md) | Done | General-English foundation with client/business/Big Tech supplements, sourced research, editable offline and Telegram plan. |
 | 29 | [roadmap-driven-study](EPIC-29-roadmap-driven-study.md) | Done | Actual module practice under Учиться, weighted general/work selection, independent written evidence and external self-reports. |
+| 30 | [plan-driven-lexical-learning](EPIC-30-plan-driven-lexical-learning.md) | Done | Three-part general/work/lexical allocation, 240 reviewed senses, new/review balance, spaced recognition and guided independent use. |
 
 ## Dependency graph
 

@@ -7,6 +7,19 @@ All notable changes to FluentLoop are recorded here. Format follows
 ## [Unreleased]
 
 ### Added
+- Plan-driven words and expressions inside **Учиться /study**, with a reviewed
+  sense-level bank, bilingual meanings, original examples, grammar frames,
+  register and plain alternatives. New slots and due reviews share the lexical
+  allocation; spaced recognition and genuine independent writing remain separate.
+  Writing supplies the target expression and measures independently authored
+  guided application; it does not establish uncued spontaneous retrieval.
+- Three disjoint Study buckets: **30% general / 40% workplace / 30% lexical**
+  for new plans, editable with `/roadmap general` and `/roadmap lexical` or the
+  offline planner. Legacy plans missing `lexical_share` normalise to zero and
+  retain their preferences. No schema migration, new active LearningItems or
+  automatic messages; pending snapshots and the existing C1 gate are preserved.
+- Lexical research, editable programme, readable bank and maintenance runbook;
+  personal issue reports quarantine a sense without changing the public bank.
 - Visual learning programme with GitHub diagrams, a flexible 12-week client and
   technology pathway, an editable public plan and a source-backed comparison
   with established business/general-English programmes.
@@ -15,11 +28,11 @@ All notable changes to FluentLoop are recorded here. Format follows
   The roadmap bank now contains 144 questions and 300 writing situations.
 - Thirty-six revised public case briefs across nine workplace and three general
   modules: supplied fictional facts, audience, output, constraints and criteria.
-- New-plan recommendation: 70% work and supporting language practice, 30% general
-  English, client-facing track. Existing saved plans retain their preferences;
+- New-plan recommendation: 30% general English, 40% work and supporting language
+  practice, 30% lexical learning, client-facing track. Existing saved plans retain their preferences;
   changing the owner's plan is an explicit release action.
 - Personal roadmap execution inside **Учиться /study**: 144 contextual questions
-  and 288 optional writing situations across all 48 general/workplace modules.
+  and 300 optional writing situations across all 48 general/workplace modules.
   General/work allocation, focus, order and pauses drive subsequent selection;
   pending questions resume intact. Module progression requires genuine independent
   spaced writing and preserves the ten-topic C1 gate. External activity reports

@@ -3,6 +3,7 @@
   "track": "client_facing",
   "weekly_minutes": 150,
   "general_share": 30,
+  "lexical_share": 30,
   "order": [
     "identity_relationships",
     "life_stories",

@@ -45,7 +45,9 @@ def _actions(reply):
 def learner(db_session, settings):
     user = ensure_user(db_session, 123456789, settings)
     set_learning_mode(db_session, user, "simple")
-    save_plan(db_session, user, default_plan())
+    legacy = default_plan()
+    legacy["lexical_share"] = 0
+    save_plan(db_session, user, legacy)
     return user
 
 

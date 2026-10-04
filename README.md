@@ -16,6 +16,7 @@ and technology situations as supplements.
 [Программа и схемы обучения](docs/curriculum/learning-programme.md) ·
 [Start learning](#start-here-if-you-want-to-learn) ·
 [Personal plan](docs/curriculum/workplace-plan-guide.md) ·
+[Words and expressions](docs/curriculum/lexical-programme.md) ·
 [Visual planner](docs/curriculum/workplace-planner.html) ·
 [Research](docs/research/README.md) ·
 [Self-hosting](#quick-start) ·
@@ -29,8 +30,11 @@ Simple mode runs on request and resumes an unfinished question after a restart.
 
 A saved personal plan connects this stream to **48 modules: 16 general-English
 and 32 workplace supplements**, with **144 contextual questions and 300 writing
-situations** across B2, B2+ and introductory C1. The new recommended balance is 70%
-client, business, technology and supporting language practice, and 30% general English.
+situations** across B2, B2+ and introductory C1. New plans allocate **30% general
+English, 40% workplace and supporting language practice, and 30% lexical learning**.
+These are three separate buckets of answered questions. Lexical slots teach new
+words and expressions and revisit due senses; their work or life context does
+not count them a second time in another bucket.
 Existing saved plans keep their settings until explicitly edited. Edit priorities, order and
 pauses in Telegram or the offline planner; future questions follow your plan.
 
@@ -46,7 +50,7 @@ controlled and runs in one Docker container with SQLite and a configurable AI
 provider. See [the architecture](docs/architecture.md) and
 [the historical build record](docs/build-log/).
 
-[![FluentLoop plan-driven Study loop: saved 30/70 plan chooses one readable question; answer, feedback, optional writing and session result preserve distinct learning signals](docs/assets/fluentloop-daily-study-flow.png)](docs/diagrams/daily-study-flow.html)
+[![FluentLoop plan-driven Study loop: saved 30/40/30 plan chooses one readable question; answer, feedback, optional writing and session result preserve distinct learning signals](docs/assets/fluentloop-daily-study-flow.png)](docs/diagrams/daily-study-flow.html)
 
 [Open the full plan-driven Study loop](docs/diagrams/daily-study-flow.html) · [SVG source](docs/diagrams/daily-study-flow.svg)
 
@@ -60,8 +64,8 @@ If you are here as a learner, not as a developer, read these first:
 | Understand what FluentLoop does | [`docs/user-guide.md`](docs/user-guide.md) |
 | Understand the learning methodology | [`docs/learning-methodology.md`](docs/learning-methodology.md) |
 | Start this week without thinking too much | [`docs/learning-plans.md`](docs/learning-plans.md) |
-| Set up the plan that drives Учиться | [`docs/curriculum/learning-programme.md`](docs/curriculum/learning-programme.md) | Russian visual guide: 70/30 programme, module sequence, learning loop and progression. |
-| [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) |
+| Set up the plan that drives Учиться | [Personal plan guide](docs/curriculum/workplace-plan-guide.md) |
+| Learn new words and expressions | [Lexical programme](docs/curriculum/lexical-programme.md) and [readable bank](docs/curriculum/lexical-bank.md) |
 | Edit priorities, order and notes visually | [Download and open the offline planner](docs/curriculum/workplace-planner.html) |
 | Prepare your own lesson notes for `/upload` | [`docs/material-upload-guide.md`](docs/material-upload-guide.md) |
 | See lesson types and public catalogs | [`docs/lesson-catalog/index.md`](docs/lesson-catalog/index.md) |
@@ -73,6 +77,8 @@ For an admitted profile in simple mode, start with:
 tap answers until Хватит
 /progress
 /roadmap
+/roadmap general 30
+/roadmap lexical 30
 ```
 
 To connect a plan for the first time, use `/roadmap activate` or the
@@ -112,7 +118,7 @@ Use `/roadmap` for the plan and common edits, or download and open the
 topics, pause them, add notes and export a personal JSON plan. With a saved plan,
 **Учиться /study follows that plan**: 144 additional contextual questions and
 300 short writing situations cover all 48 modules and three stages. The default
-30/70 general/work split balances answered questions; weekly minutes remain a suggested
+30/40/30 general/work/lexical split balances answered questions; weekly minutes remain a suggested
 workload. Focus, order and pauses affect subsequent selection, while an already
 displayed question resumes unchanged. Two independent, genuinely checked written
 applications in distinct situations, on different local dates at least 24 hours
@@ -123,6 +129,25 @@ the existing ten-topic language gate. See the
 Six work modules include two additional C1 writing situations each: negotiation,
 escalation, stakeholder updates, strategy, architecture and incident handover.
 The [research reports](docs/research/README.md) explain sources and coverage gaps.
+
+The reviewed [lexical bank](docs/curriculum/lexical-bank.md) adds **240 senses
+across 16 functions: 180 workplace and 60 general**, with 480 recognition
+variants and 480 writing tasks. Twenty entries carry an introductory-C1 task
+label. These labels describe editorial curriculum placement, not calibrated
+CEFR levels for expressions. The bank covers words, collocations, phrasal verbs
+and frames inside Study. Feedback supplies
+Russian and English meanings, an example, grammar frame, register and a plain
+alternative. Two different successful recognition variants on different local
+dates at least 24 hours apart establish spaced recognition. Two genuinely checked
+independent writing situations with the same spacing establish a separate local
+use milestone. Writing supplies the target expression: independent means the
+learner authors the answer, rather than demonstrating uncued spontaneous recall.
+Copies, model rewrites, unchecked fallback and familiar practice
+do not supply that evidence. Lexical practice does not unlock module mastery or C1.
+Use `/roadmap lexical 30` to enable it in an existing plan; old plans missing
+`lexical_share` retain zero. Edit the public bank in
+[`workplace_lexicon_v1.json`](src/fluentloop/seeds/workplace_lexicon_v1.json),
+following the [validation and release runbook](docs/runbooks/lexical-learning.md).
 
 ### Advanced lessons and vocabulary
 
@@ -222,7 +247,7 @@ For the full methodology map, see
 Choose the practice surface that fits your session:
 
 1. **Personal roadmap and adaptive stream** via `/study`: general and workplace
-   module questions, optional writing, phrases and grammar. The separate language
+   module questions, lexical new/review slots, optional writing, phrases and grammar. The separate language
    banks contain 270 adaptive B2–C1 questions (including 90 reserved transfer
    checks) and 86 reviewed lang-lessons questions. See
    [the plan guide](docs/curriculum/workplace-plan-guide.md).
@@ -255,7 +280,7 @@ reminders and summaries serve advanced profiles; backups remain enabled.
 Bounded adaptive-bank maintenance is separately opt-in.
 
 Full architecture document: [`docs/architecture.md`](docs/architecture.md).
-Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0016 Accepted;
+Decisions behind the choices: [`docs/adr/`](docs/adr/) (0002-0017 Accepted;
 0009 reserved).
 Learner-facing methodology and daily workflow: [`docs/user-guide.md`](docs/user-guide.md).
 Methodology map: [`docs/learning-methodology.md`](docs/learning-methodology.md).
@@ -332,6 +357,7 @@ Bot          Session done — 15/15 in 14 min.
 | **Learning outcomes loop** — EPIC-24 (`/baseline`, `/outcomes`, held-out retention, productive chunks, writing/L1 metrics, mistake extinction, Article probes) | ✅ Done |
 | **Simple learning pilot** — EPIC-26 (`/study`, `/progress`, manual phrase/grammar stream, optional writing, reviewed lang-lessons pack) | Implemented; per-profile opt-in |
 | **Adaptive learning and personal programme** — EPIC-27..29 (B2–C1 language evidence, editable general/workplace plan, module questions and independent writing inside `/study`) | Implemented; saved plan activates module selection |
+| **Plan-driven lexical learning** — EPIC-30 (three-part allocation, 240 senses, spaced recognition and independently authored guided writing) | Done; 771-test local gate and release checks documented |
 | **EPIC-15** Web UI | ⏸ Deferred (re-evaluate after 4–6 weeks) |
 
 Full per-epic table with dependency graph:
@@ -406,8 +432,11 @@ FluentLoop/
 | [`docs/features/README.md`](docs/features/README.md) | Epic index with dependency graph and statuses. |
 | [`docs/user-guide.md`](docs/user-guide.md) | Learner-facing methodology, process map, daily workflow, and modes. |
 | [`docs/learning-plans.md`](docs/learning-plans.md) | Practical first-week, 30-day, and 12-week learning plans. |
-| [`docs/curriculum/learning-programme.md`](docs/curriculum/learning-programme.md) | Russian visual guide: 70/30 programme, module sequence, learning loop and progression. |
+| [`docs/curriculum/learning-programme.md`](docs/curriculum/learning-programme.md) | Russian visual guide: 30/40/30 programme, module sequence, learning loop and progression. |
 | [`docs/curriculum/workplace-plan-guide.md`](docs/curriculum/workplace-plan-guide.md) | Activate and edit the general/workplace plan used by Study. |
+| [`docs/curriculum/lexical-programme.md`](docs/curriculum/lexical-programme.md) | New words and expressions, retrieval, independent use and an editable learning route. |
+| [`docs/curriculum/lexical-bank.md`](docs/curriculum/lexical-bank.md) | Complete readable sense bank; [editable JSON source](src/fluentloop/seeds/workplace_lexicon_v1.json). |
+| [`docs/runbooks/lexical-learning.md`](docs/runbooks/lexical-learning.md) | Enable lexical slots, validate content, smoke and roll back safely. |
 | [`docs/diagrams/`](docs/diagrams/) | Standalone HTML/SVG views of the current plan-driven Study loop and production architecture shown above. |
 | [`docs/research/README.md`](docs/research/README.md) | Research sources, coverage and limitations for B2–introductory C1. |
 | [`docs/runbooks/roadmap-study.md`](docs/runbooks/roadmap-study.md) | Module bank, progression rules, verification and release checks. |

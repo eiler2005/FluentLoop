@@ -273,23 +273,74 @@ def choose_question(
     bank_question: dict | None,
     recent: set[str],
 ) -> dict | None:
-    """Balance answered choice units; retain legacy eligibility without relabelling."""
+    """Balance disjoint general/work/lexical answered units within a plan cohort."""
+    from fluentloop.lexical_learning import candidate_questions
+
     catalog_data = load_curriculum()
     plan = get_plan(user, catalog_data)
-    history = [a for a in attempts(session, user) if a.exercise_type == "simple_choice"]
+    history = [
+        a
+        for a in attempts(session, user)
+        if a.exercise_type == "simple_choice" and _utc(a.created_at) <= now
+    ]
     units = [
         a
         for a in history
         if (a.feedback or {}).get("strand") in {"general", "work"}
-        and a.feedback.get("selection_mode") != "familiar"
+        and a.status in {"correct", "incorrect"}
+        and a.feedback.get("selection_mode") == "normal"
         and a.feedback.get("allocation_share") == plan["general_share"]
+        and a.feedback.get("lexical_share", 0) == plan["lexical_share"]
     ]
-    general = sum(a.feedback["strand"] == "general" for a in units)
-    desired = (
-        "general"
-        if general < (len(units) + 1) * plan["general_share"] / 100
-        else "work"
+    shares = {
+        "general": plan["general_share"],
+        "lexical": plan["lexical_share"],
+        "work": 100 - plan["general_share"] - plan["lexical_share"],
+    }
+    counts = {
+        bucket: sum(
+            a.feedback.get("allocation_bucket", a.feedback["strand"]) == bucket
+            for a in units
+        )
+        for bucket in shares
+    }
+    buckets = sorted(
+        shares,
+        key=lambda bucket: (len(units) + 1) * shares[bucket] / 100 - counts[bucket],
+        reverse=True,
     )
+    if not plan["lexical_share"]:
+        # Preserve the existing two-bucket sequence for legacy allocations.
+        desired = (
+            "general"
+            if counts["general"] < (len(units) + 1) * plan["general_share"] / 100
+            else "work"
+        )
+        buckets = [desired, "work" if desired == "general" else "general"]
+    desired = buckets[0]
+    if repeat_familiar:
+        # Familiarity rotates answered pools independently and earns no quota credit.
+        last_familiar = next(
+            (
+                a
+                for a in reversed(history)
+                if a.feedback.get("selection_mode") == "familiar"
+                and a.feedback.get("allocation_share") == plan["general_share"]
+                and a.feedback.get("lexical_share", 0) == plan["lexical_share"]
+            ),
+            None,
+        )
+        previous = (
+            last_familiar.feedback.get(
+                "allocation_bucket", last_familiar.feedback.get("strand")
+            )
+            if last_familiar
+            else None
+        )
+        if previous in buckets:
+            position = buckets.index(previous) + 1
+            buckets = buckets[position:] + buckets[:position]
+            desired = buckets[0]
     progress = {p["module_id"]: p for p in module_progress(session, user, now=now)}
     catalog = {m["id"]: m for m in catalog_data["modules"]}
     pack = {m["module_id"]: m for m in load_question_pack()["modules"]}
@@ -362,13 +413,43 @@ def choose_question(
             a.feedback.get("selection_source")
             for a in reversed(units)
             if a.feedback["strand"] == "work"
+            and a.feedback.get("selection_source") != "lexical"
         ),
         None,
     )
     bank = deepcopy(bank_question) if bank_question else None
     if bank:
         bank.update(strand="work", selection_source="language")
-    for strand in (desired, "work" if desired == "general" else "general"):
+    lexical = (
+        candidate_questions(
+            session,
+            user,
+            now=now,
+            repeat_familiar=repeat_familiar,
+            plan=plan,
+            gate=curriculum_progress(session, user, now=now).c1_unlocked,
+        )
+        if plan["lexical_share"]
+        else {"general": [], "work": []}
+    )
+    for strand in buckets:
+        if shares[strand] == 0:
+            continue
+        if strand == "lexical":
+            pool = lexical["general"] + lexical["work"]
+            selected = (
+                min(pool, key=lambda candidate: candidate[0])[1] if pool else None
+            )
+            if selected:
+                selected.update(
+                    allocation_share=plan["general_share"],
+                    lexical_share=plan["lexical_share"],
+                    allocation_bucket="lexical",
+                )
+                if strand != desired:
+                    selected["selection_fallback"] = f"{desired}_unavailable"
+                return selected
+            continue
         module = (
             min(candidates[strand], key=lambda candidate: candidate[0])[1]
             if candidates[strand]
@@ -381,6 +462,8 @@ def choose_question(
         )
         if selected:
             selected["allocation_share"] = plan["general_share"]
+            selected["lexical_share"] = plan["lexical_share"]
+            selected["allocation_bucket"] = strand
             if strand != desired:
                 selected["selection_fallback"] = f"{desired}_unavailable"
             return selected

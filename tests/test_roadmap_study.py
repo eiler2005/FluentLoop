@@ -90,6 +90,7 @@ def learner(db_session, settings, pack):
     user = ensure_user(db_session, 123456789, settings)
     plan = default_plan()
     plan["general_share"] = 60
+    plan["lexical_share"] = 0
     save_plan(db_session, user, plan)
     return user
 
@@ -142,8 +143,9 @@ def test_actual_general_work_allocation_and_restart(db_session, learner, share, 
     assert strands.count("general") == share // 10
 
 
-def test_new_default_plan_delivers_thirty_general_seventy_work(db_session, learner):
+def test_legacy_plan_delivers_thirty_general_seventy_work(db_session, learner):
     plan = default_plan()
+    plan["lexical_share"] = 0
     assert plan["track"] == "client_facing"
     assert plan["general_share"] == 30
     save_plan(db_session, learner, plan)
@@ -225,7 +227,9 @@ def test_missing_plan_keeps_existing_flow_then_new_plan_preserves_pending(
     assert not enabled(user)
     step = start_stream(db_session, user, now=NOW)
     assert "roadmap" not in step.question
-    save_plan(db_session, user, default_plan())
+    legacy = default_plan()
+    legacy["lexical_share"] = 0
+    save_plan(db_session, user, legacy)
     assert start_stream(db_session, user, now=NOW).question == step.question
     assert right(db_session, user, step).next_step.question["strand"] == "general"
 
@@ -756,7 +760,9 @@ def test_parallel_module_callbacks_claim_once_on_distinct_sqlite_connections(
     factory = make_session_factory(engine)
     with factory() as session:
         user = ensure_user(session, 123456789, settings)
-        save_plan(session, user, default_plan())
+        legacy = default_plan()
+        legacy["lexical_share"] = 0
+        save_plan(session, user, legacy)
         step = start_stream(session, user, now=NOW)
         user_id, run_id, correct = user.id, step.run.id, step.question["correct_index"]
         if action == "report":

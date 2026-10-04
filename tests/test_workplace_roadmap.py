@@ -219,14 +219,16 @@ def test_invalid_import_leaves_entire_preferences_unchanged(db_session, owner, c
     assert owner.preferences_json == before
 
 
-def test_defaults_are_separate_and_work_gets_seventy_percent(owner, catalog):
+def test_defaults_allocate_general_work_and_lexical(owner, catalog):
     first = get_plan(owner, catalog)
     first["notes"]["general_reading"] = "Only in returned copy"
     assert "workplace_plan" not in owner.preferences_json
     assert get_plan(owner, catalog)["notes"] == {}
     outline = plan_outline(first, catalog)
     assert outline["general_minutes"] == 45
-    assert outline["work_minutes"] == 105
+    assert outline["work_minutes"] == 60
+    assert outline["lexical_minutes"] == 45
+    assert first["lexical_share"] == 30
     assert first["track"] == "client_facing"
     assert outline["general_focus"]["id"] == "general_writing"
     assert outline["work_focus"]["id"] == "work_tech"
@@ -241,9 +243,13 @@ def test_note_bound_counts_unicode_codepoints(catalog):
 def test_new_recommendation_does_not_replace_saved_plan(db_session, owner, catalog):
     previous = default_plan(catalog)
     previous.update(
-        track="balanced", general_share=60, weekly_minutes=200,
+        track="balanced",
+        general_share=60,
+        lexical_share=0,
+        weekly_minutes=200,
         order=list(catalog["tracks"]["balanced"]["module_ids"]),
-        paused=["general_writing"], focus="work_client",
+        paused=["general_writing"],
+        focus="work_client",
         notes={"work_client": "Keep my existing plan"},
     )
     save_plan(db_session, owner, previous, catalog)
@@ -264,6 +270,7 @@ def test_updates_keep_notes_pauses_focus_and_mode(db_session, owner, catalog):
     assert updated["paused"] == plan["paused"]
     assert updated["focus"] == "work_client"
     update_plan(db_session, owner, "time", 120, catalog)
+    update_plan(db_session, owner, "lexical_share", 0, catalog)
     updated = update_plan(db_session, owner, "general_share", 70, catalog)
     outline = plan_outline(updated, catalog)
     assert (outline["general_minutes"], outline["work_minutes"]) == (84, 36)
@@ -422,7 +429,7 @@ def test_cli_apply_and_pilot_export_preserve_unrelated_state(
     path.write_text(json.dumps(catalog), encoding="utf-8")
     profile = tmp_path / "profile.json"
     plan = default_plan(catalog)
-    plan.update(track="client_facing", general_share=75)
+    plan.update(track="client_facing", general_share=75, lexical_share=0)
     profile.write_text(json.dumps(plan), encoding="utf-8")
     cli = _cli()
     assert (
@@ -488,7 +495,11 @@ def test_shipped_catalog_has_general_and_workplace_coverage():
     assert sum(module["strand"] == "general" for module in catalog["modules"]) == 16
     assert len(catalog["language_map"]) >= 10
     outline = plan_outline(default_plan(catalog), catalog)
-    assert (outline["general_minutes"], outline["work_minutes"]) == (45, 105)
+    assert (
+        outline["general_minutes"],
+        outline["work_minutes"],
+        outline["lexical_minutes"],
+    ) == (45, 60, 45)
 
 
 def test_cli_shipped_default_requires_no_profile_or_settings(monkeypatch, capsys):

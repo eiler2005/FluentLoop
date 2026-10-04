@@ -27,12 +27,23 @@ def _text(reply):
 
 
 @pytest.mark.parametrize("stage", ["b2", "b2_plus", "c1_intro"])
-@pytest.mark.parametrize("module_id", [
-    "client_discovery", "value_proposals", "requirements_changes",
-    "commercial_negotiation", "support_escalation", "stakeholder_updates",
-    "metrics_trends", "architecture_explanations", "meeting_facilitation",
-    "news_media", "argument_decisions", "digital_life",
-])
+@pytest.mark.parametrize(
+    "module_id",
+    [
+        "client_discovery",
+        "value_proposals",
+        "requirements_changes",
+        "commercial_negotiation",
+        "support_escalation",
+        "stakeholder_updates",
+        "metrics_trends",
+        "architecture_explanations",
+        "meeting_facilitation",
+        "news_media",
+        "argument_decisions",
+        "digital_life",
+    ],
+)
 def test_expanded_case_briefs_are_readable_without_starting_assessment(
     db_session, settings, stage, module_id
 ):
@@ -57,7 +68,8 @@ def test_roadmap_retains_general_base_and_does_not_start_practice(db_session, se
 
     assert "Общий английский: 30%" in reply.text
     assert "Основа: 45 мин" in reply.text
-    assert "Дополнения: 105 мин" in reply.text
+    assert "Дополнения: 60 мин" in reply.text
+    assert "Слова и выражения: 30%" in reply.text
     assert "внешней практики" in reply.text
     assert "CEFR" in reply.text
     assert user.preferences_json == before
@@ -76,7 +88,7 @@ def test_roadmap_edits_are_personal_and_preserve_unrelated_settings(
     other = ensure_user(db_session, 123456790, settings)
     user.preferences_json = {"unrelated": {"keep": True}}
     other_before = deepcopy(other.preferences_json)
-    for command in ("track big_tech", "time 300", "general 70"):
+    for command in ("track big_tech", "time 300", "lexical 0", "general 70"):
         reply = handle_roadmap(db_session, user, command)
         assert "Не удалось" not in reply.text
     plan = get_plan(user)

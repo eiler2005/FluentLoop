@@ -20,10 +20,20 @@ git diff --check
 - Broad roadmap: strict catalogue references, portable-plan types and limits,
   general/work retention, user isolation, safe import/export, command routing,
   HTML escaping, generated-view freshness and unchanged assessed progress.
-- Roadmap Study: all 48 modules and 144 stages/questions, actual 30/70, 60/40 and 90/10
+- Roadmap Study: all 48 modules and 144 stages/questions, retained legacy two-part
+  allocations and the new three-part allocation,
   selection, focus/order/pauses, pending recovery, language interleaving, cooldowns,
   genuine independent spaced writing, reused/copy rejection, retained C1 gate,
   self-report separation, personal quarantine and owner/duplicate callback checks.
+- Lexical Study: bank references and bounds, actual disjoint 30/40/30 selection,
+  legacy zero-share compatibility, new/review rotation, contextual provenance,
+  focus/pauses/C1, sense-wide success/error spacing, immutable pending recovery,
+  foreign/duplicate actions, different spaced recognition variants and genuine
+  independent writing, copy/reuse/fallback/familiar exclusion, user quarantine
+  and annotated empty-pool fallback. Public bank validation and generated views
+  complement synthetic evidence checks; content review remains necessary.
+  Writing checks establish independently authored use of a supplied target,
+  not spontaneous retrieval without a cue; stage placement is editorial.
 - Answer feedback: canonical verdicts and legacy aliases, rejected unknown
   statuses, provider-controlled provenance, and writing prompts that preserve
   the supplied level, general/workplace context and task requirements.
@@ -75,6 +85,13 @@ verify the saved plan actually selects a module, answer once, reject the duplica
 inspect writing and external actions, change the plan while a question is pending,
 and verify resume. Run server-side handler smoke in a rolled-back transaction;
 never retain artificial learner progress or send unsolicited test messages.
+
+For lexical slots follow [lexical-learning.md](runbooks/lexical-learning.md):
+validate the real packaged bank and generated view, exercise `/roadmap lexical`,
+check all three allocation buckets, inspect bilingual teaching feedback and
+optional writing, and confirm sense quarantine and unchanged legacy preferences.
+Use rollback transactions and isolated test data for spacing and model checks;
+do not create artificial live evidence.
 
 The repeatable browser check uses an isolated headless Chrome profile and no
 network calls from the editor. It verifies filtering, stage selection, edits,

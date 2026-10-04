@@ -6,6 +6,11 @@
 
 **ADR:** [ADR-0016](../adr/0016-roadmap-driven-study.md)
 
+**Follow-up:** [EPIC-30](EPIC-30-plan-driven-lexical-learning.md) adds the
+reviewed lexical bank and supersedes the two-part recommendation with three
+disjoint shares: 30% general, 40% work and 30% lexical. The delivered verification
+below records the earlier release; module evidence and immutable resume remain.
+
 ## Scope
 
 Connect all roadmap modules to the existing Study entrance with real contextual

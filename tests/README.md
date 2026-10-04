@@ -36,6 +36,7 @@ suite makes no real network calls.
 | Test module | Covers |
 |---|---|
 | `test_answer_feedback_contract.py` | Canonical verdicts, conservative legacy aliases, unknown-verdict rejection, provider-controlled provenance and contextual writing instructions. |
+| `test_lexical_learning.py` | Three disjoint allocation buckets, bank validation, legacy zero-share plans, new/review rotation, sense cooldowns, spaced distinct recognition/writing, originality and genuine checks, target matching, C1, pending snapshots, user quarantine and fallback. |
 | `test_roadmap_study.py` | Module pack validation, real weighted selection, focus/pauses/resume, spaced genuine independent writing, C1 gate, self-reports, personal quarantine and owned atomic actions. |
 | `test_roadmap_study_ui.py` | Module question/feedback controls, optional writing capture, external reports, progress, origin routing and stale/foreign actions. |
 | `test_workplace_roadmap.py` | Strict catalogue/personal plan validation, portable exports, explicit owner CLI operations, isolated preferences and retained general foundation. |
@@ -123,7 +124,7 @@ suite makes no real network calls.
 ```bash
 python scripts/secret_scan.py          # no real-looking tokens in tracked files
 ruff check src tests scripts           # style and basic correctness
-pytest -q                              # 121+ tests, < 30 seconds locally
+pytest -q                              # full suite; use the run's actual count
 ```
 
 A red CI is a hard gate — no merges to `main` while the gate is broken.

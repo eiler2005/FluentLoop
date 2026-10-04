@@ -46,7 +46,7 @@
             <rect x="56" y="336" width="48" height="16" rx="2" fill="#e3f0df"/>
             <text x="80" y="348" text-anchor="middle" fill="#4d6558" font-family="Geist Mono, monospace" font-size="7" font-weight="500">PLAN</text>
             <text x="56" y="376" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Personal roadmap</text>
-            <text x="56" y="397" fill="#718577" font-family="Geist, sans-serif" font-size="10">30/70 mix · track · focus · pause</text>
+            <text x="56" y="397" fill="#718577" font-family="Geist, sans-serif" font-size="10">30/40/30 · track · focus · pause</text>
           </g>
           <g>
             <rect x="276" y="324" width="204" height="96" rx="6" fill="#ffffff" stroke="#20312b" stroke-width="1"/>
@@ -60,7 +60,7 @@
             <rect x="560" y="336" width="48" height="16" rx="2" fill="#b9ddb1"/>
             <text x="584" y="348" text-anchor="middle" fill="#356a2d" font-family="Geist Mono, monospace" font-size="7" font-weight="500">STUDY</text>
             <text x="560" y="376" fill="#20312b" font-family="Geist, sans-serif" font-size="14" font-weight="600">Plan-aware selector</text>
-            <text x="560" y="397" fill="#4d6558" font-family="Geist, sans-serif" font-size="10">modules · adaptive topics · evidence</text>
+            <text x="560" y="397" fill="#4d6558" font-family="Geist, sans-serif" font-size="10">modules · language · lexical bank</text>
           </g>
           <g>
             <rect x="820" y="324" width="200" height="96" rx="6" fill="#ffffff" stroke="#20312b" stroke-width="1"/>

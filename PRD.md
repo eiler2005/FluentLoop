@@ -252,6 +252,10 @@ Telegram remains the primary interface for daily practice.
     priorities, module order and pauses select real practice; module evidence,
     optional written application and external practice are visible separately
     from the existing adaptive language gate (EPIC-29).
+18. Plan-driven lexical learning: allocate 30% of answered Study units to new
+    words, collocations and expressions plus their spaced retrieval; retain the
+    30% general / 40% workplace / 30% lexical allocation, teach form and register, and
+    report recognition separately from independently checked use (EPIC-30).
 ```
 
 ### P2 — future
@@ -801,15 +805,17 @@ keeps serving the existing adaptive language curriculum so its evidence gate can
 still be completed. Pending questions resume intact after restarts or plan edits;
 the next selection uses the latest plan.
 
-The current recommended programme allocates 70% to client-facing, business,
-technology and supporting language practice, and 30% to general English.
+The current recommended programme allocates 30% to general English, 40% to
+client-facing, business, technology and supporting language practice, and 30%
+to words, expressions and their spaced review. Each answered question belongs
+to exactly one of these three allocation buckets.
 New plans use the client-facing track; existing saved plans are not silently
 replaced. The owner may explicitly apply the new allocation to their profile.
 The published programme explains topics, a flexible weekly rhythm, selection
 and evidence through readable diagrams. A small introductory-C1 extension adds
 new written situations in selected work modules without bypassing level gates.
 When a learner ends a Study stream, its result shows the current session's
-accuracy, its general/work allocation and the next action for the modules used
+accuracy, its general/work/lexical allocation and the next action for the modules used
 there; it links directly to the complete Progress and Plan views. The session
 summary must state that it is not a CEFR assessment.
 
@@ -819,6 +825,34 @@ cannot establish mastery. B2+ requires successful independent written applicatio
 in different situations on different days; introductory C1 also respects the
 existing ten-topic language gate. Listening and speaking tasks link to external
 resources and are explicitly self-reported, never automatically scored as speech.
+
+### Words and expressions in the personal programme
+
+The programme reserves a configurable 30% of answered Study questions for lexical
+learning: new words, collocations, phrasal verbs and useful sentence frames,
+followed by retrieval in fresh situations and spaced review. The revised
+recommendation has three distinct parts that sum to 100%: 30% general English,
+40% client/business/technology topics and supporting language, and 30% lexical
+learning. A lexical question may use a work or everyday context, but counts only
+in the lexical part; it is not counted again as a general/work topic question.
+
+Every curated lexical sense includes its meaning in Russian and English, an
+original example, grammatical frame, register and a plain alternative where
+useful. Similar forms with different meanings are distinct: resisting a proposal
+with "push back on" is different from postponing a deadline with "push back".
+Practice does not require the learner to recognise an unexplained expression:
+"Не знаю" reveals the teaching card, and feedback introduces meaning and use.
+
+The learner can edit the lexical share, inspect progress and apply expressions
+in optional original writing. Choice success, exposure, spaced recognition and
+independently authored written use remain distinct; writing tasks name the target
+expression, so this is guided application rather than uncued lexical recall.
+Familiarity and copied examples cannot
+certify productive use. Lexical introduction is not CEFR certification, and
+introductory-C1 practice retains the existing language gate. Empty or paused
+pools produce an explicit fallback rather than concealed repetition. Existing
+plans and pending questions stay intact unless the learner explicitly changes
+the lexical allocation; the authorised owner pilot receives the new 30% share.
 
 ### Example daily session
 

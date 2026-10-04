@@ -928,6 +928,17 @@ def _simple_question_reply(
     question = step.question
     category = "Фраза" if question.get("category") == "phrase" else "Грамматика"
     roadmap = question.get("roadmap")
+    lexical = question.get("lexical")
+    if isinstance(lexical, dict):
+        stage = {"b2": "B2", "b2_plus": "B2+", "c1_intro": "C1 intro"}.get(
+            (question.get("lexical_entry") or {}).get("stage"), "B2"
+        )
+        intake = (
+            "Новое выражение"
+            if question.get("lexical_phase") == "new"
+            else "Повтор выражения"
+        )
+        category = f"{intake} · {stage}"
     if isinstance(roadmap, dict):
         strand = (
             "Общий английский"
@@ -1035,22 +1046,27 @@ def _simple_summary_reply(
             )
         )
         roadmap_ids = []
-        strands = {"general": [0, 0], "work": [0, 0]}
+        strands = {"general": [0, 0], "work": [0, 0], "lexical": [0, 0]}
         for attempt in attempts:
-            roadmap = (attempt.feedback or {}).get("roadmap") or {}
+            feedback = attempt.feedback or {}
+            roadmap = feedback.get("roadmap") or {}
             identifier = roadmap.get("module_id")
-            strand = roadmap.get("strand")
-            if not isinstance(identifier, str) or strand not in strands:
-                continue
-            if identifier not in roadmap_ids:
+            if isinstance(identifier, str) and identifier not in roadmap_ids:
                 roadmap_ids.append(identifier)
-            strands[strand][1] += 1
-            strands[strand][0] += attempt.status == "correct"
+            bucket = feedback.get("allocation_bucket") or (
+                "lexical"
+                if feedback.get("lexical")
+                else feedback.get("strand") or roadmap.get("strand")
+            )
+            if bucket in strands:
+                strands[bucket][1] += 1
+                strands[bucket][0] += attempt.status == "correct"
         strand_lines = [
             f"{label}: {correct}/{total} верно"
             for key, label in (
                 ("general", "Общий английский"),
                 ("work", "Рабочие темы"),
+                ("lexical", "Слова и выражения"),
             )
             for correct, total in [strands[key]]
             if total
@@ -1059,9 +1075,7 @@ def _simple_summary_reply(
             lines.extend(["", "<b>По личному плану в этой сессии</b>", *strand_lines])
             from fluentloop.roadmap_study import module_progress
 
-            progress = {
-                row["module_id"]: row for row in module_progress(session, user)
-            }
+            progress = {row["module_id"]: row for row in module_progress(session, user)}
             actions = {
                 "recognition": "ответить на вопрос по теме",
                 "writing": "написать свой короткий ответ",
@@ -1082,6 +1096,25 @@ def _simple_summary_reply(
                 )
             if len(roadmap_ids) > 3:
                 lines.append(f"Ещё тем в сессии: {len(roadmap_ids) - 3}.")
+
+        lexical_attempts = [
+            attempt for attempt in attempts if (attempt.feedback or {}).get("lexical")
+        ]
+        if lexical_attempts:
+            new = sum(
+                (a.feedback or {}).get("lexical_phase") == "new"
+                for a in lexical_attempts
+            )
+            correct = sum(a.status == "correct" for a in lexical_attempts)
+            lines.extend(
+                [
+                    "",
+                    "<b>Слова и выражения в этой сессии</b>",
+                    f"Узнавание: {correct}/{len(lexical_attempts)} верно. "
+                    f"Новых: {new}; повторов: {len(lexical_attempts) - new}.",
+                    "Дальше — вспомнить в новом контексте и применить в своём письме.",
+                ]
+            )
 
     lines.extend(
         [
@@ -1144,10 +1177,29 @@ def handle_simple_answer(
     explanation = str(feedback.get("explanation") or "").strip()
     if explanation:
         lines.append(html_escape(explanation))
+    answered_question = feedback.get("question") or {}
+    if isinstance(answered_question.get("lexical"), dict):
+        card = answered_question.get("lexical_card") or {}
+        lines.extend(
+            [
+                "",
+                bold(html_escape(card.get("headword", ""))),
+                html_escape(card.get("meaning_ru", "")),
+                html_escape(card.get("meaning_en", "")),
+                f"Пример: {html_escape(card.get('example', ''))}",
+                f"Форма: {html_escape(card.get('grammar', ''))}",
+                f"Регистр: {html_escape(card.get('register', ''))}",
+                f"Проще: {html_escape(card.get('plain_alternative', ''))}",
+            ]
+        )
     buttons = [
         [_button("Подробнее", f"feedback:explain:{result.attempt.id}")],
         [_button("Ошибка в вопросе", f"simple:issue:{run_id}:{index}")],
     ]
+    if isinstance(answered_question.get("lexical"), dict):
+        buttons.append(
+            [_button("Использовать в письме", f"simple:lexical_write:{run_id}:{index}")]
+        )
     if isinstance((feedback.get("question") or {}).get("roadmap"), dict):
         buttons.extend(
             [
@@ -1224,11 +1276,17 @@ def handle_simple_issue(
 ) -> BotReply:
     """Quarantine an answered personal question reported by its learner."""
 
+    from fluentloop.lexical_learning import (
+        answered_lexical_question,
+        report_lexical_issue,
+    )
     from fluentloop.question_quality import report_question_issue
     from fluentloop.roadmap_study import answered_module_question, report_module_issue
 
     reported = (
-        report_module_issue(session, user, run_id, index)
+        report_lexical_issue(session, user, run_id, index)
+        if answered_lexical_question(session, user, run_id, index) is not None
+        else report_module_issue(session, user, run_id, index)
         if answered_module_question(session, user, run_id, index) is not None
         else report_question_issue(session, user, run_id, index)
     )
@@ -1254,14 +1312,24 @@ def handle_simple_bonus_start(
     if module_index is None:
         step = start_bonus(session, user, parent_run_id)
     else:
+        from fluentloop.lexical_learning import (
+            answered_lexical_question,
+            start_lexical_bonus,
+        )
         from fluentloop.roadmap_study import start_module_bonus
 
-        step = start_module_bonus(session, user, parent_run_id, module_index)
+        step = (
+            start_lexical_bonus(session, user, parent_run_id, module_index)
+            if answered_lexical_question(session, user, parent_run_id, module_index)
+            else start_module_bonus(session, user, parent_run_id, module_index)
+        )
     if step.run is None or step.question is None:
         return BotReply("Это письменное задание уже завершено.")
     writing_hint = (
         "Ответь по-английски по заданию выше. Это необязательно."
-        if step.question.get("adaptive") or step.question.get("roadmap")
+        if step.question.get("adaptive")
+        or step.question.get("roadmap")
+        or step.question.get("lexical")
         else "Напиши одно предложение по-английски. Это необязательно."
     )
     return BotReply(
@@ -1286,7 +1354,7 @@ def handle_simple_bonus_text(
     from fluentloop.simple_learning import submit_bonus
 
     exercise = bonus_run.exercises[0] if bonus_run.exercises else {}
-    if exercise.get("roadmap") and len(answer) > 10000:
+    if (exercise.get("roadmap") or exercise.get("lexical")) and len(answer) > 10000:
         return BotReply(
             "Ответ слишком длинный. Сократи его до 10 000 символов.",
             channel_id,
@@ -1299,9 +1367,9 @@ def handle_simple_bonus_text(
             "Не удалось сохранить ответ. Напиши предложение ещё раз "
             "или нажми «Пропустить письмо»."
         )
-    if (exercise.get("adaptive") or exercise.get("roadmap")) and not getattr(
-        feedback, "genuine_evaluation", False
-    ):
+    if (
+        exercise.get("adaptive") or exercise.get("roadmap") or exercise.get("lexical")
+    ) and not getattr(feedback, "genuine_evaluation", False):
         return BotReply(
             "Письмо сохранено; проверка сейчас недоступна и в освоение темы "
             "не засчитана.",
@@ -1316,14 +1384,21 @@ def handle_simple_bonus_text(
     if feedback.explanation:
         lines.append(html_escape(feedback.explanation))
     lines.append("Письменная практика сохранена отдельно от узнавания.")
-    if exercise.get("roadmap"):
-        if not (result.attempt.feedback or {}).get("independent_production"):
+    if exercise.get("roadmap") or exercise.get("lexical"):
+        if exercise.get("lexical") and not (result.attempt.feedback or {}).get(
+            "target_present"
+        ):
+            lines.append(
+                "Чтобы учесть применение выражения, "
+                "используй указанную форму в своём ответе."
+            )
+        elif not (result.attempt.feedback or {}).get("independent_production"):
             lines.append(
                 "Повтор или копия образца не засчитывается "
                 "как самостоятельное применение."
             )
         lines.append(
-            "Для следующей ступени нужны два разных самостоятельных задания "
+            "Для подтверждённого применения нужны два разных самостоятельных задания "
             "с интервалом ≥24 ч."
         )
     return BotReply(
@@ -1454,6 +1529,52 @@ def _module_progress_reply(
     lines.append(
         "Внешние отметки учитываются отдельно и не подтверждают освоение. "
         "Это не оценка CEFR."
+    )
+    return _reply("\n".join(lines), channel_id, message_thread_id)
+
+
+def _lexical_progress_reply(
+    session: Session, user: User, *, channel_id=None, message_thread_id=None
+) -> BotReply | None:
+    from fluentloop.bot.roadmap import _reply
+    from fluentloop.lexical_learning import lexical_progress
+    from fluentloop.roadmap_study import enabled
+    from fluentloop.workplace_roadmap import get_plan
+
+    progress = lexical_progress(session, user)
+    if not progress["seen"] and (
+        not enabled(user) or not get_plan(user)["lexical_share"]
+    ):
+        return None
+    lines = [
+        "Слова и выражения · весь период",
+        f"Показано: {progress['seen']}/{progress['total']}. "
+        f"Ответили на знакомство: {progress['introduced']}. "
+        f"Закрепили узнавание: {progress['recognized']}. "
+        f"Самостоятельное применение: {progress['independent_writing']}.",
+        f"Ответы: новых {progress['new']}, повторов {progress['reviews']}.",
+        "Узнавание: два разных контекста на разных днях с интервалом ≥24 ч. "
+        "Самостоятельное применение: два проверенных собственных письма "
+        "в разных ситуациях с тем же интервалом. Выражение указано в задании; "
+        "это практика с опорой, а не свободное воспроизведение без подсказки.",
+    ]
+    actions = {
+        "introduction": "познакомиться со значением",
+        "spaced_recognition": "вспомнить в новом контексте через ≥24 ч",
+        "independent_writing": "использовать в своём письме",
+        "practice": "поддерживать в новых ситуациях",
+        "quarantined": "выражение исключено по сообщению об ошибке",
+    }
+    attempted = [entry for entry in progress["entries"] if entry["seen"]]
+    for entry in attempted[-5:]:
+        lines.append(
+            f"• {entry['headword']} — {entry['meaning_ru']}: "
+            f"{actions.get(entry['next_action'], 'практика')}."
+        )
+    lines.append(
+        "Копии, знакомые повторы и непроверенное письмо не подтверждают "
+        "самостоятельное применение. Это отдельная лексическая практика, "
+        "не оценка CEFR и не обход языкового порога C1."
     )
     return _reply("\n".join(lines), channel_id, message_thread_id)
 
@@ -2561,6 +2682,9 @@ def handle_progress(
     module_reply = _module_progress_reply(
         session, user, channel_id=channel_id, message_thread_id=message_thread_id
     )
+    lexical_reply = _lexical_progress_reply(
+        session, user, channel_id=channel_id, message_thread_id=message_thread_id
+    )
     return BotReply(
         "📈 <b>Прогресс · 30 дней</b>\n"
         f"Узнавание: {recognition_correct}/{recognition_total} верных ответов.\n"
@@ -2580,7 +2704,9 @@ def handle_progress(
         channel_id,
         message_thread_id=message_thread_id,
         parse_mode=HTML_PARSE_MODE,
-        extra_replies=(module_reply,) if module_reply is not None else (),
+        extra_replies=tuple(
+            reply for reply in (module_reply, lexical_reply) if reply is not None
+        ),
     )
 
 

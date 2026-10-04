@@ -149,7 +149,8 @@ def main(argv: list[str] | None = None) -> int:
         f"{action}: modules={len(catalog['modules'])} track={plan['track']} "
         f"weekly_minutes={plan['weekly_minutes']} "
         f"general_minutes={outline['general_minutes']} "
-        f"work_minutes={outline['work_minutes']} paused={len(plan['paused'])}"
+        f"work_minutes={outline['work_minutes']} "
+        f"lexical_minutes={outline['lexical_minutes']} paused={len(plan['paused'])}"
     )
     return 0
 

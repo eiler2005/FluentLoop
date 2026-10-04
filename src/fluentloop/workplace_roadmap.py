@@ -33,6 +33,7 @@ PLAN_FIELDS = {
     "track",
     "weekly_minutes",
     "general_share",
+    "lexical_share",
     "order",
     "paused",
     "focus",
@@ -266,6 +267,7 @@ def default_plan(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
         "track": "client_facing",
         "weekly_minutes": 150,
         "general_share": 30,
+        "lexical_share": 30,
         "order": list(pack["tracks"]["client_facing"]["module_ids"]),
         "paused": [],
         "focus": None,
@@ -276,13 +278,22 @@ def default_plan(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
 def validate_plan(data: Any, catalog: dict[str, Any] | None = None) -> dict[str, Any]:
     """Reject incomplete/foreign state before replacing any user's preferences."""
     pack = _catalog(catalog)
+    # Original version-1 exports remain valid and opt out until explicitly edited.
+    if isinstance(data, dict) and set(data) == PLAN_FIELDS - {"lexical_share"}:
+        data = {**data, "lexical_share": 0}
     plan = _object(data, PLAN_FIELDS, "Plan")
     _version(plan["version"], "Plan")
     if not isinstance(plan["track"], str) or plan["track"] not in TRACKS:
         raise ValueError("Unknown plan track")
-    for field, low, high in (("weekly_minutes", 30, 1200), ("general_share", 20, 90)):
+    for field, low, high in (
+        ("weekly_minutes", 30, 1200),
+        ("general_share", 20, 90),
+        ("lexical_share", 0, 60),
+    ):
         if type(plan[field]) is not int or not low <= plan[field] <= high:
             raise ValueError(f"{field} must be an integer between {low} and {high}")
+    if plan["general_share"] + plan["lexical_share"] > 90:
+        raise ValueError("General and lexical shares must leave at least 10% for work")
     module_ids = {module["id"] for module in pack["modules"]}
     order = _references(plan["order"], module_ids, "Plan order")
     if set(order) != module_ids:
@@ -352,7 +363,7 @@ def update_plan(
             raise ValueError("Unknown plan track")
         plan["track"] = value
         plan["order"] = list(pack["tracks"][value]["module_ids"])
-    elif action in ("time", "general_share"):
+    elif action in ("time", "general_share", "lexical_share"):
         plan["weekly_minutes" if action == "time" else action] = value
     elif action == "focus":
         plan["focus"] = value
@@ -380,7 +391,10 @@ def plan_outline(
     result: dict[str, Any] = {}
     general_minutes = valid["weekly_minutes"] * valid["general_share"] // 100
     result["general_minutes"] = general_minutes
-    result["work_minutes"] = valid["weekly_minutes"] - general_minutes
+    result["lexical_minutes"] = valid["weekly_minutes"] * valid["lexical_share"] // 100
+    result["work_minutes"] = (
+        valid["weekly_minutes"] - general_minutes - result["lexical_minutes"]
+    )
     for strand in ("general", "work"):
         active = [
             modules[identifier]

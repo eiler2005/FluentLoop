@@ -16,14 +16,15 @@ notes.
   the current environment gate is still a separate ADR-0009 concern.
 - **Deployment target:** One Docker container on a VPS.
 - **Source of product truth:** [`PRD.md`](PRD.md).
-- **Source of implementation truth:** [`docs/features/`](docs/features/) — 29
+- **Source of implementation truth:** [`docs/features/`](docs/features/) — 30
   numbered epics plus the EPIC-16..21 roadmap overview. EPIC-01 through
   EPIC-15 mirror the PRD §28 backlog (EPIC-15 is Deferred); EPIC-16 through
-  EPIC-29 cover the post-MVP learning engine, breakthrough roadmap, shared
-  lesson library, outcomes loop, daily vocabulary loop, and adaptive stream. See
+  EPIC-30 cover the post-MVP learning engine, breakthrough roadmap, shared
+  lesson library, outcomes loop, daily vocabulary loop, adaptive stream and
+  plan-driven lexical learning. See
   [`docs/features/README.md`](docs/features/README.md).
 - **Source of architectural truth:** [`docs/architecture.md`](docs/architecture.md)
-  + ADRs in [`docs/adr/`](docs/adr/) (0002-0016 all Accepted; 0009 reserved).
+  + ADRs in [`docs/adr/`](docs/adr/) (0002-0017 all Accepted; 0009 reserved).
 - **Build provenance (history):** [`docs/build-log/`](docs/build-log/) holds the
   autonomous overnight session brief and morning report. Frozen artifacts —
   read for context, do not treat as living documentation.
@@ -87,6 +88,16 @@ destructive action is high.
   snapshots or mastery. Module writing needs genuine independent spaced evidence;
   C1 retains the ten-topic language gate. External reports are self-reports.
   Keep exports private; regenerate public views after edits. See ADR-0015/0016.
+- **Study has three disjoint allocation buckets.** New plans use 30% general,
+  40% work and 30% lexical; legacy plans missing `lexical_share` retain zero.
+  Lexical contexts never earn a second general/work allocation credit. Keep
+  new and due-review senses inside the lexical share, sense-wide cooldowns,
+  spaced distinct recognition and genuine independent writing separate.
+  Writing supplies its target: independence means own authored application,
+  not uncued retrieval. Stage placement is editorial, not calibrated CEFR.
+  Lexical evidence cannot advance module/adaptive mastery or bypass C1.
+  Quarantine is per user and sense; public authored bank edits retain stable IDs.
+  See ADR-0017/EPIC-30.
 - **Simple mode is per profile.** Missing mode means advanced. Skip simple users
   before automatic learning claims/sends; backups still run. Recognition is
   distinct from production and cannot graduate items. See ADR-0013/EPIC-26.
@@ -167,8 +178,8 @@ FluentLoop/
 │   ├── README.md                 Doc index.
 │   ├── architecture.md           Tech architecture (Telegram, SQLite, scheduler, AI).
 │   ├── testing.md                Standard test gate and what tests cover.
-│   ├── adr/                      Architecture decision records (0002-0016 Accepted).
-│   ├── features/                 29 numbered epics + EPIC-16..21 overview.
+│   ├── adr/                      Architecture decision records (0002-0017 Accepted).
+│   ├── features/                 30 numbered epics + EPIC-16..21 overview.
 │   ├── user-guide.md             Learner guide and learning-loop map.
 │   ├── material-upload-guide.md  Upload formats and LLM prep prompt.
 │   ├── runbooks/                 Operational procedures.
@@ -191,7 +202,7 @@ Used by agents and humans to confirm a change is safe:
 ```bash
 # Structure & sanity
 find . -maxdepth 3 -type f | sort
-ls docs/features/EPIC-*.md | wc -l    # 29 numbered epics + EPIC-16..21 overview
+ls docs/features/EPIC-*.md | wc -l    # 30 numbered epics + EPIC-16..21 overview
 
 # No secrets staged
 python scripts/secret_scan.py

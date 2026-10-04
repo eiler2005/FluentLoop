@@ -655,6 +655,10 @@ def answer_choice(
         }
         for key in (
             "roadmap",
+            "lexical",
+            "lexical_phase",
+            "lexical_share",
+            "allocation_bucket",
             "strand",
             "selection_source",
             "selection_fallback",
@@ -778,6 +782,20 @@ def start_bonus(
         if attempts
         else parent_question
     )
+    if question.get("lexical"):
+        from fluentloop.lexical_learning import start_lexical_bonus
+
+        parent_index = next(
+            (
+                a.exercise_index
+                for a in attempts
+                if (a.feedback or {}).get("question") == question
+            ),
+            None,
+        )
+        if parent_index is None:
+            return SimpleStep(None, None)
+        return start_lexical_bonus(session, user, parent_run_id, parent_index, now=now)
     progress = curriculum_progress(session, user, now=_now(now))
     needed = {
         (entry.topic_id, entry.stage)
@@ -904,14 +922,22 @@ def submit_bonus(
             saved_feedback.update(
                 module_feedback_metadata(session, user, question, answer)
             )
+        if question.get("lexical"):
+            from fluentloop.lexical_learning import lexical_feedback_metadata
+
+            saved_feedback.update(
+                lexical_feedback_metadata(session, user, question, answer, now=current)
+            )
         status = str(feedback.get("status") or "unchecked")
-        if (adaptive_metadata(question) or question.get("roadmap")) and feedback.get(
-            "genuine_evaluation"
-        ) is not True:
+        if (
+            adaptive_metadata(question)
+            or question.get("roadmap")
+            or question.get("lexical")
+        ) and feedback.get("genuine_evaluation") is not True:
             status = "unchecked"
         saved_feedback["status"] = status
-        if status in {"correct", "partial", "incorrect"} and not question.get(
-            "roadmap"
+        if status in {"correct", "partial", "incorrect"} and not (
+            question.get("roadmap") or question.get("lexical")
         ):
             owned_ids = []
             for item_id in question["target_learning_item_ids"]:
